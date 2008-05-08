@@ -6,6 +6,8 @@
 
 \usepackage{listings}
 \usepackage{hyperref}
+\usepackage[margin=2cm]{geometry}
+
 
 \lstloadlanguages{Fortran,C++}
 
@@ -23,7 +25,7 @@
 \tableofcontents
 \chapter{Installation and building}
 
-\chapter{Libspud interface}
+\chapter{Libspud}
 
 \section{Fortran interface}
 \lstset{language=Fortran}
@@ -51,7 +53,24 @@ subroutine get_option_real_scalar(key, option, stat, default)
 \end{lstlisting}
 
 This is the main method for retrieving option values from the options
-dictionary. 
+dictionary. \lstinline[emph=option_type,emphstyle=\textit]+option_type+ can
+be any of \lstinline+real+, \lstinline+integer+ or
+\lstinline+character+ and \lstinline+real+ or \lstinline+integer+ arguments can be
+scalars or rank 1 or 2 arrays. In every case the type and shape of the
+argument must match that of the option in the dictionary.
+
+The fallback behaviour of the routine is as follows:
+\begin{itemize}
+\item If \lstinline+key+ matches an option but the shape, rank or type fails
+  to match, the stat argument will be set to the appropriate error (see
+  \ref{sec:fortran_error}). If the \lstinline+stat+ argument is absent then execution
+  will halt with an error.
+\item If \lstinline+key+ fails to match but \lstinline+default+ is present,
+  \lstinline+option+ is set to the value of \lstinline+default+.
+\item If \lstinline+key+ fails to match and \lstinline+default+ is not
+  present, \lstinline+stat+ will be set to \lstinline+SPUD_KEY_ERROR+. If
+  \lstinline+stat+ is not present then execution will cease with an error.
+\end{itemize}
 
 \subsection{have\_option}
 
@@ -133,7 +152,7 @@ function option_type(key, stat) result (type)
 
 Returns the type of the option specified by \lstinline+key+. The type will
 be returned as one of the following named constants: 
-\lstinline+SPUD_REAL+, \lstinline+SPUD_INTEGER+, \lstinline+SPUD_LOGICAL+,
+\lstinline+SPUD_REAL+, \lstinline+SPUD_INTEGER+ and
 \lstinline+SPUD_CHARACTER+. Note that by default, all reals in Spud are
 double precision.
 
@@ -161,11 +180,28 @@ subroutine write_options(filename)
 
 Write the current options tree out to the xml file \lstinline+filename+
 
+\subsection{Error codes}\label{sec:fortran_error}
+
+The following named integer constants are defined in the spud module:
+
+\begin{tabular}{lp{10cm}}
+  \textbf{Error code} & \textbf{Interpretation}\\
+  \lstinline+SPUD_KEY_ERROR+ & The specified option is not present in the
+  dictionary.\\
+  \lstinline+SPUD_TYPE_ERROR+ & The specified option has a different type
+  from that of the option argument provided.\\
+  \lstinline+SPUD_RANK_ERROR+ & The specified option has a different type
+  from that of the option argument provided.\\
+  \lstinline+SPUD_SHAPE_ERROR+ & The specified option has a different type
+  from that of the option argument provided.
+\end{tabular}
+
 \section{C++ interface}
 \lstset{language=C++}
 
 \chapter{Spud base language}
 
 
+\chapter{Diamond}
 
 \end{document}
