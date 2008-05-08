@@ -1,0 +1,18 @@
+Package: python-diamond
+Source: diamond
+Version: 0.1b-1
+Architecture: all
+Maintainer: The ICOM team <patrick.farrell@imperial.ac.uk>
+Installed-Size: 700
+Depends: python-gtk2, python-4suite-xml, python-lxml, libxml2-utils, python2.5
+Recommends: trang, python-psyco
+Provides: python2.5-diamond
+Section: python
+Priority: optional
+Description: A schema-driven interface for writing XML documents
+ Diamond is a dynamic schema-driven graphical user interface for writing
+ XML documents. The interface is automatically generated from a schema
+ written in RELAX NG describing an XML language. The interface is optimised
+ for configuring models for solving problems in computational mechanics,
+ though the technology is generic to any sort of XML document creation.
+Python-Version: >= 2.5

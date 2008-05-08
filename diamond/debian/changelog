@@ -1,0 +1,12 @@
+diamond (0.1b-1) gutsy; urgency=low
+
+  * Bundle the modified Xvif parser with diamond.
+  * Lots of bugfixes and new features.
+
+ -- Patrick Farrell <patrick.farrell@imperial.ac.uk>  Mon, 10 Dec 2007 12:21:46 +0000
+
+diamond (0.1a-1) unstable; urgency=low
+
+  * source package automatically created by stdeb 0.2.a1
+
+ -- Patrick Farrell <patrick.farrell@imperial.ac.uk>  Mon, 03 Dec 2007 13:26:28 +0000
