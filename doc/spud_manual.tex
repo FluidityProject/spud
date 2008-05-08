@@ -1,0 +1,171 @@
+\documentclass[a4paper, 11pt]{book}
+
+\usepackage{palatino}
+
+\title{Spud 1.0}
+
+\usepackage{listings}
+\usepackage{hyperref}
+
+\lstloadlanguages{Fortran,C++}
+
+\lstdefinelanguage{rnc}
+{morekeywords={element,attribute},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\chapter{Installation and building}
+
+\chapter{Libspud interface}
+
+\section{Fortran interface}
+\lstset{language=Fortran}
+
+\subsection{get\_child\_name}
+
+\begin{lstlisting}
+subroutine get_child_name(key, index, child_name)    
+  character(len=*), intent(in)::key 
+  integer, intent(in)::index
+  character(len=*), intent(out)::child_name
+\end{lstlisting}
+
+Retrieve the name of the \lstinline+index+th child of \lstinline+key+. This
+is mostly useful for debugging input files.
+
+\subsection{get\_option}
+
+\begin{lstlisting}[emph=option_type,emphstyle=\textit]
+subroutine get_option_real_scalar(key, option, stat, default)
+  character(len=*), intent(in) :: key
+  option_type, intent(out) :: option
+  integer, intent(out), optional :: stat
+  option_type, intent(in), optional :: default
+\end{lstlisting}
+
+This is the main method for retrieving option values from the options
+dictionary. 
+
+\subsection{have\_option}
+
+\begin{lstlisting}
+function have_option(key)
+  logical :: have_option
+  character(len=*), intent(in) :: key
+\end{lstlisting}
+
+Returns true if \lstinline+key+ is present in the options
+dictionary. This is useful for determining whether optional options have
+been set and for determining which of a choice of options has been selected.
+
+\subsection{load\_options}
+
+\begin{lstlisting}
+subroutine load_options(filename) 
+  character(len=*), intent(in) :: filename
+\end{lstlisting}
+
+Read the xml file \lstinline+filename+ into the options tree.
+
+\subsection{option\_count}
+
+\begin{lstlisting}
+function option_count(key)
+  integer :: option_count
+  character(len=*), intent(in) :: key
+\end{lstlisting}
+
+Returns the number of options which match \lstinline+key+. This is
+useful where an option can occur any number of times (for example a
+simulation may allow for any number of fields to be specified). If
+\lstinline+key+ is not present in the dictionary, this returns 0.
+
+\subsection{option\_rank}
+
+\begin{lstlisting}
+function option_rank(key, stat) result (rank)
+  integer :: rank
+  character(len=*), intent(in) :: key
+  integer, intent(out), optional :: stat
+\end{lstlisting}
+
+Returns the rank of the option specified by \lstinline+key+. If
+\lstinline+key+ does not correspond to a valid option, then if
+\lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
+if \lstinline+stat+ is not present, execution will halt with an error.
+
+The rank returned will be 0 (for a scalar), 1 (for a vector) or 2 (a rank 2
+tensor, or matrix). 
+
+\subsection{option\_shape}
+
+\begin{lstlisting}
+function option_shape(key, stat) result (lshape)
+  integer, dimension(2) :: lshape
+  character(len=*), intent(in) :: key
+  integer, intent(out), optional :: stat
+\end{lstlisting}
+
+Return the shape of the option specified by \lstinline+key+. The shape is
+always a 2-vector. If the option in question is rank 1 then the second
+component will be 0, if the option is rank 0 (a scalar) then both entries
+will be 0.
+
+ If \lstinline+key+ does not correspond to a valid option, then if
+ \lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
+ if \lstinline+stat+ is not present, execution will halt with an error.
+
+\subsection{option\_type}
+
+\begin{lstlisting}
+function option_type(key, stat) result (type)
+  integer :: type
+  character(len=*), intent(in) :: key
+  integer, intent(out), optional :: stat
+\end{lstlisting}
+
+Returns the type of the option specified by \lstinline+key+. The type will
+be returned as one of the following named constants: 
+\lstinline+SPUD_REAL+, \lstinline+SPUD_INTEGER+, \lstinline+SPUD_LOGICAL+,
+\lstinline+SPUD_CHARACTER+. Note that by default, all reals in Spud are
+double precision.
+
+If \lstinline+key+ does not correspond to a valid option, then if
+\lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
+if \lstinline+stat+ is not present, execution will halt with an error.
+
+\subsection{number\_of\_children}
+
+\begin{lstlisting}
+function number_of_children(key)
+  integer :: number_of_children
+  character(len=*), intent(in) :: key
+\end{lstlisting}
+
+Print the number of children under \lstinline+key+. This is mainly of use
+for debugging input files.
+
+\subsection{write\_options}
+
+\begin{lstlisting}
+subroutine write_options(filename) 
+  character(len=*), intent(in) :: filename
+\end{lstlisting}
+
+Write the current options tree out to the xml file \lstinline+filename+
+
+\section{C++ interface}
+\lstset{language=C++}
+
+\chapter{Spud base language}
+
+
+
+\end{document}
