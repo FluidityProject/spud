@@ -29,11 +29,11 @@ module spud
   !!< can contain a wide variety of data.
   implicit none
 
-  integer, parameter, public :: OPT_REAL=0, OPT_INTEGER=1,&
-       & OPT_LOGICAL=2, OPT_NONE=3, OPT_CHARACTER=4
+  integer, parameter, public :: SPUD_REAL=0, SPUD_INTEGER=1,&
+       & SPUD_LOGICAL=2, SPUD_NONE=3, SPUD_CHARACTER=4
 
-  integer, parameter, public :: OPT_KEY_ERROR=1, OPT_TYPE_ERROR=2,&
-       & OPT_RANK_ERROR=3, OPT_SHAPE_ERROR=4, OPT_NEW_KEY_WARNING=5, OPT_ATTR_SET_FAILED_WARNING=6
+  integer, parameter, public :: SPUD_KEY_ERROR=1, SPUD_TYPE_ERROR=2,&
+       & SPUD_RANK_ERROR=3, SPUD_SHAPE_ERROR=4, SPUD_NEW_KEY_WARNING=5, SPUD_ATTR_SET_FAILED_WARNING=6
 
   interface get_option
      module procedure get_option_real_scalar,&
@@ -58,8 +58,8 @@ module spud
   end interface
 
   private
-  public get_child_name, get_number_of_children, get_option, &
-       get_option_count, have_option, option_rank, option_shape, &
+  public get_child_name, number_of_children, get_option, &
+       option_count, have_option, option_rank, option_shape, &
        option_type, option_error, add_option, set_option, &
        set_option_attribute, delete_option, add_or_delete_option, &
        load_options, write_options
@@ -135,29 +135,29 @@ contains
     lstat = cget_child_name(key, len_trim(key), index, child_name)
   end subroutine get_child_name
 
-  function get_number_of_children(key)
+  function number_of_children(key)
     external cget_number_of_children
     integer cget_number_of_children
     
     character(len=*), intent(in) :: key
-    integer :: get_number_of_children
+    integer :: number_of_children
     integer :: lstat
     
-    lstat = cget_number_of_children(key, len_trim(key), get_number_of_children)
+    lstat = cget_number_of_children(key, len_trim(key), number_of_children)
     
-  end function get_number_of_children
+  end function number_of_children
 
-  function get_option_count(key)
+  function option_count(key)
     external cget_option_count
     integer cget_option_count
     
     character(len=*), intent(in) :: key
-    integer :: get_option_count
+    integer :: option_count
     integer :: lstat
     
-    lstat = cget_option_count(key, len_trim(key), get_option_count)
+    lstat = cget_option_count(key, len_trim(key), option_count)
     
-  end function get_option_count
+  end function option_count
 
   function have_option(key)
     !!< Test for the presence of the option given by key.
@@ -170,8 +170,6 @@ contains
     integer :: lstat
 
     lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-!    write(0, *) "checking for the presence of: ", key
 
     have_option=(chave_option(key, len_trim(key))==1)
 
@@ -192,7 +190,7 @@ contains
     lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
 
@@ -213,7 +211,7 @@ contains
     lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
 
@@ -234,7 +232,7 @@ contains
     lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
 
@@ -261,22 +259,22 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=0) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_REAL) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_REAL) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_real_scalar
@@ -302,26 +300,26 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=1) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_REAL) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_REAL) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
     if (lshape(1)/=size(option)) then
-       call option_error(key, OPT_SHAPE_ERROR, stat)
+       call option_error(key, SPUD_SHAPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_real_vector
@@ -347,26 +345,26 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=2) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_REAL) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_REAL) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
     if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-       call option_error(key, OPT_SHAPE_ERROR, stat)
+       call option_error(key, SPUD_SHAPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_real_tensor
@@ -392,22 +390,22 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=0) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_INTEGER) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_INTEGER) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_integer_scalar
@@ -433,26 +431,26 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=1) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_INTEGER) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_INTEGER) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
     if (lshape(1)/=size(option)) then
-       call option_error(key, OPT_SHAPE_ERROR, stat)
+       call option_error(key, SPUD_SHAPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_integer_vector
@@ -478,26 +476,26 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=2) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_INTEGER) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_INTEGER) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
     if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-       call option_error(key, OPT_SHAPE_ERROR, stat)
+       call option_error(key, SPUD_SHAPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine get_option_integer_tensor
@@ -518,21 +516,21 @@ contains
     lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
     if (rank/=0) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_LOGICAL) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_LOGICAL) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
 
     lstat=cget_option(key, len_trim(key), option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
     
@@ -562,16 +560,16 @@ contains
           option=default
           return
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     end if
     if (rank/=1) then
-       call option_error(key, OPT_RANK_ERROR, stat)
+       call option_error(key, SPUD_RANK_ERROR, stat)
        return
     end if
-    if (type/=OPT_CHARACTER) then
-       call option_error(key, OPT_TYPE_ERROR, stat)
+    if (type/=SPUD_CHARACTER) then
+       call option_error(key, SPUD_TYPE_ERROR, stat)
        return
     end if
 
@@ -579,7 +577,7 @@ contains
     lstat=cget_option(key, len_trim(key), option)
     
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
        return
     end if
     
@@ -601,17 +599,17 @@ contains
     end if
     
     select case (error)
-    case (OPT_KEY_ERROR)
+    case (SPUD_KEY_ERROR)
        buffer="Option key error. Key is: "//trim(key)
-    case (OPT_TYPE_ERROR)
+    case (SPUD_TYPE_ERROR)
        buffer="Option type error. Key is: "//trim(key)
-    case (OPT_RANK_ERROR)
+    case (SPUD_RANK_ERROR)
        buffer="Option rank error. Key is: "//trim(key)       
-    case (OPT_SHAPE_ERROR)
+    case (SPUD_SHAPE_ERROR)
        buffer="Option shape error. Key is: "//trim(key)       
-    case (OPT_NEW_KEY_WARNING)
+    case (SPUD_NEW_KEY_WARNING)
        buffer="Option warning. Key is not in the options tree: "//trim(key)
-    case (OPT_ATTR_SET_FAILED_WARNING)
+    case (SPUD_ATTR_SET_FAILED_WARNING)
       buffer = "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
     end select
 
@@ -639,16 +637,16 @@ contains
 
     if(lstat /= 0) then
       if(present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     end if
 
     lstat = cadd_option(key, len_trim(key))
     if (lstat /= 0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   
   end subroutine add_option
@@ -670,26 +668,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=0) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_REAL) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_REAL) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), 0, 0, OPT_REAL, option)
+    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_REAL, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_real_scalar
 
@@ -710,26 +708,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=1) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_REAL) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_REAL) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), size(option), 1, OPT_REAL, option)
+    lstat=cset_option(key, len_trim(key), size(option), 1, SPUD_REAL, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_real_vector
 
@@ -751,30 +749,30 @@ contains
 
     if (lstat/=0) then
        if (present(stat)) then
-          call option_error(key, OPT_NEW_KEY_WARNING, stat)
+          call option_error(key, SPUD_NEW_KEY_WARNING, stat)
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     else
        if (rank/=2) then
-          call option_error(key, OPT_RANK_ERROR, stat)
+          call option_error(key, SPUD_RANK_ERROR, stat)
           return
        end if
-       if (type/=OPT_REAL) then
-          call option_error(key, OPT_TYPE_ERROR, stat)
+       if (type/=SPUD_REAL) then
+          call option_error(key, SPUD_TYPE_ERROR, stat)
           return
        end if
        if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-          call option_error(key, OPT_SHAPE_ERROR, stat)
+          call option_error(key, SPUD_SHAPE_ERROR, stat)
           return
        end if
     end if
 
-    lstat=cset_option(key, len_trim(key), shape(option), 2, OPT_REAL,&
+    lstat=cset_option(key, len_trim(key), shape(option), 2, SPUD_REAL,&
          & option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine set_option_real_tensor
@@ -796,26 +794,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=0) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_INTEGER) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_INTEGER) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), 0, 0, OPT_INTEGER, option)
+    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_INTEGER, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_integer_scalar
 
@@ -836,26 +834,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=1) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_INTEGER) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_INTEGER) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), size(option), 1, OPT_INTEGER, option)
+    lstat=cset_option(key, len_trim(key), size(option), 1, SPUD_INTEGER, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_integer_vector
 
@@ -877,30 +875,30 @@ contains
 
     if (lstat/=0) then
        if (present(stat)) then
-          call option_error(key, OPT_NEW_KEY_WARNING, stat)
+          call option_error(key, SPUD_NEW_KEY_WARNING, stat)
        else
-          call option_error(key, OPT_KEY_ERROR, stat)
+          call option_error(key, SPUD_KEY_ERROR, stat)
           return
        end if
     else
        if (rank/=2) then
-          call option_error(key, OPT_RANK_ERROR, stat)
+          call option_error(key, SPUD_RANK_ERROR, stat)
           return
        end if
-       if (type/=OPT_INTEGER) then
-          call option_error(key, OPT_TYPE_ERROR, stat)
+       if (type/=SPUD_INTEGER) then
+          call option_error(key, SPUD_TYPE_ERROR, stat)
           return
        end if
        if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-          call option_error(key, OPT_SHAPE_ERROR, stat)
+          call option_error(key, SPUD_SHAPE_ERROR, stat)
           return
        end if
     end if
 
-    lstat=cset_option(key, len_trim(key), shape(option), 2, OPT_INTEGER,&
+    lstat=cset_option(key, len_trim(key), shape(option), 2, SPUD_INTEGER,&
          & option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
     
   end subroutine set_option_integer_tensor
@@ -922,26 +920,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=0) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_LOGICAL) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_LOGICAL) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), 0, 0, OPT_LOGICAL, option)
+    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_LOGICAL, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_logical_scalar
 
@@ -962,26 +960,26 @@ contains
 
     if (lstat/=0) then
       if (present(stat)) then
-        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
       else
-        call option_error(key, OPT_KEY_ERROR, stat)
+        call option_error(key, SPUD_KEY_ERROR, stat)
         return
       end if
     else
       if (rank/=1) then
-         call option_error(key, OPT_RANK_ERROR, stat)
+         call option_error(key, SPUD_RANK_ERROR, stat)
          return
       end if
 
-      if (type/=OPT_CHARACTER) then
-         call option_error(key, OPT_TYPE_ERROR, stat)
+      if (type/=SPUD_CHARACTER) then
+         call option_error(key, SPUD_TYPE_ERROR, stat)
          return
       end if
     end if
 
-    lstat=cset_option(key, len_trim(key), len(option), 1, OPT_CHARACTER, option)
+    lstat=cset_option(key, len_trim(key), len(option), 1, SPUD_CHARACTER, option)
     if (lstat/=0) then
-       call option_error(key, OPT_KEY_ERROR, stat)
+       call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   end subroutine set_option_character
   
@@ -999,9 +997,9 @@ contains
     
     lstat = cset_option_is_attribute(key, len_trim(key), 1, is_attribute)
     if(lstat /= 0) then
-      call option_error(key, OPT_KEY_ERROR, stat)
+      call option_error(key, SPUD_KEY_ERROR, stat)
     else if(is_attribute /= 1) then
-      call option_error(key, OPT_ATTR_SET_FAILED_WARNING, stat)
+      call option_error(key, SPUD_ATTR_SET_FAILED_WARNING, stat)
     end if
     
   end subroutine set_option_attribute
@@ -1018,7 +1016,7 @@ contains
 
     lstat = cdelete_option(key, len_trim(key))
     if(lstat /= 0) then
-      call option_error(key, OPT_KEY_ERROR, stat)
+      call option_error(key, SPUD_KEY_ERROR, stat)
     end if
   
   end subroutine delete_option
