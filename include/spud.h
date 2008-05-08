@@ -29,8 +29,6 @@
 #ifndef SPUD_H
 #define SPUD_H
 
-#include "confdefs.h"
-
 #include <algorithm>
 #include <cassert>
 #include <deque>
@@ -41,7 +39,6 @@
 #include <vector>
 
 #include "tinyxml.h"
-#include "Tokenize.h"
 
 namespace Spud{
 
@@ -228,7 +225,9 @@ namespace Spud{
         void verbose_off();
 
       private:
-      
+        void Tokenize(const std::string& str,
+                      std::vector<std::string>& tokens,
+                      const std::string& delimiters = " ") const;
         int split_name(const std::string, std::string&, std::string&) const;
         int split_name(const std::string, std::string&, int &index, std::string&) const;
         void split_node_name(std::string&, std::string&) const;
