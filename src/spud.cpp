@@ -25,67 +25,67 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
     USA
 */
-#include "FLOption.h"
 
-// FLOption CLASS METHODS
+#include "spud.h"
+
+// OptionManager::Option CLASS METHODS
 
 // PUBLIC METHODS
 
 using namespace std;
 
-/**
- * Construct a non-verbose non-attribute empty element with no defined path or name.
- */
-FLOption::FLOption(){
+using namespace Spud;
+
+OptionManager::OptionManager(){
+  options = OptionManager::Option();
+
+  return;
+}
+
+OptionManager::Option::Option(){
   verbose_off();
   set_rank_and_shape(-1, NULL);
   is_attribute = false;
+  
+  return;
 }
 
-/**
- * Construct a new element as a copy of the supplied element.
- */
-FLOption::FLOption(const FLOption& in){
-  *this = in;
+OptionManager::Option::Option(const OptionManager::Option& inOption){
+  *this = inOption;
+  
+  return;
 }
 
-/**
- * Construct a non-verbose non-attribute empty element with the given option path and name.
- */
-FLOption::FLOption(std::string path, std::string name){
+OptionManager::Option::Option(std::string path, std::string name){
   verbose_off();
   node_path = path;
   node_name = name;
   set_rank_and_shape(-1, NULL);
   is_attribute = false;
-}
-
-/**
- * Destructor.
- */
-FLOption::~FLOption(){
-}
-
-/**
- * Make this element a copy of the supplied element.
- */
-const FLOption& FLOption::operator=(const FLOption& in){
-  verbose = in.verbose;
   
+  return;
+}
+
+OptionManager::Option::~Option(){
+  return;
+}
+
+const OptionManager::Option& OptionManager::Option::operator=(const OptionManager::Option& inOption){
+  verbose = inOption.verbose;
   if(verbose)
-    cout<<"const FLOption& FLOption::operator=(const FLOption& in)\n";
+    cout<<"const OptionManager::Option& OptionManager::Option::operator=(const OptionManager::Option& in)\n";
   
-  node_path = in.node_path;
-  node_name = in.node_name;
-  children = in.children;
+  node_path = inOption.node_path;
+  node_name = inOption.node_name;
+  children = inOption.children;
 
-  data_bool = in.data_bool;
-  data_double = in.data_double;
-  data_int = in.data_int;
-  data_string = in.data_string;
-  set_rank_and_shape(in.rank, in.shape);
+  data_bool = inOption.data_bool;
+  data_double = inOption.data_double;
+  data_int = inOption.data_int;
+  data_string = inOption.data_string;
+  set_rank_and_shape(inOption.rank, inOption.shape);
   
-  is_attribute = in.is_attribute;
+  is_attribute = inOption.is_attribute;
 
   return *this;
 }
@@ -93,28 +93,28 @@ const FLOption& FLOption::operator=(const FLOption& in){
 /**
  * Get the name of this element.
  */
-std::string FLOption::get_name() const{
+std::string OptionManager::Option::get_name() const{
   return node_name;
 }
 
 /**
  * Get the option path for this element.
  */
-std::string FLOption::get_path() const{
+std::string OptionManager::Option::get_path() const{
   return node_path;
 }
 
 /**
  * Get the attribute status for this element.
  */
-logical_t FLOption::get_is_attribute() const{
+logical_t OptionManager::Option::get_is_attribute() const{
   return is_attribute;
 }
 
 /** 
  * Attempt to set the attribute status for this element. Only elements with string data and no children may be marked as attributes.
  */
-logical_t FLOption::set_is_attribute(logical_t is_attribute){
+logical_t OptionManager::Option::set_is_attribute(logical_t is_attribute){
   if(children.size() == 0 and get_option_type() == OPTION_TYPE_STRING){
     this->is_attribute = is_attribute;
   }
@@ -125,9 +125,9 @@ logical_t FLOption::set_is_attribute(logical_t is_attribute){
 /** 
  * Get the child of this element at the supplied option path (const version).
  */
-const FLOption* FLOption::get_child(string str) const{
+const OptionManager::Option* OptionManager::Option::get_child(string str) const{
   if(verbose)
-    cout << "const FLOption* FLOption::get_child("<<str<<") const\n";
+    cout << "const OptionManager::Option* OptionManager::Option::get_child("<<str<<") const\n";
 
   if(str == "/" or str.empty())
     return this;
@@ -141,7 +141,7 @@ const FLOption* FLOption::get_child(string str) const{
     exit(-1);
   }
 
-  multimap<string, FLOption>::const_iterator it;
+  multimap<string, OptionManager::Option>::const_iterator it;
   if(children.count(name) == 0){
     name += "::";
     int i = 0;
@@ -158,7 +158,7 @@ const FLOption* FLOption::get_child(string str) const{
     if(index < 0){
       it = children.find(name);
     }else{
-      std::pair<std::multimap< std::string, FLOption>::const_iterator, std::multimap<std::string, FLOption>::const_iterator> range = children.equal_range(name);
+      std::pair<std::multimap< std::string, OptionManager::Option>::const_iterator, std::multimap<std::string, OptionManager::Option>::const_iterator> range = children.equal_range(name);
       it = range.first;
       for(int i = 0;it != range.second;it++, i++){
         if(i == index){
@@ -180,9 +180,9 @@ const FLOption* FLOption::get_child(string str) const{
 /**
  * Get the child of this element at the supplied option path (non-const version - checks that the child exists, and if it does finds it with create_child).
  */
-FLOption* FLOption::get_child(string str){
+OptionManager::Option* OptionManager::Option::get_child(string str){
   if(verbose)
-    cout << "FLOption* FLOption::get_child("<< str <<")\n";
+    cout << "OptionManager::Option* OptionManager::Option::get_child("<< str <<")\n";
     
   if(!have_option(str)){
     return NULL;
@@ -194,7 +194,7 @@ FLOption* FLOption::get_child(string str){
 /** 
  * Get the data from this element or, if this element hold array data, get the first element of the array. Tranparently seeks into __value sub-element if this exists.
  */
-const void *FLOption::get_option() const{
+const void *OptionManager::Option::get_option() const{
 
   if(have_option("__value")){
     return children.find("__value")->second.get_option();
@@ -222,9 +222,9 @@ const void *FLOption::get_option() const{
 /** 
  * Get the logical data from this element. Tranparently seeks into __value sub-element if this exists.
  */
-int FLOption::get_option(std::vector<logical_t>& data) const{
+int OptionManager::Option::get_option(std::vector<logical_t>& data) const{
   if(verbose)
-    cout<<"const void* FLOption::get_option(std::vector<logical_t>&) const\n";
+    cout<<"const void* OptionManager::Option::get_option(std::vector<logical_t>&) const\n";
 
   if(have_option("__value")){
     return get_option("__value", data);
@@ -239,9 +239,9 @@ int FLOption::get_option(std::vector<logical_t>& data) const{
 /** 
  * Get the double data from this element. Tranparently seeks into __value sub-element if this exists.
  */
-int FLOption::get_option(std::vector<double>& data) const{
+int OptionManager::Option::get_option(std::vector<double>& data) const{
   if(verbose)
-    cout<<"const void* FLOption::get_option(std::vector<double>&) const\n";
+    cout<<"const void* OptionManager::Option::get_option(std::vector<double>&) const\n";
 
   if(have_option("__value")){
     return get_option("__value", data);
@@ -256,9 +256,9 @@ int FLOption::get_option(std::vector<double>& data) const{
 /** 
  * Get the integer data from this element. Tranparently seeks into __value sub-element if this exists.
  */
-int FLOption::get_option(std::vector<int>& data) const{
+int OptionManager::Option::get_option(std::vector<int>& data) const{
   if(verbose)
-    cout<<"const void* FLOption::get_option(std::vector<int>&) const\n";
+    cout<<"const void* OptionManager::Option::get_option(std::vector<int>&) const\n";
 
   if(have_option("__value")){
     return get_option("__value", data);
@@ -273,9 +273,9 @@ int FLOption::get_option(std::vector<int>& data) const{
 /** 
  * Get the string data from this element. Tranparently seeks into __value sub-element if this exists.
  */
-int FLOption::get_option(std::string& data) const{
+int OptionManager::Option::get_option(std::string& data) const{
   if(verbose)
-    cout<<"const void* FLOption::get_option(std::string&) const\n";
+    cout<<"const void* OptionManager::Option::get_option(std::string&) const\n";
 
   if(have_option("__value")){
     return get_option("__value", data);
@@ -290,7 +290,7 @@ int FLOption::get_option(std::string& data) const{
 /** 
  * Get the logical data from the supplied option path.
  */
-int FLOption::get_option(std::string str, std::vector<logical_t>& data) const{
+int OptionManager::Option::get_option(std::string str, std::vector<logical_t>& data) const{
   if(have_option(str)){
     return get_child(str)->get_option(data);
   }else{
@@ -301,8 +301,8 @@ int FLOption::get_option(std::string str, std::vector<logical_t>& data) const{
 /** 
  * Get the double data from the supplied option path.
  */
-int FLOption::get_option(std::string str, std::vector<double>& data) const{
-  const FLOption* child = get_child(str);
+int OptionManager::Option::get_option(std::string str, std::vector<double>& data) const{
+  const OptionManager::Option* child = get_child(str);
   if(child == NULL){
     return -1;
   }else{
@@ -313,8 +313,8 @@ int FLOption::get_option(std::string str, std::vector<double>& data) const{
 /** 
  * Get the integer data from the supplied option path.
  */
-int FLOption::get_option(std::string str, std::vector<int>& data) const{
-  const FLOption* child = get_child(str);
+int OptionManager::Option::get_option(std::string str, std::vector<int>& data) const{
+  const OptionManager::Option* child = get_child(str);
   if(child == NULL){
     return -1;
   }else{
@@ -325,8 +325,8 @@ int FLOption::get_option(std::string str, std::vector<int>& data) const{
 /**
  * Get the string data from the supplied option path.
  */
-int FLOption::get_option(std::string str, std::string& data) const{
-  const FLOption* child = get_child(str);
+int OptionManager::Option::get_option(std::string str, std::string& data) const{
+  const OptionManager::Option* child = get_child(str);
   if(child == NULL){
     return -1;
   }else{
@@ -337,9 +337,9 @@ int FLOption::get_option(std::string str, std::string& data) const{
 /** 
  * Get the number of elements at the supplied option path. Searches un-named elements first, and if this is zero searches (from this highest element in the tree first) named elements.
  */
-int FLOption::get_option_count(std::string str) const{
+int OptionManager::Option::get_option_count(std::string str) const{
   if(verbose)
-    cout<<"int FLOption::get_option_count("<<str<<") const\n";
+    cout<<"int OptionManager::Option::get_option_count("<<str<<") const\n";
   
   string name, branch;
   int index;
@@ -355,7 +355,7 @@ int FLOption::get_option_count(std::string str) const{
   }
 
   int count=0, i=0;
-  for(multimap<string, FLOption>::const_iterator it=children.begin();it!=children.end(); it++){
+  for(multimap<string, OptionManager::Option>::const_iterator it=children.begin();it!=children.end(); it++){
     if(it->first.compare(0, name.size(), name)==0){
       if(index<0){
         if(branch.empty())
@@ -382,7 +382,7 @@ int FLOption::get_option_count(std::string str) const{
 /**
  * Get the rank of the data in this element.
  */
-size_t FLOption::get_option_rank() const{
+size_t OptionManager::Option::get_option_rank() const{
   if(have_option("__value")){
     return children.find("__value")->second.get_option_rank();
   }else{
@@ -393,7 +393,7 @@ size_t FLOption::get_option_rank() const{
 /**
  * Get the shape of the data in this element.
  */
-void FLOption::get_option_shape(int *shape) const{
+void OptionManager::Option::get_option_shape(int *shape) const{
   if(have_option("__value")){
     children.find("__value")->second.get_option_shape(shape);
     return;
@@ -406,9 +406,9 @@ void FLOption::get_option_shape(int *shape) const{
 /**
  * Get the size of the data in this element. For array data this is the same as the rank. For string data this is the length of the string.
  */
-size_t FLOption::get_option_size() const{
+size_t OptionManager::Option::get_option_size() const{
   if(verbose)
-    cout<<"size_t FLOption::get_option_size() const\n";
+    cout<<"size_t OptionManager::Option::get_option_size() const\n";
   
   if(have_option("__value")){
     return children.find("__value")->second.get_option_size();
@@ -436,9 +436,9 @@ size_t FLOption::get_option_size() const{
 /**
  * Get the type of the data in this element.
  */
-FLOptionType FLOption::get_option_type() const{
+OptionType OptionManager::Option::get_option_type() const{
   if(verbose)
-    cout<<"FLOptionType FLOption::get_option_type() const\n";
+    cout<<"OptionType OptionManager::Option::get_option_type() const\n";
 
   if(have_option("__value")){
     return children.find("__value")->second.get_option_type();
@@ -460,9 +460,9 @@ FLOptionType FLOption::get_option_type() const{
 /**
  * Test if an element exists at the supplied option path.
  */
-logical_t FLOption::have_option(string str) const{
+logical_t OptionManager::Option::have_option(string str) const{
   if(verbose)
-    cout<<"bool FLOption::have_option(\""<<str<<"\") const\n";
+    cout<<"bool OptionManager::Option::have_option(\""<<str<<"\") const\n";
 
   if(str=="/")
     return true;
@@ -473,15 +473,15 @@ logical_t FLOption::have_option(string str) const{
 /**
  * Generate a list containing the names of the children of this element.
  */
-void FLOption::list_children(string name, deque<string>& kids) const{
+void OptionManager::Option::list_children(string name, deque<string>& kids) const{
   if(verbose)
     cout<<"void list_children(string name, deque<string>& kids) const\n";
   
   kids.clear();
 
-  const FLOption* descendant = get_child(name);
+  const OptionManager::Option* descendant = get_child(name);
   if(descendant != NULL){
-    for(map<string, FLOption>::const_iterator it=descendant->children.begin(); it!=descendant->children.end(); it++){
+    for(map<string, OptionManager::Option>::const_iterator it=descendant->children.begin(); it!=descendant->children.end(); it++){
       kids.push_back(it->first);
     }
   }
@@ -492,9 +492,9 @@ void FLOption::list_children(string name, deque<string>& kids) const{
 /**
  * Read from an XML file with the given filename. Sets the name of this element to be that of the root element in the supplied XML file, and adds children to this element corresponding the the data in the XML file.
  */
-void FLOption::load_options_xml(string xmlfile){
+void OptionManager::Option::load_options_xml(string xmlfile){
   if(verbose)
-    cout<<"void FLOption::load_options_xml("<<xmlfile<<")\n";
+    cout<<"void OptionManager::Option::load_options_xml("<<xmlfile<<")\n";
 
   TiXmlDocument doc(xmlfile);
   doc.SetCondenseWhiteSpace(false);
@@ -523,9 +523,9 @@ void FLOption::load_options_xml(string xmlfile){
 
 /**  Write out this element and all of its children to an XML file with the supplied filename.
   */
-void FLOption::write_options_xml(string xmlfile) const{
+void OptionManager::Option::write_options_xml(string xmlfile) const{
   if(verbose)
-    cout << "void FLOption::write_options_xml(" << xmlfile << ")\n";
+    cout << "void OptionManager::Option::write_options_xml(" << xmlfile << ")\n";
     
   TiXmlDocument doc;
   
@@ -546,9 +546,9 @@ void FLOption::write_options_xml(string xmlfile) const{
 
 /**  Parses the supplied TiXmlNode and sets the data and and attribute status of this element appropriately.
   */
-void FLOption::parse_node(string root, const TiXmlNode *node){
+void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
   if(verbose)
-    cout<<"void FLOption::parse_option(\""<<root<<"\", const TiXmlNode *node)\n"; 
+    cout<<"void OptionManager::Option::parse_option(\""<<root<<"\", const TiXmlNode *node)\n"; 
   
   // In fact I think at this level I only ever deal with ELEMENT -
   // time will tell
@@ -566,7 +566,7 @@ void FLOption::parse_node(string root, const TiXmlNode *node){
   }
 
   // Ensure this path has been added
-  FLOption* child = create_child(basename);
+  OptionManager::Option* child = create_child(basename);
   if(child == NULL){
     cerr << "ERROR: Unexpected failure when creating child element\n";
     exit(-1);
@@ -690,7 +690,7 @@ void FLOption::parse_node(string root, const TiXmlNode *node){
 
 /**  Convert this element into a TiXmlElement.
   */
-TiXmlElement* FLOption::to_element() const{
+TiXmlElement* OptionManager::Option::to_element() const{
   if(verbose){
     cout << "TiXmlElement* to_element(void) const\n";
   }
@@ -711,7 +711,7 @@ TiXmlElement* FLOption::to_element() const{
   data_ele->SetValue(data_as_string());
   ele->LinkEndChild(data_ele);
   
-  for(map<string, FLOption>::const_iterator iter = children.begin();iter != children.end();iter++){
+  for(map<string, OptionManager::Option>::const_iterator iter = children.begin();iter != children.end();iter++){
     if(iter->second.is_attribute){
       // Add attribute
       ele->SetAttribute(iter->second.node_name, iter->second.data_as_string());
@@ -748,7 +748,7 @@ TiXmlElement* FLOption::to_element() const{
 
 /**  Print this element to standard output.
   */
-void FLOption::print() const{
+void OptionManager::Option::print() const{
   string::size_type last_pos=0;
   string space("");
   while((last_pos = node_path.find_first_of("/", last_pos))!=string::npos){
@@ -803,7 +803,7 @@ void FLOption::print() const{
       cout<<space<<"<value>: "<<data_string;
       cout<<endl;
     }
-    for(std::map<std::string, FLOption>::const_iterator i=children.begin(); i!=children.end(); ++i)
+    for(std::map<std::string, OptionManager::Option>::const_iterator i=children.begin(); i!=children.end(); ++i)
       i->second.print();
   }
   return;
@@ -811,13 +811,13 @@ void FLOption::print() const{
 
 /**  Find or add a new element at the supplied option path.
   */
-int FLOption::add_option(std::string str){
+int OptionManager::Option::add_option(std::string str){
   return create_child(str) == NULL ? 1 : 0;
 }
 
 /**  Set the data in the element with the supplied logical data. Transparently sets the data of a __value sub-element if this exists.
   */
-int FLOption::set_option(int rank, const int *shape, std::vector<logical_t>& data){
+int OptionManager::Option::set_option(int rank, const int *shape, std::vector<logical_t>& data){
   if(have_option("__value")){
     return set_option("__value", rank, shape, data);
   }else{  
@@ -830,8 +830,8 @@ int FLOption::set_option(int rank, const int *shape, std::vector<logical_t>& dat
 
 /**  Set the data at the supplied option path with the supplied logical data.
   */
-int FLOption::set_option(std::string str, int rank, const int *shape, std::vector<logical_t>& data){
-  FLOption* opt = create_child(str);
+int OptionManager::Option::set_option(std::string str, int rank, const int *shape, std::vector<logical_t>& data){
+  OptionManager::Option* opt = create_child(str);
   
   if(opt == NULL){
     return -1;
@@ -842,7 +842,7 @@ int FLOption::set_option(std::string str, int rank, const int *shape, std::vecto
 
 /**  Set the data in the element with the supplied double data. Transparently sets the data of a __value sub-element if this exists.
   */
-int FLOption::set_option(int rank, const int *shape, std::vector<double>& data){
+int OptionManager::Option::set_option(int rank, const int *shape, std::vector<double>& data){
   if(have_option("__value")){
     return set_option("__value", rank, shape, data);
   }else{  
@@ -855,8 +855,8 @@ int FLOption::set_option(int rank, const int *shape, std::vector<double>& data){
 
 /**  Set the data at the supplied option path with the supplied double data.
   */
-int FLOption::set_option(std::string str, int rank, const int *shape, std::vector<double>& data){
-  FLOption* opt = create_child(str);
+int OptionManager::Option::set_option(std::string str, int rank, const int *shape, std::vector<double>& data){
+  OptionManager::Option* opt = create_child(str);
     
   if(opt == NULL){
     return -1;
@@ -867,7 +867,7 @@ int FLOption::set_option(std::string str, int rank, const int *shape, std::vecto
 
 /**  Set the data in the element with the supplied integer data. Transparently sets the data of a __value sub-element if this exists.
   */
-int FLOption::set_option(int rank, const int *shape, std::vector<int>& data){
+int OptionManager::Option::set_option(int rank, const int *shape, std::vector<int>& data){
   if(have_option("__value")){
     return set_option("__value", rank, shape, data);
   }else{  
@@ -880,8 +880,8 @@ int FLOption::set_option(int rank, const int *shape, std::vector<int>& data){
 
 /**  Set the data at the supplied option path with the supplied integer data.
   */
-int FLOption::set_option(std::string str, int rank, const int *shape, std::vector<int>& data){
-  FLOption* opt = create_child(str);
+int OptionManager::Option::set_option(std::string str, int rank, const int *shape, std::vector<int>& data){
+  OptionManager::Option* opt = create_child(str);
   
   if(opt == NULL){
     return -1;
@@ -892,9 +892,9 @@ int FLOption::set_option(std::string str, int rank, const int *shape, std::vecto
 
 /**  Set the data in the element with the supplied string data. Transparently sets the data of a __value sub-element if this exists.
   */
-int FLOption::set_option(std::string data){
+int OptionManager::Option::set_option(std::string data){
   if(verbose)
-    cout<<"void FLOption::set_option("<<data<<")\n";
+    cout<<"void OptionManager::Option::set_option("<<data<<")\n";
 
   if(have_option("__value")){
     return set_option("__value", data);
@@ -909,11 +909,11 @@ int FLOption::set_option(std::string data){
 
 /**  Set the data at the supplied option path with the supplied string data.
   */
-int FLOption::set_option(std::string str, std::string data){
+int OptionManager::Option::set_option(std::string str, std::string data){
   if(verbose)
-    cout<<"void FLOption::set_option("<<str<<", "<<data<<")\n";
+    cout<<"void OptionManager::Option::set_option("<<str<<", "<<data<<")\n";
 
-  FLOption* opt = create_child(str);
+  OptionManager::Option* opt = create_child(str);
     
   if(opt == NULL){
     return -1;
@@ -924,11 +924,11 @@ int FLOption::set_option(std::string str, std::string data){
 
 /**  Set the data of this element with the supplied string data, and mark this element as an attribute.
   */
-int FLOption::set_attribute(std::string str, std::string data){
+int OptionManager::Option::set_attribute(std::string str, std::string data){
   if(verbose)
-    cout << "logical_t FLOption::set_attribute(" << str << ", " << data << ")\n";
+    cout << "logical_t OptionManager::Option::set_attribute(" << str << ", " << data << ")\n";
   
-  FLOption* opt = create_child(str);
+  OptionManager::Option* opt = create_child(str);
   
   if(opt == NULL){
     return -1;
@@ -941,9 +941,9 @@ int FLOption::set_attribute(std::string str, std::string data){
 
 /**  Delete all data from this element.
   */
-int FLOption::clear_option(){
+int OptionManager::Option::clear_option(){
   if(verbose)
-    cout << "void FLOption::clear_option(void)\n";
+    cout << "void OptionManager::Option::clear_option(void)\n";
     
   set_option_type(OPTION_TYPE_NULL);
   set_rank_and_shape(-1, NULL);
@@ -953,11 +953,11 @@ int FLOption::clear_option(){
 
 /**  Delete all data from the element at the supplied option path.
   */
-int FLOption::clear_option(std::string str){
+int OptionManager::Option::clear_option(std::string str){
   if(verbose)
-    cout << "void FLOption::clear_option(" << str << ")\n";
+    cout << "void OptionManager::Option::clear_option(" << str << ")\n";
 
-  FLOption* opt = get_child(str);
+  OptionManager::Option* opt = get_child(str);
   if(opt == NULL){
     return -1;
   }else{
@@ -967,19 +967,19 @@ int FLOption::clear_option(std::string str){
 
 /**  Delete the element at the supplied option path.
   */
-int FLOption::delete_option(std::string str){
+int OptionManager::Option::delete_option(std::string str){
   if(verbose)
-    cout << "void FLOption::delete_option(" << str << ")\n";
+    cout << "void OptionManager::Option::delete_option(" << str << ")\n";
 
   string branch, name;
   split_name(str, name, branch);
  
-  FLOption* opt = get_child(name);
+  OptionManager::Option* opt = get_child(name);
   
   if(opt == NULL){
     return -1;
   }else if(branch.empty()){
-    for(multimap<std::string, FLOption>::iterator it = children.begin();it != children.end();it++){
+    for(multimap<std::string, OptionManager::Option>::iterator it = children.begin();it != children.end();it++){
       if(&it->second == opt){
         children.erase(it);
         return 0;
@@ -993,13 +993,13 @@ int FLOption::delete_option(std::string str){
 
 /**  Turn on verbosity for this element (used for debugging only).
   */
-void FLOption::verbose_on(){
+void OptionManager::Option::verbose_on(){
   verbose = true;
 }
 
 /**  Turn off verbosity for this element.
   */
-void FLOption::verbose_off(){
+void OptionManager::Option::verbose_off(){
   verbose = false;
 }
 
@@ -1007,9 +1007,9 @@ void FLOption::verbose_off(){
 
 /**  Split the supplied option path in into the highest child name (including its index) and option path from that sub -child.
   */
-int FLOption::split_name(const string in, string& name, string& branch) const{
+int OptionManager::Option::split_name(const string in, string& name, string& branch) const{
   if(verbose){
-    cout << "int FLOption::split_name(" << in << ", " << name << ", " << branch << ")\n";
+    cout << "int OptionManager::Option::split_name(" << in << ", " << name << ", " << branch << ")\n";
   }
 
   // I cannot believe I'm doing this
@@ -1036,9 +1036,9 @@ int FLOption::split_name(const string in, string& name, string& branch) const{
 
 /**  Split the supplied option path in into the highest child name (excluding its index), the index of that sub-child, and the option path from that sub-child.
   */
-int FLOption::split_name(const string in, string& name, int &index, string& branch) const{
+int OptionManager::Option::split_name(const string in, string& name, int &index, string& branch) const{
   if(verbose)
-    cout<<"int FLOption::split_name("<<in<<", string& name , string& branch)\n";
+    cout<<"int OptionManager::Option::split_name("<<in<<", string& name , string& branch)\n";
   
   int ret = split_name(in, name, branch);
   if(ret != 0){
@@ -1059,9 +1059,9 @@ int FLOption::split_name(const string in, string& name, int &index, string& bran
 
 /**  Split a node name into the child name (excluding the name attribute) and it's name attribute (which may be empty).
   */
-void FLOption::split_node_name(string& node_name, string& name_attr) const{
+void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{
   if(verbose){
-    cout << "void FLOption::split_node_name(" << node_name << ", " << name_attr << "&) const\n";
+    cout << "void OptionManager::Option::split_node_name(" << node_name << ", " << name_attr << "&) const\n";
   }
   
   string::size_type firstPos = this->node_name.rfind("::");
@@ -1079,9 +1079,9 @@ void FLOption::split_node_name(string& node_name, string& name_attr) const{
 
 /**  Converts the data for this element into a string.
   */
-string FLOption::data_as_string() const{
+string OptionManager::Option::data_as_string() const{
   if(verbose){
-    cout << "string FLOption::data_as_string(void) const\n";
+    cout << "string OptionManager::Option::data_as_string(void) const\n";
   }
 
   stringstream data_as_string; 
@@ -1128,9 +1128,9 @@ string FLOption::data_as_string() const{
 
 /**  Finds or creates a new child at the supplied option path, and returns that child. If the parent of a created child is marked as an attribute, unmarks it.
   */
-FLOption* FLOption::create_child(string str){
+OptionManager::Option* OptionManager::Option::create_child(string str){
   if(verbose)
-    cout<<"FLOption& FLOption::create_child("<<str<<")\n";
+    cout<<"OptionManager::Option& OptionManager::Option::create_child("<<str<<")\n";
 
   if(str == "/" or str.empty())
     return this;
@@ -1144,7 +1144,7 @@ FLOption* FLOption::create_child(string str){
     exit(-1);
   }
 
-  multimap<std::string, FLOption>::iterator child;
+  multimap<std::string, OptionManager::Option>::iterator child;
   if(children.count(name) == 0){
     string name2 = name + "::";
     int i = 0;
@@ -1162,7 +1162,7 @@ FLOption* FLOption::create_child(string str){
         cerr << "WARNING: Creating __value child for non null element - deleting parent data\n";
         set_option_type(OPTION_TYPE_NULL);
       }
-      child = children.insert(pair<string, FLOption>(name, FLOption(node_path + "/" + node_name, name)));
+      child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(node_path + "/" + node_name, name)));
       string new_node_name, name_attr;
       child->second.split_node_name(new_node_name, name_attr);
       if(name_attr.size() > 0){
@@ -1174,7 +1174,7 @@ FLOption* FLOption::create_child(string str){
     if(index < 0){
       child = children.find(name);
     }else{
-      std::pair<std::multimap< std::string, FLOption>::iterator, std::multimap<std::string, FLOption>::iterator> range = children.equal_range(name);
+      std::pair<std::multimap< std::string, OptionManager::Option>::iterator, std::multimap<std::string, OptionManager::Option>::iterator> range = children.equal_range(name);
       child = range.first;
       for(int i = 0;child != range.second;child++, i++){
         if(i == index){
@@ -1195,7 +1195,7 @@ FLOption* FLOption::create_child(string str){
 
 /**  Set the option type for this element, and delete all data of other option types. If the new option type is not string type and this element is marked as an attribute, unmarks it.
   */
-void FLOption::set_option_type(FLOptionType option_type){
+void OptionManager::Option::set_option_type(OptionType option_type){
   switch(option_type){
     case(OPTION_TYPE_DOUBLE):
       data_int.clear();
@@ -1237,10 +1237,10 @@ void FLOption::set_option_type(FLOptionType option_type){
 
 /**  Set the rank and shape for the data in this element.
   */
-void FLOption::set_rank_and_shape(int rank, const int* shape){
+void OptionManager::Option::set_rank_and_shape(int rank, const int* shape){
   logical_t set_attrs = false;
   if(rank > 0){
-    FLOptionType option_type = get_option_type();
+    OptionType option_type = get_option_type();
     set_attrs = (option_type == OPTION_TYPE_DOUBLE or option_type == OPTION_TYPE_INT or option_type == OPTION_TYPE_BOOL);
   }
   switch(rank){
@@ -1288,10 +1288,11 @@ void FLOption::set_rank_and_shape(int rank, const int* shape){
   return;
 }
 
-// END OF FLOption CLASS METHODS
+// END OF OptionManager::Option CLASS METHODS
 
-// Initialise the root node
-FLOption fluidity_options("", "");
+
+// VERY TEMPORARY
+#if 0
 
 
 // FORTRAN INTERFACES
@@ -1353,7 +1354,7 @@ extern "C" {
   int cget_option_info_fc(const char *str, const int *len, int *shape, int *rank, int *type){
     string name(str, *len);
 
-    const FLOption* option = fluidity_options.get_child(name);
+    const OptionManager::Option* option = fluidity_options.get_child(name);
     if(option == NULL){
       return -1;
     }
@@ -1369,7 +1370,7 @@ extern "C" {
   int cget_option_fc(const char *str, const int *len, void *val){
     string name(str, *len);
   
-    const FLOption* option = fluidity_options.get_child(name);
+    const OptionManager::Option* option = fluidity_options.get_child(name);
     
     if(option == NULL){
       return -1;
@@ -1453,7 +1454,7 @@ extern "C" {
   int cset_option_is_attribute_fc(const char *str, const int *str_len, int* is_attribute_set, int* is_attribute_get = NULL){    
     string name(str, *str_len);
     
-    FLOption* opt = fluidity_options.get_child(name);
+    OptionManager::Option* opt = fluidity_options.get_child(name);
     if(opt == NULL){
       return -1;
     }else{
@@ -1486,3 +1487,5 @@ extern "C" {
     return;
   }
 }
+
+#endif

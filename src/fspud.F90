@@ -24,6 +24,7 @@
 !    License along with this library; if not, write to the Free Software
 !    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
 !    USA
+
 module spud
   !!< This module provides a dictionary object for options whose entries
   !!< can contain a wide variety of data.
@@ -61,7 +62,7 @@ module spud
   public get_child_name, number_of_children, get_option, &
        option_count, have_option, option_rank, option_shape, &
        option_type, option_error, add_option, set_option, &
-       set_option_attribute, delete_option, add_or_delete_option, &
+       set_option_attribute, delete_option, &
        load_options, write_options
 
   interface 
@@ -1020,21 +1021,5 @@ contains
     end if
   
   end subroutine delete_option
-  
-  subroutine add_or_delete_option(key, add, stat)
-    !!< Add the option specified by key if add_or_delete is .true., otherwise
-    !!< delete the option specified by key.
-
-    character(len = *), intent(in) :: key
-    logical, intent(in) :: add
-    integer, optional, intent(out) :: stat
-    
-    if(add) then
-      call add_option(key, stat)
-    else
-      call delete_option(key, stat)
-    end if
-
-  end subroutine
   
 end module spud
