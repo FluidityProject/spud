@@ -10,7 +10,6 @@ setup(
       url = "http://amcg.ese.ic.ac.uk",
       py_modules=["schema", "tree", "interface", "TextBufferMarkup", "dialogs", "debug", "config"],
       scripts=["diamond"],
-      data_files = [("/usr/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"]),
-                    ("/usr/share/diamond/schema", ["../fluidity_options.rng"])],
+      data_files = [("/usr/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])],
      )
 
