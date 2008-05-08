@@ -1,0 +1,230 @@
+#!/usr/bin/env python
+
+#    This file is part of Diamond.
+#
+#    Diamond is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    Diamond is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with Diamond.  If not, see <http://www.gnu.org/licenses/>.
+
+import getopt
+import os
+import os.path
+import sys
+import traceback
+
+import gtk
+import gtk.gdk
+import gobject
+
+import debug
+import dialogs
+
+def Help():
+  """
+  Prints usage information to standard output.
+  """
+
+  debug.dprint("Usage: diamond [OPTIONS] ... [FILE]\n" + \
+               "\n" + \
+               "A Relax NG aware XML editor. [FILE] is the XML file to be opened (a new file is\n" + \
+               "created if this is not supplied).\n" + \
+               "\n" + \
+               "Options:\n" + \
+               "\n" + \
+               "-d               Dump the supplied XML file to standard output (does not\n" + \
+               "                 launch the GUI)\n" + \
+               "-h               Display this message\n" + \
+               "-s [SCHEMAFILE]  Use the supplied schema file\n" + \
+               "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
+               "                 debugging information to standard output and standard error", 0)
+
+  return
+
+def main():
+  diamond_path = os.path.dirname(__file__) + os.path.sep
+
+  sys.path.insert(0, diamond_path)
+
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "dhvs:")
+  except:
+    Help()
+    sys.exit(1)
+
+  if len(args) > 1:
+    Help()
+    sys.exit(1)
+
+  if not ("-v", "") in opts:
+    debug.SetDebugLevel(0)
+  if ("-h", "") in opts:
+    Help()
+    return
+  dump_file = ("-d", "") in opts
+
+  try:
+    import psyco
+    psyco.full()
+    debug.dprint("Using Psyco specialising compiler")
+  except ImportError:
+    debug.dprint("Unable to use Psyco module")
+
+  import interface
+  import schema
+  import tree
+  import config
+
+  try:
+    input_filename = args[0]
+  except IndexError:
+    input_filename = None
+
+  logofile = None
+  for possible_logofile in [os.path.join(diamond_path, "gui", "diamond.svg"), "/usr/share/diamond/gui/diamond.svg"]:
+    try:
+      os.stat(possible_logofile)
+      logofile = possible_logofile
+      break
+    except OSError:
+      pass
+
+
+  # Let's find a schema.
+
+  suffix = None
+
+  # if the user specifies a schema on the command line, use that.
+
+  input_schemafile = None
+  for opt in opts:
+    if opt[0] == "-s":
+      input_schemafile = opt[1]
+      break
+
+  # if the user has specified a file to work on, use the suffix as a key
+
+  if input_filename is not None and input_schemafile is None:
+    suffix = input_filename.split(".")[-1]
+    try:
+      input_schemafile = config.schemata[suffix][1]
+    except IndexError:
+      debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
+      debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+      sys.exit(1)
+
+  # if there is only one schema, use that
+  
+  if input_schemafile is None:
+    if len(config.schemata) == 1:
+      suffix = config.schemata.keys()[0]
+      input_schemafile = config.schemata[suffix][1]
+
+  # otherwise ask the user to choose
+
+  if input_schemafile is None:
+    choices = [key + ": " + config.schemata[key][0] for key in config.schemata]
+    choice = dialogs.radio_dialog("Choose a schema", "Choose a schema to use:", choices, logofile)
+    suffix = choice.split(":")[0]
+    input_schemafile = config.schemata[suffix][1]
+
+  # ensure that the specified schema actually exists!
+
+  try:
+    os.stat(input_schemafile)
+  except OSError:
+    debug.deprint("Could not find schemafile %s!" % input_schemafile, 0)
+    sys.exit(1)
+
+  if input_filename is not None:
+    try:
+      os.stat(input_filename)
+    except OSError:
+       pass
+
+  gladefile = None
+  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"), "/usr/share/diamond/gui/gui.glade"]:
+    try:
+      os.stat(possible_gladefile)
+      gladefile = possible_gladefile
+      break
+    except OSError:
+      pass
+  if gladefile is None:
+    debug.deprint("Cannot locate GUI!", 0)
+    sys.exit(1)
+
+  if input_schemafile == None:
+    for possible_schemafile in [os.path.join(diamond_path, os.pardir, "fluidity_options.rng"), "/usr/share/diamond/schema/fluidity_options.rng"]:
+      try:
+        os.stat(possible_schemafile)
+        input_schemafile = possible_schemafile
+        break
+      except OSError:
+        pass
+
+  debug.dprint("\n" + \
+               "Glade file:  " + str(gladefile) + "\n" + \
+               "Schema file: " + str(input_schemafile) + "\n" + \
+               "Logo file:   " + str(logofile) + "\n" + \
+               "Input file:  " + str(input_filename) + "\n")
+
+  if dump_file:
+    try:
+      s = schema.Schema(input_schemafile)
+    except:
+      tb = traceback.format_exception(sys.exc_info()[0] ,sys.exc_info()[1], sys.exc_info()[2])
+      tb_msg = ""
+      for tbline in tb:
+        tb_msg += tbline
+      debug.deprint(tb_msg + "\nUnable to open schema file \"" + input_schemafile + "\"", 0)
+      sys.exit(1)
+    if input_filename is None:
+      debug.deprint("No input XML file given", 0)
+    else:
+      try:
+        tree, errors = s.read(input_filename)
+      except:
+        tb = traceback.format_exception(sys.exc_info()[0] ,sys.exc_info()[1], sys.exc_info()[2])
+        tb_msg = ""
+        for tbline in tb:
+          tb_msg += tbline
+        debug.deprint(tb_msg + "\nUnable to open file \"" + input_filename + "\"", 0)
+        sys.exit(1)
+      tree.print_recursively()
+  else:
+    i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
+
+    def initialise(i, s, f):
+      i.open_file(schemafile = s)
+      if not f is None:
+        try:
+          os.stat(f)
+          i.open_file(filename = f)
+        except:
+          i.set_saved(False, f)
+      i.statusbar.clear_statusbar()
+
+    i.statusbar.set_statusbar("Loading ...")
+    gobject.idle_add(initialise, i, input_schemafile, input_filename)
+    while gtk.events_pending():
+      gtk.main_iteration()
+
+    gtk.main()
+
+  return
+
+if __name__ == "__main__":
+#  import hotshot
+#  prof = hotshot.Profile("hotshot_stats.prof")
+#  prof.runcall(main)
+#  prof.close()
+  main()
