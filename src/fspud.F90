@@ -24,12 +24,9 @@
 !    License along with this library; if not, write to the Free Software
 !    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
 !    USA
-#include "fdebug.h"
-module options
+module spud
   !!< This module provides a dictionary object for options whose entries
   !!< can contain a wide variety of data.
-  use FLDebug
-  use Futils
   implicit none
 
   integer, parameter, public :: OPT_REAL=0, OPT_INTEGER=1,&
@@ -52,10 +49,10 @@ module options
   interface set_option
      module procedure set_option_real_scalar ,&
           set_option_real_vector, &
-!          set_option_real_tensor, &
+          set_option_real_tensor, &
           set_option_integer_scalar,&
-!          set_option_integer_vector,&
-!          set_option_integer_tensor,&
+          set_option_integer_vector,&
+          set_option_integer_tensor,&
           set_option_logical_scalar ,&
           set_option_character
   end interface
@@ -63,9 +60,9 @@ module options
   private
   public get_child_name, get_number_of_children, get_option, &
        get_option_count, have_option, option_rank, option_shape, &
-       option_type, option_error, int2str, add_option, set_option, &
+       option_type, option_error, add_option, set_option, &
        set_option_attribute, delete_option, add_or_delete_option, &
-       load_options, write_options, starts_with
+       load_options, write_options
 
   interface 
      !! C interface to dictionary inquiry function.
@@ -168,11 +165,11 @@ contains
     character(len=*), intent(in) :: key
 
     integer :: rank
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: type
     integer :: lstat
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
 !    write(0, *) "checking for the presence of: ", key
 
@@ -187,12 +184,12 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: rank
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        call option_error(key, OPT_KEY_ERROR, stat)
@@ -208,12 +205,12 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        call option_error(key, OPT_KEY_ERROR, stat)
@@ -222,9 +219,9 @@ contains
 
   end function option_rank
 
-  function option_shape(key, stat) result (shape)
+  function option_shape(key, stat) result (lshape)
     !!< Return the rank of the option given by key.
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     character(len=*), intent(in) :: key
     integer, intent(out), optional :: stat
 
@@ -234,7 +231,7 @@ contains
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        call option_error(key, OPT_KEY_ERROR, stat)
@@ -251,13 +248,13 @@ contains
     real, intent(in), optional :: default
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -292,13 +289,13 @@ contains
     real, intent(in), optional :: default
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -317,7 +314,7 @@ contains
        call option_error(key, OPT_TYPE_ERROR, stat)
        return
     end if
-    if (shape(1)/=size(option)) then
+    if (lshape(1)/=size(option)) then
        call option_error(key, OPT_SHAPE_ERROR, stat)
        return
     end if
@@ -337,13 +334,13 @@ contains
     real, intent(in), optional :: default
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -362,7 +359,7 @@ contains
        call option_error(key, OPT_TYPE_ERROR, stat)
        return
     end if
-    if (shape(1)/=size(option,1) .or. shape(2)/=size(option,2)) then
+    if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
        call option_error(key, OPT_SHAPE_ERROR, stat)
        return
     end if
@@ -382,13 +379,13 @@ contains
     integer, intent(in), optional :: default
  
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -423,13 +420,13 @@ contains
     integer, intent(in), optional :: default
  
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -448,7 +445,7 @@ contains
        call option_error(key, OPT_TYPE_ERROR, stat)
        return
     end if
-    if (shape(1)/=size(option)) then
+    if (lshape(1)/=size(option)) then
        call option_error(key, OPT_SHAPE_ERROR, stat)
        return
     end if
@@ -468,13 +465,13 @@ contains
     integer, intent(in), optional :: default
  
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -493,7 +490,7 @@ contains
        call option_error(key, OPT_TYPE_ERROR, stat)
        return
     end if
-    if (shape(1)/=size(option,1) .or. shape(2)/=size(option,2)) then
+    if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
        call option_error(key, OPT_SHAPE_ERROR, stat)
        return
     end if
@@ -512,13 +509,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        call option_error(key, OPT_KEY_ERROR, stat)
@@ -552,13 +549,13 @@ contains
     character(len=*), intent(in), optional :: default
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
        if (present(default)) then
@@ -618,39 +615,11 @@ contains
       buffer = "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
     end select
 
-    FLExit(trim(buffer))
+    write(0,*) trim(buffer)
+    stop
     
   end subroutine option_error
 
-  pure function int2str_len(i)
-
-    !!< Count number of digits in i.
-
-    integer, intent(in) :: i
-    integer :: int2str_len 
-
-    if(i==0) then
-       int2str_len=1
-    else if (i>0) then
-       int2str_len = floor(log10(real(i)))+1
-    else
-       int2str_len = floor(log10(abs(real(i))))+2
-    end if
-
-  end function int2str_len
-
-  function int2str (i)
-
-    !!< Convert integer i into a string.
-    !!< This should only be used when forming option strings.
-
-    integer, intent(in) :: i
-    character(len=int2str_len(i)) :: int2str
-
-    write(int2str,"(i0)") i
-
-  end function int2str
-  
   subroutine add_option(key, stat)
     !!< Add an option specified by key
     
@@ -658,7 +627,7 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
@@ -666,7 +635,7 @@ contains
       stat=0
     end if
 
-    lstat = cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat = cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if(lstat /= 0) then
       if(present(stat)) then
@@ -691,13 +660,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
       if (present(stat)) then
@@ -731,13 +700,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
       if (present(stat)) then
@@ -764,6 +733,52 @@ contains
     end if
   end subroutine set_option_real_vector
 
+  subroutine set_option_real_tensor(key, option, stat, default)
+    !!< Set the value of the option given by key
+    character(len=*), intent(in) :: key
+    real, dimension(:,:), intent(in) :: option
+    integer, intent(out), optional :: stat
+    real, intent(in), optional :: default
+
+    integer :: type
+    integer, dimension(2) :: lshape
+    integer :: rank
+    integer :: lstat
+
+    if (present(stat)) stat=0
+
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
+
+    if (lstat/=0) then
+       if (present(stat)) then
+          call option_error(key, OPT_NEW_KEY_WARNING, stat)
+       else
+          call option_error(key, OPT_KEY_ERROR, stat)
+          return
+       end if
+    else
+       if (rank/=2) then
+          call option_error(key, OPT_RANK_ERROR, stat)
+          return
+       end if
+       if (type/=OPT_REAL) then
+          call option_error(key, OPT_TYPE_ERROR, stat)
+          return
+       end if
+       if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
+          call option_error(key, OPT_SHAPE_ERROR, stat)
+          return
+       end if
+    end if
+
+    lstat=cset_option(key, len_trim(key), shape(option), 2, OPT_REAL,&
+         & option)
+    if (lstat/=0) then
+       call option_error(key, OPT_KEY_ERROR, stat)
+    end if
+    
+  end subroutine set_option_real_tensor
+
   subroutine set_option_integer_scalar(key, option, stat)
     !!< Set the value of the option given by key
     character(len=*), intent(in) :: key
@@ -771,13 +786,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
       if (present(stat)) then
@@ -804,6 +819,92 @@ contains
     end if
   end subroutine set_option_integer_scalar
 
+  subroutine set_option_integer_vector(key, option, stat)
+    !!< Set the value of the option given by key
+    character(len=*), intent(in) :: key
+    integer, dimension(:), intent(in) :: option
+    integer, intent(out), optional :: stat
+
+    integer :: type
+    integer, dimension(2) :: lshape
+    integer :: rank
+    integer :: lstat
+
+    if (present(stat)) stat=0
+
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
+
+    if (lstat/=0) then
+      if (present(stat)) then
+        call option_error(key, OPT_NEW_KEY_WARNING, stat)
+      else
+        call option_error(key, OPT_KEY_ERROR, stat)
+        return
+      end if
+    else
+      if (rank/=1) then
+         call option_error(key, OPT_RANK_ERROR, stat)
+         return
+      end if
+
+      if (type/=OPT_INTEGER) then
+         call option_error(key, OPT_TYPE_ERROR, stat)
+         return
+      end if
+    end if
+
+    lstat=cset_option(key, len_trim(key), size(option), 1, OPT_INTEGER, option)
+    if (lstat/=0) then
+       call option_error(key, OPT_KEY_ERROR, stat)
+    end if
+  end subroutine set_option_integer_vector
+
+  subroutine set_option_integer_tensor(key, option, stat, default)
+    !!< Set the value of the option given by key
+    character(len=*), intent(in) :: key
+    integer, dimension(:,:), intent(in) :: option
+    integer, intent(out), optional :: stat
+    integer, intent(in), optional :: default
+
+    integer :: type
+    integer, dimension(2) :: lshape
+    integer :: rank
+    integer :: lstat
+
+    if (present(stat)) stat=0
+
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
+
+    if (lstat/=0) then
+       if (present(stat)) then
+          call option_error(key, OPT_NEW_KEY_WARNING, stat)
+       else
+          call option_error(key, OPT_KEY_ERROR, stat)
+          return
+       end if
+    else
+       if (rank/=2) then
+          call option_error(key, OPT_RANK_ERROR, stat)
+          return
+       end if
+       if (type/=OPT_INTEGER) then
+          call option_error(key, OPT_TYPE_ERROR, stat)
+          return
+       end if
+       if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
+          call option_error(key, OPT_SHAPE_ERROR, stat)
+          return
+       end if
+    end if
+
+    lstat=cset_option(key, len_trim(key), shape(option), 2, OPT_INTEGER,&
+         & option)
+    if (lstat/=0) then
+       call option_error(key, OPT_KEY_ERROR, stat)
+    end if
+    
+  end subroutine set_option_integer_tensor
+
   subroutine set_option_logical_scalar(key, option, stat)
     !!< Set the value of the option given by key
     character(len=*), intent(in) :: key
@@ -811,13 +912,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
       if (present(stat)) then
@@ -851,13 +952,13 @@ contains
     integer, intent(out), optional :: stat
 
     integer :: type
-    integer, dimension(2) :: shape
+    integer, dimension(2) :: lshape
     integer :: rank
     integer :: lstat
 
     if (present(stat)) stat=0
 
-    lstat=cget_option_info(key, len_trim(key), shape, rank, type)
+    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
 
     if (lstat/=0) then
       if (present(stat)) then
@@ -938,17 +1039,4 @@ contains
 
   end subroutine
   
-  logical function starts_with(string, start)
-    !!< Auxillary function, returns .true. if 'string' starts with 'start'
-  
-    character(len=*), intent(in):: string, start
-  
-    if (len(start)>len(string)) then
-      starts_with=.false.
-    else 
-      starts_with= string(1:len(start))==start
-    end if
-  
-  end function starts_with
-
-end module options
+end module spud
