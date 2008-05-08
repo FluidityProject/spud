@@ -27,15 +27,15 @@
 
 SHELL = /bin/sh
 
-FC      = gfortran
-FCFLAGS =  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -ffast-math -frecord-marker=4  -I/usr/include -ffree-line-length-none -ffixed-line-length-none  -O3 -fdefault-real-8 -Iinclude
+FC      = @FC@
+FCFLAGS = @CPPFLAGS@ @FCFLAGS@ -Iinclude
 
-CXX     = g++
-CXXFLAGS=  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -g -O2 -Iinclude
+CXX     = @CXX@
+CXXFLAGS= @CPPFLAGS@ @CXXFLAGS@ -Iinclude
 
-MAKE    = make
-AR  = ar
-ARFLAGS = cr
+MAKE    = @MAKE@
+AR  = @AR@
+ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
 
