@@ -62,8 +62,64 @@ def preprocess(schemafile):
     # now delete the include:
     include_parent.remove(include)
 
+  grammar = tree.xpath('/t:grammar', namespaces={'t': ns})[0]
+
+  defines = {}
+  define_nodes = tree.xpath('/t:grammar//t:define', namespaces={'t': ns})
+
+  #
   # deal with combine="interleave"
+  #
+
+  # first, fetch all the plain definitions
+  for define in define_nodes:
+    if "combine" not in define.attrib:
+      name = define.attrib["name"]
+      defines[name] = define
+
+  # now look for interleaves with those
+  for define in define_nodes:
+    if "combine" in define.attrib and define.attrib["combine"] == "interleave":
+      name = define.attrib["name"]
+      if name not in defines:
+        defines[name] = define
+      else:
+        matching_defn = defines[name]
+        for child in define:
+          matching_defn.append(copy.deepcopy(child))
+  
+  #
   # deal with combine="choice"
+  #
+  combine_names = []
+  for define in define_nodes:
+    if "combine" in define.attrib and define.attrib["combine"] == "choice":
+      name = define.attrib["name"]
+      combine_names.append(name)
+
+  combine_names = list(set(combine_names))
+  for name in combine_names:
+    xpath = tree.xpath('/t:grammar//t:define[@name="%s"]' % name, namespaces={'t': ns})
+    choices = []
+    for node in xpath:
+      choices = choices + list(node)
+    define = etree.Element("define")
+    define.attrib["name"] = name
+    choice = etree.Element("choice")
+    define.append(choice)
+    for x in choices:
+      choice.append(x)
+    defines[name] = define
+
+  # delete all the define nodes from the xml
+  for define in define_nodes:
+    parent = define.getparent()
+    parent.remove(define)
+  
+
+  # add the modified defines back to the grammar
+  for define in defines.values():
+    grammar.append(define)
 
   return etree.tostring(tree, xml_declaration=True, encoding='utf-8', pretty_print=True)
 

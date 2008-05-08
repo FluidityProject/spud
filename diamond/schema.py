@@ -331,7 +331,7 @@ class Schema(object):
             f = self.callbacks[tag]
             return f(element, facts)
 
-      for child in children
+      for child in children:
         newfacts = {}
         tag = self.tag(child)
         f = self.callbacks[tag]
