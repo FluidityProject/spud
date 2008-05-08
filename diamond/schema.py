@@ -17,6 +17,7 @@
 
 import debug
 import tree
+import preprocess
 
 import base64
 import bz2
@@ -33,7 +34,7 @@ from Ft.Xml.Domlette import Print, PrettyPrint
 class Schema(object):
   def __init__(self, schemafile):
     p = etree.XMLParser(remove_comments=True)
-    self.tree = etree.parse(schemafile, p)
+    self.tree = etree.parse(cStringIO.StringIO(preprocess.preprocess(schemafile)), p)
 
     self.callbacks = {'element': self.cb_element,
                       'documentation': self.cb_documentation,
