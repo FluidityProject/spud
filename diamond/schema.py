@@ -82,6 +82,20 @@ class Schema(object):
         children.append(child1)
 
     return children
+    
+  def choice_children(self, children):
+    """
+    Collapse all choices within a choice into a single list of (non-choice) children
+    """
+  
+    out_children = []
+    for child in children:
+      if self.tag(child) == "choice":
+        out_children = out_children + self.choice_children(self.element_children(child))
+      else:
+        out_children.append(child)
+        
+    return out_children
 
   def valid_children(self, eid):
     if isinstance(eid, tree.Tree):
@@ -96,7 +110,6 @@ class Schema(object):
 
     for child in self.element_children(node):
       self.append(results, self.to_tree(child))
-
 
     return results
 
@@ -303,8 +316,22 @@ class Schema(object):
       if "schemaname" in facts:
         return
 
-      r = []
-      for child in self.element_children(element):
+      r = []      
+      children = self.choice_children(self.element_children(element))
+      
+      # bloody simplified RNG
+      if len(children) == 2:
+        empty = [x for x in children if self.tag(x) == "empty"]
+        nonempty = [x for x in children if self.tag(x) != "empty"]
+        if len(empty) > 0:
+          tag = self.tag(nonempty[0])
+          if tag == "oneOrMore":
+            return self.cb_oneormore(element, facts)
+          else:
+            f = self.callbacks[tag]
+            return f(element, facts)
+
+      for child in children
         newfacts = {}
         tag = self.tag(child)
         f = self.callbacks[tag]
