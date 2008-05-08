@@ -1,12 +1,12 @@
-Source: diamond
+Source: spud
 Maintainer: The ICOM team <patrick.farrell@imperial.ac.uk>
-Section: python
-Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3-1), python-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), python-central (>= 0.5.6)
+Section: science
+Priority: extra
+Build-Depends: gfortran (>=4.2), g++ (>=4.2), python-setuptools (>= 0.6b3-1), python-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), python-central (>= 0.5.6)
 Standards-Version: 3.7.2
 XS-Python-Version: >= 2.5
 
-Package: python-diamond
+Package: diamond
 Architecture: all
 Depends: python-gtk2, python-4suite-xml, python-lxml, libxml2-utils, python2.5
 Recommends: trang, python-psyco
@@ -19,3 +19,14 @@ Description: A schema-driven interface for writing XML documents
  written in RELAX NG describing an XML language. The interface is optimised
  for configuring models for solving problems in computational mechanics,
  though the technology is generic to any sort of XML document creation.
+
+Package: libspud
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: diamond
+Suggests:
+Description: An automatic options system for scientific models.
+ Spud is an automatic options system which reads an xml options file 
+ into a dictionary for immediate access from within the model. The xml 
+ file is generated using a spud-compatible RELAX NG schema and a
+ schema-aware editor such as Diamond.

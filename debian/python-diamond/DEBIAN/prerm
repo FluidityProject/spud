@@ -1,3 +1,5 @@
+#!/bin/sh
+set -e
 # Automatically added by dh_pycentral
 if which python >/dev/null 2>&1 && which pycentral >/dev/null 2>&1; then
 	pycentral pkgremove python-diamond
