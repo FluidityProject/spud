@@ -21,8 +21,7 @@ for dir in dirs:
     pass
 
 if len(schemata) == 0:
-  debug.deprint("Error: could not find any registered schemata.")
-  sys.exit(1)
+  debug.deprint("Warning: could not find any registered schemata.", 0)
 
 if __name__ == "__main__":
   for key in schemata:
