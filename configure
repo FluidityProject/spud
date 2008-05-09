@@ -7164,13 +7164,12 @@ if test "$enable_debugging" = "yes" ; then
   fi
 
 else
-    { echo "$as_me:$LINENO: Setting optimisation flags for $F77" >&5
-echo "$as_me: Setting optimisation flags for $F77" >&6;}
+    { echo "$as_me:$LINENO: Setting optimisation flags" >&5
+echo "$as_me: Setting optimisation flags" >&6;}
     CPPFLAGS="$CPPFLAGS -DNDEBUG=1"
-    OPTIMIZATION_FFLAGS="$OPTIMIZATION_FFLAGS -O3"
+    FCFLAGS="-O3 `echo $FCFLAGS | sed 's/-g -O2//g'`"
+    CXXFLAGS="-O3 `echo $CXXFLAGS | sed 's/-g -O2//g'`"
 fi
-
-FCFLAGS="$FCFLAGS $OPTIMIZATION_FFLAGS"
 
 if test "$FC" = "ifc" ; then
   FCFLAGS="-implicitnone -w95 $FCFLAGS"

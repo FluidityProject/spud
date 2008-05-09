@@ -28,10 +28,10 @@
 SHELL = /bin/sh
 
 FC      = gfortran
-FCFLAGS =  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -ffast-math -frecord-marker=4  -I/usr/include -ffree-line-length-none -ffixed-line-length-none  -O3 -fdefault-real-8 -Iinclude
+FCFLAGS =  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -O3 -ffast-math -frecord-marker=4 -I/usr/include -ffree-line-length-none -ffixed-line-length-none -fdefault-real-8 -Iinclude
 
 CXX     = g++
-CXXFLAGS=  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -g -O2 -Iinclude
+CXXFLAGS=  -DUSING_GFORTRAN=1 -DNDEBUG=1 -DDOUBLEP=1 -O3  -Iinclude
 
 MAKE    = make
 AR  = ar
