@@ -52,6 +52,11 @@ OBJS = fspud.o spud.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
 
 default: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+
 clean:
-	rm -f *.o
+	rm -f *.o libspud.a spud.mod
+
+distclean:
+	@MAKE@ clean
+	rm -rf config.log config.status autom4te.cache Makefile
 
