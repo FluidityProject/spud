@@ -69,39 +69,32 @@ namespace Spud{
 
       static OptionManager& get_manager();
 
-      static void load_options(const std::string& filename);
-      
+      static void load_options(const std::string& filename);      
       static void write_options(const std::string& filename);
       
       static OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name); 
       
-      static int number_of_children(const std::string& key);
+      static int get_number_of_children(const std::string& key);
       
-      static int option_count(const std::string& key);
+      static int get_option_count(const std::string& key);
       
       static logical_t have_option(const std::string& key);
       
-      static OptionError get_option_type(const std::string& key, OptionType& type);
-      
+      static OptionError get_option_type(const std::string& key, OptionType& type);      
       static OptionError get_option_rank(const std::string& key, int& rank);
-      
       static OptionError get_option_shape(const std::string& key, std::vector<int>& shape);
       
       static OptionError get_option(const std::string& key, double& option);
-      static OptionError get_option(const std::string& key, double& option, const double& default_val);
-      
+      static OptionError get_option(const std::string& key, double& option, const double& default_val);      
       static OptionError get_option(const std::string& key, std::vector<double>& option);
-      static OptionError get_option(const std::string& key, std::vector<double>& option, const std::vector<double>& default_val);
-      
+      static OptionError get_option(const std::string& key, std::vector<double>& option, const std::vector<double>& default_val);      
       static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option);
       static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option, const std::vector< std::vector<double> >& default_val);
       
       static OptionError get_option(const std::string& key, int& option);
-      static OptionError get_option(const std::string& key, int& option, const int& default_val);
-      
+      static OptionError get_option(const std::string& key, int& option, const int& default_val);      
       static OptionError get_option(const std::string& key, std::vector<int>& option);
-      static OptionError get_option(const std::string& key, std::vector<int>& option, const std::vector<int>& default_val);
-      
+      static OptionError get_option(const std::string& key, std::vector<int>& option, const std::vector<int>& default_val);      
       static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option);
       static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option, const std::vector< std::vector<int> >& default_val);
       
@@ -110,16 +103,12 @@ namespace Spud{
       
       static OptionError add_option(const std::string& key);
       
-      static OptionError set_option(const std::string& key, const double& option);
-      
-      static OptionError set_option(const std::string& key, const std::vector<double>& option);
-      
+      static OptionError set_option(const std::string& key, const double& option);      
+      static OptionError set_option(const std::string& key, const std::vector<double>& option);      
       static OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& option);
       
-      static OptionError set_option(const std::string& key, const int& option);
-      
-      static OptionError set_option(const std::string& key, const std::vector<int>& option);
-      
+      static OptionError set_option(const std::string& key, const int& option);      
+      static OptionError set_option(const std::string& key, const std::vector<int>& option);      
       static OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& option);
       
       static OptionError set_option(const std::string& key, const std::string& option);
@@ -160,14 +149,47 @@ namespace Spud{
        
         const Option& operator=(const Option& inOption); 
 
+        /**
+          * Read from an XML file with the given filename.
+          * Sets the name of this element to be that of the root element in the
+          * supplied XML file, and adds children to this element corresponding
+          * to the data in the XML file.
+          */
+        void load_options(const std::string& filename);        
+        /**
+          * Write out this element and all of its children to an XML file with the supplied filename.
+          */
+        void write_options(const std::string& filename) const;
+
+        /**
+          * Get the name of this element.
+          */
         std::string get_name() const;
+        /**
+          * Get the attribute status for this element.
+          */
         logical_t get_is_attribute() const;
-        logical_t set_is_attribute(logical_t is_attribute);
+        /** 
+          * Attempt to set the attribute status for this element.
+          * Only elements with string data and no children may be marked as attributes.
+          */
+        logical_t set_is_attribute(const logical_t& is_attribute);
+        
+        /**
+          * Generate a list containing the names of the children of this element.
+          */
+        void list_children(const std::string& key, std::deque< std::string >& kids) const;
 
-        const Option* get_child(std::string) const;
-        Option* get_child(std::string);
-
-        const void *get_option() const;
+        /** 
+          * Get the child of this element at the supplied key
+          * Const version.
+          */
+        const Option* get_child(const std::string& key) const;
+        /**
+          * Get the child of this element at the supplied key.
+          * Non-const version - checks that the child exists, and if it does finds it with create_child.
+          */
+        Option* get_child(const std::string& key);
 
         int get_option(std::vector<logical_t>&) const;
         int get_option(std::vector<double>&) const;
@@ -187,13 +209,7 @@ namespace Spud{
         OptionType get_option_type() const;
 
         logical_t have_option(std::string) const;
-
-        void list_children(std::string, std::deque< std::string >&) const;
-        void load_options_xml(std::string);
-        void write_options_xml(std::string) const;
         
-        void parse_node(std::string name, const TiXmlNode *);
-        TiXmlElement* to_element() const;
         void print(const std::string& prefix = "") const;
         
         int add_option(std::string);
@@ -221,9 +237,7 @@ namespace Spud{
         /**
           * Tokenize the supplied string
           */
-        void tokenize(const std::string& str,
-                      std::vector<std::string>& tokens,
-                      const std::string& delimiters = " ") const;
+        void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ") const;
         int split_name(const std::string, std::string&, std::string&) const;
         int split_name(const std::string, std::string&, int &index, std::string&) const;
         void split_node_name(std::string&, std::string&) const;
@@ -231,8 +245,11 @@ namespace Spud{
         
         Option* create_child(std::string);
        
-        void set_option_type(OptionType option_type); 
         void set_rank_and_shape(int, const int*);
+        void set_option_type(OptionType option_type); 
+        
+        void parse_node(std::string name, const TiXmlNode *);
+        TiXmlElement* to_element() const;
        
         logical_t verbose;
         
