@@ -41,7 +41,7 @@ LIB = libspud.a
 
 VPATH = src/
 
-OBJS = fspud.o spud.o fspud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
+OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
 
 .SUFFIXES: .f .f90 .F90 .F .c .cpp .o .a
 

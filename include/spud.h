@@ -44,19 +44,19 @@ namespace Spud{
 
   enum OptionType{
     SPUD_DOUBLE = 0,
-    SPUD_INT = 1,
-    SPUD_NONE = 2,
+    SPUD_INT    = 1,
+    SPUD_NONE   = 2,
     SPUD_STRING = 3,
   };
   
   enum OptionError{
-    SPUD_NO_ERROR = 0,
-    SPUD_KEY_ERROR = 1,
-    SPUD_TYPE_ERROR = 2,
-    SPUD_RANK_ERROR = 3,
-    SPUD_SHAPE_ERROR = 4,
-    SPUD_NEW_KEY_WARNING = 5,
-    SPUD_ATTR_SET_FAILED_WARNING = 6,
+    SPUD_NO_ERROR                = 0,
+    SPUD_KEY_ERROR               = 1,
+    SPUD_TYPE_ERROR              = 2,
+    SPUD_RANK_ERROR              = 3,
+    SPUD_SHAPE_ERROR             = 4,
+    SPUD_NEW_KEY_WARNING         = -1,
+    SPUD_ATTR_SET_FAILED_WARNING = -2,
   };
 
   typedef char logical_t;
@@ -74,9 +74,9 @@ namespace Spud{
       
       static OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name); 
       
-      static int get_number_of_children(const std::string& key);
+      static int number_of_children(const std::string& key);
       
-      static int get_option_count(const std::string& key);
+      static int option_count(const std::string& key);
       
       static logical_t have_option(const std::string& key);
       
@@ -169,11 +169,6 @@ namespace Spud{
             * Get the attribute status for this element.
             */
           logical_t get_is_attribute() const;
-          /** 
-            * Attempt to set the attribute status for this element.
-            * Only elements with string data and no children may be marked as attributes.
-            */
-          logical_t set_is_attribute(const logical_t& is_attribute);
           
           /**
             * Generate a list containing the names of the children of this element.
@@ -226,7 +221,13 @@ namespace Spud{
           int set_option(std::string);
           int set_option(std::string, std::string);
           
+          /** 
+            * Attempt to set the attribute status for this element.
+            * Only elements with string data and no children may be marked as attributes.
+            */
+          logical_t set_is_attribute(const logical_t& is_attribute);
           int set_attribute(std::string, std::string);
+          
           
           int delete_option(std::string);
 
@@ -234,6 +235,7 @@ namespace Spud{
           void verbose_off();
 
         private:
+        
           /**
             * Tokenize the supplied string
             */

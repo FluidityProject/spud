@@ -70,14 +70,14 @@ OptionError OptionManager::get_child_name(const string& key, const unsigned& ind
   return SPUD_NO_ERROR;
 }
 
-int OptionManager::get_number_of_children(const string& key){
+int OptionManager::number_of_children(const string& key){
   deque<string> kids;
   manager.options->list_children(key, kids);
   
   return kids.size();
 }
 
-int OptionManager::get_option_count(const string& key){
+int OptionManager::option_count(const string& key){
   return manager.options->get_option_count(key);
 }
 
@@ -390,11 +390,11 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<do
   logical_t new_key = !have_option(key);
   
   vector<double> option_handle;
-  for(int i = 0;i < (int)option.size();i++){
+  for(size_t i = 0;i < option.size();i++){
     if(i > 0 and option[i].size() != option[0].size()){
       return SPUD_SHAPE_ERROR;
     }
-    for(int j = 0;j < (int)option[i].size();j++){
+    for(size_t j = 0;j < option[i].size();j++){
       option_handle.push_back(option[i][j]);
     }
   }
@@ -452,11 +452,11 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<in
   logical_t new_key = !have_option(key);
   
   vector<int> option_handle;
-  for(int i = 0;i < (int)option.size();i++){
+  for(size_t i = 0;i < option.size();i++){
     if(i > 0 and option[i].size() != option[0].size()){
       return SPUD_SHAPE_ERROR;
     }
-    for(int j = 0;j < (int)option[i].size();j++){
+    for(size_t j = 0;j < option[i].size();j++){
       option_handle.push_back(option[i][j]);
     }
   }
@@ -497,6 +497,16 @@ OptionError OptionManager::set_option_attribute(const string& key, const string&
   
   return SPUD_NO_ERROR;
 }
+
+logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
+  if(verbose)
+    cout << "void OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
+  if(children.size() == 0 and get_option_type() == SPUD_STRING){
+    this->is_attribute = is_attribute;
+  }
+  
+  return this->is_attribute;
+}
       
 OptionError OptionManager::delete_option(const string& key){
   int del_ret = manager.options->delete_option(key);
@@ -516,12 +526,12 @@ OptionManager::OptionManager(){
 }
 
 OptionManager::OptionManager(const OptionManager& manager){
-  cerr << "SPUD OptionManager copy constructor cannot be called" << endl;
+  cerr << "OptionManager copy constructor cannot be called" << endl;
   exit(-1);
 }
 
 OptionManager& OptionManager::operator=(const OptionManager& manager){
-  cerr << "SPUD OptionManager assignment operator cannot be called" << endl;
+  cerr << "OptionManager assignment operator cannot be called" << endl;
   exit(-1);
 }
 
@@ -689,16 +699,6 @@ logical_t OptionManager::Option::get_is_attribute() const{
   return is_attribute;
 }
 
-logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
-  if(verbose)
-    cout << "void OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
-  if(children.size() == 0 and get_option_type() == SPUD_STRING){
-    this->is_attribute = is_attribute;
-  }
-  
-  return this->is_attribute;
-}
-
 void OptionManager::Option::list_children(const string& name, deque<string>& kids) const{
   if(verbose)
     cout << "void list_children(const string& name, deque<string>& kids) const\n";
@@ -750,8 +750,8 @@ const OptionManager::Option* OptionManager::Option::get_child(const string& key)
     }else{
       pair<multimap< string, OptionManager::Option>::const_iterator, multimap<string, OptionManager::Option>::const_iterator> range = children.equal_range(name);
       it = range.first;
-      for(int i = 0;it != range.second;it++, i++){
-        if(i == index){
+      for(size_t i = 0;it != range.second;it++, i++){
+        if((int)i == index){
           break;
         }
       }
@@ -1337,8 +1337,8 @@ OptionManager::Option* OptionManager::Option::create_child(string str){
     }else{
       pair<multimap< string, OptionManager::Option>::iterator, multimap<string, OptionManager::Option>::iterator> range = children.equal_range(name);
       child = range.first;
-      for(int i = 0;child != range.second;child++, i++){
-        if(i == index){
+      for(size_t i = 0;child != range.second;child++, i++){
+        if((int)i == index){
           break;
         }
       }
