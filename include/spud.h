@@ -43,124 +43,119 @@
 namespace Spud{
 
   enum OptionType{
-    OPTION_TYPE_DOUBLE,
-	  OPTION_TYPE_INT,
-    OPTION_TYPE_BOOL,
-	  OPTION_TYPE_NULL, 
-	  OPTION_TYPE_STRING
+    SPUD_REAL = 0,
+    SPUD_INTEGER = 1,
+    SPUD_NONE = 2,
+    SPUD_CHARACTER = 3,
+  };
+  
+  enum OptionError{
+    SPUD_NO_ERROR = 0,
+    SPUD_KEY_ERROR = 1,
+    SPUD_TYPE_ERROR = 2,
+    SPUD_RANK_ERROR = 3,
+    SPUD_SHAPE_ERROR = 4,
+    SPUD_NEW_KEY_WARNING = 5,
+    SPUD_ATTR_SET_FAILED_WARNING = 6,
   };
 
   typedef char logical_t;
 
-  /**
-    * Manager of SPUD options.
-    * Singleton class handling the options dictionary.
-    */
   class OptionManager{
     
     public:
-      /**
-        * Get the SPUD option manager.
-        * \return The SPUD option manager.
-        */
+    
+      ~OptionManager();
+
       OptionManager& get_manager();
 
-#if 0
-      /** Get the manager scope.
-        * \return The current option manager scope.
-        */
-      std::string& get_scope();
+      void load_options(const std::string& filename);
       
-      /**
-        * Return whether the specified option manager scope exists.
-        * \param scope The option manager scope to test.
-        * \return 1 if the scope exists, 0 if it does not.
-        */
-      logical_t have_scope(const std::string& scope)
+      void write_options(const std::string& filename) const;
       
-      /** Get all current manager scopes.
-        * \return All current manager scopes.
-        */
-      std::vector<std::string>& get_possible_scopes();
+      OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name) const;
       
-      /** Add a manager scope.
-        * Add the specified scope to the option manager. Any scope name except for an empty string is permitted.
-        * \param scope The new option manager scope.
-        * \return 0 on success and 1 on failure.
-        */
-      int delete_scope(const std::string& scope);        
+      int number_of_children(const std::string& key) const;
       
-      /** Set the manager scope.
-        * Sets the option scope (adding the scope if it does not currently exist).
-        * \param scope The option manager scope.
-        */
-      void set_scope(const std::string& scope);
+      int option_count(const std::string& key) const;
       
-      /** Delete the specified manager scope.
-        * Deletes the specified scope. If this is the current scope then sets the scope to "". Fails if the specified scope does not exist.
-        * \return 0 on success and 1 on failure.
-        */
-      int delete_scope(const std::string& scope);
-#endif
+      logical_t have_option(const std::string& key) const;
+      
+      OptionError get_option_type(const std::string& key, OptionType& type) const;
+      
+      OptionError get_option_rank(const std::string& key, int& rank) const;
+      
+      OptionError get_option_shape(const std::string& key, std::vector<int>& shape) const;
+      
+      OptionError get_option(const std::string& key, double& option) const;
+      OptionError get_option(const std::string& key, double& option, const double& default_val) const;
+      
+      OptionError get_option(const std::string& key, std::vector<double>& option) const;
+      OptionError get_option(const std::string& key, std::vector<double>& option, const std::vector<double>& default_val) const;
+      
+      OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option) const;
+      OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option, const std::vector< std::vector<double> >& default_val) const;
+      
+      OptionError get_option(const std::string& key, int& option) const;
+      OptionError get_option(const std::string& key, int& option, const int& default_val) const;
+      
+      OptionError get_option(const std::string& key, std::vector<int>& option) const;
+      OptionError get_option(const std::string& key, std::vector<int>& option, const std::vector<int>& default_val) const;
+      
+      OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option) const;
+      OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option, const std::vector< std::vector<int> >& default_val) const;
+      
+      OptionError get_option(const std::string& key, const std::string& option) const;
+      OptionError get_option(const std::string& key, const std::string& option, const std::string& default_val) const;
+      
+      OptionError add_option(const std::string& key);
+      
+      OptionError set_option(const std::string& key, double& option);
+      
+      OptionError set_option(const std::string& key, std::vector<double>& option);
+      
+      OptionError set_option(const std::string& key, std::vector< std::vector<double> >& option);
+      
+      OptionError set_option(const std::string& key, int& option);
+      
+      OptionError set_option(const std::string& key, std::vector<int>& option);
+      
+      OptionError set_option(const std::string& key, std::vector< std::vector<int> >& option);
+      
+      OptionError set_option_character(const std::string& key, const std::string& option);
+      
+      OptionError delete_option(const std::string& key);
     
     private:
-      /**
-        * Default constructor.
-        * OptionManager is a singleton class, hence this is private.
-        */
+
       OptionManager();
-    
-      /**
-        * Copy constructor - unused.
-        */
+
       OptionManager(const OptionManager& manager);
-      
-      /**
-        * Assignment operator - unused.
-        */
+
       OptionManager& operator=(const OptionManager& manager);
       
-      /**
-        * The SPUD option manager.
-        */
-      //static OptionManager manager = OptionManager();
+      OptionError check_key(const std::string& key) const;
+      
+      OptionError check_rank(const std::string& key, const int& rank) const;
+      
+      OptionError check_type(const std::string& key, const OptionType& type) const;
+      
+      OptionError check_option(const std::string& key, const int& rank, const OptionType& type) const;
+      
+      static OptionManager manager;
 
-    /**
-      * Options dictionary class.
-      * A class defining an option element with specified name, path and children.
-      */
     class Option{
     
       public:
       
-        /**
-          * Default constructor.
-          * Construct a non-verbose non-attribute empty element with no defined path or name.
-          */
         Option();
-        /**
-          * Copy constructor.
-          * Construct a new element as a copy of the supplied element.
-          * \param inOption Option to be copied
-          */
+
         Option(const Option& inOption);
-        /**
-          * Option constructor
-          * Construct a non-verbose non-attribute empty element with the given option path and name.
-          * \param The option path
-          * \param The option name
-          */
+
         Option(std::string path, std::string name);
-        /**
-          * Option destructor.
-          */
+
         ~Option();
        
-        /**
-          * Assignment operator.
-          * Make this element a copy of the supplied element.
-          * \param inOption Option to be copied.
-          */    
         const Option& operator=(const Option& inOption); 
 
         std::string get_name() const;
@@ -244,7 +239,6 @@ namespace Spud{
         std::multimap<std::string, Option> children;
         
         int rank, shape[2];
-        std::vector<logical_t> data_bool;
         std::vector<double> data_double;
         std::vector<int> data_int;
         std::string data_string;
@@ -252,10 +246,7 @@ namespace Spud{
         logical_t is_attribute;
       };
       
-    /**
-      * The options dictionary.
-      */
-    Option options;
+    Option* options;
   };
 }
 
