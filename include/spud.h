@@ -154,14 +154,13 @@ namespace Spud{
 
         Option(const Option& inOption);
 
-        Option(std::string path, std::string name);
+        Option(std::string name);
 
         ~Option();
        
         const Option& operator=(const Option& inOption); 
 
         std::string get_name() const;
-        std::string get_path() const;
         logical_t get_is_attribute() const;
         logical_t set_is_attribute(logical_t is_attribute);
 
@@ -195,7 +194,7 @@ namespace Spud{
         
         void parse_node(std::string name, const TiXmlNode *);
         TiXmlElement* to_element() const;
-        void print() const;
+        void print(const std::string& prefix = "") const;
         
         int add_option(std::string);
 
@@ -237,7 +236,7 @@ namespace Spud{
        
         logical_t verbose;
         
-        std::string node_path, node_name;
+        std::string node_name;
         std::multimap<std::string, Option> children;
         
         int rank, shape[2];

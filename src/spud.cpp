@@ -592,9 +592,8 @@ OptionManager::Option::Option(const OptionManager::Option& inOption){
   return;
 }
 
-OptionManager::Option::Option(string path, string name){
+OptionManager::Option::Option(string name){
   verbose_off();
-  node_path = path;
   node_name = name;
   set_rank_and_shape(-1, NULL);
   is_attribute = false;
@@ -611,7 +610,6 @@ const OptionManager::Option& OptionManager::Option::operator=(const OptionManage
   if(verbose)
     cout<<"const OptionManager::Option& OptionManager::Option::operator=(const OptionManager::Option& in)\n";
   
-  node_path = inOption.node_path;
   node_name = inOption.node_name;
   children = inOption.children;
 
@@ -630,13 +628,6 @@ const OptionManager::Option& OptionManager::Option::operator=(const OptionManage
  */
 string OptionManager::Option::get_name() const{
   return node_name;
-}
-
-/**
- * Get the option path for this element.
- */
-string OptionManager::Option::get_path() const{
-  return node_path;
 }
 
 /**
@@ -1257,15 +1248,9 @@ TiXmlElement* OptionManager::Option::to_element() const{
 
 /**  Print this element to standard output.
   */
-void OptionManager::Option::print() const{
-  string::size_type last_pos=0;
-  string space("");
-  while((last_pos = node_path.find_first_of("/", last_pos))!=string::npos){
-    space+=" ";
-    last_pos++;
-  }
-  cout<<space<<node_name;
-  space+=" ";
+void OptionManager::Option::print(const std::string& prefix) const{
+  cout<<prefix<<node_name;
+  std::string lprefix = prefix + " ";
   
   if(children.empty()){
     cout<<": ";
@@ -1284,21 +1269,21 @@ void OptionManager::Option::print() const{
     cout<<"/"<<endl;
     
     if(!data_double.empty()){
-      cout<<space<<"<value>: ";
+      cout<<lprefix<<"<value>: ";
       for(vector<double>::const_iterator i=data_double.begin();i!=data_double.end();++i)
         cout<<*i<<" ";
       cout<<endl;
     }else if(!data_int.empty()){
-      cout<<space<<"<value>: ";
+      cout<<lprefix<<"<value>: ";
       for(vector<int>::const_iterator i=data_int.begin();i!=data_int.end();++i)
         cout<<*i<<" ";
       cout<<endl;
     }else if(!data_string.empty()){
-      cout<<space<<"<value>: "<<data_string;
+      cout<<lprefix<<"<value>: "<<data_string;
       cout<<endl;
     }
     for(map<string, OptionManager::Option>::const_iterator i=children.begin(); i!=children.end(); ++i)
-      i->second.print();
+      i->second.print(lprefix + " ");
   }
   return;
 }
@@ -1656,7 +1641,7 @@ OptionManager::Option* OptionManager::Option::create_child(string str){
         cerr << "WARNING: Creating __value child for non null element - deleting parent data\n";
         set_option_type(SPUD_NONE);
       }
-      child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(node_path + "/" + node_name, name)));
+      child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(name)));
       string new_node_name, name_attr;
       child->second.split_node_name(new_node_name, name_attr);
       if(name_attr.size() > 0){
