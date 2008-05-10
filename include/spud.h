@@ -43,10 +43,10 @@
 namespace Spud{
 
   enum OptionType{
-    SPUD_REAL = 0,
-    SPUD_INTEGER = 1,
+    SPUD_DOUBLE = 0,
+    SPUD_INT = 1,
     SPUD_NONE = 2,
-    SPUD_CHARACTER = 3,
+    SPUD_STRING = 3,
   };
   
   enum OptionError{
