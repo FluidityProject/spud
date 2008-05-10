@@ -26,11 +26,16 @@
     USA
 */
 
-#include "spud.h"
+#ifndef SPUD_INTERFACES_H
+#define SPUD_INTERFACES_H
 
+#include "confdefs.h"
+
+#ifdef __cplusplus
 extern "C" {
+#endif
 #define cload_options F77_FUNC(cload_options, CLOAD_OPTIONS)
-  void cload_options(const char* key, const int* ley_len);
+  void cload_options(const char* key, const int* key_len);
 #define cwrite_options F77_FUNC(cwrite_options, CWRITE_OPTIONS)
   void cwrite_options(const char* key, const int* key_len);
   
@@ -67,4 +72,8 @@ extern "C" {
   
 #define cdelete_option F77_FUNC(cdelete_option, CDELETE_OPTION)
   int cdelete_option(const char* key, const int* key_len);
+#ifdef __cplusplus
 }
+#endif
+
+#endif

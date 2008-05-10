@@ -26,10 +26,8 @@
     USA
 */
 
-#include "spud_interfaces.h"
-
-#ifndef SPUD_INTERFACES_H
-#define SPUD_INTERFACES_H
+#include "cspud.h"
+#include "spud.h"
 
 using namespace std;
 
@@ -147,8 +145,7 @@ extern "C" {
           }
         }
       }else{
-        cerr << "ERROR: Invalid option rank\n";
-        exit(-1);
+        return SPUD_RANK_ERROR;
       }
     }else if(type == SPUD_INT){
       if(rank == 0){
@@ -179,8 +176,7 @@ extern "C" {
           }
         }
       }else{
-        cerr << "ERROR: Invalid option rank\n";
-        exit(-1);
+        return SPUD_RANK_ERROR;
       }
     }else if(type == SPUD_STRING){
       string val_handle;
@@ -223,8 +219,7 @@ extern "C" {
         }
         return OptionManager::set_option(key_handle, val_handle);    
       }else{
-        cerr << "ERROR: Invalid option rank\n";
-        exit(-1);
+        return SPUD_RANK_ERROR;
       }
     }else if(*type == SPUD_INT){
       if(*rank == 0){
@@ -246,8 +241,7 @@ extern "C" {
         }
         return OptionManager::set_option(key_handle, val_handle);
       }else{
-        cerr << "ERROR: Invalid option rank\n";
-        exit(-1);
+        return SPUD_RANK_ERROR;
       }
     }else if(*type == SPUD_STRING){
       return OptionManager::set_option(key_handle, string((char*)val, shape[0]));
@@ -266,5 +260,3 @@ extern "C" {
     return OptionManager::delete_option(string(key, *key_len));
   }
 }
-
-#endif
