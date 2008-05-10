@@ -28,10 +28,6 @@
 
 #include "spud.h"
 
-// If the following two lines have been committed, please delete them!
-#define F77_FUNC(name,NAME) name ## _
-#define F77_FUNC_(name,NAME) name ## _
-
 extern "C" {
 #define cload_options F77_FUNC(cload_options, CLOAD_OPTIONS)
   void cload_options(const char* key, const int* ley_len);
