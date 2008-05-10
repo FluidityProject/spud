@@ -54,16 +54,16 @@ extern "C" {
   int cget_option_shape(const char* key, const int* key_len, int* shape);
   
 #define cget_option F77_FUNC(cget_option, CGET_OPTION)
-  int cget_option(const char* key, const int* key_len, void* option);
+  int cget_option(const char* key, const int* key_len, void* val);
   
 #define cadd_option F77_FUNC(cadd_option, CADD_OPTION)
   int cadd_option(const char* key, const int* key_len);
 
 #define cset_option_attribute F77_FUNC(cset_option_attribute, CSET_OPTION_ATTRIBUTE)
-  int cset_option_attribute(const char* key, const int* key_len, const char* option, const int* option_len);
+  int cset_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
   
 #define cset_option F77_FUNC(cset_option, CSET_OPTION)
-  int cset_option(const char* key, const int* key_len, const void* option, const int* type, const int* rank, const int* shape);
+  int cset_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
   
 #define cdelete_option F77_FUNC(cdelete_option, CDELETE_OPTION)
   int cdelete_option(const char* key, const int* key_len);
