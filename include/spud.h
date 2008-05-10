@@ -135,136 +135,136 @@ namespace Spud{
       
       static OptionManager manager;
 
-    class Option{
-    
-      public:
+      class Option{
       
-        Option();
-
-        Option(const Option& inOption);
-
-        Option(std::string name);
-
-        ~Option();
-       
-        const Option& operator=(const Option& inOption); 
-
-        /**
-          * Read from an XML file with the given filename.
-          * Sets the name of this element to be that of the root element in the
-          * supplied XML file, and adds children to this element corresponding
-          * to the data in the XML file.
-          */
-        void load_options(const std::string& filename);        
-        /**
-          * Write out this element and all of its children to an XML file with the supplied filename.
-          */
-        void write_options(const std::string& filename) const;
-
-        /**
-          * Get the name of this element.
-          */
-        std::string get_name() const;
-        /**
-          * Get the attribute status for this element.
-          */
-        logical_t get_is_attribute() const;
-        /** 
-          * Attempt to set the attribute status for this element.
-          * Only elements with string data and no children may be marked as attributes.
-          */
-        logical_t set_is_attribute(const logical_t& is_attribute);
+        public:
         
-        /**
-          * Generate a list containing the names of the children of this element.
-          */
-        void list_children(const std::string& key, std::deque< std::string >& kids) const;
+          Option();
 
-        /** 
-          * Get the child of this element at the supplied key
-          * Const version.
-          */
-        const Option* get_child(const std::string& key) const;
-        /**
-          * Get the child of this element at the supplied key.
-          * Non-const version - checks that the child exists, and if it does finds it with create_child.
-          */
-        Option* get_child(const std::string& key);
+          Option(const Option& inOption);
 
-        int get_option(std::vector<logical_t>&) const;
-        int get_option(std::vector<double>&) const;
-        int get_option(std::vector<int>&) const;
-        int get_option(std::string&) const;
+          Option(std::string name);
 
-        int get_option(std::string, std::vector<logical_t>&) const;
-        int get_option(std::string, std::vector<double>&) const;
-        int get_option(std::string, std::vector<int>&) const;
-        int get_option(std::string, std::string&) const;
-        
-        int get_option_count(std::string) const;
+          ~Option();
+         
+          const Option& operator=(const Option& inOption); 
 
-        size_t get_option_rank() const;
-        void get_option_shape(int *) const;
-        size_t get_option_size() const;
-        OptionType get_option_type() const;
+          /**
+            * Read from an XML file with the given filename.
+            * Sets the name of this element to be that of the root element in the
+            * supplied XML file, and adds children to this element corresponding
+            * to the data in the XML file.
+            */
+          void load_options(const std::string& filename);        
+          /**
+            * Write out this element and all of its children to an XML file with the supplied filename.
+            */
+          void write_options(const std::string& filename) const;
 
-        logical_t have_option(std::string) const;
-        
-        void print(const std::string& prefix = "") const;
-        
-        int add_option(std::string);
+          /**
+            * Get the name of this element.
+            */
+          std::string get_name() const;
+          /**
+            * Get the attribute status for this element.
+            */
+          logical_t get_is_attribute() const;
+          /** 
+            * Attempt to set the attribute status for this element.
+            * Only elements with string data and no children may be marked as attributes.
+            */
+          logical_t set_is_attribute(const logical_t& is_attribute);
+          
+          /**
+            * Generate a list containing the names of the children of this element.
+            */
+          void list_children(const std::string& key, std::deque< std::string >& kids) const;
 
-        int set_option(int, const int*, std::vector<logical_t>&);
-        int set_option(std::string, int, const int *, std::vector<logical_t>&);
-        
-        int set_option(int, const int*, std::vector<double>&);
-        int set_option(std::string, int, const int *, std::vector<double>&);
+          /** 
+            * Get the child of this element at the supplied key
+            * Const version.
+            */
+          const Option* get_child(const std::string& key) const;
+          /**
+            * Get the child of this element at the supplied key.
+            * Non-const version - checks that the child exists, and if it does finds it with create_child.
+            */
+          Option* get_child(const std::string& key);
 
-        int set_option(int, const int*, std::vector<int>&);
-        int set_option(std::string, int, const int*, std::vector<int>&);
+          int get_option(std::vector<logical_t>&) const;
+          int get_option(std::vector<double>&) const;
+          int get_option(std::vector<int>&) const;
+          int get_option(std::string&) const;
 
-        int set_option(std::string);
-        int set_option(std::string, std::string);
-        
-        int set_attribute(std::string, std::string);
-        
-        int delete_option(std::string);
+          int get_option(std::string, std::vector<logical_t>&) const;
+          int get_option(std::string, std::vector<double>&) const;
+          int get_option(std::string, std::vector<int>&) const;
+          int get_option(std::string, std::string&) const;
+          
+          int get_option_count(std::string) const;
 
-        void verbose_on();
-        void verbose_off();
+          size_t get_option_rank() const;
+          void get_option_shape(int *) const;
+          size_t get_option_size() const;
+          OptionType get_option_type() const;
 
-      private:
-        /**
-          * Tokenize the supplied string
-          */
-        void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ") const;
-        int split_name(const std::string, std::string&, std::string&) const;
-        int split_name(const std::string, std::string&, int &index, std::string&) const;
-        void split_node_name(std::string&, std::string&) const;
-        std::string data_as_string() const;
-        
-        Option* create_child(std::string);
-       
-        void set_rank_and_shape(int, const int*);
-        void set_option_type(OptionType option_type); 
-        
-        void parse_node(std::string name, const TiXmlNode *);
-        TiXmlElement* to_element() const;
-       
-        logical_t verbose;
-        
-        std::string node_name;
-        std::multimap<std::string, Option> children;
-        
-        int rank, shape[2];
-        std::vector<double> data_double;
-        std::vector<int> data_int;
-        std::string data_string;
-        
-        logical_t is_attribute;
+          logical_t have_option(std::string) const;
+          
+          void print(const std::string& prefix = "") const;
+          
+          int add_option(std::string);
+
+          int set_option(int, const int*, std::vector<logical_t>&);
+          int set_option(std::string, int, const int *, std::vector<logical_t>&);
+          
+          int set_option(int, const int*, std::vector<double>&);
+          int set_option(std::string, int, const int *, std::vector<double>&);
+
+          int set_option(int, const int*, std::vector<int>&);
+          int set_option(std::string, int, const int*, std::vector<int>&);
+
+          int set_option(std::string);
+          int set_option(std::string, std::string);
+          
+          int set_attribute(std::string, std::string);
+          
+          int delete_option(std::string);
+
+          void verbose_on();
+          void verbose_off();
+
+        private:
+          /**
+            * Tokenize the supplied string
+            */
+          void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ") const;
+          int split_name(const std::string, std::string&, std::string&) const;
+          int split_name(const std::string, std::string&, int &index, std::string&) const;
+          void split_node_name(std::string&, std::string&) const;
+          std::string data_as_string() const;
+          
+          Option* create_child(std::string);
+         
+          void set_rank_and_shape(int, const int*);
+          void set_option_type(OptionType option_type); 
+          
+          void parse_node(std::string name, const TiXmlNode *);
+          TiXmlElement* to_element() const;
+         
+          logical_t verbose;
+          
+          std::string node_name;
+          std::multimap<std::string, Option> children;
+          
+          int rank, shape[2];
+          std::vector<double> data_double;
+          std::vector<int> data_int;
+          std::string data_string;
+          
+          logical_t is_attribute;
       };
       
-    Option* options;
+      Option* options;
   };
 }
 
