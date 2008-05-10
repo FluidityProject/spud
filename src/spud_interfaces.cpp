@@ -267,46 +267,4 @@ extern "C" {
   }
 }
 
-// VERY TEMPORARY
-#if 0
-
-// FORTRAN INTERFACES
-
-#define cset_option_fc F77_FUNC(cset_option, CSET_OPTION)
-  int cset_option_fc(const char *str, const int *str_len, const int *shape, const int *rank, const int *type, void *data){
-    string name(str, *str_len);
-    
-    // Get the size of the data
-    size_t len = 1;
-    if((*rank)>0)
-      len = *shape;
-    for(size_t i=1;i<(*rank);i++){
-      len*=shape[i];
-    }
-
-    if(*type == SPUD_DOUBLE){
-      vector<double> option_data(len);
-      for(size_t i=0;i<len;i++)
-        option_data[i] = ((double *)data)[i];
-      return fluidity_options->set_option(name, *rank, shape, option_data);
-    }else if(*type == SPUD_INT){
-      vector<int> option_data(len);
-      for(size_t i=0;i<len;i++)
-        option_data[i] = ((int *)data)[i];
-      return fluidity_options->set_option(name, *rank, shape, option_data);
-    }else if(*type == SPUD_STRING){
-      return fluidity_options->set_option(name, string((const char *)data, len));
-    }else if(*type == OPTION_TYPE_BOOL){
-      vector<logical_t> option_data(len);
-      for(size_t i=0;i<len;i++)
-        option_data[i] = ((logical_t *)data)[i];
-      return fluidity_options->set_option(name, *rank, shape, option_data);
-    }else{
-      cerr << "ERROR: unsupported type passed into set_option(): " << __FILE__ << ", "<< __LINE__ <<endl;
-      return -1;
-    }
-  }
-
-#endif
-
 #endif
