@@ -1253,32 +1253,6 @@ int OptionManager::Option::set_attribute(string str, string data){
   }
 }
 
-/**  Delete all data from this element.
-  */
-int OptionManager::Option::clear_option(){
-  if(verbose)
-    cout << "void OptionManager::Option::clear_option(void)\n";
-    
-  set_option_type(SPUD_NONE);
-  set_rank_and_shape(-1, NULL);
-  
-  return 0;  
-}
-
-/**  Delete all data from the element at the supplied option path.
-  */
-int OptionManager::Option::clear_option(string str){
-  if(verbose)
-    cout << "void OptionManager::Option::clear_option(" << str << ")\n";
-
-  OptionManager::Option* opt = get_child(str);
-  if(opt == NULL){
-    return -1;
-  }else{
-    return opt->clear_option();
-  }
-}
-
 /**  Delete the element at the supplied option path.
   */
 int OptionManager::Option::delete_option(string str){

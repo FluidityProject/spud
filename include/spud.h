@@ -212,9 +212,6 @@ namespace Spud{
         
         int set_attribute(std::string, std::string);
         
-        int clear_option();
-        int clear_option(std::string);
-        
         int delete_option(std::string);
 
         void verbose_on();
