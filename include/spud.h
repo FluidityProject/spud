@@ -105,24 +105,26 @@ namespace Spud{
       OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option) const;
       OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option, const std::vector< std::vector<int> >& default_val) const;
       
-      OptionError get_option(const std::string& key, const std::string& option) const;
-      OptionError get_option(const std::string& key, const std::string& option, const std::string& default_val) const;
+      OptionError get_option(const std::string& key, std::string& option) const;
+      OptionError get_option(const std::string& key, std::string& option, const std::string& default_val) const;
       
       OptionError add_option(const std::string& key);
       
-      OptionError set_option(const std::string& key, double& option);
+      OptionError set_option(const std::string& key, const double& option);
       
-      OptionError set_option(const std::string& key, std::vector<double>& option);
+      OptionError set_option(const std::string& key, const std::vector<double>& option);
       
-      OptionError set_option(const std::string& key, std::vector< std::vector<double> >& option);
+      OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& option);
       
-      OptionError set_option(const std::string& key, int& option);
+      OptionError set_option(const std::string& key, const int& option);
       
-      OptionError set_option(const std::string& key, std::vector<int>& option);
+      OptionError set_option(const std::string& key, const std::vector<int>& option);
       
-      OptionError set_option(const std::string& key, std::vector< std::vector<int> >& option);
+      OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& option);
       
-      OptionError set_option_character(const std::string& key, const std::string& option);
+      OptionError set_option(const std::string& key, const std::string& option);
+      
+      OptionError set_option_attribute(const std::string& key, const std::string& option);
       
       OptionError delete_option(const std::string& key);
     
