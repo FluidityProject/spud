@@ -49,8 +49,6 @@ namespace Spud{
   class OptionManager{
     
     public:
-    
-      ~OptionManager();
 
       static OptionManager& get_manager();
 
@@ -107,6 +105,8 @@ namespace Spud{
       OptionManager();
 
       OptionManager(const OptionManager& manager);
+      
+      ~OptionManager();
 
       OptionManager& operator=(const OptionManager& manager);
       

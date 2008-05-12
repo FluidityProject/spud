@@ -36,12 +36,6 @@ using namespace Spud;
 
 // PUBLIC METHODS
 
-OptionManager::~OptionManager(){
-  delete options;
-
-  return;
-}
-
 OptionManager& OptionManager::get_manager(){
   return manager;
 }
@@ -518,6 +512,12 @@ OptionManager::OptionManager(){
 OptionManager::OptionManager(const OptionManager& manager){
   cerr << "OptionManager copy constructor cannot be called" << endl;
   exit(-1);
+}
+
+OptionManager::~OptionManager(){
+  delete options;
+
+  return;
 }
 
 OptionManager& OptionManager::operator=(const OptionManager& manager){
