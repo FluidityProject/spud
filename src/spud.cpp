@@ -487,6 +487,9 @@ OptionError OptionManager::set_option_attribute(const string& key, const string&
   }
   
   Option* child = manager.options->get_child(key);
+  if(child == NULL){
+    return SPUD_KEY_ERROR;
+  }
   logical_t is_attribute = child->set_is_attribute(true);
   if(!is_attribute){
     return SPUD_ATTR_SET_FAILED_WARNING;

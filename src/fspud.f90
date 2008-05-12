@@ -286,7 +286,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 0, SPUD_REAL, (/-1, -1/), stat)
+      call check_option(key, 0, SPUD_REAL, (/-1, -1/), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -311,7 +311,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 1, SPUD_REAL, (/size(val), -1/), stat)
+      call check_option(key, 1, SPUD_REAL, (/size(val), -1/), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -361,7 +361,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 0, SPUD_INTEGER, (/-1, -1/), stat)
+      call check_option(key, 0, SPUD_INTEGER, (/-1, -1/), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -386,7 +386,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 1, SPUD_INTEGER, (/size(val), -1/), stat)
+      call check_option(key, 1, SPUD_INTEGER, (/size(val), -1/), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -411,7 +411,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 2, SPUD_INTEGER, shape(val), stat)
+      call check_option(key, 2, SPUD_INTEGER, shape(val), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -437,7 +437,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = trim(default)
     else
-      call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), stat)
+      call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
