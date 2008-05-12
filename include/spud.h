@@ -40,9 +40,9 @@
 
 #include "tinyxml.h"
 
-namespace Spud{
-
 #include "spud_enums.h"
+
+namespace Spud{
 
   typedef char logical_t;
 

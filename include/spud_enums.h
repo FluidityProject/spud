@@ -29,21 +29,37 @@
 #ifndef SPUD_ENUMS_H
 #define SPUD_ENUMS_H
 
-enum OptionType{
-  SPUD_DOUBLE = 0,
-  SPUD_INT    = 1,
-  SPUD_NONE   = 2,
-  SPUD_STRING = 3,
-};
-  
-enum OptionError{
-  SPUD_NO_ERROR                = 0,
-  SPUD_KEY_ERROR               = 1,
-  SPUD_TYPE_ERROR              = 2,
-  SPUD_RANK_ERROR              = 3,
-  SPUD_SHAPE_ERROR             = 4,
-  SPUD_NEW_KEY_WARNING         = -1,
-  SPUD_ATTR_SET_FAILED_WARNING = -2,
-};
+#ifdef __cplusplus
+namespace Spud{
+#endif
+
+#ifdef __cplusplus
+  enum OptionType{
+#else
+  enum SpudOptionType{
+#endif
+    SPUD_DOUBLE = 0,
+    SPUD_INT    = 1,
+    SPUD_NONE   = 2,
+    SPUD_STRING = 3,
+  };
+    
+#ifdef __cplusplus
+  enum OptionError{
+#else
+  enum SpudOptionError{
+#endif
+    SPUD_NO_ERROR                = 0,
+    SPUD_KEY_ERROR               = 1,
+    SPUD_TYPE_ERROR              = 2,
+    SPUD_RANK_ERROR              = 3,
+    SPUD_SHAPE_ERROR             = 4,
+    SPUD_NEW_KEY_WARNING         = -1,
+    SPUD_ATTR_SET_FAILED_WARNING = -2,
+  };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
