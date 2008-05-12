@@ -131,7 +131,7 @@ namespace Spud{
       
       static OptionError check_type(const std::string& key, const OptionType& type);
       
-      static OptionError check_option(const std::string& key, const int& rank, const OptionType& type);
+      static OptionError check_option(const std::string& key, const OptionType& type, const int& rank);
       
       static OptionManager manager;
 

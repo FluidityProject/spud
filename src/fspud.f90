@@ -28,998 +28,619 @@
 module spud
   !!< This module provides a dictionary object for options whose entries
   !!< can contain a wide variety of data.
+  
   implicit none
+  
+  private
+  
+  integer, parameter, public :: &
+    & SPUD_REAL      = 0, &
+    & SPUD_INTEGER   = 1, &
+    & SPUD_NONE      = 2, &
+    & SPUD_CHARACTER = 4
 
-  integer, parameter, public :: SPUD_REAL=0, SPUD_INTEGER=1,&
-       & SPUD_LOGICAL=2, SPUD_NONE=3, SPUD_CHARACTER=4
+  integer, parameter, public :: &
+    & SPUD_NO_ERROR                = 0, &
+    & SPUD_KEY_ERROR               = 1, &
+    & SPUD_TYPE_ERROR              = 2, &
+    & SPUD_RANK_ERROR              = 3, &
+    & SPUD_SHAPE_ERROR             = 4, &
+    & SPUD_NEW_KEY_WARNING         = -2, &
+    & SPUD_ATTR_SET_FAILED_WARNING = -3
 
-  integer, parameter, public :: SPUD_KEY_ERROR=1, SPUD_TYPE_ERROR=2,&
-       & SPUD_RANK_ERROR=3, SPUD_SHAPE_ERROR=4, SPUD_NEW_KEY_WARNING=5, SPUD_ATTR_SET_FAILED_WARNING=6
+  public :: load_options, &
+    & write_options, &
+    & get_child_name, &
+    & number_of_children, &
+    & option_count, &
+    & have_option, &
+    & option_type, &
+    & option_rank, &
+    & option_shape, &
+    & get_option, &
+    & add_option, &
+    & set_option, &
+    & set_option_attribute, &
+    & delete_option
 
   interface get_option
-     module procedure get_option_real_scalar,&
-          get_option_real_vector, &
-          get_option_real_tensor, &
-          get_option_integer_scalar,&
-          get_option_integer_vector,&
-          get_option_integer_tensor,&
-          get_option_logical_scalar,&
-          get_option_character
+    module procedure get_option_real_scalar, &
+      & get_option_real_vector, &
+      & get_option_real_tensor, &
+      & get_option_integer_scalar, &
+      & get_option_integer_vector, &
+      & get_option_integer_tensor, &
+      & get_option_character
   end interface
 
   interface set_option
-     module procedure set_option_real_scalar ,&
-          set_option_real_vector, &
-          set_option_real_tensor, &
-          set_option_integer_scalar,&
-          set_option_integer_vector,&
-          set_option_integer_tensor,&
-          set_option_logical_scalar ,&
-          set_option_character
+    module procedure set_option_real_scalar, &
+      & set_option_real_vector, &
+      &  set_option_real_tensor, &
+      &  set_option_integer_scalar, &
+      &  set_option_integer_vector, &
+      &  set_option_integer_tensor, &
+      &  set_option_character
   end interface
-
-  private
-  public get_child_name, number_of_children, get_option, &
-       option_count, have_option, option_rank, option_shape, &
-       option_type, option_error, add_option, set_option, &
-       set_option_attribute, delete_option, &
-       load_options, write_options
-
+    
   interface 
-     !! C interface to dictionary inquiry function.
-     integer function cget_option_info(key, len, shape, rank, type)
-       integer, intent(in) :: len
-       character(len=len), intent(in) :: key
-       integer, intent(out) :: rank
-       integer, dimension(2), intent(out) :: shape
-       integer, intent(out) :: type
-     end function cget_option_info
+    !! C interfaces
+    subroutine spud_load_options(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+    end subroutine spud_load_options
+    
+    subroutine spud_write_options(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+    end subroutine spud_write_options
+    
+    function spud_get_child_name(key, key_len, index, child_name, child_name_len)
+      integer, intent(in) :: key_len
+      integer, intent(in) :: child_name_len
+      character(len = key_len), intent(in) :: key
+      integer, intent(in) :: index
+      character(len = child_name_len), intent(out) :: child_name
+      integer :: spud_get_child_name
+    end function spud_get_child_name
+    
+    function spud_number_of_children(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer :: spud_number_of_children
+    end function spud_number_of_children
+    
+    function spud_option_count(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer :: spud_option_count
+    end function spud_option_count
+    
+    function spud_have_option(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer :: spud_have_option
+    end function spud_have_option
+    
+    function spud_get_option_type(key, key_len, option_type)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer, intent(out) :: option_type
+      integer :: spud_get_option_type
+    end function spud_get_option_type
+    
+    function spud_get_option_rank(key, key_len, option_rank)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer, intent(out) :: option_rank
+      integer :: spud_get_option_rank
+    end function spud_get_option_rank
+    
+    function spud_get_option_shape(key, key_len, shape)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer, dimension(2), intent(out) :: shape
+      integer :: spud_get_option_shape
+    end function spud_get_option_shape
+    
+    function spud_add_option(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer :: spud_add_option
+    end function spud_add_option
+    
+    function spud_set_option_attribute(key, key_len, val, val_len)
+      integer, intent(in) :: key_len
+      integer, intent(in) :: val_len
+      character(len = key_len), intent(in) :: key
+      character(len = val_len), intent(in) :: val
+      integer :: spud_set_option_attribute
+    end function spud_set_option_attribute
+    
+    function spud_delete_option(key, key_len)
+      integer, intent(in) :: key_len
+      character(len = key_len), intent(in) :: key
+      integer :: spud_delete_option
+    end function spud_delete_option
   end interface
 
-  interface 
-     !! C interface to dictionary loading function.
-     integer function cget_load_option(key, len)
-       integer, intent(in) :: len
-       character(len=len), intent(in) :: key
-     end function cget_load_option
-  end interface
-
-  !! Deliberately leave the interface to cget_option implicit so we can
-  !! play silly buggers with the argument types.
-  integer :: cget_option
-  external :: cget_option
-
-  integer :: chave_option
-  external :: chave_option
-  
-  integer :: cadd_option
-  external :: cadd_option
-
-  integer :: cset_option
-  external :: cset_option
-  
-  integer :: cset_option_is_attribute
-  external :: cset_option_is_attribute
-  
-  integer :: cdelete_option
-  external :: cdelete_option
-
-  external :: cload_option
+  !! Implicitly interfaced as can take multiple argument types
+  integer, external :: spud_get_option, spud_set_option
 
 contains
 
-  subroutine load_options(filename)
-    character(len=*), intent(in) :: filename
-    external :: cload_option
+  subroutine load_options(filename)  
+    character(len = * ), intent(in) :: filename
 
-    call cload_option(filename, len_trim(filename))
+    call spud_load_option(filename, len_trim(filename))
+    
   end subroutine load_options
   
   subroutine write_options(filename)
-    character(len=*), intent(in) :: filename
-    external :: cwrite_option
+    character(len = *), intent(in) :: filename
     
-    call cwrite_option(filename, len_trim(filename))
+    call spud_write_option(filename, len_trim(filename))
+    
   end subroutine write_options
 
-  subroutine get_child_name(key, index, child_name)
-    external cget_child_name
-    integer cget_child_name
-    
-    character(len=*), intent(in)::key
-    integer, intent(in)::index
-    character(len=*), intent(out)::child_name
+  subroutine get_child_name(key, index, child_name, stat)    
+    character(len = *), intent(in) :: key
+    integer, intent(in) :: index
+    character(len = *), intent(out) :: child_name
+    integer, intent(out) :: stat
     
     integer :: lstat
 
     child_name = " "
-    lstat = cget_child_name(key, len_trim(key), index, child_name)
+    lstat = spud_get_child_name(key, len_trim(key), index, child_name, len(child_name))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
   end subroutine get_child_name
-
-  function number_of_children(key)
-    external cget_number_of_children
-    integer cget_number_of_children
+  
+  function number_of_children(key)    
+    character(len = *), intent(in) :: key
     
-    character(len=*), intent(in) :: key
     integer :: number_of_children
-    integer :: lstat
     
-    lstat = cget_number_of_children(key, len_trim(key), number_of_children)
+    number_of_children = spud_number_of_children(key, len_trim(key))
     
   end function number_of_children
-
-  function option_count(key)
-    external cget_option_count
-    integer cget_option_count
+  
+  function option_count(key)    
+    character(len = *), intent(in) :: key
     
-    character(len=*), intent(in) :: key
     integer :: option_count
-    integer :: lstat
     
-    lstat = cget_option_count(key, len_trim(key), option_count)
-    
+    option_count = spud_option_count(key, len_trim(key))
+        
   end function option_count
-
+  
   function have_option(key)
-    !!< Test for the presence of the option given by key.
+    character(len = *), intent(in) :: key
+    
     logical :: have_option
-    character(len=*), intent(in) :: key
-
-    integer :: rank
-    integer, dimension(2) :: lshape
-    integer :: type
-    integer :: lstat
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    have_option=(chave_option(key, len_trim(key))==1)
+    
+    have_option = (spud_have_option(key, len_trim(key)) == 1)
 
   end function have_option
-
-  function option_type(key, stat) result (type)
-    !!< Return the type of the option given by key.
-    integer :: type
-    character(len=*), intent(in) :: key
-    integer, intent(out), optional :: stat
-
-    integer :: rank
-    integer, dimension(2) :: lshape
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-
-  end function option_type
-
-  function option_rank(key, stat) result (rank)
-    !!< Return the rank of the option given by key.
-    integer :: rank
-    character(len=*), intent(in) :: key
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-
-  end function option_rank
-
-  function option_shape(key, stat) result (lshape)
-    !!< Return the rank of the option given by key.
-    integer, dimension(2) :: lshape
-    character(len=*), intent(in) :: key
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-
-  end function option_shape
   
-  subroutine get_option_real_scalar(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, intent(out) :: option
-    integer, intent(out), optional :: stat
-    real, intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=0) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_REAL) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_real_scalar
-
-  subroutine get_option_real_vector(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, dimension(:), intent(out) :: option
-    integer, intent(out), optional :: stat
-    real, intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=1) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_REAL) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-    if (lshape(1)/=size(option)) then
-       call option_error(key, SPUD_SHAPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_real_vector
-
-  subroutine get_option_real_tensor(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, dimension(:,:), intent(out) :: option
-    integer, intent(out), optional :: stat
-    real, intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=2) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_REAL) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-    if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-       call option_error(key, SPUD_SHAPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_real_tensor
-
-  subroutine get_option_integer_scalar(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, intent(out) :: option
-    integer, intent(out), optional :: stat
-    integer, intent(in), optional :: default
- 
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=0) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_INTEGER) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_integer_scalar
-
-  subroutine get_option_integer_vector(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, dimension(:), intent(out) :: option
-    integer, intent(out), optional :: stat
-    integer, intent(in), optional :: default
- 
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=1) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_INTEGER) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-    if (lshape(1)/=size(option)) then
-       call option_error(key, SPUD_SHAPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_integer_vector
-
-  subroutine get_option_integer_tensor(key, option, stat, default)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, dimension(:,:), intent(out) :: option
-    integer, intent(out), optional :: stat
-    integer, intent(in), optional :: default
- 
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=2) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_INTEGER) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-    if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-       call option_error(key, SPUD_SHAPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine get_option_integer_tensor
-
-  subroutine get_option_logical_scalar(key, option, stat)
-    !!< Return the value of the option given by key
-    character(len=*), intent(in) :: key
-    logical, intent(out) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-    if (rank/=0) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_LOGICAL) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-
-    lstat=cget_option(key, len_trim(key), option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-    
-  end subroutine get_option_logical_scalar
-
-  subroutine get_option_character(key, option, stat, default)
-    !!< Return the value of the option given by key
-    !!<
-    !!< Note that due to the limitations of C strings, only scalar string
-    !!< options are possible.
-    character(len=*), intent(in) :: key
-    character(len=*), intent(out) :: option
-    integer, intent(out), optional :: stat
-    character(len=*), intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(default)) then
-          option=default
-          return
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    end if
-    if (rank/=1) then
-       call option_error(key, SPUD_RANK_ERROR, stat)
-       return
-    end if
-    if (type/=SPUD_CHARACTER) then
-       call option_error(key, SPUD_TYPE_ERROR, stat)
-       return
-    end if
-
-    option=" "
-    lstat=cget_option(key, len_trim(key), option)
-    
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-       return
-    end if
-    
-  end subroutine get_option_character
-
-  subroutine option_error(key, error, stat)
-    !!< Handle option errors in a nice way.
-    character(len=*), intent(in) :: key
-    ! Error code.
-    integer, intent(in) :: error
-    ! Optional stat argument: die if it's not present.
-    integer, intent(out), optional :: stat
-    
-    character(len=666) :: buffer
-
-    if (present(stat)) then
-       stat=error
-       return
-    end if
-    
-    select case (error)
-    case (SPUD_KEY_ERROR)
-       buffer="Option key error. Key is: "//trim(key)
-    case (SPUD_TYPE_ERROR)
-       buffer="Option type error. Key is: "//trim(key)
-    case (SPUD_RANK_ERROR)
-       buffer="Option rank error. Key is: "//trim(key)       
-    case (SPUD_SHAPE_ERROR)
-       buffer="Option shape error. Key is: "//trim(key)       
-    case (SPUD_NEW_KEY_WARNING)
-       buffer="Option warning. Key is not in the options tree: "//trim(key)
-    case (SPUD_ATTR_SET_FAILED_WARNING)
-      buffer = "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
-    end select
-
-    write(0,*) trim(buffer)
-    stop
-    
-  end subroutine option_error
-
-  subroutine add_option(key, stat)
-    !!< Add an option specified by key
-    
-    character(len = *), intent(in) :: key
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if(present(stat)) then
-      stat=0
-    end if
-
-    lstat = cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if(lstat /= 0) then
-      if(present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    end if
-
-    lstat = cadd_option(key, len_trim(key))
-    if (lstat /= 0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  
-  end subroutine add_option
-
-  subroutine set_option_real_scalar(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=0) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_REAL) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_REAL, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_real_scalar
-
-  subroutine set_option_real_vector(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, dimension(:), intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=1) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_REAL) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), size(option), 1, SPUD_REAL, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_real_vector
-
-  subroutine set_option_real_tensor(key, option, stat, default)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    real, dimension(:,:), intent(in) :: option
-    integer, intent(out), optional :: stat
-    real, intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(stat)) then
-          call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    else
-       if (rank/=2) then
-          call option_error(key, SPUD_RANK_ERROR, stat)
-          return
-       end if
-       if (type/=SPUD_REAL) then
-          call option_error(key, SPUD_TYPE_ERROR, stat)
-          return
-       end if
-       if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-          call option_error(key, SPUD_SHAPE_ERROR, stat)
-          return
-       end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), shape(option), 2, SPUD_REAL,&
-         & option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine set_option_real_tensor
-
-  subroutine set_option_integer_scalar(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=0) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_INTEGER) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_INTEGER, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_integer_scalar
-
-  subroutine set_option_integer_vector(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, dimension(:), intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=1) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_INTEGER) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), size(option), 1, SPUD_INTEGER, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_integer_vector
-
-  subroutine set_option_integer_tensor(key, option, stat, default)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    integer, dimension(:,:), intent(in) :: option
-    integer, intent(out), optional :: stat
-    integer, intent(in), optional :: default
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-       if (present(stat)) then
-          call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-       else
-          call option_error(key, SPUD_KEY_ERROR, stat)
-          return
-       end if
-    else
-       if (rank/=2) then
-          call option_error(key, SPUD_RANK_ERROR, stat)
-          return
-       end if
-       if (type/=SPUD_INTEGER) then
-          call option_error(key, SPUD_TYPE_ERROR, stat)
-          return
-       end if
-       if (lshape(1)/=size(option,1) .or. lshape(2)/=size(option,2)) then
-          call option_error(key, SPUD_SHAPE_ERROR, stat)
-          return
-       end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), shape(option), 2, SPUD_INTEGER,&
-         & option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-    
-  end subroutine set_option_integer_tensor
-
-  subroutine set_option_logical_scalar(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    logical, intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=0) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_LOGICAL) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), 0, 0, SPUD_LOGICAL, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_logical_scalar
-
-  subroutine set_option_character(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    character(len=*), intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: type
-    integer, dimension(2) :: lshape
-    integer :: rank
-    integer :: lstat
-
-    if (present(stat)) stat=0
-
-    lstat=cget_option_info(key, len_trim(key), lshape, rank, type)
-
-    if (lstat/=0) then
-      if (present(stat)) then
-        call option_error(key, SPUD_NEW_KEY_WARNING, stat)
-      else
-        call option_error(key, SPUD_KEY_ERROR, stat)
-        return
-      end if
-    else
-      if (rank/=1) then
-         call option_error(key, SPUD_RANK_ERROR, stat)
-         return
-      end if
-
-      if (type/=SPUD_CHARACTER) then
-         call option_error(key, SPUD_TYPE_ERROR, stat)
-         return
-      end if
-    end if
-
-    lstat=cset_option(key, len_trim(key), len(option), 1, SPUD_CHARACTER, option)
-    if (lstat/=0) then
-       call option_error(key, SPUD_KEY_ERROR, stat)
-    end if
-  end subroutine set_option_character
-  
-  subroutine set_option_attribute(key, option, stat)
-    !!< Set the value of the option given by key
-    character(len=*), intent(in) :: key
-    character(len=*), intent(in) :: option
-    integer, intent(out), optional :: stat
-
-    integer :: is_attribute, lstat
-
-    if (present(stat)) stat=0
-    
-    call set_option_character(key, option, stat)
-    
-    lstat = cset_option_is_attribute(key, len_trim(key), 1, is_attribute)
-    if(lstat /= 0) then
-      call option_error(key, SPUD_KEY_ERROR, stat)
-    else if(is_attribute /= 1) then
-      call option_error(key, SPUD_ATTR_SET_FAILED_WARNING, stat)
-    end if
-    
-  end subroutine set_option_attribute
-  
-  subroutine delete_option(key, stat)
-    !!< Delete the option specified by key, together with all of its children.
-  
+  function option_type(key, stat)
     character(len = *), intent(in) :: key
     integer, optional, intent(out) :: stat
     
+    integer :: option_type
+    
     integer :: lstat
+    
+    lstat = spud_get_option_type(key, len_trim(key), option_type)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
 
-    if(present(stat)) stat = 0
-
-    lstat = cdelete_option(key, len_trim(key))
-    if(lstat /= 0) then
-      call option_error(key, SPUD_KEY_ERROR, stat)
+  end function option_type
+  
+  function option_rank(key, stat)
+    character(len = *), intent(in) :: key
+    integer, optional, intent(out) :: stat
+    
+    integer :: option_rank
+    
+    integer :: lstat
+    
+    lstat = spud_get_option_type(key, len_trim(key), option_rank)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end function option_rank
+  
+  function option_shape(key, stat)
+    character(len = *), intent(in) :: key
+    integer, optional, intent(out) :: stat
+    
+    integer, dimension(2) :: option_shape
+    
+    integer :: lstat
+    
+    lstat = spud_get_option_shape(key, len_trim(key), option_shape)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end function option_shape
+  
+  subroutine get_option_real_scalar(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    real, intent(out) :: val
+    integer, optional, intent(out) :: stat
+    real, optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 0, SPUD_REAL, (/-1, -1/), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
     end if
   
+  end subroutine get_option_real_scalar
+  
+  subroutine get_option_real_vector(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    real, dimension(:), intent(out) :: val
+    integer, optional, intent(out) :: stat
+    real, dimension(size(val)), optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 1, SPUD_REAL, (/size(val), -1/), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+  
+  end subroutine get_option_real_vector
+  
+  subroutine get_option_real_tensor(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    real, dimension(:, :), intent(out) :: val
+    integer, optional, intent(out) :: stat
+    real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 2, SPUD_REAL, shape(val), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+  
+  end subroutine get_option_real_tensor
+  
+  subroutine get_option_integer_scalar(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    integer, intent(out) :: val
+    integer, optional, intent(out) :: stat
+    integer, optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 0, SPUD_INTEGER, (/-1, -1/), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+  
+  end subroutine get_option_integer_scalar
+  
+  subroutine get_option_integer_vector(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    integer, dimension(:), intent(out) :: val
+    integer, optional, intent(out) :: stat
+    integer, dimension(size(val)), optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 1, SPUD_INTEGER, (/size(val), -1/), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+  
+  end subroutine get_option_integer_vector
+  
+  subroutine get_option_integer_tensor(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    integer, dimension(:, :), intent(out) :: val
+    integer, optional, intent(out) :: stat
+    integer, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
+    
+    integer :: lstat
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 2, SPUD_INTEGER, shape(val), stat)
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+  
+  end subroutine get_option_integer_tensor
+  
+  subroutine get_option_character(key, val, stat, default)
+    character(len = *), intent(in) :: key
+    character(len = *), intent(out) :: val
+    integer, optional, intent(out) :: stat
+    character(len = *), optional, intent(in) :: default
+    
+    integer :: lstat
+    integer, dimension(2) :: lshape
+    
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), stat)
+      lshape = option_shape(key, stat)
+      if(lshape(1) > len(val)) then
+        call option_error(key, SPUD_SHAPE_ERROR, stat)
+        return
+      end if
+      lstat = spud_get_option(key, len_trim(key), val)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+    
+  end subroutine get_option_character
+  
+  subroutine add_option(key, stat)
+    character(len = *), intent(in) :: key
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_add_option(key, len_trim(key))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine add_option
+  
+  subroutine set_option_real_scalar(key, val, stat)
+    character(len = *), intent(in) :: key
+    real, intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 0, (/-1, -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+  
+  end subroutine set_option_real_scalar
+  
+  subroutine set_option_real_vector(key, val, stat)
+    character(len = *), intent(in) :: key
+    real, dimension(:), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 1, (/size(val), -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine set_option_real_vector
+  
+  subroutine set_option_real_tensor(key, val, stat)
+    character(len = *), intent(in) :: key
+    real, dimension(:, :), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 2, shape(val))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine set_option_real_tensor
+  
+  subroutine set_option_integer_scalar(key, val, stat)
+    character(len = *), intent(in) :: key
+    integer, intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 0, (/-1, -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+  
+  end subroutine set_option_integer_scalar
+  
+  subroutine set_option_integer_vector(key, val, stat)
+    character(len = *), intent(in) :: key
+    integer, dimension(:), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 1, (/size(val), -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine set_option_integer_vector
+  
+  subroutine set_option_integer_tensor(key, val, stat)
+    character(len = *), intent(in) :: key
+    integer, dimension(:, :), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 2, shape(val))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine set_option_integer_tensor
+  
+  subroutine set_option_character(key, val, stat)
+    character(len = *), intent(in) :: key
+    character(len = *), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option(key, len_trim(key), val, SPUD_CHARACTER, 1, (/len_trim(val), -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+  end subroutine set_option_character
+  
+  subroutine set_option_attribute(key, val, stat)
+    character(len = *), intent(in) :: key
+    character(len = *), intent(in) :: val
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_set_option_attribute(key, len_trim(key), val, len_trim(val))
+        if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+  
+  end subroutine set_option_attribute
+  
+  subroutine delete_option(key, stat)
+    character(len = *), intent(in) :: key
+    integer, intent(out) :: stat
+    
+    integer :: lstat
+    
+    lstat = spud_delete_option(key, len_trim(key))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
   end subroutine delete_option
+        
+  subroutine option_error(key, error, stat)
+    !!< Handle option errors
+    
+    character(len = *), intent(in) :: key
+    ! Error code
+    integer, intent(in) :: error
+    ! Optional stat argument - die if error and it's not present
+    integer, optional, intent(out) :: stat
+    
+    character(len = 1024) :: buffer
+
+    if(present(stat)) then
+      stat = error
+      return
+    end if
+    
+    select case(error)
+      case(SPUD_NO_ERROR)
+        return
+      case(SPUD_KEY_ERROR)
+        buffer = "Option key error. Key is: " // trim(key)
+      case(SPUD_TYPE_ERROR)
+        buffer = "Option type error. Key is: " // trim(key)
+      case(SPUD_RANK_ERROR)
+        buffer = "Option rank error. Key is: " // trim(key)       
+      case(SPUD_SHAPE_ERROR)
+        buffer = "Option shape error. Key is: " // trim(key)       
+      case(SPUD_NEW_KEY_WARNING)
+        buffer = "Option warning. Key is not in the options tree: " // trim(key)
+      case(SPUD_ATTR_SET_FAILED_WARNING)
+        buffer = "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
+      case default
+        buffer = "Unknown option error. Key is: " // trim(key)
+    end select
+
+    write(0, *) trim(buffer)
+    stop
+    
+  end subroutine option_error
+  
+  subroutine check_option(key, type, rank, shape, stat)
+    character(len = *), intent(in) :: key
+    integer, intent(in) :: type
+    integer, intent(in) :: rank
+    integer, dimension(2), intent(in) :: shape
+    integer, optional, intent(out) :: stat
+    
+    integer :: i
+    integer, dimension(2) :: lshape
+    
+    if(type /= option_type(key, stat)) then
+      call option_error(key, SPUD_TYPE_ERROR, stat)
+      return
+    else if(rank /= option_rank(key, stat)) then
+      call option_error(key, SPUD_RANK_ERROR, stat)
+      return
+    else
+      lshape = option_shape(key, stat)
+      do i = 1, rank
+        if(shape(i) /= lshape(i)) then
+          call option_error(key, SPUD_SHAPE_ERROR, stat)
+          return
+        end if
+      end do
+    end if
+  end subroutine check_option
   
 end module spud

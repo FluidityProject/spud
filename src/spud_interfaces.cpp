@@ -96,7 +96,10 @@ extern "C" {
       return get_shape_err;
     }
     
-    shape[0] = shape_handle[0];  shape[1] = shape_handle[1];
+    shape[0] = -1;  shape[1] = -1;
+    for(size_t i = 0;i < shape.size();i++){
+      shape[i] = shape_handle[i];
+    }
     
     return SPUD_NO_ERROR;
   }

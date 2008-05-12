@@ -131,7 +131,7 @@ OptionError OptionManager::get_option_shape(const string& key, vector<int>& shap
 }
 
 OptionError OptionManager::get_option(const string& key, double& option){
-  OptionError check_err = check_option(key, 0, SPUD_DOUBLE);
+  OptionError check_err = check_option(key, SPUD_DOUBLE, 0);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -159,7 +159,7 @@ OptionError OptionManager::get_option(const string& key, double& option, const d
 }
 
 OptionError OptionManager::get_option(const string& key, vector<double>& option){ 
-  OptionError check_err = check_option(key, 1, SPUD_DOUBLE);
+  OptionError check_err = check_option(key, SPUD_DOUBLE, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -185,7 +185,7 @@ OptionError OptionManager::get_option(const string& key, vector<double>& option,
 }
 
 OptionError OptionManager::get_option(const string& key, vector< vector<double> >& option){
-  OptionError check_err = check_option(key, 2, SPUD_DOUBLE);
+  OptionError check_err = check_option(key, SPUD_DOUBLE, 2);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -223,7 +223,7 @@ OptionError OptionManager::get_option(const string& key, vector< vector<double> 
 }
       
 OptionError OptionManager::get_option(const string& key, int& option){
-  OptionError check_err = check_option(key, 0, SPUD_INT);
+  OptionError check_err = check_option(key, SPUD_INT, 0);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -251,7 +251,7 @@ OptionError OptionManager::get_option(const string& key, int& option, const int&
 }
 
 OptionError OptionManager::get_option(const string& key, vector<int>& option){
-  OptionError check_err = check_option(key, 1, SPUD_INT);
+  OptionError check_err = check_option(key, SPUD_INT, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -277,7 +277,7 @@ OptionError OptionManager::get_option(const string& key, vector<int>& option, co
 }
 
 OptionError OptionManager::get_option(const string& key, vector< vector<int> >& option){
-  OptionError check_err = check_option(key, 2, SPUD_INT);
+  OptionError check_err = check_option(key, SPUD_INT, 2);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -315,7 +315,7 @@ OptionError OptionManager::get_option(const string& key, vector< vector<int> >& 
 }
 
 OptionError OptionManager::get_option(const string& key, string& option){
-  OptionError check_err = check_option(key, 1, SPUD_STRING);
+  OptionError check_err = check_option(key, SPUD_STRING, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
@@ -567,20 +567,20 @@ OptionError OptionManager::check_type(const string& key, const OptionType& type)
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::check_option(const string& key, const int& rank, const OptionType& type){
+OptionError OptionManager::check_option(const string& key, const OptionType& type, const int& rank){
   OptionError check_err;
   check_err = check_key(key);
-  if(check_err != SPUD_NO_ERROR){
-    return check_err;
-  }
-  check_err = check_rank(key, rank);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
   check_err = check_type(key, type);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
-  }  
+  } 
+  check_err = check_rank(key, rank);
+  if(check_err != SPUD_NO_ERROR){
+    return check_err;
+  } 
 
   return SPUD_NO_ERROR;
 }
