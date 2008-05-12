@@ -45,10 +45,11 @@ module spud
     & SPUD_TYPE_ERROR              = 2, &
     & SPUD_RANK_ERROR              = 3, &
     & SPUD_SHAPE_ERROR             = 4, &
-    & SPUD_NEW_KEY_WARNING         = -2, &
-    & SPUD_ATTR_SET_FAILED_WARNING = -3
+    & SPUD_NEW_KEY_WARNING         = -1, &
+    & SPUD_ATTR_SET_FAILED_WARNING = -2
 
-  public :: load_options, &
+  public :: &
+    & load_options, &
     & write_options, &
     & get_child_name, &
     & number_of_children, &
@@ -64,7 +65,8 @@ module spud
     & delete_option
 
   interface get_option
-    module procedure get_option_real_scalar, &
+    module procedure &
+      & get_option_real_scalar, &
       & get_option_real_vector, &
       & get_option_real_tensor, &
       & get_option_integer_scalar, &
@@ -74,13 +76,14 @@ module spud
   end interface
 
   interface set_option
-    module procedure set_option_real_scalar, &
+    module procedure &
+      & set_option_real_scalar, &
       & set_option_real_vector, &
-      &  set_option_real_tensor, &
-      &  set_option_integer_scalar, &
-      &  set_option_integer_vector, &
-      &  set_option_integer_tensor, &
-      &  set_option_character
+      & set_option_real_tensor, &
+      & set_option_integer_scalar, &
+      & set_option_integer_vector, &
+      & set_option_integer_tensor, &
+      & set_option_character
   end interface
   
   !! C interfaces
@@ -172,14 +175,14 @@ contains
   subroutine load_options(filename)  
     character(len = * ), intent(in) :: filename
 
-    call spud_load_option(filename, len_trim(filename))
+    call spud_load_options(filename, len_trim(filename))
     
   end subroutine load_options
   
   subroutine write_options(filename)
     character(len = *), intent(in) :: filename
     
-    call spud_write_option(filename, len_trim(filename))
+    call spud_write_options(filename, len_trim(filename))
     
   end subroutine write_options
 
