@@ -481,11 +481,14 @@ OptionError OptionManager::set_option(const string& key, const string& option){
 }
 
 OptionError OptionManager::set_option_attribute(const string& key, const string& option){
-  OptionError set_err = set_option(key, option);
-  logical_t is_attribute = manager.options->set_is_attribute(true);
+  OptionError set_err = set_option(key, option);  
   if(set_err != SPUD_NO_ERROR){
     return set_err;
-  }else if(!is_attribute){
+  }
+  
+  Option* child = manager.options->get_child(key);
+  logical_t is_attribute = child->set_is_attribute(true);
+  if(!is_attribute){
     return SPUD_ATTR_SET_FAILED_WARNING;
   }
   
@@ -1093,7 +1096,7 @@ int OptionManager::Option::set_option(string str, string data){
   */
 int OptionManager::Option::set_attribute(string str, string data){
   if(verbose)
-    cout << "logical_t OptionManager::Option::set_attribute(" << str << ", " << data << ")\n";
+    cout << "int OptionManager::Option::set_attribute(" << str << ", " << data << ")\n";
   
   OptionManager::Option* opt = create_child(str);
   
