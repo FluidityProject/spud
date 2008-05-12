@@ -611,8 +611,6 @@ contains
     integer, intent(in) :: error
     ! Optional stat argument - die if error and it's not present
     integer, optional, intent(out) :: stat
-    
-    character(len = 1024) :: buffer
 
     if(present(stat)) then
       stat = error
@@ -623,22 +621,21 @@ contains
       case(SPUD_NO_ERROR)
         return
       case(SPUD_KEY_ERROR)
-        buffer = "Option key error. Key is: " // trim(key)
+        write(0, *) "Option key error. Key is: " // trim(key)
       case(SPUD_TYPE_ERROR)
-        buffer = "Option type error. Key is: " // trim(key)
+        write(0, *) "Option type error. Key is: " // trim(key)
       case(SPUD_RANK_ERROR)
-        buffer = "Option rank error. Key is: " // trim(key)       
+        write(0, *) "Option rank error. Key is: " // trim(key)       
       case(SPUD_SHAPE_ERROR)
-        buffer = "Option shape error. Key is: " // trim(key)       
+        write(0, *) "Option shape error. Key is: " // trim(key)       
       case(SPUD_NEW_KEY_WARNING)
-        buffer = "Option warning. Key is not in the options tree: " // trim(key)
+        write(0, *) "Option warning. Key is not in the options tree: " // trim(key)
       case(SPUD_ATTR_SET_FAILED_WARNING)
-        buffer = "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
+        write(0, *) "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
       case default
-        buffer = "Unknown option error. Key is: " // trim(key)
+        write(0, *) "Unknown option error. Key is: " // trim(key)
     end select
-
-    write(0, *) trim(buffer)
+    
     stop
     
   end subroutine option_error
@@ -652,6 +649,10 @@ contains
     
     integer :: i
     integer, dimension(2) :: lshape
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     if(type /= option_type(key, stat)) then
       call option_error(key, SPUD_TYPE_ERROR, stat)
