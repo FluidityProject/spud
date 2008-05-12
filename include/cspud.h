@@ -30,6 +30,7 @@
 #define CSPUD_H
 
 #include "confdefs.h"
+#include "spud_enums.h"
 
 #define spud_load_options F77_FUNC(spud_load_options, SPUD_LOAD_OPTIONS)
 #define spud_write_options F77_FUNC(spud_write_options, SPUD_WRITE_OPTIONS)
