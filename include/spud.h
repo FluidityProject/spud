@@ -298,33 +298,63 @@ namespace Spud{
           void verbose_off();
 
         private:
-        
-          /**
-            * Tokenize the supplied string
-            */
-          void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ") const;
-          int split_name(const std::string, std::string&, std::string&) const;
-          int split_name(const std::string, std::string&, int &index, std::string&) const;
-          void split_node_name(std::string&, std::string&) const;
-          std::string data_as_string() const;
           
-          Option* create_child(std::string);
+          /** 
+            * Finds or creates a new child at the supplied key, and returns
+            * that child.
+            * If the parent of a created child is marked as an attribute,
+            * unmarks it.
+            */
+          Option* create_child(const std::string& key);
          
           /** 
             * Set the rank and shape for the data in this element.
             */
           OptionError set_rank_and_shape(const int& rank, const std::vector<int>& shape);
           /** 
-            * Set the option type for this element, and delete all data of other option types.
-            * If the new option type is not string type and this element is marked as an attribute, unmarks it.
+            * Set the option type for this element, and delete all data of
+            * other option types.
+            * If the new option type is not string type and this element is
+            * marked as an attribute, unmarks it.
             */
           OptionError set_option_type(const OptionType& option_type);
           
-          void parse_node(std::string name, const TiXmlNode *);
+          /** 
+            * Parses the supplied TiXmlNode and sets the data and and attribute
+            * status of this element appropriately.
+            */
+          void parse_node(const std::string& root, const TiXmlNode* node);
+          /** 
+            * Convert this element into a TiXmlElement.
+            */
           TiXmlElement* to_element() const;
-         
-          logical_t verbose;
           
+          /**
+            * Tokenize the supplied string
+            */
+          void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ") const;
+          /** 
+            * Split the supplied key into the highest child name (including its
+            * index) and key from that sub-child.
+            */
+          void split_name(const std::string in, std::string& name, std::string& branch) const;
+          /** 
+            * Split the supplied key in into the highest child name (excluding
+            * its index), the index of that sub-child, and the key from that
+            * sub-child.
+            */
+          void split_name(const std::string in, std::string& name, int& index, std::string& branch) const;
+          /** 
+            * Split the name of this element into the key (excluding the name
+            * attribute) and it's name attribute (which may be empty).
+            */
+          void split_node_name(std::string& node_name, std::string& name_attr) const;
+          
+          /** 
+            * Converts the data for this element into a string.
+            */
+          std::string data_as_string() const;
+         
           std::string node_name;
           std::multimap<std::string, Option> children;
           
@@ -332,8 +362,10 @@ namespace Spud{
           std::vector<double> data_double;
           std::vector<int> data_int;
           std::string data_string;
-          
+                    
           logical_t is_attribute;
+          
+          logical_t verbose;
       };
       
       Option* options;

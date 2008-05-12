@@ -630,7 +630,7 @@ void OptionManager::Option::load_options(const string& filename){
   TiXmlDocument doc(filename);
   doc.SetCondenseWhiteSpace(false);
   if(!doc.LoadFile()){
-    cerr << "WARNING: Failed to load options file.\n";
+    cerr << "WARNING: Failed to load options file" << endl;
     return;
   }
   
@@ -667,7 +667,7 @@ void OptionManager::Option::write_options(const string& filename) const{
   doc.LinkEndChild(root_node);
 
   if(!doc.SaveFile(filename)){
-    cerr << "WARNING: Failed to write options file.\n";
+    cerr << "WARNING: Failed to write options file" << endl;
   }
 
   return;
@@ -713,7 +713,7 @@ const OptionManager::Option* OptionManager::Option::get_child(const string& key)
   split_name(key, name, index, branch);
 
   if(name.empty()){
-    cerr << "ERROR: child name cannot be empty\n";
+    cerr << "ERROR: child name cannot be empty" << endl;
     exit(-1);
   }
 
@@ -766,7 +766,7 @@ OptionManager::Option* OptionManager::Option::get_child(const string& key){
 
 int OptionManager::Option::option_count(const string& key) const{
   if(verbose)
-    cout <<" int OptionManager::Option::option_count(const string& key = " << key << ") const\n";
+    cout << "int OptionManager::Option::option_count(const string& key = " << key << ") const\n";
   
   string name, branch;
   int index;
@@ -1159,153 +1159,19 @@ void OptionManager::Option::verbose_off(){
 
 // PRIVATE METHODS
 
-void OptionManager::Option::tokenize(const string& str,
-                                     vector<string>& tokens,
-                                     const string& delimiters) const{
-  tokens.clear();
-  
-  // Skip delimiters at beginning.
-  string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-  
-  // Find first "non-delimiter".
-  string::size_type pos     = str.find_first_of(delimiters, lastPos);
-  
-  while (string::npos != pos || string::npos != lastPos){
-    // Found a token, add it to the vector.
-    tokens.push_back(str.substr(lastPos, pos - lastPos));
-    
-    // Skip delimiters.  Note the "not_of"
-    lastPos = str.find_first_not_of(delimiters, pos);
-    
-    // Find next "non-delimiter"
-    pos = str.find_first_of(delimiters, lastPos);
-  }
-  
-  return;
-}
-
-/**  Split the supplied key in into the highest child name (including its index) and key from that sub -child.
-  */
-int OptionManager::Option::split_name(const string in, string& name, string& branch) const{
-  if(verbose){
-    cout << "int OptionManager::Option::split_name(" << in << ", " << name << ", " << branch << ")\n";
-  }
-
-  string valid_chars("/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
-  string fullname = in.substr(0, min(in.size(), in.find_first_not_of(valid_chars)));
- 
-  // Skip delimiters at beginning.
-  string::size_type lastPos = fullname.find_first_not_of("/", 0);
-  if(lastPos==string::npos)
-    return 0;
-  
-  // Find next delimiter
-  string::size_type pos = fullname.find_first_of("/", lastPos);
-  
-  if(pos==string::npos){
-    name = fullname.substr(lastPos, fullname.size() - lastPos);
-  }else{
-    name = fullname.substr(lastPos, pos - lastPos);
-    branch = fullname.substr(pos, fullname.size()-pos);
-  }
-
-  return 0;  
-}
-
-/**  Split the supplied key in into the highest child name (excluding its index), the index of that sub-child, and the key from that sub-child.
-  */
-int OptionManager::Option::split_name(const string in, string& name, int &index, string& branch) const{
+OptionManager::Option* OptionManager::Option::create_child(const string& key){
   if(verbose)
-    cout<<"int OptionManager::Option::split_name("<<in<<", string& name , string& branch)\n";
-  
-  int ret = split_name(in, name, branch);
-  if(ret != 0){
-    return ret;
-  }    
-  
-  // Extract the index from the name if necessary
-  string::size_type pos = name.find_first_of("[", 0);
-  string::size_type lastPos = name.find_first_of("]", 0);
-  index = -1;
-  if((lastPos-pos)>0){
-    istringstream(name.substr(pos+1, lastPos-1))>>index;
-    name = name.substr(0, pos);
-  }
-  
-  return 0;
-}
+    cout << "OptionManager::Option* OptionManager::Option::create_child(const string& key = " << key << ")\n";
 
-/**  Split a node name into the child name (excluding the name attribute) and it's name attribute (which may be empty).
-  */
-void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{
-  if(verbose){
-    cout << "void OptionManager::Option::split_node_name(" << node_name << ", " << name_attr << "&) const\n";
-  }
-  
-  string::size_type firstPos = this->node_name.rfind("::");
-  if(firstPos == string::npos or firstPos == this->node_name.size() - 2){
-    node_name = this->node_name;
-    name_attr = "";
-  }
-  else{
-    node_name = this->node_name.substr(0, firstPos);
-    name_attr = this->node_name.substr(firstPos + 2);
-  }
-  
-  return;
-}
-
-/**  Converts the data for this element into a string.
-  */
-string OptionManager::Option::data_as_string() const{
-  if(verbose){
-    cout << "string OptionManager::Option::data_as_string(void) const\n";
-  }
-
-  stringstream data_as_string; 
-  switch(option_type()){
-    case(SPUD_DOUBLE):
-      for(unsigned int i = 0;i < data_double.size();i++){
-        data_as_string << data_double[i];
-        if(i < data_double.size() - 1){
-          data_as_string << " ";
-        }
-      }
-      return data_as_string.str();
-    case(SPUD_INT):
-      for(unsigned int i = 0;i < data_int.size();i++){
-        data_as_string << data_int[i];
-        if(i < data_int.size() - 1){
-          data_as_string << " ";
-        }
-      }
-      return data_as_string.str();
-    case(SPUD_NONE):
-      return "";
-    case(SPUD_STRING):
-      return data_string;
-    default:
-      cerr << "ERROR: Invalid option type\n";
-      exit(-1);
-  }
-}
-
-/**  Finds or creates a new child at the supplied key, and returns that child. If the parent of a created child is marked as an attribute, unmarks it.
-  */
-OptionManager::Option* OptionManager::Option::create_child(string str){
-  if(verbose)
-    cout<<"OptionManager::Option& OptionManager::Option::create_child("<<str<<")\n";
-
-  if(str == "/" or str.empty())
+  if(key == "/" or key.empty())
     return this;
   
   string branch, name;
   int index;
-  split_name(str, name, index, branch);
+  split_name(key, name, index, branch);
 
   if(name.empty()){
-    cerr << "ERROR: child name cannot be empty\n";
-    exit(-1);
+    return NULL;
   }
 
   multimap<string, OptionManager::Option>::iterator child;
@@ -1323,7 +1189,7 @@ OptionManager::Option* OptionManager::Option::create_child(string str){
     }
     if(child == children.end()){
       if(name == "__value" and option_type() != SPUD_NONE){
-        cerr << "WARNING: Creating __value child for non null element - deleting parent data\n";
+        cerr << "WARNING: Creating __value child for non null element - deleting parent data" << endl;
         set_option_type(SPUD_NONE);
       }
       child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(name)));
@@ -1446,42 +1312,39 @@ OptionError OptionManager::Option::set_option_type(const OptionType& option_type
   return SPUD_NO_ERROR;
 }
 
-/**  Parses the supplied TiXmlNode and sets the data and and attribute status of this element appropriately.
-  */
-void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
+void OptionManager::Option::parse_node(const string& root, const TiXmlNode* node){
   if(verbose)
-    cout<<"void OptionManager::Option::parse_option(\""<<root<<"\", const TiXmlNode *node)\n"; 
+    cout << "void OptionManager::Option::parse_node(const string& root = " << root << ", const TiXmlNode* node)\n"; 
   
-  // In fact I think at this level I only ever deal with ELEMENT -
-  // time will tell
-  if(node->Type()!=TiXmlNode::ELEMENT){
-    cerr<<"WARNING - non-element: "<<root<<endl;
+  // Should only deal with TiXmlNode::ELEMENT types
+  if(node->Type() != TiXmlNode::ELEMENT){
+    cerr << "WARNING - Non-element: " << root << " encountered" << endl;
     return;
   }
 
-  const TiXmlElement *element = node->ToElement();
+  const TiXmlElement* element = node->ToElement();
   
   // Establish new base name of this node
-  string basename = root+"/"+node->ValueStr();
+  string basename = root + "/" + node->ValueStr();
   if(element->Attribute("name")){
-    basename = basename+"::"+element->Attribute("name");
+    basename = basename + "::" + element->Attribute("name");
   }
 
   // Ensure this path has been added
   OptionManager::Option* child = create_child(basename);
   if(child == NULL){
-    cerr << "ERROR: Unexpected failure when creating child element\n";
+    cerr << "ERROR: Unexpected failure when creating child element" << endl;
     exit(-1);
   }
 
   // Store node attributes
-  for(const TiXmlAttribute *att=element->FirstAttribute(); att; att=att->Next()){
-    string att_name(basename+"/"+att->Name());
+  for(const TiXmlAttribute *att = element->FirstAttribute();att;att = att->Next()){
+    string att_name(basename + "/" + att->Name());
     set_attribute(att_name, att->ValueStr());
   }
 
   // Loop through all child elements
-  for(const TiXmlNode *cnode=node->FirstChild(); cnode; cnode=cnode->NextSibling()){
+  for(const TiXmlNode* cnode = node->FirstChild();cnode;cnode = cnode->NextSibling()){
     switch(cnode->Type()){
       case(TiXmlNode::ELEMENT):
         break;
@@ -1499,63 +1362,67 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
       continue;
     }
     
-    const TiXmlElement *celement = cnode->ToElement();      
+    const TiXmlElement* celement = cnode->ToElement();      
         
-    if(cnode->ValueStr()==string("integer_value")){
-      // Tokenise the data stored and convert to integers
+    if(cnode->ValueStr() == string("integer_value")){
+      // Tokenise the data stored and convert to ints
       vector<string> tokens;
       tokenize(cnode->FirstChild()->ValueStr(), tokens);
       
       // Find shape and rank
       int rank;
       vector<int> shape(2);
-      istringstream(celement->Attribute("rank"))>>rank;
-      if(rank==1){
-        // istringstream(celement->Attribute("shape"))>>shape[0];
-        shape[0] = tokens.size();
-      }else if(rank==2){
-        istringstream(celement->Attribute("shape"))>>shape[0]>>shape[1];
+      istringstream(celement->Attribute("rank")) >> rank;
+      if(rank == 0){
+        shape[0] = -1;  shape[1] = -1;
+      }else if(rank == 1){
+        shape[0] = tokens.size();  shape[1] = -1;
+      }else if(rank == 2){
+        istringstream(celement->Attribute("shape")) >> shape[0] >> shape[1];
       }
       
       vector<int> val;
       val.resize(tokens.size());
-      for(size_t i=0;i<tokens.size();i++)
-        istringstream(tokens[i])>>val[i];
+      for(size_t i = 0;i<tokens.size();i++){
+        istringstream(tokens[i]) >> val[i];
+      }
       
-      set_option(basename+"/__value", val, rank, shape);
-      for(const TiXmlAttribute *att=celement->FirstAttribute(); att; att=att->Next()){
-        string att_name(basename+"/__value/"+att->Name());
+      set_option(basename + "/__value", val, rank, shape);
+      for(const TiXmlAttribute* att = celement->FirstAttribute();att;att = att->Next()){
+        string att_name(basename + "/__value/" + att->Name());
         set_attribute(att_name, att->ValueStr());
       }
-    }else if(cnode->ValueStr()==string("real_value")){
-      // Tokenise the data stored and convert to integers
+    }else if(cnode->ValueStr() == string("real_value")){
+      // Tokenise the data stored and convert to doubles
       vector<string> tokens;
       tokenize(cnode->FirstChild()->ValueStr(), tokens);
       
       // Find shape and rank
       int rank;
       vector<int> shape(2);
-      istringstream(celement->Attribute("rank"))>>rank;
-      if(rank==1){
-        shape[0] = tokens.size();
-      }else if(rank==2){
-        istringstream(celement->Attribute("shape"))>>shape[0]>>shape[1];
+      istringstream(celement->Attribute("rank")) >> rank;
+      if(rank == 0){
+        shape[0] = -1;  shape[1] = -1;
+      }else if(rank == 1){
+        shape[0] = tokens.size();  shape[1] = -1;
+      }else if(rank == 2){
+        istringstream(celement->Attribute("shape")) >> shape[0] >> shape[1];
       }
             
       vector<double> val;
       val.resize(tokens.size());
-      for(size_t i=0;i<tokens.size();i++)
-        istringstream(tokens[i])>>val[i];
+      for(size_t i = 0;i<tokens.size();i++)
+        istringstream(tokens[i]) >> val[i];
             
-      set_option(basename+"/__value", val, rank, shape);
-      for(const TiXmlAttribute *att=celement->FirstAttribute(); att; att=att->Next()){
-        string att_name(basename+"/__value/"+att->Name());
+      set_option(basename + "/__value", val, rank, shape);
+      for(const TiXmlAttribute* att=celement->FirstAttribute();att;att = att->Next()){
+        string att_name(basename + "/__value/"+att->Name());
         set_attribute(att_name, att->ValueStr());
       }
-    }else if(cnode->ValueStr()==string("string_value")){
-      set_option(basename+"/__value", cnode->FirstChild()->ValueStr());
-      for(const TiXmlAttribute *att=celement->FirstAttribute(); att; att=att->Next()){
-        string att_name(basename+"/__value/"+att->Name());
+    }else if(cnode->ValueStr() == string("string_value")){
+      set_option(basename + "/__value", cnode->FirstChild()->ValueStr());
+      for(const TiXmlAttribute* att = celement->FirstAttribute();att;att = att->Next()){
+        string att_name(basename + "/__value/" + att->Name());
         set_attribute(att_name, att->ValueStr());
       }
     }else{
@@ -1564,11 +1431,12 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
   }
 }
 
-/**  Convert this element into a TiXmlElement.
-  */
 TiXmlElement* OptionManager::Option::to_element() const{
-  if(verbose){
-    cout << "TiXmlElement* to_element(void) const\n";
+  if(verbose)
+    cout << "TiXmlElement* OptionManager::Option:to_element(void) const\n";
+  
+  if(is_attribute){
+    cerr << "WARNING: Converting an attribute to an element" << endl;
   }
 
   // Create new element
@@ -1608,7 +1476,7 @@ TiXmlElement* OptionManager::Option::to_element() const{
             child_ele->SetValue("string_value");
             break;
           default:
-            cerr << "ERROR: Invalid option type\n";
+            cerr << "ERROR: Invalid option type" << endl;
             exit(-1);
          }
       }
@@ -1617,6 +1485,126 @@ TiXmlElement* OptionManager::Option::to_element() const{
     }
   }
   return ele;
+}
+
+void OptionManager::Option::tokenize(const string& str, vector<string>& tokens, const string& delimiters) const{
+  if(verbose)
+    cout << "void OptionManager::Option::tokenize(const string& str = " << str << ", vector<string>& tokens, const string& delimiters = " << delimiters << ")\n";
+
+  tokens.clear();
+  
+  // Skip delimiters at beginning.
+  string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  
+  // Find first "non-delimiter".
+  string::size_type pos     = str.find_first_of(delimiters, lastPos);
+  
+  while (string::npos != pos || string::npos != lastPos){
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+  
+  return;
+}
+
+void OptionManager::Option::split_name(const string in, string& name, string& branch) const{
+  if(verbose)
+    cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, string& branch) const\n";
+ 
+  name = "";
+  branch = "";
+  
+  string valid_chars("/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
+  string fullname = in.substr(0, min(in.size(), in.find_first_not_of(valid_chars)));
+ 
+  // Skip delimiters at beginning.
+  string::size_type lastPos = fullname.find_first_not_of("/", 0);
+  if(lastPos == string::npos){
+    return;
+  }
+  
+  // Find next delimiter
+  string::size_type pos = fullname.find_first_of("/", lastPos);
+  if(pos == string::npos){
+    name = fullname.substr(lastPos, fullname.size() - lastPos);
+  }else{
+    name = fullname.substr(lastPos, pos - lastPos);
+    branch = fullname.substr(pos, fullname.size()-pos);
+  }
+
+  return;  
+}
+
+void OptionManager::Option::split_name(const string in, string& name, int& index, string& branch) const{
+  if(verbose)
+    cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, int& index, string& branch) const\n";
+  
+  index = -1;
+  split_name(in, name, branch);
+  
+  // Extract the index from the name if necessary
+  string::size_type pos = name.find_first_of("[", 0);
+  string::size_type lastPos = name.find_first_of("]", 0);
+  if((lastPos-pos) > 0){
+    istringstream(name.substr(pos + 1, lastPos - 1))>>index;
+    name = name.substr(0, pos);
+  }
+  
+  return;
+}
+
+void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{
+  if(verbose)
+    cout << "vvoid OptionManager::Option::split_node_name(string& node_name, string& name_attr) const\n";
+  
+  string::size_type firstPos = this->node_name.rfind("::");
+  if(firstPos == string::npos or firstPos == this->node_name.size() - 2){
+    node_name = this->node_name;
+    name_attr = "";
+  }else{
+    node_name = this->node_name.substr(0, firstPos);
+    name_attr = this->node_name.substr(firstPos + 2);
+  }
+  
+  return;
+}
+
+string OptionManager::Option::data_as_string() const{
+  if(verbose)
+    cout << "string OptionManager::Option::data_as_string(void) const\n";
+
+  stringstream data_as_string; 
+  switch(option_type()){
+    case(SPUD_DOUBLE):
+      for(unsigned int i = 0;i < data_double.size();i++){
+        data_as_string << data_double[i];
+        if(i < data_double.size() - 1){
+          data_as_string << " ";
+        }
+      }
+      return data_as_string.str();
+    case(SPUD_INT):
+      for(unsigned int i = 0;i < data_int.size();i++){
+        data_as_string << data_int[i];
+        if(i < data_int.size() - 1){
+          data_as_string << " ";
+        }
+      }
+      return data_as_string.str();
+    case(SPUD_NONE):
+      return "";
+    case(SPUD_STRING):
+      return data_string;
+    default:
+      cerr << "ERROR: Invalid option type" << endl;
+      exit(-1);
+  }
 }
 
 // END OF OptionManager::Option CLASS METHODS
