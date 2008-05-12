@@ -82,9 +82,9 @@ module spud
       &  set_option_integer_tensor, &
       &  set_option_character
   end interface
-    
-  interface 
-    !! C interfaces
+  
+  !! C interfaces
+  interface  
     subroutine spud_load_options(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
@@ -223,7 +223,7 @@ contains
     
     logical :: have_option
     
-    have_option = (spud_have_option(key, len_trim(key)) == 1)
+    have_option = (spud_have_option(key, len_trim(key)) /= 0)
 
   end function have_option
   
@@ -287,6 +287,10 @@ contains
       val = default
     else
       call check_option(key, 0, SPUD_REAL, (/-1, -1/), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -308,6 +312,10 @@ contains
       val = default
     else
       call check_option(key, 1, SPUD_REAL, (/size(val), -1/), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -328,7 +336,11 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, 2, SPUD_REAL, shape(val), stat)
+      call check_option(key, 2, SPUD_REAL, shape(val), lstat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -350,6 +362,10 @@ contains
       val = default
     else
       call check_option(key, 0, SPUD_INTEGER, (/-1, -1/), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -371,6 +387,10 @@ contains
       val = default
     else
       call check_option(key, 1, SPUD_INTEGER, (/size(val), -1/), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -392,6 +412,10 @@ contains
       val = default
     else
       call check_option(key, 2, SPUD_INTEGER, shape(val), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lstat = spud_get_option(key, len_trim(key), val)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
@@ -414,6 +438,10 @@ contains
       val = trim(default)
     else
       call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
       lshape = option_shape(key, stat)
       if(lshape(1) > len(val)) then
         call option_error(key, SPUD_SHAPE_ERROR, stat)
@@ -641,6 +669,7 @@ contains
         end if
       end do
     end if
+    
   end subroutine check_option
   
 end module spud
