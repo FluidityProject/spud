@@ -411,7 +411,7 @@ contains
     integer, dimension(2) :: lshape
     
     if(.not. have_option(key) .and. present(default)) then
-      val = default
+      val = trim(default)
     else
       call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), stat)
       lshape = option_shape(key, stat)

@@ -29,11 +29,7 @@
 #ifndef CSPUD_H
 #define CSPUD_H
 
-//#include "confdefs.h"
-
-#ifndef F77_FUNC
-#define F77_FUNC(name, NAME) name ## _
-#endif
+#include "confdefs.h"
 
 #define spud_load_options F77_FUNC(spud_load_options, SPUD_LOAD_OPTIONS)
 #define spud_write_options F77_FUNC(spud_write_options, SPUD_WRITE_OPTIONS)

@@ -228,7 +228,6 @@ namespace Spud{
           logical_t set_is_attribute(const logical_t& is_attribute);
           int set_attribute(std::string, std::string);
           
-          
           int delete_option(std::string);
 
           void verbose_on();
