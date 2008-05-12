@@ -136,13 +136,14 @@ namespace Spud{
 
           /**
             * Read from an XML file with the given filename.
-            * Sets the name of this element to be that of the root element in the
-            * supplied XML file, and adds children to this element corresponding
-            * to the data in the XML file.
+            * Sets the name of this element to be that of the root element in
+            * the supplied XML file, and adds children to this element
+            * corresponding to the data in the XML file.
             */
           void load_options(const std::string& filename);        
           /**
-            * Write out this element and all of its children to an XML file with the supplied filename.
+            * Write out this element and all of its children to an XML file
+            * with the supplied filename.
             */
           void write_options(const std::string& filename) const;
 
@@ -154,9 +155,10 @@ namespace Spud{
             * Get the attribute status for this element.
             */
           logical_t get_is_attribute() const;
-          
+
           /**
-            * Generate a list containing the names of the children of this element.
+            * Generate a list containing the names of the children of the
+            * element with the supplied key.
             */
           void list_children(const std::string& key, std::deque< std::string >& kids) const;
 
@@ -167,55 +169,132 @@ namespace Spud{
           const Option* get_child(const std::string& key) const;
           /**
             * Get the child of this element at the supplied key.
-            * Non-const version - checks that the child exists, and if it does finds it with create_child.
+            * Non-const version - checks that the child exists, and if it does
+            * finds it with create_child.
             */
           Option* get_child(const std::string& key);
-
-          int get_option(std::vector<logical_t>&) const;
-          int get_option(std::vector<double>&) const;
-          int get_option(std::vector<int>&) const;
-          int get_option(std::string&) const;
-
-          int get_option(std::string, std::vector<logical_t>&) const;
-          int get_option(std::string, std::vector<double>&) const;
-          int get_option(std::string, std::vector<int>&) const;
-          int get_option(std::string, std::string&) const;
           
-          int get_option_count(std::string) const;
-
-          size_t get_option_rank() const;
-          void get_option_shape(int *) const;
-          size_t get_option_size() const;
-          OptionType get_option_type() const;
-
-          logical_t have_option(std::string) const;
+          /** 
+            * Get the number of elements at the supplied key.
+            * Searches un-named elements first, and if this is zero searches
+            * (from this highest element in the tree first) named elements.
+            */
+          int option_count(const std::string& key) const;
           
-          void print(const std::string& prefix = "") const;
+          /**
+            * Test if an element exists at the supplied key.
+            */
+          logical_t have_option(const std::string& key) const;
           
-          int add_option(std::string);
+          /**
+            * Get the type of the data in this element, or the __value child if
+            * it exists.
+            */
+          OptionType option_type() const;
+          /**
+            * Get the rank of the data in this element, or the __value child if
+            * it exists.
+            */
+          size_t option_rank() const;
+          /**
+            * Get the shape of the data in this element, or the __value child
+            * if it exists.
+            */
+          std::vector<int> option_shape() const;
 
-          int set_option(int, const int*, std::vector<logical_t>&);
-          int set_option(std::string, int, const int *, std::vector<logical_t>&);
+          /** 
+            * Get the double data from this element, or from the __value child
+            * if it exists.
+            */
+          OptionError get_option(std::vector<double>& val) const;
+          /** 
+            * Get the int data from this element, or from the __value child
+            * if it exists.
+            */
+          OptionError get_option(std::vector<int>& val) const;
+          /** 
+            * Get the string data from this element, or from the __value child
+            * if it exists.
+            */
+          OptionError get_option(std::string& val) const;
+
+          /** 
+            * Get the double data from the supplied key.
+            */
+          OptionError get_option(const std::string& key, std::vector<double>& val) const;
+          /** 
+            * Get the int data from the supplied key.
+            */
+          OptionError get_option(const std::string& key, std::vector<int>& val) const;
+
+          /**
+            * Get the string data from the supplied key.
+            */
+          OptionError get_option(const std::string& key, std::string& val) const;
           
-          int set_option(int, const int*, std::vector<double>&);
-          int set_option(std::string, int, const int *, std::vector<double>&);
-
-          int set_option(int, const int*, std::vector<int>&);
-          int set_option(std::string, int, const int*, std::vector<int>&);
-
-          int set_option(std::string);
-          int set_option(std::string, std::string);
+          /** 
+            * Find or add a new element at the supplied key.
+            */
+          OptionError add_option(const std::string& key);
+          
+          /** 
+            * Set the data in the element, or in the __value child if it
+            * exists, with the supplied double data.
+            */
+          OptionError set_option(const std::vector<double>& val, const int& rank, const std::vector<int>& shape);
+          /** 
+            * Set the data in the element, or in the __value child if it
+            * exists, with the supplied int data.
+            */
+          OptionError set_option(const std::vector<int>& val, const int& rank, const std::vector<int>& shape);
+          /** 
+            * Set the data in the element, or in the __value child if it
+            * exists, with the supplied string data.
+            */
+          OptionError set_option(const std::string& val);
+          
+          /** 
+            * Set the data at the supplied key with the supplied double data.
+            */
+          OptionError set_option(const std::string& key, const std::vector<double>& val, const int& rank, const std::vector<int>& shape);
+          /** 
+            * Set the data at the supplied key with the supplied int data.
+            */
+          OptionError set_option(const std::string& key, const std::vector<int>& val, const int& rank, const std::vector<int>& shape);
+          /** 
+            * Set the data at the supplied key with the supplied string data.
+            */
+          OptionError set_option(const std::string& key, const std::string& val);
           
           /** 
             * Attempt to set the attribute status for this element.
-            * Only elements with string data and no children may be marked as attributes.
+            * Only elements with string data and no children may be marked as
+            * attributes.
             */
           logical_t set_is_attribute(const logical_t& is_attribute);
-          int set_attribute(std::string, std::string);
+          /** 
+            * Set the data at the supplied key with the supplied string data,
+            * and mark the element as an attribute.
+            */
+          OptionError set_attribute(const std::string& key, const std::string& val);
           
-          int delete_option(std::string);
+          /** 
+            * Delete the element at the supplied key.
+            */
+          OptionError delete_option(const std::string& key);
+          
+          /** 
+            * Print this element to standard output.
+            */
+          void print(const std::string& prefix = "") const;
 
+          /** 
+            * Turn on verbosity for this element (used for debugging only).
+            */
           void verbose_on();
+          /** 
+            * Turn off verbosity for this element.
+            */
           void verbose_off();
 
         private:
@@ -231,8 +310,15 @@ namespace Spud{
           
           Option* create_child(std::string);
          
-          void set_rank_and_shape(int, const int*);
-          void set_option_type(OptionType option_type); 
+          /** 
+            * Set the rank and shape for the data in this element.
+            */
+          OptionError set_rank_and_shape(const int& rank, const std::vector<int>& shape);
+          /** 
+            * Set the option type for this element, and delete all data of other option types.
+            * If the new option type is not string type and this element is marked as an attribute, unmarks it.
+            */
+          OptionError set_option_type(const OptionType& option_type);
           
           void parse_node(std::string name, const TiXmlNode *);
           TiXmlElement* to_element() const;

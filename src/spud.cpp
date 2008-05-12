@@ -72,7 +72,7 @@ int OptionManager::number_of_children(const string& key){
 }
 
 int OptionManager::option_count(const string& key){
-  return manager.options->get_option_count(key);
+  return manager.options->option_count(key);
 }
 
 logical_t OptionManager::have_option(const string& key){
@@ -85,7 +85,7 @@ OptionError OptionManager::get_option_type(const string& key, OptionType& type){
     return SPUD_KEY_ERROR;
   }
   
-  type = child->get_option_type();
+  type = child->option_type();
   
   return SPUD_NO_ERROR;
 }
@@ -96,7 +96,7 @@ OptionError OptionManager::get_option_rank(const string& key, int& rank){
     return SPUD_KEY_ERROR;
   }
   
-  rank = child->get_option_rank();
+  rank = child->option_rank();
   
   return SPUD_NO_ERROR;
 }
@@ -107,19 +107,7 @@ OptionError OptionManager::get_option_shape(const string& key, vector<int>& shap
     return SPUD_KEY_ERROR;
   }
   
-  int shape_handle[2];
-  child->get_option_shape(shape_handle);
-
-  int rank;
-  OptionError rank_err = get_option_rank(key, rank);
-  if(rank_err != SPUD_NO_ERROR){
-    return rank_err;
-  }
-  
-  shape.clear();
-  for(int i = 0;i < rank;i++){
-    shape.push_back(shape_handle[i]);
-  }
+  shape = child->option_shape();
 
   return SPUD_NO_ERROR;
 }
@@ -131,9 +119,9 @@ OptionError OptionManager::get_option(const string& key, double& option){
   }
 
   vector<double> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }else if(option_handle.size() != 1){
     return SPUD_RANK_ERROR;
   }
@@ -159,9 +147,9 @@ OptionError OptionManager::get_option(const string& key, vector<double>& option)
   }
 
   vector<double> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }
   
   option = option_handle;
@@ -191,9 +179,9 @@ OptionError OptionManager::get_option(const string& key, vector< vector<double> 
   }
   
   vector<double> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }
   
   option.clear();
@@ -223,9 +211,9 @@ OptionError OptionManager::get_option(const string& key, int& option){
   }
 
   vector<int> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }else if(option_handle.size() != 1){
     return SPUD_RANK_ERROR;
   }
@@ -251,9 +239,9 @@ OptionError OptionManager::get_option(const string& key, vector<int>& option){
   }
 
   vector<int> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }
   
   option = option_handle;
@@ -283,9 +271,9 @@ OptionError OptionManager::get_option(const string& key, vector< vector<int> >& 
   }
   
   vector<int> option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }
   
   option.clear();
@@ -315,9 +303,9 @@ OptionError OptionManager::get_option(const string& key, string& option){
   }
   
   string option_handle;
-  int get_ret = manager.options->get_option(key, option_handle);
-  if(get_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError get_err = manager.options->get_option(key, option_handle);
+  if(get_err != SPUD_NO_ERROR){
+    return get_err;
   }
   
   option = option_handle;
@@ -337,9 +325,9 @@ OptionError OptionManager::get_option(const string& key, string& option, const s
 OptionError OptionManager::add_option(const string& key){
   logical_t new_key = !have_option(key);
   
-  int add_ret = manager.options->add_option(key);
-  if(add_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError add_err = manager.options->add_option(key);
+  if(add_err != SPUD_NO_ERROR){
+    return add_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -352,11 +340,11 @@ OptionError OptionManager::set_option(const string& key, const double& option){
   
   vector<double> option_handle;
   option_handle.push_back(option);
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  int set_ret = manager.options->set_option(key, 0, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 0, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -368,11 +356,11 @@ OptionError OptionManager::set_option(const string& key, const vector<double>& o
   logical_t new_key = !have_option(key);
   
   vector<double> option_handle = option;
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = option.size();  shape[1] = -1;
-  int set_ret = manager.options->set_option(key, 1, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -392,16 +380,16 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<do
       option_handle.push_back(option[i][j]);
     }
   }
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = option.size();
   if(option.size() == 0){
     shape[1] = 0;
   }else{
     shape[1] = option[0].size();
   }
-  int set_ret = manager.options->set_option(key, 1, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -414,11 +402,11 @@ OptionError OptionManager::set_option(const string& key, const int& option){
   
   vector<int> option_handle;
   option_handle.push_back(option);
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  int set_ret = manager.options->set_option(key, 0, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 0, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -430,11 +418,11 @@ OptionError OptionManager::set_option(const string& key, const vector<int>& opti
   logical_t new_key = !have_option(key);
   
   vector<int> option_handle = option;
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  int set_ret = manager.options->set_option(key, 1, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -454,16 +442,16 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<in
       option_handle.push_back(option[i][j]);
     }
   }
-  int shape[2];
+  vector<int> shape(2);
   shape[0] = option.size();
   if(option.size() == 0){
     shape[1] = 0;
   }else{
     shape[1] = option[0].size();
   }
-  int set_ret = manager.options->set_option(key, 2, shape, option_handle);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option_handle, 2, shape);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
@@ -472,9 +460,9 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<in
 }
 
 OptionError OptionManager::set_option(const string& key, const string& option){
-  int set_ret = manager.options->set_option(key, option);
-  if(set_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError set_err = manager.options->set_option(key, option);
+  if(set_err != SPUD_NO_ERROR){
+    return set_err;
   }
   
   return SPUD_NO_ERROR;
@@ -499,9 +487,9 @@ OptionError OptionManager::set_option_attribute(const string& key, const string&
 }
       
 OptionError OptionManager::delete_option(const string& key){
-  int del_ret = manager.options->delete_option(key);
-  if(del_ret != 0){
-    return SPUD_KEY_ERROR;
+  OptionError del_err = manager.options->delete_option(key);
+  if(del_err != SPUD_NO_ERROR){
+    return del_err;
   }
   
   return SPUD_NO_ERROR;
@@ -590,7 +578,7 @@ OptionError OptionManager::check_option(const string& key, const OptionType& typ
 
 OptionManager::Option::Option(){
   verbose_off();
-  set_rank_and_shape(-1, NULL);
+  set_rank_and_shape(-1, vector<int>());
   is_attribute = false;
   
   return;
@@ -605,7 +593,7 @@ OptionManager::Option::Option(const OptionManager::Option& inOption){
 OptionManager::Option::Option(string name){
   verbose_off();
   node_name = name;
-  set_rank_and_shape(-1, NULL);
+  set_rank_and_shape(-1, vector<int>());
   is_attribute = false;
   
   return;
@@ -626,7 +614,9 @@ const OptionManager::Option& OptionManager::Option::operator=(const OptionManage
   data_double = inOption.data_double;
   data_int = inOption.data_int;
   data_string = inOption.data_string;
-  set_rank_and_shape(inOption.rank, inOption.shape);
+  vector<int> shape(2);
+  shape[0] = inOption.shape[0];  shape[1] = inOption.shape[1];
+  set_rank_and_shape(inOption.rank, shape);
   
   is_attribute = inOption.is_attribute;
 
@@ -691,13 +681,13 @@ string OptionManager::Option::get_name() const{
 
 logical_t OptionManager::Option::get_is_attribute() const{
   if(verbose)
-    cout << "void OptionManager::Option::get_is_attribute(void) const\n";
+    cout << "logical_t OptionManager::Option::get_is_attribute(void) const\n";
   return is_attribute;
 }
 
 void OptionManager::Option::list_children(const string& name, deque<string>& kids) const{
   if(verbose)
-    cout << "void list_children(const string& name, deque<string>& kids) const\n";
+    cout << "void list_children(const string& name = " << name << ", deque<string>& kids) const\n";
   
   kids.clear();
 
@@ -774,52 +764,13 @@ OptionManager::Option* OptionManager::Option::get_child(const string& key){
   }
 }
 
-/** 
- * Get the double data from the supplied key.
- */
-int OptionManager::Option::get_option(string str, vector<double>& data) const{
-  const OptionManager::Option* child = get_child(str);
-  if(child == NULL){
-    return -1;
-  }else{
-    return child->get_option(data);
-  }
-}
-
-/** 
- * Get the integer data from the supplied key.
- */
-int OptionManager::Option::get_option(string str, vector<int>& data) const{
-  const OptionManager::Option* child = get_child(str);
-  if(child == NULL){
-    return -1;
-  }else{
-    return child->get_option(data);
-  }
-}
-
-/**
- * Get the string data from the supplied key.
- */
-int OptionManager::Option::get_option(string str, string& data) const{
-  const OptionManager::Option* child = get_child(str);
-  if(child == NULL){
-    return -1;
-  }else{
-    return child->get_option(data);
-  }
-}
-
-/** 
- * Get the number of elements at the supplied key. Searches un-named elements first, and if this is zero searches (from this highest element in the tree first) named elements.
- */
-int OptionManager::Option::get_option_count(string str) const{
+int OptionManager::Option::option_count(const string& key) const{
   if(verbose)
-    cout<<"int OptionManager::Option::get_option_count("<<str<<") const\n";
+    cout <<" int OptionManager::Option::option_count(const string& key = " << key << ") const\n";
   
   string name, branch;
   int index;
-  split_name(str, name, index, branch);
+  split_name(key, name, index, branch);
 
   if(name.empty()){
     return 0;
@@ -827,24 +778,25 @@ int OptionManager::Option::get_option_count(string str) const{
   
   if(!children.count(name)){
     // Apparently there is no such child but lets check for "name::*"
-    name = name+"::";
+    name += "::";
   }
 
-  int count=0, i=0;
-  for(multimap<string, OptionManager::Option>::const_iterator it=children.begin();it!=children.end(); it++){
-    if(it->first.compare(0, name.size(), name)==0){
-      if(index<0){
-        if(branch.empty())
+  int count = 0, i = 0;
+  for(multimap<string, OptionManager::Option>::const_iterator it = children.begin();it != children.end();it++){
+    if(it->first.compare(0, name.size(), name) == 0){
+      if(index < 0){
+        if(branch.empty()){
           count++;
-        else{
-          count+=it->second.get_option_count(branch);
+        }else{
+          count += it->second.option_count(branch);
         }
       }else{
-        if(i==index){
-          if(branch.empty())
+        if(i == index){
+          if(branch.empty()){
             count++;
-          else
-            count+=it->second.get_option_count(branch);
+          }else{
+            count += it->second.option_count(branch);
+          }
           break;
         }
         i++;
@@ -855,90 +807,23 @@ int OptionManager::Option::get_option_count(string str) const{
   return count;
 }
 
-/** 
- * Get the double data from this element. Tranparently seeks into __value sub-element if this exists.
- */
-int OptionManager::Option::get_option(vector<double>& data) const{
+logical_t OptionManager::Option::have_option(const string& key) const{
   if(verbose)
-    cout<<"const void* OptionManager::Option::get_option(vector<double>&) const\n";
+    cout << "logical_t OptionManager::Option::have_option(const string& key = " << key << ") const\n";
 
-  if(have_option("__value")){
-    return get_option("__value", data);
-  }else if(get_option_type() == SPUD_DOUBLE){
-    data = data_double;
-    return 0;
-  }
-
-  return -1;
-}
-
-/** 
- * Get the integer data from this element. Tranparently seeks into __value sub-element if this exists.
- */
-int OptionManager::Option::get_option(vector<int>& data) const{
-  if(verbose)
-    cout<<"const void* OptionManager::Option::get_option(vector<int>&) const\n";
-
-  if(have_option("__value")){
-    return get_option("__value", data);
-  }else if(get_option_type() == SPUD_INT){
-    data = data_int;
-    return 0;
-  }
-
-  return -1;  
-}
-
-/** 
- * Get the string data from this element. Tranparently seeks into __value sub-element if this exists.
- */
-int OptionManager::Option::get_option(string& data) const{
-  if(verbose)
-    cout<<"const void* OptionManager::Option::get_option(string&) const\n";
-
-  if(have_option("__value")){
-    return get_option("__value", data);
-  }else if(get_option_type() == SPUD_STRING){
-    data = data_string;
-    return 0;
-  }
-
-  return -1;
-}
-
-/**
- * Get the rank of the data in this element.
- */
-size_t OptionManager::Option::get_option_rank() const{
-  if(have_option("__value")){
-    return children.find("__value")->second.get_option_rank();
+  if(key == "/"){
+    return true;
   }else{
-    return rank;
+    return (get_child(key) != NULL);
   }
 }
 
-/**
- * Get the shape of the data in this element.
- */
-void OptionManager::Option::get_option_shape(int *shape) const{
-  if(have_option("__value")){
-    children.find("__value")->second.get_option_shape(shape);
-    return;
-  }else{  
-    shape[0] = this->shape[0];
-    shape[1] = this->shape[1];
-  }
-}
-
-/**
- * Get the type of the data in this element.
- */
-OptionType OptionManager::Option::get_option_type() const{
+OptionType OptionManager::Option::option_type() const{
   if(verbose)
-    cout<<"OptionType OptionManager::Option::get_option_type() const\n";
+    cout << "OptionType FLOption::option_type(void) const\n";
 
   if(have_option("__value")){
-    return children.find("__value")->second.get_option_type();
+    return children.find("__value")->second.option_type();
   }
 
   if(!data_double.empty()){
@@ -952,211 +837,323 @@ OptionType OptionManager::Option::get_option_type() const{
   }
 }
 
-/**
- * Test if an element exists at the supplied key.
- */
-logical_t OptionManager::Option::have_option(string str) const{
+
+size_t OptionManager::Option::option_rank() const{
   if(verbose)
-    cout<<"bool OptionManager::Option::have_option(\""<<str<<"\") const\n";
+    cout << "size_t FLOption::option_rank(void) const\n";
 
-  if(str=="/")
-    return true;
-
-  return (get_child(str) != NULL);
+  if(have_option("__value")){
+    return children.find("__value")->second.option_rank();
+  }else{
+    return rank;
+  }
 }
 
-/**  Print this element to standard output.
-  */
-void OptionManager::Option::print(const string& prefix) const{
-  cout<<prefix<<node_name;
-  string lprefix = prefix + " ";
-  
-  if(children.empty()){
-    cout<<": ";
-    if(!data_double.empty())
-      for(vector<double>::const_iterator i=data_double.begin();i!=data_double.end();++i)
-        cout<<*i<<" ";
-    else if(!data_int.empty())
-      for(vector<int>::const_iterator i=data_int.begin();i!=data_int.end();++i)
-        cout<<*i<<" ";
-    else if(!data_string.empty())
-      cout<<data_string;
-    else
-      cout<<"NULL";
-    cout<<endl;
+vector<int> OptionManager::Option::option_shape() const{
+  if(verbose)
+    cout << "vector<int> FLOption::option_shape(void) const\n";
+
+  if(have_option("__value")){
+    return children.find("__value")->second.option_shape();
   }else{
-    cout<<"/"<<endl;
+    vector<int> shape(2);
+    shape[0] = this->shape[0];
+    shape[1] = this->shape[1];
+    return shape;
+  }
+}
+
+OptionError OptionManager::Option::get_option(vector<double>& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(vector<double>& val) const\n";
+
+  if(have_option("__value")){
+    return get_option("__value", val);
+  }else if(option_type() != SPUD_DOUBLE){
+    return SPUD_TYPE_ERROR;
+  }else{
+    val = data_double;
+    return SPUD_NO_ERROR;
+  }
+}
+
+OptionError OptionManager::Option::get_option(vector<int>& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(vector<int>& val) const\n";
+
+  if(have_option("__value")){
+    return get_option("__value", val);
+  }else if(option_type() != SPUD_INT){
+    return SPUD_TYPE_ERROR;
+  }else{
+    val = data_int;
+    return SPUD_NO_ERROR;
+  }
+}
+
+OptionError OptionManager::Option::get_option(string& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(string& val = " << val << ") const\n";
+
+  if(have_option("__value")){
+    return get_option("__value", val);
+  }else if(option_type() != SPUD_STRING){
+    return SPUD_TYPE_ERROR;
+  }else{
+    val = data_string;
+    return SPUD_NO_ERROR;
+  }
+}
+
+OptionError OptionManager::Option::get_option(const string& key, vector<double>& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", vector<double>& val)\n";
+
+  const OptionManager::Option* child = get_child(key);
+  if(child == NULL){
+    return SPUD_KEY_ERROR;
+  }else{
+    return child->get_option(val);
+  }
+}
+
+OptionError OptionManager::Option::get_option(const string& key, vector<int>& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", vector<int>& val)\n";
     
-    if(!data_double.empty()){
-      cout<<lprefix<<"<value>: ";
-      for(vector<double>::const_iterator i=data_double.begin();i!=data_double.end();++i)
-        cout<<*i<<" ";
-      cout<<endl;
-    }else if(!data_int.empty()){
-      cout<<lprefix<<"<value>: ";
-      for(vector<int>::const_iterator i=data_int.begin();i!=data_int.end();++i)
-        cout<<*i<<" ";
-      cout<<endl;
-    }else if(!data_string.empty()){
-      cout<<lprefix<<"<value>: "<<data_string;
-      cout<<endl;
+  const OptionManager::Option* child = get_child(key);
+  if(child == NULL){
+    return SPUD_KEY_ERROR;
+  }else{
+    return child->get_option(val);
+  }
+}
+
+OptionError OptionManager::Option::get_option(const string& key, string& val) const{
+  if(verbose)
+    cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", string& val = " << val << ")\n";
+
+  const OptionManager::Option* child = get_child(key);
+  if(child == NULL){
+    return SPUD_KEY_ERROR;
+  }else{
+    return child->get_option(val);
+  }
+}
+
+OptionError OptionManager::Option::add_option(const string& key){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::add_option(const string& key = " << key << ")\n";
+
+  return create_child(key) == NULL ? SPUD_KEY_ERROR : SPUD_NO_ERROR;
+}
+
+OptionError OptionManager::Option::set_option(const std::vector<double>& val, const int& rank, const std::vector<int>& shape){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::set_option(const std::vector<double>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+
+  if(have_option("__value")){
+    return set_option("__value", val, rank, shape);
+  }else{  
+    data_double = val;
+    OptionError set_err = set_option_type(SPUD_DOUBLE);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
     }
-    for(map<string, OptionManager::Option>::const_iterator i=children.begin(); i!=children.end(); ++i)
-      i->second.print(lprefix + " ");
-  }
-  return;
-}
-
-/**  Find or add a new element at the supplied key.
-  */
-int OptionManager::Option::add_option(string str){
-  return create_child(str) == NULL ? 1 : 0;
-}
-
-/**  Set the data in the element with the supplied double data. Transparently sets the data of a __value sub-element if this exists.
-  */
-int OptionManager::Option::set_option(int rank, const int *shape, vector<double>& data){
-  if(have_option("__value")){
-    return set_option("__value", rank, shape, data);
-  }else{  
-    data_double = data;
-    set_option_type(SPUD_DOUBLE);
-    set_rank_and_shape(rank, shape);
-    return 0;
+    set_err = set_rank_and_shape(rank, shape);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    return SPUD_NO_ERROR;
   }
 }
 
-/**  Set the data at the supplied key with the supplied double data.
-  */
-int OptionManager::Option::set_option(string str, int rank, const int *shape, vector<double>& data){
-  OptionManager::Option* opt = create_child(str);
-    
-  if(opt == NULL){
-    return -1;
-  }else{
-    return opt->set_option(rank, shape, data);
-  }
-}
-
-/**  Set the data in the element with the supplied integer data. Transparently sets the data of a __value sub-element if this exists.
-  */
-int OptionManager::Option::set_option(int rank, const int *shape, vector<int>& data){
-  if(have_option("__value")){
-    return set_option("__value", rank, shape, data);
-  }else{  
-    data_int = data;
-    set_option_type(SPUD_INT);
-    set_rank_and_shape(rank, shape);
-    return 0;
-  }
-}
-
-/**  Set the data at the supplied key with the supplied integer data.
-  */
-int OptionManager::Option::set_option(string str, int rank, const int *shape, vector<int>& data){
-  OptionManager::Option* opt = create_child(str);
-  
-  if(opt == NULL){
-    return -1;
-  }else{
-    return opt->set_option(rank, shape, data);
-  }
-}
-
-/**  Set the data in the element with the supplied string data. Transparently sets the data of a __value sub-element if this exists.
-  */
-int OptionManager::Option::set_option(string data){
+OptionError OptionManager::Option::set_option(const std::vector<int>& val, const int& rank, const std::vector<int>& shape){
   if(verbose)
-    cout<<"void OptionManager::Option::set_option("<<data<<")\n";
+    cout << "OptionError OptionManager::Option::set_option(const std::vector<int>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
 
   if(have_option("__value")){
-    return set_option("__value", data);
+    return set_option("__value", val, rank, shape);
+  }else{  
+    data_int = val;
+    OptionError set_err = set_option_type(SPUD_INT);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    set_err = set_rank_and_shape(rank, shape);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    return SPUD_NO_ERROR;
+  }
+}
+
+OptionError OptionManager::Option::set_option(const std::string& val){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::set_option(const string& val = " << val << ")\n";
+
+  if(have_option("__value")){
+    return set_option("__value", val);
   }else{
-    data_string = data;
-    int rank = data.size();
-    set_option_type(SPUD_STRING);
-    set_rank_and_shape(1, &rank);
-    return 0;
+    data_string = val;
+    vector<int> shape(2);
+    shape[0] = val.size();  shape[1] = -1;
+    OptionError set_err = set_option_type(SPUD_STRING);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    set_err = set_rank_and_shape(1, shape);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    return SPUD_NO_ERROR;
   };
 }
 
-/**  Set the data at the supplied key with the supplied string data.
-  */
-int OptionManager::Option::set_option(string str, string data){
+OptionError OptionManager::Option::set_option(const std::string& key, const std::vector<double>& val, const int& rank, const std::vector<int>& shape){
   if(verbose)
-    cout<<"void OptionManager::Option::set_option("<<str<<", "<<data<<")\n";
+    cout << "OptionError OptionManager::Option::set_option(const std::string& key = " << key << ", const std::vector<double>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
 
-  OptionManager::Option* opt = create_child(str);
-    
+  OptionManager::Option* opt = create_child(key);
   if(opt == NULL){
-    return -1;
+    return SPUD_KEY_ERROR;
   }else{
-    return opt->set_option(data);
+    return opt->set_option(val, rank, shape);
   }
 }
 
-/**  Set the data of this element with the supplied string data, and mark this element as an attribute.
-  */
-int OptionManager::Option::set_attribute(string str, string data){
+OptionError OptionManager::Option::set_option(const std::string& key, const std::vector<int>& val, const int& rank, const std::vector<int>& shape){
   if(verbose)
-    cout << "int OptionManager::Option::set_attribute(" << str << ", " << data << ")\n";
-  
-  OptionManager::Option* opt = create_child(str);
-  
+    cout << "OptionError OptionManager::Option::set_option(const std::string& key = " << key << ", const std::vector<int>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+
+  OptionManager::Option* opt = create_child(key);
   if(opt == NULL){
-    return -1;
+    return SPUD_KEY_ERROR;
   }else{
-    int ret = opt->set_option(data);
-    opt->set_is_attribute(true);
-    return ret;
+    return opt->set_option(val, rank, shape);
+  }
+}
+
+OptionError OptionManager::Option::set_option(const string& key, const string& val){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const string& val = " << val <<")\n";
+
+  OptionManager::Option* opt = create_child(key);
+  if(opt == NULL){
+    return SPUD_KEY_ERROR;
+  }else{
+    return opt->set_option(val);
   }
 }
 
 logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
   if(verbose)
-    cout << "void OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
-  if(children.size() == 0 and get_option_type() == SPUD_STRING){
+    cout << "logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
+  if(children.size() == 0 and option_type() == SPUD_STRING){
     this->is_attribute = is_attribute;
   }
   
   return this->is_attribute;
 }
 
-/**  Delete the element at the supplied key.
-  */
-int OptionManager::Option::delete_option(string str){
+OptionError OptionManager::Option::set_attribute(const string& key, const string& val){
   if(verbose)
-    cout << "void OptionManager::Option::delete_option(" << str << ")\n";
+    cout << "OptionError OptionManager::Option::set_attribute(const string& key = " << key << ", const string& val = " << val << ")\n";
+  
+  OptionManager::Option* opt = create_child(key);
+  if(opt == NULL){
+    return SPUD_KEY_ERROR;
+  }else{
+    OptionError set_err = opt->set_option(val);
+    if(set_err != SPUD_NO_ERROR){
+      return set_err;
+    }
+    opt->set_is_attribute(true);
+    return SPUD_NO_ERROR;
+  }
+}
+
+
+OptionError OptionManager::Option::delete_option(const string& key){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::delete_option(const string& key = " << key << ")\n";
 
   string branch, name;
-  split_name(str, name, branch);
+  split_name(key, name, branch);
  
   OptionManager::Option* opt = get_child(name);
-  
   if(opt == NULL){
-    return -1;
+    return SPUD_KEY_ERROR;
   }else if(branch.empty()){
     for(multimap<string, OptionManager::Option>::iterator it = children.begin();it != children.end();it++){
       if(&it->second == opt){
         children.erase(it);
-        return 0;
+        return SPUD_NO_ERROR;
       }
     }
-    return -1;
+    return SPUD_KEY_ERROR;
   }else{
     return opt->delete_option(branch);
   }
 }
 
-/**  Turn on verbosity for this element (used for debugging only).
-  */
+void OptionManager::Option::print(const string& prefix) const{
+  cout << prefix << node_name;
+  string lprefix = prefix + " ";
+  
+  if(children.empty()){
+    cout << ": ";
+    if(!data_double.empty()){
+      for(vector<double>::const_iterator i = data_double.begin();i != data_double.end();++i){
+        cout << *i << " ";
+      }
+    }else if(!data_int.empty()){
+      for(vector<int>::const_iterator i=data_int.begin();i != data_int.end();++i){
+        cout << *i << " ";
+      }
+    }else if(!data_string.empty()){
+      cout << data_string;
+    }else{
+      cout << "NULL";
+    }
+    cout << endl;
+  }else{
+    cout << "/" << endl;
+    
+    if(!data_double.empty()){
+      cout << lprefix << "<value>: ";
+      for(vector<double>::const_iterator i = data_double.begin();i != data_double.end();++i){
+        cout << *i<< " ";
+      }
+      cout << endl;
+    }else if(!data_int.empty()){
+      cout << lprefix << "<value>: ";
+      for(vector<int>::const_iterator i=data_int.begin();i!=data_int.end();++i){
+        cout << *i << " ";
+      }
+      cout << endl;
+    }else if(!data_string.empty()){
+      cout << lprefix << "<value>: " << data_string;
+      cout << endl;
+    }
+    for(map<string, OptionManager::Option>::const_iterator i = children.begin();i!=children.end();++i){
+      i->second.print(lprefix + " ");
+    }
+  }
+  
+  return;
+}
+
 void OptionManager::Option::verbose_on(){
+  cout << "void OptionManager::Option::verbose_on(void)\n";
+
   verbose = true;
 }
 
-/**  Turn off verbosity for this element.
-  */
 void OptionManager::Option::verbose_off(){
+  if(verbose)
+    cout << "void OptionManager::Option::verbose_off(void)\n";
+
   verbose = false;
 }
 
@@ -1266,7 +1263,7 @@ string OptionManager::Option::data_as_string() const{
   }
 
   stringstream data_as_string; 
-  switch(get_option_type()){
+  switch(option_type()){
     case(SPUD_DOUBLE):
       for(unsigned int i = 0;i < data_double.size();i++){
         data_as_string << data_double[i];
@@ -1325,7 +1322,7 @@ OptionManager::Option* OptionManager::Option::create_child(string str){
       }
     }
     if(child == children.end()){
-      if(name == "__value" and get_option_type() != SPUD_NONE){
+      if(name == "__value" and option_type() != SPUD_NONE){
         cerr << "WARNING: Creating __value child for non null element - deleting parent data\n";
         set_option_type(SPUD_NONE);
       }
@@ -1360,13 +1357,18 @@ OptionManager::Option* OptionManager::Option::create_child(string str){
   }
 }
 
-/**  Set the rank and shape for the data in this element.
-  */
-void OptionManager::Option::set_rank_and_shape(int rank, const int* shape){
+OptionError OptionManager::Option::set_rank_and_shape(const int& rank, const vector<int>& shape){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::set_rank_and_shape(const int& rank = " << rank << ", const vector<int>& shape)\n";
+
+  if((rank == -1 and shape.size() != 0) or ((int)shape.size() != rank and (int)shape.size() != 2)){
+    return SPUD_SHAPE_ERROR;
+  }
+
   logical_t set_attrs = false;
   if(rank > 0){
-    OptionType option_type = get_option_type();
-    set_attrs = (option_type == SPUD_DOUBLE or option_type == SPUD_INT);
+    OptionType type = option_type();
+    set_attrs = (type == SPUD_DOUBLE or type == SPUD_INT);
   }
   switch(rank){
     case(-1):
@@ -1406,16 +1408,16 @@ void OptionManager::Option::set_rank_and_shape(int rank, const int* shape){
       }
       break;
     default:
-      cerr << "ERROR: Invalid option rank\n";
-      exit(-1);
+      return SPUD_RANK_ERROR;
   }
 
-  return;
+  return SPUD_NO_ERROR;
 }
 
-/**  Set the option type for this element, and delete all data of other option types. If the new option type is not string type and this element is marked as an attribute, unmarks it.
-  */
-void OptionManager::Option::set_option_type(OptionType option_type){
+OptionError OptionManager::Option::set_option_type(const OptionType& option_type){
+  if(verbose)
+    cout << "OptionError OptionManager::Option::set_option_type(const OptionType& option_type)\n";
+
   switch(option_type){
     case(SPUD_DOUBLE):
       data_int.clear();
@@ -1438,11 +1440,10 @@ void OptionManager::Option::set_option_type(OptionType option_type){
       data_int.clear();
       break;
     default:
-      cerr << "ERROR: Invalid option type\n";
-      exit(-1);
+      return SPUD_TYPE_ERROR;
   }
   
-  return;
+  return SPUD_NO_ERROR;
 }
 
 /**  Parses the supplied TiXmlNode and sets the data and and attribute status of this element appropriately.
@@ -1506,7 +1507,8 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
       tokenize(cnode->FirstChild()->ValueStr(), tokens);
       
       // Find shape and rank
-      int rank, shape[2];
+      int rank;
+      vector<int> shape(2);
       istringstream(celement->Attribute("rank"))>>rank;
       if(rank==1){
         // istringstream(celement->Attribute("shape"))>>shape[0];
@@ -1520,7 +1522,7 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
       for(size_t i=0;i<tokens.size();i++)
         istringstream(tokens[i])>>val[i];
       
-      set_option(basename+"/__value", rank, shape, val);
+      set_option(basename+"/__value", val, rank, shape);
       for(const TiXmlAttribute *att=celement->FirstAttribute(); att; att=att->Next()){
         string att_name(basename+"/__value/"+att->Name());
         set_attribute(att_name, att->ValueStr());
@@ -1531,7 +1533,8 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
       tokenize(cnode->FirstChild()->ValueStr(), tokens);
       
       // Find shape and rank
-      int rank, shape[2];
+      int rank;
+      vector<int> shape(2);
       istringstream(celement->Attribute("rank"))>>rank;
       if(rank==1){
         shape[0] = tokens.size();
@@ -1544,7 +1547,7 @@ void OptionManager::Option::parse_node(string root, const TiXmlNode *node){
       for(size_t i=0;i<tokens.size();i++)
         istringstream(tokens[i])>>val[i];
             
-      set_option(basename+"/__value", rank, shape, val);
+      set_option(basename+"/__value", val, rank, shape);
       for(const TiXmlAttribute *att=celement->FirstAttribute(); att; att=att->Next()){
         string att_name(basename+"/__value/"+att->Name());
         set_attribute(att_name, att->ValueStr());
@@ -1592,7 +1595,7 @@ TiXmlElement* OptionManager::Option::to_element() const{
       TiXmlElement* child_ele = iter->second.to_element();
       if(iter->second.node_name == "__value"){
         // Detect data sub-element
-        switch(iter->second.get_option_type()){
+        switch(iter->second.option_type()){
           case(SPUD_DOUBLE):
             child_ele->SetValue("real_value");
             break;

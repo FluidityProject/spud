@@ -644,6 +644,9 @@ contains
   end subroutine option_error
   
   subroutine check_option(key, type, rank, shape, stat)
+    !!< Check key existence, type, rank, and optionally shape, of the option
+    !!< with the supplied key
+  
     character(len = *), intent(in) :: key
     integer, intent(in) :: type
     integer, intent(in) :: rank
