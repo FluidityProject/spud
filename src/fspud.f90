@@ -660,7 +660,7 @@ contains
     else if(rank /= option_rank(key, stat)) then
       call option_error(key, SPUD_RANK_ERROR, stat)
       return
-    else if(present(shape))
+    else if(present(shape)) then
       lshape = option_shape(key, stat)
       do i = 1, rank
         if(shape(i) /= lshape(i)) then
