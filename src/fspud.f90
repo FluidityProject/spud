@@ -555,7 +555,7 @@ contains
     integer :: lstat
     
     lstat = spud_set_option_attribute(key, len_trim(key), val, len_trim(val))
-        if(lstat /= SPUD_NO_ERROR) then
+    if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if

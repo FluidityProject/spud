@@ -497,16 +497,6 @@ OptionError OptionManager::set_option_attribute(const string& key, const string&
   
   return SPUD_NO_ERROR;
 }
-
-logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
-  if(verbose)
-    cout << "void OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
-  if(children.size() == 0 and get_option_type() == SPUD_STRING){
-    this->is_attribute = is_attribute;
-  }
-  
-  return this->is_attribute;
-}
       
 OptionError OptionManager::delete_option(const string& key){
   int del_ret = manager.options->delete_option(key);

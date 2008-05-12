@@ -97,7 +97,7 @@ extern "C" {
     }
     
     shape[0] = -1;  shape[1] = -1;
-    for(size_t i = 0;i < shape.size();i++){
+    for(size_t i = 0;i < shape_handle.size();i++){
       shape[i] = shape_handle[i];
     }
     
