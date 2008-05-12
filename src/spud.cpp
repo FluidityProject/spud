@@ -1116,6 +1116,16 @@ int OptionManager::Option::set_attribute(string str, string data){
   }
 }
 
+logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
+  if(verbose)
+    cout << "void OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
+  if(children.size() == 0 and get_option_type() == SPUD_STRING){
+    this->is_attribute = is_attribute;
+  }
+  
+  return this->is_attribute;
+}
+
 /**  Delete the element at the supplied key.
   */
 int OptionManager::Option::delete_option(string str){

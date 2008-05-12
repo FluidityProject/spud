@@ -26,52 +26,57 @@
     USA
 */
 
-#ifndef SPUD_INTERFACES_H
-#define SPUD_INTERFACES_H
+#ifndef CSPUD_H
+#define CSPUD_H
 
-#include "confdefs.h"
+//#include "confdefs.h"
+
+#ifndef F77_FUNC
+#define F77_FUNC(name, NAME) name ## _
+#endif
+
+#define spud_load_options F77_FUNC(spud_load_options, SPUD_LOAD_OPTIONS)
+#define spud_write_options F77_FUNC(spud_write_options, SPUD_WRITE_OPTIONS)
+#define spud_get_child_name F77_FUNC(spud_get_child_name, SPUD_GET_CHILD_NAME)
+#define spud_get_number_of_children F77_FUNC(spud_get_number_of_children, SPUD_GET_NUMBER_OF_CHILDREN)
+#define spud_option_count F77_FUNC(spud_option_count, SPUD_OPTION_COUNT)
+#define spud_have_option F77_FUNC(spud_have_option, SPUD_HAVE_OPTION)
+#define spud_get_option_type F77_FUNC(spud_get_option_type, SPUD_GET_OPTION_TYPE)
+#define spud_get_option_rank F77_FUNC(spud_get_option_rank, SPUD_GET_OPTION_RANK)
+#define spud_get_option_shape F77_FUNC(spud_get_option_shape, SPUD_GET_OPTION_SHAPE)
+#define spud_get_option F77_FUNC(spud_get_option, SPUD_GET_OPTION)
+#define spud_add_option F77_FUNC(spud_add_option, SPUD_ADD_OPTION)
+#define spud_set_option F77_FUNC(spud_set_option, SPUD_SET_OPTION)
+#define spud_set_option_attribute F77_FUNC(spud_set_option_attribute, SPUD_SET_OPTION_ATTRIBUTE)
+#define spud_delete_option F77_FUNC(spud_delete_option, SPUD_DELETE_OPTION)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define cload_options F77_FUNC(cload_options, CLOAD_OPTIONS)
-  void cload_options(const char* key, const int* key_len);
-#define cwrite_options F77_FUNC(cwrite_options, CWRITE_OPTIONS)
-  void cwrite_options(const char* key, const int* key_len);
+  void spud_load_options(const char* key, const int* key_len);
+  void spud_write_options(const char* key, const int* key_len);
   
-#define cget_child_name F77_FUNC(cget_child_name, CGET_CHILD_NAME)
-  int cget_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
+  int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
   
-#define cget_number_of_children F77_FUNC(cget_number_of_children, CGET_NUMBER_OF_CHILDREN)
-  int cnumber_of_children(const char* key, const int* key_len);
+  int spud_number_of_children(const char* key, const int* key_len);
   
-#define coption_count F77_FUNC(coption_count, COPTION_COUNT)
-  int coption_count(const char* key, const int* key_len);
+  int spud_option_count(const char* key, const int* key_len);
   
-#define chave_option F77_FUNC(chave_option, CHAVE_OPTION)
-  int chave_option(const char* key, const int* key_len);
+  int spud_have_option(const char* key, const int* key_len);
   
-#define cget_option_type F77_FUNC(cget_option_type, GET_OPTION_TYPE)
-  int cget_option_type(const char* key, const int* key_len, int* type);
-#define cget_option_rank F77_FUNC(cget_option_rank, CGET_OPTION_RANK)
-  int cget_option_rank(const char* key, const int* key_len, int* rank);
-#define cget_option_shape F77_FUNC(cget_option_shape, CGET_OPTION_SHAPE)
-  int cget_option_shape(const char* key, const int* key_len, int* shape);
+  int spud_get_option_type(const char* key, const int* key_len, int* type);
+  int spud_get_option_rank(const char* key, const int* key_len, int* rank);
+  int spud_get_option_shape(const char* key, const int* key_len, int* shape);
   
-#define cget_option F77_FUNC(cget_option, CGET_OPTION)
-  int cget_option(const char* key, const int* key_len, void* val);
+  int spud_get_option(const char* key, const int* key_len, void* val);
   
-#define cadd_option F77_FUNC(cadd_option, CADD_OPTION)
-  int cadd_option(const char* key, const int* key_len);
+  int spud_add_option(const char* key, const int* key_len);
+  
+  int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
 
-#define cset_option_attribute F77_FUNC(cset_option_attribute, CSET_OPTION_ATTRIBUTE)
-  int cset_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
+  int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
   
-#define cset_option F77_FUNC(cset_option, CSET_OPTION)
-  int cset_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
-  
-#define cdelete_option F77_FUNC(cdelete_option, CDELETE_OPTION)
-  int cdelete_option(const char* key, const int* key_len);
+  int spud_delete_option(const char* key, const int* key_len);
 #ifdef __cplusplus
 }
 #endif

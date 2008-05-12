@@ -34,21 +34,21 @@ using namespace std;
 using namespace Spud;
 
 extern "C" {
-  void cload_options(const char* key, const int* key_len)
+  void spud_load_options(const char* key, const int* key_len)
   {
     OptionManager::load_options(string(key, *key_len));
 
     return;
   }
   
-  void cwrite_options(const char* key, const int* key_len)
+  void spud_write_options(const char* key, const int* key_len)
   {
     OptionManager::write_options(string(key, *key_len));
 
     return;
   }
   
-  int cget_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
+  int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
     string child_name_handle;
     OptionError get_name_err = OptionManager::get_child_name(string(key, *key_len), *index, child_name_handle);
     if(get_name_err != SPUD_NO_ERROR){
@@ -61,19 +61,19 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int cnumber_of_children(const char* key, const int* key_len){
+  int spud_number_of_children(const char* key, const int* key_len){
     return OptionManager::number_of_children(string(key, *key_len));
   }
   
-  int coption_count(const char* key, const int* key_len){
+  int spud_option_count(const char* key, const int* key_len){
     return OptionManager::option_count(string(key, *key_len));
   }
   
-  int chave_option(const char* key, const int* key_len){
+  int spud_have_option(const char* key, const int* key_len){
     return OptionManager::have_option(string(key, *key_len)) ? 1 : 0;
   }
   
-  int cget_option_type(const char* key, const int* key_len, int* type){
+  int spud_get_option_type(const char* key, const int* key_len, int* type){
     OptionType type_handle;
     OptionError get_type_err = OptionManager::get_option_type(string(key, *key_len), type_handle);
     if(get_type_err != SPUD_NO_ERROR){
@@ -85,11 +85,11 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int cget_option_rank(const char* key, const int* key_len, int* rank){
+  int spud_get_option_rank(const char* key, const int* key_len, int* rank){
     return OptionManager::get_option_rank(string(key, *key_len), *rank);
   }
   
-  int cget_option_shape(const char* key, const int* key_len, int* shape){
+  int spud_get_option_shape(const char* key, const int* key_len, int* shape){
     vector<int> shape_handle;
     OptionError get_shape_err = OptionManager::get_option_shape(string(key, *key_len), shape_handle);
     if(get_shape_err != SPUD_NO_ERROR){
@@ -101,7 +101,7 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
   
-  int cget_option(const char* key, const int* key_len, void* val){
+  int spud_get_option(const char* key, const int* key_len, void* val){
     string key_handle(key, *key_len);
   
     OptionType type;
@@ -192,11 +192,11 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
   
-  int cadd_option(const char* key, const int* key_len){
+  int spud_add_option(const char* key, const int* key_len){
     return OptionManager::add_option(string(key, *key_len));
   }
   
-  int cset_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
+  int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
     string key_handle(key, *key_len);
 
     if(*type == SPUD_DOUBLE){
@@ -252,11 +252,11 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
    
-  int cset_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
+  int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
     return OptionManager::set_option_attribute(string(key, *key_len), string(val, *val_len));
   }
    
-  int cdelete_option(const char* key, const int* key_len){
+  int spud_delete_option(const char* key, const int* key_len){
     return OptionManager::delete_option(string(key, *key_len));
   }
 }
