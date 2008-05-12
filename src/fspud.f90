@@ -191,7 +191,6 @@ contains
     
     integer :: lstat
 
-    child_name = " "
     lstat = spud_get_child_name(key, len_trim(key), index, child_name, len(child_name))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -437,7 +436,7 @@ contains
     if(.not. have_option(key) .and. present(default)) then
       val = trim(default)
     else
-      call check_option(key, 1, SPUD_CHARACTER, (/-1, -1/), lstat)
+      call check_option(key, 1, SPUD_CHARACTER, stat = lstat)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -648,7 +647,7 @@ contains
     character(len = *), intent(in) :: key
     integer, intent(in) :: type
     integer, intent(in) :: rank
-    integer, dimension(2), intent(in) :: shape
+    integer, dimension(2), optional, intent(in) :: shape
     integer, optional, intent(out) :: stat
     
     integer :: i
@@ -660,7 +659,7 @@ contains
     else if(rank /= option_rank(key, stat)) then
       call option_error(key, SPUD_RANK_ERROR, stat)
       return
-    else
+    else if(present(shape))
       lshape = option_shape(key, stat)
       do i = 1, rank
         if(shape(i) /= lshape(i)) then
