@@ -8,6 +8,7 @@ setup(
       author = "The ICOM team",
       author_email = "patrick.farrell@imperial.ac.uk",
       url = "http://amcg.ese.ic.ac.uk",
+      packages = ['diamond'],
       package_dir = {'diamond': 'diamond'},
       scripts=["bin/diamond"],
       data_files = [("/usr/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])],
