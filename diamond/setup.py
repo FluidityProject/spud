@@ -8,8 +8,10 @@ setup(
       author = "The ICOM team",
       author_email = "patrick.farrell@imperial.ac.uk",
       url = "http://amcg.ese.ic.ac.uk",
-      py_modules=["schema", "tree", "interface", "TextBufferMarkup", "dialogs", "debug", "config"],
-      scripts=["diamond"],
+      py_modules=["diamond/schema", "diamond/tree", "diamond/interface", 
+                  "diamond/TextBufferMarkup", "diamond/dialogs", "diamond/debug",
+                  "diamond/config", "diamond/preprocess"],
+      scripts=["bin/diamond"],
       data_files = [("/usr/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])],
      )
 
