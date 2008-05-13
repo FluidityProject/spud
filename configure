@@ -7246,6 +7246,13 @@ VERSION=`svnversion .`
 
 
 
+# It appears this is not good practice but...go sue me
+
+# let's try getting include/confdefs.h a different way...
+# (take only lines starting with "#defin" or "#undef" or "#allow" and
+# strip out #allow from start if there)
+cat confdefs.h | grep "^#[dua][enl][fdl][ieo][nfw]" | sed -e 's/^#allow//' > include/confdefs.h
+
 ac_config_files="$ac_config_files Makefile"
 
 cat >confcache <<\_ACEOF
