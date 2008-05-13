@@ -1,9 +1,10 @@
 Source: spud
 Maintainer: The ICOM team <patrick.farrell@imperial.ac.uk>
+Uploaders: David Ham <david.ham@imperial.ac.uk>
 Section: science
 Priority: extra
-Build-Depends: gfortran (>=4.2), g++ (>=4.2), python-setuptools (>= 0.6b3-1), python-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), python-central (>= 0.5.6)
-Standards-Version: 3.7.2
+Build-Depends: gfortran (>=4.2), g++ (>=4.2), python-setuptools (>= 0.6b3-1), python-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), python-central (>= 0.5.6), texlive
+Standards-Version: 3.7.3
 XS-Python-Version: >= 2.5
 
 Package: diamond
@@ -20,7 +21,7 @@ Description: A schema-driven interface for writing XML documents
  for configuring models for solving problems in computational mechanics,
  though the technology is generic to any sort of XML document creation.
 
-Package: libspud
+Package: libspud-dev
 Architecture: any
 Depends: ${shlibs:Depends}
 Recommends: diamond

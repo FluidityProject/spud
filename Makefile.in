@@ -38,6 +38,7 @@ AR  = @AR@
 ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
+HEADERS=include/spud.h include/cspud.h include/spud_enums.h
 
 VPATH = src/
 
@@ -53,7 +54,21 @@ OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyx
 default: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
+.PHONY:doc
+
+doc: 
+	@cd doc; $(MAKE) spud_manual.pdf
+
+install: libspud.a
+	@INSTALL@ -d $(DESTDIR)/usr/share/spud
+	@INSTALL@ $(LIB) $(DESTDIR)/usr/lib
+	@INSTALL@ spud.mod $(DESTDIR)/usr/include
+	@INSTALL@ $(HEADERS) $(DESTDIR)/usr/include
+	@INSTALL@ -m644 schema/spud_base.rnc $(DESTDIR)/usr/share/spud
+	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)/usr/share/spud
+
 clean:
+	@cd doc; $(MAKE) clean
 	rm -f *.o libspud.a spud.mod
 
 distclean:
