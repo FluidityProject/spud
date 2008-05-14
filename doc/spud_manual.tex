@@ -9,7 +9,7 @@
 \usepackage[margin=2cm]{geometry}
 
 
-\lstloadlanguages{Fortran,C++}
+\lstloadlanguages{Fortran,C++,C}
 
 \lstdefinelanguage{rnc}
 {morekeywords={element,attribute},
@@ -27,16 +27,40 @@
 
 \chapter{Libspud}
 
-\section{Fortran interface}
+Libspud provides C, C++ and Fortran interfaces for accessing the options
+specified in a Spud xml file. 
+
+\section{The options tree}
+
+\section{Language specific features}
+
+\section{Fortran module}
+
+All of the Fortran procedures as well as the named constants for data types
+(\ref{sec:types}) 
+
+\section{Procedure interfaces}
 \lstset{language=Fortran}
 
 \subsection{get\_child\_name}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 subroutine get_child_name(key, index, child_name)    
   character(len=*), intent(in)::key 
   integer, intent(in)::index
   character(len=*), intent(out)::child_name
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int spud_get_child_name(const char* key, const int* key_len, 
+  const int* index, 
+  char* child_name, const int* child_name_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+Spud::OptionError Spud::get_child_name(const std::string& key, 
+  const unsigned& index, 
+  std::string& child_name); 
 \end{lstlisting}
 
 Retrieve the name of the \lstinline+index+th child of \lstinline+key+. This
@@ -44,12 +68,20 @@ is mostly useful for debugging input files.
 
 \subsection{get\_option}
 
-\begin{lstlisting}[emph=option_type,emphstyle=\textit]
+\begin{lstlisting}[language=fortran,emph=option_type,emphstyle=\textit]
 subroutine get_option_real_scalar(key, option, stat, default)
   character(len=*), intent(in) :: key
   option_type, intent(out) :: option
   integer, intent(out), optional :: stat
   option_type, intent(in), optional :: default
+\end{lstlisting}
+
+\begin{lstlisting}[language=C,emph=option_type,emphstyle=\textit]
+int spud_get_option(const char* key, const int* key_len, void* val);
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++,emph=option_type,emphstyle=\textit]
+Spud::OptionError Spud::get_option(const std::string& key, option_type);
 \end{lstlisting}
 
 This is the main method for retrieving option values from the options
@@ -63,7 +95,7 @@ The fallback behaviour of the routine is as follows:
 \begin{itemize}
 \item If \lstinline+key+ matches an option but the shape, rank or type fails
   to match, the stat argument will be set to the appropriate error (see
-  \ref{sec:fortran_error}). If the \lstinline+stat+ argument is absent then execution
+  \ref{sec:error_codes}). If the \lstinline+stat+ argument is absent then execution
   will halt with an error.
 \item If \lstinline+key+ fails to match but \lstinline+default+ is present,
   \lstinline+option+ is set to the value of \lstinline+default+.
@@ -141,7 +173,7 @@ will be 0.
  \lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
  if \lstinline+stat+ is not present, execution will halt with an error.
 
-\subsection{option\_type}
+\subsection{option\_type}\label{sec:option_type}
 
 \begin{lstlisting}
 function option_type(key, stat) result (type)
@@ -180,12 +212,19 @@ subroutine write_options(filename)
 
 Write the current options tree out to the xml file \lstinline+filename+
 
-\subsection{Error codes}\label{sec:fortran_error}
+\subsection{Error codes}\label{sec:error_codes}
 
-The following named integer constants are defined in the spud module:
+The following values are return statuses of procedures. In Fortran these are
+named constants in the \lstinline+spud+ module while in C and C++ these are
+the enum types \lstinline+SpudOptionError+ and \lstinline+Spud::OptionError+
+respectively. 
 
-\begin{tabular}{lp{10cm}}
+Error values are greater than zero, warnings are negative and
+\lstinline+SPUD_NO_ERROR+ has the value 0.
+
+\begin{tabular}{lp{8cm}}
   \textbf{Error code} & \textbf{Interpretation}\\
+  \lstinline+SPUD_NO_ERROR+ & Returned for successful completion.\\
   \lstinline+SPUD_KEY_ERROR+ & The specified option is not present in the
   dictionary.\\
   \lstinline+SPUD_TYPE_ERROR+ & The specified option has a different type
@@ -193,7 +232,26 @@ The following named integer constants are defined in the spud module:
   \lstinline+SPUD_RANK_ERROR+ & The specified option has a different type
   from that of the option argument provided.\\
   \lstinline+SPUD_SHAPE_ERROR+ & The specified option has a different type
-  from that of the option argument provided.
+  from that of the option argument provided.\\
+  \lstinline+SPUD_NEW_KEY_WARNING+ & The option being inserted is not
+  already in the dictionary.\\
+  \lstinline+SPUD_ATTR_SET_FAILED_WARNING+ & The key being set as an
+  attribute already refers to an option.
+\end{tabular}
+
+\subsection{Data type parameters}\label{sec:types}
+
+The option\_type routine returns the following values. In Fortran these are
+named constants in the \lstinline+spud+ module while in C and C++ these are
+the enum types \lstinline+SpudOptionType+ and \lstinline+Spud::OptionType+
+respectively. 
+
+\begin{tabular}{ll}
+  \textbf{Fortran} & \textbf{C/C++} \\
+  \lstinline+SPUD_REAL+ & \lstinline+SPUD_DOUBLE+\\
+  \lstinline+SPUD_INTEGER+ & \lstinline+SPUD_INT+\\
+  \lstinline+SPUD_NONE+ & \lstinline+SPUD_NONE+\\
+  \lstinline+SPUD_CHARACTER+ & \lstinline+SPUD_STRING+
 \end{tabular}
 
 \section{C++ interface}
