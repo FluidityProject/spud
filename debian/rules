@@ -50,7 +50,7 @@ clean:
 	rm -f *-stamp
 	rm -rf dist build
 	-find -name '*.py[co]' | xargs rm -f
-	$(MAKE) clean
+	$(MAKE) clean || true
 #	find . -name *.pyc -exec rm {} \;
 	dh_clean
 
