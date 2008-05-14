@@ -274,5 +274,42 @@ The examples presented above are shown in a compact syntax of RELAX NG.  This is
 
 \chapter{Diamond}
 
+\section{Configuration files}
+
+In accordance with normal Unix practice, system wide configuration for
+diamond is stored in the \verb+/etc/diamond+ directory while per-user
+configuration is stored in a \verb+.diamond+ directory in the user's home
+directory.
+
+\subsection{Schemas}
+
+Diamond needs to know which Spud schemas are installed and available on the
+current system. This is specified in the \verb+schemata+ subdirectory of the
+\verb+/etc/diamond+ and \verb+~/.diamond+ directories. The file names in the
+\verb+schemata+ directory give the filename extension associated with a
+particular problem description language. The content of the file is two
+lines. The first line is the name of the problem description language while
+the second line contains the path of the xml syntax (\verb+.rng+) version of
+the corresponding schema. 
+
+For example, the Fluidity package has a problem description language called
+the Fluidity Markup Language which uses the file extension
+\verb+.flml+. When installed on a system by the sysadmin, Fluidity might
+create the file \verb+/etc/diamond/flml+ with the following contents:
+\begin{verbatim}
+Fluidity Markup Language
+/usr/share/fluidity/fluidity_options.rng
+\end{verbatim}
+An individual user \verb+jrluser+ might have the current version of the
+Fluidity svn tree checked out in their home directory and would need to
+point diamond at the (posssibly updated) schema in their source
+tree. \verb+jrluser+ would then create the file
+\verb+/home/jrluser/.diamond/schemata/flml+ which would contain:
+\begin{verbatim}
+Fluidity Markup Language
+/home/jrluser/fluidity/tools/fluidity_options.rng
+\end{verbatim}
+Now Diamond will pick up the version of the schema in \verb+jrluser+'s svn
+tree rather than the version the sysadmin installed.
 
 \end{document}
