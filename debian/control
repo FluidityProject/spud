@@ -12,6 +12,8 @@ Architecture: all
 Depends: python-gtk2, python-4suite-xml, python-lxml, libxml2-utils, python2.5
 Recommends: trang, python-psyco
 Suggests: 
+Conflicts: python-diamond
+Replaces: python-diamond
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description: A schema-driven interface for writing XML documents
