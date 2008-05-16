@@ -5,7 +5,7 @@
 \title{Spud 1.0}
 
 \usepackage{listings}
-\usepackage{hyperref}
+\usepackage{hyperref,xspace}
 \usepackage[margin=2cm]{geometry}
 
 
@@ -18,6 +18,14 @@
   morestring=[b]",
 }
 
+\newcommand{\fortran}[1]{\framebox{#1}}
+\renewcommand{\c}[1]{\framebox{#1}}
+\newcommand{\cpp}[1]{\framebox{#1}}
+
+\newcommand{\stat}{\lstinline[language=fortran]+stat+\xspace}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex}
 
 \begin{document}
 \maketitle
@@ -34,13 +42,15 @@ specified in a Spud xml file.
 
 \section{Language specific features}
 
-\section{Fortran module}
+\subsection{Fortran module}
 
 All of the Fortran procedures as well as the named constants for data types
-(\ref{sec:types}) 
+(\ref{sec:types}) are encapsulated in the \lstinline+spud+ module.
+
+\subsection{C++ namespace}
 
 \section{Procedure interfaces}
-\lstset{language=Fortran}
+\lstset{language=Fortran,frame=single}
 
 \subsection{get\_child\_name}
 
@@ -60,7 +70,7 @@ int spud_get_child_name(const char* key, const int* key_len,
 \begin{lstlisting}[language=C++]
 Spud::OptionError Spud::get_child_name(const std::string& key, 
   const unsigned& index, 
-  std::string& child_name); 
+  std::string& child_name)
 \end{lstlisting}
 
 Retrieve the name of the \lstinline+index+th child of \lstinline+key+. This
@@ -77,39 +87,72 @@ subroutine get_option_real_scalar(key, option, stat, default)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C,emph=option_type,emphstyle=\textit]
-int spud_get_option(const char* key, const int* key_len, void* val);
+int spud_get_option(const char* key, const int* key_len, void* val)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++,emph=option_type,emphstyle=\textit]
-Spud::OptionError Spud::get_option(const std::string& key, option_type);
+Spud::OptionError Spud::get_option(const std::string& key, 
+option_type option)
+
+Spud::OptionError Spud::get_option(const std::string& key, 
+option_type option, option_type default_val)
 \end{lstlisting}
 
-This is the main method for retrieving option values from the options
-dictionary. \lstinline[emph=option_type,emphstyle=\textit]+option_type+ can
-be any of \lstinline+real+, \lstinline+integer+ or
-\lstinline+character+ and \lstinline+real+ or \lstinline+integer+ arguments can be
-scalars or rank 1 or 2 arrays. In every case the type and shape of the
-argument must match that of the option in the dictionary.
 
-The fallback behaviour of the routine is as follows:
+This is the main method for retrieving option values from the options
+dictionary. For Fortran and C++ \lstinline[emph=option_type,emphstyle=\textit]+option_type+ can be any of the following values:
+
+\begin{tabular}{ll}
+  \textbf{Fortran type} & \textbf{C++ type} \\
+   \lstinline[language=fortran]+double precision+ & 
+   \lstinline[language=C++]+double&+ \\
+   \lstinline[language=fortran]+double precision, dimension(:)+ & 
+   \lstinline[language=C++]+std::vector<double>&+ \\
+   \lstinline[language=fortran]+double precision, dimension(:,:)+ & 
+   \lstinline[language=C++]+std::vector< std::vector<double> >&+\\
+   \lstinline[language=fortran]+integer+ & 
+   \lstinline[language=C++]+int&+ \\
+   \lstinline[language=fortran]+integer, dimension(:)+ & 
+   \lstinline[language=C++]+std::vector<int>&+ \\
+   \lstinline[language=fortran]+integer, dimension(:,:)+ & 
+   \lstinline[language=C++]+std::vector< std::vector<int> >&+\\
+   \lstinline[language=fortran]+character(len=*)+ &
+   \lstinline[language=C++]+std::string&+
+\end{tabular}
+
+In C, the returned argument is always a \lstinline+void+ pointer and it is
+the responsibility of the user to match the type correctly.  In every case
+the type and shape of the argument must match that of the option in the
+dictionary.
+
+In C and C++, the function returns an error code. In Fortran, the error code
+is returned via the optional \stat argument. If an error or warning occurs
+and the \stat argument has not been set, execution will halt with an
+appropriate error message. The fallback behaviour of the routine is as follows:
 \begin{itemize}
 \item If \lstinline+key+ matches an option but the shape, rank or type fails
-  to match, the stat argument will be set to the appropriate error (see
-  \ref{sec:error_codes}). If the \lstinline+stat+ argument is absent then execution
-  will halt with an error.
+  to match, appropriate error  code will be set (see
+  \ref{sec:error_codes}). 
 \item If \lstinline+key+ fails to match but \lstinline+default+ is present,
   \lstinline+option+ is set to the value of \lstinline+default+.
 \item If \lstinline+key+ fails to match and \lstinline+default+ is not
-  present, \lstinline+stat+ will be set to \lstinline+SPUD_KEY_ERROR+. If
-  \lstinline+stat+ is not present then execution will cease with an error.
+  present, the error code will be set to \lstinline+SPUD_KEY_ERROR+. 
 \end{itemize}
 
 \subsection{have\_option}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 function have_option(key)
   logical :: have_option
   character(len=*), intent(in) :: key
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int spud_have_option(const char* key, const int* key_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+logical_t Spud::have_option(const std::string& key)
 \end{lstlisting}
 
 Returns true if \lstinline+key+ is present in the options
@@ -118,19 +161,35 @@ been set and for determining which of a choice of options has been selected.
 
 \subsection{load\_options}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 subroutine load_options(filename) 
   character(len=*), intent(in) :: filename
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+void spud_load_options(const char* key, const int* key_len)
+\end{lstlisting}
+
+\begin{lstlisting}
+void Spud::load_options(const std::string& filename)
 \end{lstlisting}
 
 Read the xml file \lstinline+filename+ into the options tree.
 
 \subsection{option\_count}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 function option_count(key)
   integer :: option_count
   character(len=*), intent(in) :: key
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int spud_option_count(const char* key, const int* key_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+int Spud::option_count(const std::string& key)
 \end{lstlisting}
 
 Returns the number of options which match \lstinline+key+. This is
