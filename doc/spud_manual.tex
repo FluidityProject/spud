@@ -25,13 +25,48 @@
 \newcommand{\stat}{\lstinline[language=fortran]+stat+\xspace}
 
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{2ex}
+\setlength{\parskip}{1ex}
 
 \begin{document}
 \maketitle
 
 \tableofcontents
 \chapter{Installation and building}
+
+\section{Building from source}
+
+
+
+\section{Debian and Ubuntu packages}
+
+Debian and Ubuntu packages are available from the Applied Modelling and
+Computation Group at Imperial College London. The Debian repositiory may be
+accessed by adding the following lines to \verb+/etc/apt/sources.list+:
+
+\begin{verbatim}
+deb http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
+deb-src http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
+\end{verbatim}
+
+The Ubuntu repsository may be accessed via the following lines:
+
+\begin{verbatim}
+deb http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
+deb-src http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
+\end{verbatim}
+
+The Spud library and the base language are installed by the
+\verb+libspud-dev+ package while diamond is shipped in the \verb+diamond+
+package. Both packages are built from the \verb+spud+ source package. Binary
+packages are supplied for the i386 and amd64 architectures.
+
+After adding the relevant lines to \verb+/etc/apt/sources.list+, install the
+packages by typing:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install diamond libspud-dev
+\end{verbatim}
 
 \chapter{Libspud}
 
@@ -40,17 +75,51 @@ specified in a Spud xml file.
 
 \section{The options tree}
 
+\subsection{Option path syntax}
+
 \section{Language specific features}
 
-\subsection{Fortran module}
+In some cases the interfaces are differ slightly between Fortran, C and C++.
+This is brought about by differences in the designs of these languages
+themselves and in particular the difference in the manner in which optional
+arguments are supported in Fortran on the one hand and C/C++ on the other.
+The decision has been made to write the interfaces in the manner which seems
+natural in each language at the cost of consistency between languages rather
+than enforcing a foreign paradigm on one or all of the interfaces.
+
+\subsection{Fortran}
 
 All of the Fortran procedures as well as the named constants for data types
 (\ref{sec:types}) are encapsulated in the \lstinline+spud+ module.
 
-\subsection{C++ namespace}
+Where a routine returns an error code, in Fortran this is achieved via the
+optional \stat argument. If \stat is not present and an error code other
+than \lstinline[language=fortran]+SPUD_NO_ERROR+ is returned then execution
+will halt with an error message.
+
+\subsection{C}
+
+Since C does not itself have any namespacing facility, all exposed symbols
+have the prefix \lstinline[language=C]+spud_+.
+
+\subsection{C++}
+
+The entire public C++ API of libspud is contained in the
+\lstinline[language=C++]+Spud+ namespace.
+
+\section{Naming conventions}
+
+Where a routine returns it's main result via an argument (as is the case for
+a Fortran subroutine, for example), the routine's name starts with
+\lstinline[language=fortran]+get_+. The word
+\lstinline[language=fortran]+key+ is exclusively used to refer to a lookup key in
+the options dictionary.
 
 \section{Procedure interfaces}
-\lstset{language=Fortran,frame=single}
+\lstset{frame=single}
+
+In each case, the Fortran interface is given first, followed by the C and
+then C++ interfaces.
 
 \subsection{get\_child\_name}
 
@@ -68,7 +137,7 @@ int spud_get_child_name(const char* key, const int* key_len,
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
-Spud::OptionError Spud::get_child_name(const std::string& key, 
+static Spud::OptionError Spud::get_child_name(const std::string& key, 
   const unsigned& index, 
   std::string& child_name)
 \end{lstlisting}
@@ -79,9 +148,9 @@ is mostly useful for debugging input files.
 \subsection{get\_option}
 
 \begin{lstlisting}[language=fortran,emph=option_type,emphstyle=\textit]
-subroutine get_option_real_scalar(key, option, stat, default)
+subroutine get_option_real_scalar(key, val, stat, default)
   character(len=*), intent(in) :: key
-  option_type, intent(out) :: option
+  option_type, intent(out) :: val
   integer, intent(out), optional :: stat
   option_type, intent(in), optional :: default
 \end{lstlisting}
@@ -91,11 +160,11 @@ int spud_get_option(const char* key, const int* key_len, void* val)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++,emph=option_type,emphstyle=\textit]
-Spud::OptionError Spud::get_option(const std::string& key, 
-option_type option)
+static Spud::OptionError Spud::get_option(const std::string& key, 
+option_type val)
 
-Spud::OptionError Spud::get_option(const std::string& key, 
-option_type option, option_type default_val)
+static Spud::OptionError Spud::get_option(const std::string& key, 
+option_type val, option_type default_val)
 \end{lstlisting}
 
 
@@ -152,7 +221,7 @@ int spud_have_option(const char* key, const int* key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
-logical_t Spud::have_option(const std::string& key)
+static logical_t Spud::have_option(const std::string& key)
 \end{lstlisting}
 
 Returns true if \lstinline+key+ is present in the options
@@ -171,7 +240,7 @@ void spud_load_options(const char* key, const int* key_len)
 \end{lstlisting}
 
 \begin{lstlisting}
-void Spud::load_options(const std::string& filename)
+static void Spud::load_options(const std::string& filename)
 \end{lstlisting}
 
 Read the xml file \lstinline+filename+ into the options tree.
@@ -189,7 +258,7 @@ int spud_option_count(const char* key, const int* key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
-int Spud::option_count(const std::string& key)
+static int Spud::option_count(const std::string& key)
 \end{lstlisting}
 
 Returns the number of options which match \lstinline+key+. This is
@@ -199,28 +268,45 @@ simulation may allow for any number of fields to be specified). If
 
 \subsection{option\_rank}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 function option_rank(key, stat) result (rank)
   integer :: rank
   character(len=*), intent(in) :: key
   integer, intent(out), optional :: stat
 \end{lstlisting}
 
+\begin{lstlisting}[language=C]
+int spud_get_option_rank(const char* key, const int* key_len, int* rank)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+static Spud::OptionError Spud::get_option_rank(const std::string& key, 
+int& rank)
+\end{lstlisting}
+
 Returns the rank of the option specified by \lstinline+key+. If
-\lstinline+key+ does not correspond to a valid option, then if
-\lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
-if \lstinline+stat+ is not present, execution will halt with an error.
+\lstinline+key+ is not in the options dictionary then the error code
+\lstinline+SPUD_KEY_ERROR+ will be set.
 
 The rank returned will be 0 (for a scalar), 1 (for a vector) or 2 (a rank 2
 tensor, or matrix). 
 
 \subsection{option\_shape}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 function option_shape(key, stat) result (lshape)
   integer, dimension(2) :: lshape
   character(len=*), intent(in) :: key
   integer, intent(out), optional :: stat
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int spud_get_option_shape(const char* key, const int* key_len, int* shape)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+static Spud::OptionError Spud::get_option_shape(const std::string& key, 
+std::vector<int>& shape)
 \end{lstlisting}
 
 Return the shape of the option specified by \lstinline+key+. The shape is
@@ -228,28 +314,32 @@ always a 2-vector. If the option in question is rank 1 then the second
 component will be 0, if the option is rank 0 (a scalar) then both entries
 will be 0.
 
- If \lstinline+key+ does not correspond to a valid option, then if
- \lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
- if \lstinline+stat+ is not present, execution will halt with an error.
+If \lstinline+key+ does not correspond to a valid option, then the error
+code \lstinline+SPUD_KEY_ERROR+ will be set.
 
 \subsection{option\_type}\label{sec:option_type}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=fortran]
 function option_type(key, stat) result (type)
   integer :: type
   character(len=*), intent(in) :: key
   integer, intent(out), optional :: stat
 \end{lstlisting}
 
+\begin{lstlisting}[language=C]
+int spud_get_option_type(const char* key, const int* key_len, int* type)  
+\end{lstlisting}
+
 Returns the type of the option specified by \lstinline+key+. The type will
 be returned as one of the following named constants: 
 \lstinline+SPUD_REAL+, \lstinline+SPUD_INTEGER+ and
-\lstinline+SPUD_CHARACTER+. Note that by default, all reals in Spud are
+\lstinline+SPUD_CHARACTER+. 
+
+Note that by default, all reals in Spud are
 double precision.
 
-If \lstinline+key+ does not correspond to a valid option, then if
-\lstinline+stat+ is present it will be set to \lstinline+SPUD_KEY_ERROR+ and
-if \lstinline+stat+ is not present, execution will halt with an error.
+If \lstinline+key+ does not correspond to a valid option, then the error
+code \lstinline+SPUD_KEY_ERROR+ will be set.
 
 \subsection{number\_of\_children}
 
