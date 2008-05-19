@@ -62,7 +62,16 @@ def preprocess(schemafile):
     # now delete the include:
     include_parent.remove(include)
 
-  grammar = tree.xpath('/t:grammar', namespaces={'t': ns})[0]
+  grammar_list = tree.xpath('/t:grammar', namespaces={'t': ns})
+  
+  # If the .rnc didn't include a start = prefix, then no valid
+  # grammar tag will be present. Let the user know.
+  
+  if len(grammar_list) == 0:
+  		debug.deprint("Error: No grammar tag present in schema.", 0)
+	  	sys.exit(1)
+
+  grammar = grammar_list[0]
 
   defines = {}
   define_nodes = tree.xpath('/t:grammar//t:define', namespaces={'t': ns})
