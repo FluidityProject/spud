@@ -394,8 +394,16 @@ class Diamond:
     self.tree.write(tmp.name)
     std_input, std_output, err_output = os.popen3("xmllint --relaxng %s %s" % (self.schemafile, tmp.name))
     output = std_output.read()
-    output = output.replace(file.name + ":", "Line ")
-    output = output.replace(file.name, "\nXML file")
+
+	 # If there is no current filename, then Python errors out if you try to do
+	 # file.name + ":". Handle the case of "Untitled" documents.
+    if self.filename is None:
+    	output = output.replace("Untitled: ", "Line ")
+    	output = output.replace("Untitled: ", "\nXML file")
+    else:
+    	output = output.replace(file.name + ":", "Line ")
+    	output = output.replace(file.name, "\nXML file")
+    	
     output = output.replace("Relax-NG validity error :", "")
     output = output.replace(" , ", ", ")
     output = output.replace("Expecting", "expecting")
