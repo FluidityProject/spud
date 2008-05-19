@@ -49,7 +49,8 @@ class Schema(object):
                       'list': self.cb_list,
                       'group': self.cb_group,
                       'interleave': self.cb_group,
-                      'name': self.cb_name}
+                      'name': self.cb_name,
+                      'text': self.cb_text}
                       
     self.lost_eles = ""
   
@@ -377,6 +378,22 @@ class Schema(object):
       self.append(results, f(child, newfacts))
 
     return results
+
+  def cb_text(self, element, facts):
+    if "datatype" in facts:
+      if isinstance(facts["datatype"], tuple):
+        l = list(facts["datatype"])
+      else:
+        l = [facts["datatype"]]
+    else:
+      l = []
+
+    l.append(str)
+    if len(l) == 1:
+      facts["datatype"] = l[0]
+    else:
+      facts["datatype"] = tuple(l)
+
 
   def tag(self, element):
     return element.tag.split('}')[-1]
