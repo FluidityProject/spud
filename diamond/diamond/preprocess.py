@@ -24,8 +24,13 @@ import copy
 
 def preprocess(schemafile):
   p = etree.XMLParser(remove_comments=True)
-  tree = etree.parse(schemafile, p)
   ns = 'http://relaxng.org/ns/structure/1.0'
+  
+  try:
+  	tree = etree.parse(schemafile, p)
+  except Exception:
+  	debug.deprint("Error: %s is not a valid Relax NG schema" % schemafile, 0)
+  	sys.exit(1)
 
   #
   # deal with include
@@ -125,7 +130,6 @@ def preprocess(schemafile):
     parent = define.getparent()
     parent.remove(define)
   
-
   # add the modified defines back to the grammar
   for define in defines.values():
     grammar.append(define)
