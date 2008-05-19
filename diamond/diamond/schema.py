@@ -262,6 +262,7 @@ class Schema(object):
 
     mapping = {'integer': int,
                'float': float,
+               'double': float,
                'string': str}
 
     datatype_name = element.attrib["type"]
