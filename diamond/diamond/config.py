@@ -22,9 +22,9 @@ for dir in dirs:
 
 if len(schemata) == 0:
   debug.deprint("Error: could not find any registered schemata.", 0)
-  debug.deprint("Have you registered any in %s?" % dirs, 0)
-  debug.deprint("The directory should contain a file with the name of the suffix of your language,", 0)
-  debug.deprint("and its contents should be:", 0)
+  debug.deprint("Have you registered any in one of the directores %s?" % dirs, 0)
+  debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
+  debug.deprint("The file should have two lines in it:", 0)
   debug.deprint(" A Verbal Description Of The Language Purpose", 0)
   debug.deprint(" /path/to/the/schema/file.rng", 0)
   sys.exit(1)
