@@ -25,6 +25,10 @@ import gtk
 import gtk.gdk
 import gobject
 
+# do this right at the start, so we can find the diamond modules
+diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
+sys.path.insert(0, diamond_path)
+
 import diamond.debug as debug
 import diamond.dialogs as dialogs
 import diamond.interface as interface
@@ -55,9 +59,6 @@ def Help():
   return
 
 def main():
-  diamond_path = os.path.dirname(__file__) + os.path.sep
-
-  sys.path.insert(0, diamond_path)
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "dhvs:")
@@ -151,7 +152,7 @@ def main():
        pass
 
   gladefile = None
-  for possible_gladefile in [os.path.join(diamond_path, os.pardir, "gui", "gui.glade"), "/usr/share/diamond/gui/gui.glade"]:
+  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"), "/usr/share/diamond/gui/gui.glade"]:
     try:
       os.stat(possible_gladefile)
       gladefile = possible_gladefile
@@ -163,7 +164,7 @@ def main():
     sys.exit(1)
 
   if input_schemafile == None:
-    for possible_schemafile in [os.path.join(diamond_path, os.pardir, "fluidity_options.rng"), "/usr/share/diamond/schema/fluidity_options.rng"]:
+    for possible_schemafile in [os.path.join(diamond_path, "fluidity_options.rng"), "/usr/share/diamond/schema/fluidity_options.rng"]:
       try:
         os.stat(possible_schemafile)
         input_schemafile = possible_schemafile
