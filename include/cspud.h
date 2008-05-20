@@ -50,8 +50,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void spud_load_options(const char* key, const int* key_len);
-  void spud_write_options(const char* key, const int* key_len);
+  void spud_load_options(const char* filename, const int* filename_len);
+  void spud_write_options(const char* filename, const int* filename_len);
   
   int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
   

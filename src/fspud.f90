@@ -194,7 +194,8 @@ contains
     
     integer :: lstat
 
-    lstat = spud_get_child_name(key, len_trim(key), index, child_name, len(child_name))
+    lstat = spud_get_child_name(key, len_trim(key), index, child_name,&
+         & len(child_name))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return

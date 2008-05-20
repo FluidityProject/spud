@@ -34,16 +34,16 @@ using namespace std;
 using namespace Spud;
 
 extern "C" {
-  void spud_load_options(const char* key, const int* key_len)
+  void spud_load_options(const char* filename, const int* filename_len)
   {
-    OptionManager::load_options(string(key, *key_len));
+    OptionManager::load_options(string(filename, *filename_len));
 
     return;
   }
   
-  void spud_write_options(const char* key, const int* key_len)
+  void spud_write_options(const char* filename, const int* filename_len)
   {
-    OptionManager::write_options(string(key, *key_len));
+    OptionManager::write_options(string(filename, *filename_len));
 
     return;
   }
