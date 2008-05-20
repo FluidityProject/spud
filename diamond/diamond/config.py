@@ -20,7 +20,7 @@ for dir in dirs:
   except OSError:
     pass
 
-if len(schemata) == 0:
+if len(schemata) == 0 and "-s" not in sys.argv:
   debug.deprint("Error: could not find any registered schemata.", 0)
   debug.deprint("Have you registered any in one of the directores %s?" % dirs, 0)
   debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
