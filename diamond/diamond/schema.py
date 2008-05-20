@@ -22,6 +22,7 @@ import preprocess
 import base64
 import bz2
 import copy
+import sys
 
 import cStringIO
 
@@ -50,7 +51,10 @@ class Schema(object):
                       'group': self.cb_group,
                       'interleave': self.cb_group,
                       'name': self.cb_name,
-                      'text': self.cb_text}
+                      'text': self.cb_text,
+		      'anyName' : self.cb_anyname,
+		      'nsName' : self.cb_nsname,
+		      'except' : self.cb_except}
                       
     self.lost_eles = ""
   
@@ -395,6 +399,19 @@ class Schema(object):
     else:
       facts["datatype"] = tuple(l)
 
+  def cb_anyname(self, element, facts):
+    debug.deprint("anyName element found. Yet to handle.", 0)
+    sys.exit(1)
+
+  def cb_nsname(self, element, facts):
+    debug.deprint("nsName element found. Yet to handle.", 0)
+    sys.exit(1)
+
+  def cb_except(self, element, facts):
+    debug.deprint("except element found. Yet to handle.", 0)
+    sys.exit(1)
+
+  # End of schema processing functions.
 
   def tag(self, element):
     return element.tag.split('}')[-1]
