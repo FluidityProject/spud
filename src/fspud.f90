@@ -190,7 +190,7 @@ contains
     character(len = *), intent(in) :: key
     integer, intent(in) :: index
     character(len = *), intent(out) :: child_name
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
 
@@ -461,7 +461,7 @@ contains
   
   subroutine add_option(key, stat)
     character(len = *), intent(in) :: key
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -476,7 +476,7 @@ contains
   subroutine set_option_real_scalar(key, val, stat)
     character(len = *), intent(in) :: key
     real, intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -491,7 +491,7 @@ contains
   subroutine set_option_real_vector(key, val, stat)
     character(len = *), intent(in) :: key
     real, dimension(:), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -506,7 +506,7 @@ contains
   subroutine set_option_real_tensor(key, val, stat)
     character(len = *), intent(in) :: key
     real, dimension(:, :), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -521,7 +521,7 @@ contains
   subroutine set_option_integer_scalar(key, val, stat)
     character(len = *), intent(in) :: key
     integer, intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -536,7 +536,7 @@ contains
   subroutine set_option_integer_vector(key, val, stat)
     character(len = *), intent(in) :: key
     integer, dimension(:), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -551,7 +551,7 @@ contains
   subroutine set_option_integer_tensor(key, val, stat)
     character(len = *), intent(in) :: key
     integer, dimension(:, :), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -566,7 +566,7 @@ contains
   subroutine set_option_character(key, val, stat)
     character(len = *), intent(in) :: key
     character(len = *), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -581,7 +581,7 @@ contains
   subroutine set_option_attribute(key, val, stat)
     character(len = *), intent(in) :: key
     character(len = *), intent(in) :: val
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
@@ -595,7 +595,7 @@ contains
   
   subroutine delete_option(key, stat)
     character(len = *), intent(in) :: key
-    integer, intent(out) :: stat
+    integer, optional, intent(out) :: stat
     
     integer :: lstat
     
