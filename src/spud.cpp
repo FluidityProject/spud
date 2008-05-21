@@ -460,9 +460,13 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<in
 }
 
 OptionError OptionManager::set_option(const string& key, const string& option){
+  logical_t new_key = !have_option(key);
+
   OptionError set_err = manager.options->set_option(key, option);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
+  }else if(new_key){
+    return SPUD_NEW_KEY_WARNING;
   }
   
   return SPUD_NO_ERROR;
