@@ -97,7 +97,7 @@ OptionError OptionManager::get_option_rank(const string& key, int& rank){
   }
   
   rank = child->option_rank();
-  
+
   return SPUD_NO_ERROR;
 }
 
@@ -337,7 +337,7 @@ OptionError OptionManager::add_option(const string& key){
 
 OptionError OptionManager::set_option(const string& key, const double& option){
   logical_t new_key = !have_option(key);
-  
+
   vector<double> option_handle;
   option_handle.push_back(option);
   vector<int> shape(2);
@@ -348,7 +348,7 @@ OptionError OptionManager::set_option(const string& key, const double& option){
   }else if(new_key){
     return SPUD_NEW_KEY_WARNING;
   }
-  
+
   return SPUD_NO_ERROR;
 }
       
@@ -1151,9 +1151,6 @@ void OptionManager::Option::verbose_on(){
 }
 
 void OptionManager::Option::verbose_off(){
-  if(verbose)
-    cout << "void OptionManager::Option::verbose_off(void)\n";
-
   verbose = false;
 }
 
