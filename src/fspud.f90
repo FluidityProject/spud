@@ -37,7 +37,7 @@ module spud
     & SPUD_REAL      = 0, &
     & SPUD_INTEGER   = 1, &
     & SPUD_NONE      = 2, &
-    & SPUD_CHARACTER = 4
+    & SPUD_CHARACTER = 3
 
   integer, parameter, public :: &
     & SPUD_NO_ERROR                = 0, &
