@@ -266,7 +266,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = spud_get_option_type(key, len_trim(key), option_rank)
+    lstat = spud_get_option_rank(key, len_trim(key), option_rank)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
