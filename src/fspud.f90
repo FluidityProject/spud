@@ -305,7 +305,7 @@ contains
   
   subroutine get_option_real_vector(key, val, stat, default)
     character(len = *), intent(in) :: key
-    real, dimension(:), intent(out) :: val
+    real, dimension(:), intent(inout) :: val
     integer, optional, intent(out) :: stat
     real, dimension(size(val)), optional, intent(in) :: default
     
@@ -330,7 +330,7 @@ contains
   
   subroutine get_option_real_tensor(key, val, stat, default)
     character(len = *), intent(in) :: key
-    real, dimension(:, :), intent(out) :: val
+    real, dimension(:, :), intent(inout) :: val
     integer, optional, intent(out) :: stat
     real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
     
@@ -380,7 +380,7 @@ contains
   
   subroutine get_option_integer_vector(key, val, stat, default)
     character(len = *), intent(in) :: key
-    integer, dimension(:), intent(out) :: val
+    integer, dimension(:), intent(inout) :: val
     integer, optional, intent(out) :: stat
     integer, dimension(size(val)), optional, intent(in) :: default
     
@@ -405,7 +405,7 @@ contains
   
   subroutine get_option_integer_tensor(key, val, stat, default)
     character(len = *), intent(in) :: key
-    integer, dimension(:, :), intent(out) :: val
+    integer, dimension(:, :), intent(inout) :: val
     integer, optional, intent(out) :: stat
     integer, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
     

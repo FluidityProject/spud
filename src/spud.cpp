@@ -1252,10 +1252,10 @@ OptionError OptionManager::Option::set_rank_and_shape(const int& rank, const vec
       this->shape[0] = shape[0];
       this->shape[1] = -1;
       if(set_attrs){
-        stringstream rank_as_string;
+        ostringstream rank_as_string;
         rank_as_string << this->rank;
         set_attribute("rank", rank_as_string.str());
-        stringstream shape_as_string;
+        ostringstream shape_as_string;
         shape_as_string << shape[0];
         set_attribute("shape", shape_as_string.str());
       }
@@ -1265,10 +1265,10 @@ OptionError OptionManager::Option::set_rank_and_shape(const int& rank, const vec
       this->shape[0] = shape[0];
       this->shape[1] = shape[1];
       if(set_attrs){
-        stringstream rank_as_string;
+        ostringstream rank_as_string;
         rank_as_string << this->rank;
         set_attribute("rank", rank_as_string.str());
-        stringstream shape_as_string;
+        ostringstream shape_as_string;
         shape_as_string << shape[0] << " " << shape[1];
         set_attribute("shape", shape_as_string.str());
       }
@@ -1338,7 +1338,7 @@ void OptionManager::Option::parse_node(const string& root, const TiXmlNode* node
   }
 
   // Store node attributes
-  for(const TiXmlAttribute *att = element->FirstAttribute();att;att = att->Next()){
+  for(const TiXmlAttribute* att = element->FirstAttribute();att;att = att->Next()){
     string att_name(basename + "/" + att->Name());
     set_attribute(att_name, att->ValueStr());
   }
@@ -1415,8 +1415,8 @@ void OptionManager::Option::parse_node(const string& root, const TiXmlNode* node
         istringstream(tokens[i]) >> val[i];
             
       set_option(basename + "/__value", val, rank, shape);
-      for(const TiXmlAttribute* att=celement->FirstAttribute();att;att = att->Next()){
-        string att_name(basename + "/__value/"+att->Name());
+      for(const TiXmlAttribute* att = celement->FirstAttribute();att;att = att->Next()){
+        string att_name(basename + "/__value/" + att->Name());
         set_attribute(att_name, att->ValueStr());
       }
     }else if(cnode->ValueStr() == string("string_value")){
@@ -1561,7 +1561,7 @@ void OptionManager::Option::split_name(const string in, string& name, int& index
 
 void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{
   if(verbose)
-    cout << "vvoid OptionManager::Option::split_node_name(string& node_name, string& name_attr) const\n";
+    cout << "void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const\n";
   
   string::size_type firstPos = this->node_name.rfind("::");
   if(firstPos == string::npos or firstPos == this->node_name.size() - 2){
@@ -1579,7 +1579,7 @@ string OptionManager::Option::data_as_string() const{
   if(verbose)
     cout << "string OptionManager::Option::data_as_string(void) const\n";
 
-  stringstream data_as_string; 
+  ostringstream data_as_string; 
   switch(option_type()){
     case(SPUD_DOUBLE):
       for(unsigned int i = 0;i < data_double.size();i++){
