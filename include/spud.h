@@ -50,7 +50,7 @@ namespace Spud{
     
     public:
 
-      static OptionManager& get_manager();
+      static OptionManager* get_manager();
 
       static void load_options(const std::string& filename);      
       static void write_options(const std::string& filename);

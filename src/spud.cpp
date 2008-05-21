@@ -36,8 +36,8 @@ using namespace Spud;
 
 // PUBLIC METHODS
 
-OptionManager& OptionManager::get_manager(){
-  return manager;
+OptionManager* OptionManager::get_manager(){
+  return &manager;
 }
 
 void OptionManager::load_options(const string& filename){
@@ -1608,3 +1608,5 @@ string OptionManager::Option::data_as_string() const{
 }
 
 // END OF OptionManager::Option CLASS METHODS
+
+OptionManager OptionManager::manager;
