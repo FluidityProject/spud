@@ -21,7 +21,6 @@ for dir in dirs:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)
         continue
       schemata[file] = newSchemata
-      print schemata[file]
       debug.dprint("Registered schema type: " + file)
   except OSError:
     pass
