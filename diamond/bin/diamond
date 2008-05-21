@@ -30,12 +30,6 @@ diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
 sys.path.insert(0, diamond_path)
 
 import diamond.debug as debug
-import diamond.dialogs as dialogs
-import diamond.interface as interface
-import diamond.schema as schema
-import diamond.tree as tree
-import diamond.config as config
-
 
 def Help():
   """
@@ -73,6 +67,13 @@ def main():
   if ("-h", "") in opts:
     Help()
     return
+    
+
+  import diamond.dialogs as dialogs
+  import diamond.interface as interface
+  import diamond.schema as schema
+  import diamond.tree as tree
+  import diamond.config as config
 
   try:
     import psyco
