@@ -246,12 +246,12 @@ class Schema(object):
 
         if len(l_data) > 0:
           debug.deprint("Warning: Attribute %s has multiple datatypes - using first one" % name)
-
-        if len(l_data) > 0:
           if len(l_values) == 0:
             datatype = l_data[0]
           else:
             datatype = tuple([tuple(l_values)] + l_data[0])
+        else:
+          datatype = tuple(l_values)
 
     facts["attrs"][name] = (datatype, curval)
 
