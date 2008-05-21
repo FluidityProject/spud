@@ -194,6 +194,10 @@ contains
     
     integer :: lstat
 
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
     lstat = spud_get_child_name(key, len_trim(key), index, child_name,&
          & len(child_name))
     if(lstat /= SPUD_NO_ERROR) then
@@ -237,7 +241,11 @@ contains
     integer :: option_type
     
     integer :: lstat
-    
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
     lstat = spud_get_option_type(key, len_trim(key), option_type)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -253,7 +261,11 @@ contains
     integer :: option_rank
     
     integer :: lstat
-    
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
     lstat = spud_get_option_type(key, len_trim(key), option_rank)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -269,6 +281,10 @@ contains
     integer, dimension(2) :: option_shape
     
     integer :: lstat
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     lstat = spud_get_option_shape(key, len_trim(key), option_shape)
     if(lstat /= SPUD_NO_ERROR) then
@@ -285,6 +301,10 @@ contains
     real, optional, intent(in) :: default
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     if(.not. have_option(key) .and. present(default)) then
       val = default
@@ -311,6 +331,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
@@ -335,6 +359,10 @@ contains
     real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     if(.not. have_option(key) .and. present(default)) then
       val = default
@@ -361,6 +389,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
@@ -385,6 +417,10 @@ contains
     integer, dimension(size(val)), optional, intent(in) :: default
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     if(.not. have_option(key) .and. present(default)) then
       val = default
@@ -411,6 +447,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
@@ -436,6 +476,10 @@ contains
     
     integer :: lstat
     integer, dimension(2) :: lshape
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     if(.not. have_option(key) .and. present(default)) then
       val = trim(default)
@@ -465,6 +509,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_add_option(key, len_trim(key))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -480,6 +528,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 0, (/-1, -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -494,6 +546,10 @@ contains
     integer, optional, intent(out) :: stat
     
     integer :: lstat
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 1, (/size(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
@@ -510,6 +566,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 2, shape(val))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -524,6 +584,10 @@ contains
     integer, optional, intent(out) :: stat
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 0, (/-1, -1/))
     if(lstat /= SPUD_NO_ERROR) then
@@ -540,6 +604,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 1, (/size(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -554,6 +622,10 @@ contains
     integer, optional, intent(out) :: stat
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 2, shape(val))
     if(lstat /= SPUD_NO_ERROR) then
@@ -570,6 +642,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_set_option(key, len_trim(key), val, SPUD_CHARACTER, 1, (/len_trim(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -585,6 +661,10 @@ contains
     
     integer :: lstat
     
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
     lstat = spud_set_option_attribute(key, len_trim(key), val, len_trim(val))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
@@ -598,6 +678,10 @@ contains
     integer, optional, intent(out) :: stat
     
     integer :: lstat
+    
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
     
     lstat = spud_delete_option(key, len_trim(key))
     if(lstat /= SPUD_NO_ERROR) then
