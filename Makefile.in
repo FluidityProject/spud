@@ -60,12 +60,12 @@ doc:
 	@cd doc; $(MAKE) spud_manual.pdf
 
 install: libspud.a
-	@INSTALL@ -d $(DESTDIR)/usr/share/spud
-	@INSTALL@ $(LIB) $(DESTDIR)/usr/lib
-	@INSTALL@ spud.mod $(DESTDIR)/usr/include
-	@INSTALL@ $(HEADERS) $(DESTDIR)/usr/include
-	@INSTALL@ -m644 schema/spud_base.rnc $(DESTDIR)/usr/share/spud
-	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)/usr/share/spud
+	@INSTALL@ -d $(DESTDIR)@prefix@/share/spud
+	@INSTALL@ $(LIB) $(DESTDIR)@prefix@/lib
+	@INSTALL@ spud.mod $(DESTDIR)@prefix@/include
+	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
+	@INSTALL@ -m644 schema/spud_base.rnc $(DESTDIR)@prefix@/share/spud
+	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)@prefix@/share/spud
 
 clean:
 	@cd doc; $(MAKE) clean
