@@ -283,7 +283,7 @@ contains
     
     integer, dimension(2) :: option_shape
     
-    integer :: lstat
+    integer :: lstat, shape_store
 
     if(present(stat)) then
       stat = SPUD_NO_ERROR
@@ -294,6 +294,10 @@ contains
       call option_error(key, lstat, stat)
       return
     end if
+    
+    shape_store = option_shape(1)
+    option_shape(1) = option_shape(2)
+    option_shape(2) = shape_store
     
   end function option_shape
   
@@ -361,7 +365,8 @@ contains
     integer, optional, intent(out) :: stat
     real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
     
-    integer :: lstat
+    integer :: i, j, lstat
+    real, dimension(size(val, 2), size(val, 1)) :: val_handle
     
     if(present(stat)) then
       stat = SPUD_NO_ERROR
@@ -375,11 +380,16 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
+      lstat = spud_get_option(key, len_trim(key), val_handle)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
+      do i = 1, size(val, 1)
+        do j = 1, size(val, 2)
+          val(i, j) = val_handle(j, i)
+        end do
+      end do
     end if
   
   end subroutine get_option_real_tensor
@@ -448,7 +458,8 @@ contains
     integer, optional, intent(out) :: stat
     integer, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
     
-    integer :: lstat
+    integer :: i ,j, lstat
+    integer, dimension(size(val, 2), size(val, 1)) :: val_handle
     
     if(present(stat)) then
       stat = SPUD_NO_ERROR
@@ -462,11 +473,16 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
+      lstat = spud_get_option(key, len_trim(key), val_handle)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
+      do i = 1, size(val, 1)
+        do j = 1, size(val, 2)
+          val(i, j) = val_handle(j, i)
+        end do
+      end do
     end if
   
   end subroutine get_option_integer_tensor
@@ -571,13 +587,20 @@ contains
     real, dimension(:, :), intent(in) :: val
     integer, optional, intent(out) :: stat
     
-    integer :: lstat
+    integer :: i, j, lstat
+    real, dimension(size(val, 2), size(val, 1)) :: val_handle
     
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
     
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 2, shape(val))
+    do i = 1, size(val, 1)
+      do j = 1, size(val, 2)
+        val_handle(j, i) = val(i, j)
+      end do
+    end do
+    
+    lstat = spud_set_option(key, len_trim(key), val_handle, SPUD_REAL, 2, shape(val_handle))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -628,13 +651,20 @@ contains
     integer, dimension(:, :), intent(in) :: val
     integer, optional, intent(out) :: stat
     
-    integer :: lstat
+    integer :: i, j, lstat
+    integer, dimension(size(val, 2), size(val, 1)) :: val_handle
     
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
     
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 2, shape(val))
+    do i = 1, size(val, 1)
+      do j = 1, size(val, 2)
+        val_handle(j, i) = val(i, j)
+      end do
+    end do
+    
+    lstat = spud_set_option(key, len_trim(key), val_handle, SPUD_INTEGER, 2, shape(val_handle))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
