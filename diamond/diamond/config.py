@@ -16,11 +16,12 @@ for dir in dirs:
   try:
     for file in os.listdir(dir):
       handle = open(os.path.join(dir, file))
-      newSchemata = tuple([x.strip() for x in handle])
+      newSchemata = [x.strip() for x in handle]
       if len(newSchemata) != 2:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)
         continue
-      schemata[file] = newSchemata
+      newSchemata[1] = os.path.expandvars(newSchemata[1])
+      schemata[file] = tuple(newSchemata)
       debug.dprint("Registered schema type: " + file)
   except OSError:
     pass
