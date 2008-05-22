@@ -567,6 +567,21 @@ Similar extensions can be made for an integer based \lstinline *integer_value* e
 
 \section{Comments and annotations}
 
+\section{Preprocessing the schema for use with Diamond}
+RELAX NG comes in two equivalent formats: XML syntax (with
+file suffix \verb+.rng+) and compact
+syntax (with file suffix \verb+.rnc+).
+Compact syntax is optimised for human use, while XML
+syntax is optimised for ease of machine parsing. Therefore, 
+it is recommended that model developers write the schema
+in compact syntax, then transform it using a supplied tool
+to XML syntax for use with Diamond and other validation tools.
+To transform compact syntax into XML syntax, use the command:
+\begin{verbatim}
+spud-preprocess /path/to/schema.rnc
+\end{verbatim}
+This will create a file called schema.rng in the same directory.
+
 \chapter{Diamond}
 
 \section{Installation}

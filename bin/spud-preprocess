@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 schema.rnc" >&2
+  exit 1
+fi
+
+if ! which trang > /dev/null; then
+  echo "Error: cannot locate trang, a dependency of spud." >&2
+  echo "Please install trang."
+  exit 1
+fi
+
+trang $1 ${1/rnc/rng}
