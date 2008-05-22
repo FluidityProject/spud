@@ -288,16 +288,18 @@ contains
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
-    
+        
     lstat = spud_get_option_shape(key, len_trim(key), option_shape)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
     
-    shape_store = option_shape(1)
-    option_shape(1) = option_shape(2)
-    option_shape(2) = shape_store
+    if(option_rank(key, stat) == 2) then
+      shape_store = option_shape(1)
+      option_shape(1) = option_shape(2)
+      option_shape(2) = shape_store
+    end if
     
   end function option_shape
   
