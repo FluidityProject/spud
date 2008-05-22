@@ -461,20 +461,16 @@ class Choice:
     for choice in self.l:
       choice.parent = parent
 
-  def write_core(self, writer):
+  def write_core(self, tree):
     l = self.l
     for i in range(len(l)):
       if self.index == i:
         l[i].write_core(writer)
       else:
-        comment_buffer = StringIO.StringIO()
-        comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
-        comment_writer.startDocument()
-        l[i].write_core(comment_writer)
-        comment_writer.endDocument()
+        comment_buffer = StringIO.StringIO(etree.tostring(l[i].write_core(etree.Element(l[i].name))))
         comment_text = ("DIAMOND MAGIC COMMENT (neglected choice subtree %s):\n" % l[i].schemaname)
         comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-        writer.comment(unicode(comment_text))
+        tree.append(etree.Comment(unicode(comment_text)))
 
   def choices(self):
     return self.l
