@@ -187,7 +187,7 @@ OptionError OptionManager::get_option(const string& key, vector< vector<double> 
   option.clear();
   for(int i = 0;i < shape[0];i++){
     option.push_back(vector<double>(shape[1]));
-    for(int j = 0;i < shape[1];j++){
+    for(int j = 0;j < shape[1];j++){
       option[i][j] = option_handle[(i * shape[0]) + j];
     }
   }
@@ -279,7 +279,7 @@ OptionError OptionManager::get_option(const string& key, vector< vector<int> >& 
   option.clear();
   for(int i = 0;i < shape[0];i++){
     option.push_back(vector<int>(shape[1]));
-    for(int j = 0;i < shape[1];j++){
+    for(int j = 0;j < shape[1];j++){
       option[i][j] = option_handle[(i * shape[0]) + j];
     }
   }
