@@ -22,8 +22,7 @@ import cPickle as pickle
 import cStringIO as StringIO
 import re
 import zlib
-
-import Ft.Xml
+from lxml import etree
 
 import debug
 
@@ -231,38 +230,37 @@ class Tree:
     else:
       file = filename
 
-    writer = Ft.Xml.MarkupWriter(file, indent=u'yes')
-    writer.startDocument()
-    self.write_core(writer)
-    writer.endDocument()
+    xmlTree=etree.tostring(self.write_core(etree.Element(self.name)), pretty_print = True, xml_declaration = True,
+    	encoding="utf8")
+    
+    file.write(xmlTree)
+    file.close()
 
-  def write_core(self, writer):
+  def write_core(self, tree):
     """Write to XML; this is the part that recurses"""
-    writer.startElement(unicode(self.name))
+    
     for key in self.attrs.keys():
       val = self.attrs[key]
       output_val = val[1]
       if output_val is not None:
-        writer.attribute(unicode(key), unicode(output_val))
-
+        tree.set(unicode(key), unicode(output_val))
+        
     for child in self.children:
       if child.active is True:
-        child.write_core(writer)
+        sub_tree=etree.Element(child.name)
+        child.write_core(sub_tree)
+        tree.append(sub_tree)
       else:
         if child.cardinality == '?':
-          comment_buffer = StringIO.StringIO()
-          comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
-          comment_writer.startDocument()
-          child.write_core(comment_writer)
-          comment_writer.endDocument()
+          comment_buffer = StringIO.StringIO(etree.tostring(child.write_core(etree.Element(self.name))))
           comment_text = ("DIAMOND MAGIC COMMENT (inactive optional subtree %s):\n" % child.schemaname)
           comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-          writer.comment(unicode(comment_text))
-
+          tree.append(etree.Comment(unicode(comment_text)))
+        
     if self.data is not None:
-      writer.text(unicode(self.data))
+      tree.text=(unicode(self.data))
 
-    writer.endElement(unicode(self.name))
+    return tree
 
   def pickle(self):
     if hasattr(self, "xmlnode"):
