@@ -745,21 +745,38 @@ contains
     integer, dimension(2), optional, intent(in) :: shape
     integer, optional, intent(out) :: stat
     
-    integer :: i
+    integer :: i, lrank, lstat, ltype
     integer, dimension(2) :: lshape
     
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
     
-    if(type /= option_type(key, stat)) then
+    ltype = option_type(key, lstat)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+    lrank = option_rank(key, lstat)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+    
+    if(type /= ltype) then
       call option_error(key, SPUD_TYPE_ERROR, stat)
       return
-    else if(rank /= option_rank(key, stat)) then
+    else if(rank /= lrank) then
       call option_error(key, SPUD_RANK_ERROR, stat)
       return
     else if(present(shape)) then
       lshape = option_shape(key, stat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+      
       do i = 1, rank
         if(shape(i) /= lshape(i)) then
           call option_error(key, SPUD_SHAPE_ERROR, stat)
