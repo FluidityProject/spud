@@ -288,8 +288,8 @@ contains
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
-        
-    lstat = spud_get_option_shape(key, len_trim(key), option_shape)
+    
+    lstat = spud_get_option_shape(key, len_trim(key), option_shape(1:2))  ! Slicing required by GCC 4.2
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
