@@ -191,19 +191,22 @@ contains
     integer, intent(in) :: index
     character(len = *), intent(out) :: child_name
     integer, optional, intent(out) :: stat
-    
+   
+    character(len = len(child_name)) :: lchild_name
     integer :: lstat
 
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = spud_get_child_name(key, len_trim(key), index, child_name,&
-         & len(child_name))
+    lchild_name = ""
+    lstat = spud_get_child_name(key, len_trim(key), index, lchild_name, len(lchild_name))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
+
+    child_name = trim(lchild_name)
     
   end subroutine get_child_name
   
@@ -473,10 +476,11 @@ contains
     character(len = *), intent(out) :: val
     integer, optional, intent(out) :: stat
     character(len = *), optional, intent(in) :: default
-    
+   
+    character(len = len(val)) :: lval
     integer :: lstat
     integer, dimension(2) :: lshape
-    
+
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
@@ -494,11 +498,14 @@ contains
         call option_error(key, SPUD_SHAPE_ERROR, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
+      lval = ""
+      lstat = spud_get_option(key, len_trim(key), lval)
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
+
+      val = trim(lval)
     end if
     
   end subroutine get_option_character
