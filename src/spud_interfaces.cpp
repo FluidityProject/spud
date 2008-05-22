@@ -36,21 +36,21 @@ using namespace Spud;
 extern "C" {
   void spud_load_options(const char* filename, const int* filename_len)
   {
-    OptionManager::load_options(string(filename, *filename_len));
+    load_options(string(filename, *filename_len));
 
     return;
   }
   
   void spud_write_options(const char* filename, const int* filename_len)
   {
-    OptionManager::write_options(string(filename, *filename_len));
+    write_options(string(filename, *filename_len));
 
     return;
   }
   
   int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
     string child_name_handle;
-    OptionError get_name_err = OptionManager::get_child_name(string(key, *key_len), *index, child_name_handle);
+    OptionError get_name_err = get_child_name(string(key, *key_len), *index, child_name_handle);
     if(get_name_err != SPUD_NO_ERROR){
       return get_name_err;
     }
@@ -62,20 +62,20 @@ extern "C" {
   }
 
   int spud_number_of_children(const char* key, const int* key_len){
-    return OptionManager::number_of_children(string(key, *key_len));
+    return number_of_children(string(key, *key_len));
   }
   
   int spud_option_count(const char* key, const int* key_len){
-    return OptionManager::option_count(string(key, *key_len));
+    return option_count(string(key, *key_len));
   }
   
   int spud_have_option(const char* key, const int* key_len){
-    return OptionManager::have_option(string(key, *key_len)) ? 1 : 0;
+    return have_option(string(key, *key_len)) ? 1 : 0;
   }
   
   int spud_get_option_type(const char* key, const int* key_len, int* type){
     OptionType type_handle;
-    OptionError get_type_err = OptionManager::get_option_type(string(key, *key_len), type_handle);
+    OptionError get_type_err = get_option_type(string(key, *key_len), type_handle);
     if(get_type_err != SPUD_NO_ERROR){
       return get_type_err;
     }
@@ -86,12 +86,12 @@ extern "C" {
   }
 
   int spud_get_option_rank(const char* key, const int* key_len, int* rank){
-    return OptionManager::get_option_rank(string(key, *key_len), *rank);
+    return get_option_rank(string(key, *key_len), *rank);
   }
   
   int spud_get_option_shape(const char* key, const int* key_len, int* shape){
     vector<int> shape_handle;
-    OptionError get_shape_err = OptionManager::get_option_shape(string(key, *key_len), shape_handle);
+    OptionError get_shape_err = get_option_shape(string(key, *key_len), shape_handle);
     if(get_shape_err != SPUD_NO_ERROR){
       return get_shape_err;
     }
@@ -108,13 +108,13 @@ extern "C" {
     string key_handle(key, *key_len);
   
     OptionType type;
-    OptionError get_type_err = OptionManager::get_option_type(key_handle, type);
+    OptionError get_type_err = get_option_type(key_handle, type);
     if(get_type_err != SPUD_NO_ERROR){
       return get_type_err;
     }
     
     int rank;
-    OptionError get_rank_err = OptionManager::get_option_rank(key_handle, rank);
+    OptionError get_rank_err = get_option_rank(key_handle, rank);
     if(get_rank_err != SPUD_NO_ERROR){
       return get_rank_err;
     }
@@ -122,14 +122,14 @@ extern "C" {
     if(type == SPUD_DOUBLE){
       if(rank == 0){
         double val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
         *((double*)val) = val_handle;
       }else if(rank == 1){
         vector<double> val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
@@ -138,7 +138,7 @@ extern "C" {
         }
       }else if(rank == 2){
         vector< vector<double> > val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
@@ -153,14 +153,14 @@ extern "C" {
     }else if(type == SPUD_INT){
       if(rank == 0){
         int val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
         *((int*)val) = val_handle;
       }else if(rank == 1){
         vector<int> val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
@@ -169,7 +169,7 @@ extern "C" {
         }
       }else if(rank == 2){
         vector< vector<int> > val_handle;
-        OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+        OptionError get_err = get_option(key_handle, val_handle);
         if(get_err != SPUD_NO_ERROR){
           return get_err;
         }
@@ -183,7 +183,7 @@ extern "C" {
       }
     }else if(type == SPUD_STRING){
       string val_handle;
-      OptionError get_err = OptionManager::get_option(key_handle, val_handle);
+      OptionError get_err = get_option(key_handle, val_handle);
       if(get_err != SPUD_NO_ERROR){
         return get_err;
       }
@@ -196,7 +196,7 @@ extern "C" {
   }
   
   int spud_add_option(const char* key, const int* key_len){
-    return OptionManager::add_option(string(key, *key_len));
+    return add_option(string(key, *key_len));
   }
   
   int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
@@ -205,13 +205,13 @@ extern "C" {
     if(*type == SPUD_DOUBLE){
       if(*rank == 0){
         double val_handle = *((double*)val);
-        return OptionManager::set_option(key_handle, val_handle);
+        return set_option(key_handle, val_handle);
       }else if(*rank == 1){
         vector<double> val_handle;
         for(int i = 0;i < shape[0];i++){
           val_handle.push_back(((double*)val)[i]);
         }
-        return OptionManager::set_option(key_handle, val_handle);
+        return set_option(key_handle, val_handle);
       }else if(*rank == 2){
         vector< vector<double> > val_handle;
         for(int i = 0;i < shape[0];i++){
@@ -220,20 +220,20 @@ extern "C" {
             val_handle[i].push_back(((double*)val)[i * val_handle[0].size() + j]);
           }
         }
-        return OptionManager::set_option(key_handle, val_handle);    
+        return set_option(key_handle, val_handle);    
       }else{
         return SPUD_RANK_ERROR;
       }
     }else if(*type == SPUD_INT){
       if(*rank == 0){
         int val_handle = *((int*)val);
-        return OptionManager::set_option(key_handle, val_handle);
+        return set_option(key_handle, val_handle);
       }else if(*rank == 1){
         vector<int> val_handle;
         for(int i = 0;i < shape[0];i++){
           val_handle.push_back(((int*)val)[i]);
         }
-        return OptionManager::set_option(key_handle, val_handle);
+        return set_option(key_handle, val_handle);
       }else if(*rank == 2){
         vector< vector<int> > val_handle;
         for(int i = 0;i < shape[0];i++){
@@ -242,12 +242,12 @@ extern "C" {
             val_handle[i].push_back(((int*)val)[i * val_handle[0].size() + j]);
           }
         }
-        return OptionManager::set_option(key_handle, val_handle);
+        return set_option(key_handle, val_handle);
       }else{
         return SPUD_RANK_ERROR;
       }
     }else if(*type == SPUD_STRING){
-      return OptionManager::set_option(key_handle, string((char*)val, shape[0]));
+      return set_option(key_handle, string((char*)val, shape[0]));
     }else{
       return SPUD_TYPE_ERROR;
     }
@@ -256,10 +256,10 @@ extern "C" {
   }
    
   int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
-    return OptionManager::set_option_attribute(string(key, *key_len), string(val, *val_len));
+    return set_option_attribute(string(key, *key_len), string(val, *val_len));
   }
    
   int spud_delete_option(const char* key, const int* key_len){
-    return OptionManager::delete_option(string(key, *key_len));
+    return delete_option(string(key, *key_len));
   }
 }

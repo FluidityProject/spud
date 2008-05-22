@@ -50,8 +50,6 @@ namespace Spud{
     
     public:
 
-      static OptionManager* get_manager();
-
       static void load_options(const std::string& filename);      
       static void write_options(const std::string& filename);
       
@@ -67,36 +65,36 @@ namespace Spud{
       static OptionError get_option_rank(const std::string& key, int& rank);
       static OptionError get_option_shape(const std::string& key, std::vector<int>& shape);
       
-      static OptionError get_option(const std::string& key, double& option);
-      static OptionError get_option(const std::string& key, double& option, const double& default_val);      
-      static OptionError get_option(const std::string& key, std::vector<double>& option);
-      static OptionError get_option(const std::string& key, std::vector<double>& option, const std::vector<double>& default_val);      
-      static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option);
-      static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& option, const std::vector< std::vector<double> >& default_val);
+      static OptionError get_option(const std::string& key, double& val);
+      static OptionError get_option(const std::string& key, double& val, const double& default_val);      
+      static OptionError get_option(const std::string& key, std::vector<double>& val);
+      static OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val);      
+      static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val);
+      static OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val);
       
-      static OptionError get_option(const std::string& key, int& option);
-      static OptionError get_option(const std::string& key, int& option, const int& default_val);      
-      static OptionError get_option(const std::string& key, std::vector<int>& option);
-      static OptionError get_option(const std::string& key, std::vector<int>& option, const std::vector<int>& default_val);      
-      static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option);
-      static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& option, const std::vector< std::vector<int> >& default_val);
+      static OptionError get_option(const std::string& key, int& val);
+      static OptionError get_option(const std::string& key, int& val, const int& default_val);      
+      static OptionError get_option(const std::string& key, std::vector<int>& val);
+      static OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val);      
+      static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val);
+      static OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val);
       
-      static OptionError get_option(const std::string& key, std::string& option);
-      static OptionError get_option(const std::string& key, std::string& option, const std::string& default_val);
+      static OptionError get_option(const std::string& key, std::string& val);
+      static OptionError get_option(const std::string& key, std::string& val, const std::string& default_val);
       
       static OptionError add_option(const std::string& key);
       
-      static OptionError set_option(const std::string& key, const double& option);      
-      static OptionError set_option(const std::string& key, const std::vector<double>& option);      
-      static OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& option);
+      static OptionError set_option(const std::string& key, const double& val);      
+      static OptionError set_option(const std::string& key, const std::vector<double>& val);      
+      static OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val);
       
-      static OptionError set_option(const std::string& key, const int& option);      
-      static OptionError set_option(const std::string& key, const std::vector<int>& option);      
-      static OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& option);
+      static OptionError set_option(const std::string& key, const int& val);      
+      static OptionError set_option(const std::string& key, const std::vector<int>& val);      
+      static OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val);
       
-      static OptionError set_option(const std::string& key, const std::string& option);
+      static OptionError set_option(const std::string& key, const std::string& val);
       
-      static OptionError set_option_attribute(const std::string& key, const std::string& option);
+      static OptionError set_option_attribute(const std::string& key, const std::string& val);
       
       static OptionError delete_option(const std::string& key);
     
@@ -317,7 +315,7 @@ namespace Spud{
             * If the new option type is not string type and this element is
             * marked as an attribute, unmarks it.
             */
-          OptionError set_option_type(const OptionType& option_type);
+          OptionError set_option_type(const OptionType& val_type);
           
           /** 
             * Parses the supplied TiXmlNode and sets the data and and attribute
@@ -370,6 +368,54 @@ namespace Spud{
       
       Option* options;
   };
+  
+  void load_options(const std::string& filename);
+  void write_options(const std::string& filename);
+  
+  OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name); 
+  
+  int number_of_children(const std::string& key);
+  
+  int option_count(const std::string& key);
+  
+  logical_t have_option(const std::string& key);
+  
+  OptionError get_option_type(const std::string& key, OptionType& type);      
+  OptionError get_option_rank(const std::string& key, int& rank);
+  OptionError get_option_shape(const std::string& key, std::vector<int>& shape);
+  
+  OptionError get_option(const std::string& key, double& val);
+  OptionError get_option(const std::string& key, double& val, const double& default_val);      
+  OptionError get_option(const std::string& key, std::vector<double>& val);
+  OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val);      
+  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val);
+  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val);
+  
+  OptionError get_option(const std::string& key, int& val);
+  OptionError get_option(const std::string& key, int& val, const int& default_val);      
+  OptionError get_option(const std::string& key, std::vector<int>& val);
+  OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val);      
+  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val);
+  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val);
+  
+  OptionError get_option(const std::string& key, std::string& val);
+  OptionError get_option(const std::string& key, std::string& val, const std::string& default_val);
+  
+  OptionError add_option(const std::string& key);
+  
+  OptionError set_option(const std::string& key, const double& val);      
+  OptionError set_option(const std::string& key, const std::vector<double>& val);      
+  OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val);
+  
+  OptionError set_option(const std::string& key, const int& val);      
+  OptionError set_option(const std::string& key, const std::vector<int>& val);      
+  OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val);
+  
+  OptionError set_option(const std::string& key, const std::string& val);
+  
+  OptionError set_option_attribute(const std::string& key, const std::string& val);
+  
+  OptionError delete_option(const std::string& key);
 }
 
 #endif

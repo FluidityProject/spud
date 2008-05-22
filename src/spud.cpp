@@ -36,10 +36,6 @@ using namespace Spud;
 
 // PUBLIC METHODS
 
-OptionManager* OptionManager::get_manager(){
-  return &manager;
-}
-
 void OptionManager::load_options(const string& filename){
   manager.options->load_options(filename);
   
@@ -112,61 +108,61 @@ OptionError OptionManager::get_option_shape(const string& key, vector<int>& shap
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, double& option){
+OptionError OptionManager::get_option(const string& key, double& val){
   OptionError check_err = check_option(key, SPUD_DOUBLE, 0);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
 
-  vector<double> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<double> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
-  }else if(option_handle.size() != 1){
+  }else if(val_handle.size() != 1){
     return SPUD_RANK_ERROR;
   }
   
-  option = option_handle[0];
+  val = val_handle[0];
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, double& option, const double& default_val){
+OptionError OptionManager::get_option(const string& key, double& val, const double& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
   
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
-OptionError OptionManager::get_option(const string& key, vector<double>& option){ 
+OptionError OptionManager::get_option(const string& key, vector<double>& val){ 
   OptionError check_err = check_option(key, SPUD_DOUBLE, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
 
-  vector<double> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<double> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
   }
   
-  option = option_handle;
+  val = val_handle;
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, vector<double>& option, const vector<double>& default_val){
+OptionError OptionManager::get_option(const string& key, vector<double>& val, const vector<double>& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
   
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
-OptionError OptionManager::get_option(const string& key, vector< vector<double> >& option){
+OptionError OptionManager::get_option(const string& key, vector< vector<double> >& val){
   OptionError check_err = check_option(key, SPUD_DOUBLE, 2);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
@@ -178,87 +174,87 @@ OptionError OptionManager::get_option(const string& key, vector< vector<double> 
     return shape_err;
   }
   
-  vector<double> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<double> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
   }
   
-  option.clear();
+  val.clear();
   for(int i = 0;i < shape[0];i++){
-    option.push_back(vector<double>(shape[1]));
+    val.push_back(vector<double>(shape[1]));
     for(int j = 0;j < shape[1];j++){
-      option[i][j] = option_handle[(i * shape[0]) + j];
+      val[i][j] = val_handle[(i * shape[0]) + j];
     }
   }
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, vector< vector<double> >& option, const vector< vector<double> >& default_val){
+OptionError OptionManager::get_option(const string& key, vector< vector<double> >& val, const vector< vector<double> >& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
 
-  return get_option(key, option);
+  return get_option(key, val);
 }
       
-OptionError OptionManager::get_option(const string& key, int& option){
+OptionError OptionManager::get_option(const string& key, int& val){
   OptionError check_err = check_option(key, SPUD_INT, 0);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
 
-  vector<int> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<int> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
-  }else if(option_handle.size() != 1){
+  }else if(val_handle.size() != 1){
     return SPUD_RANK_ERROR;
   }
   
-  option = option_handle[0];
+  val = val_handle[0];
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, int& option, const int& default_val){
+OptionError OptionManager::get_option(const string& key, int& val, const int& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
   
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
-OptionError OptionManager::get_option(const string& key, vector<int>& option){
+OptionError OptionManager::get_option(const string& key, vector<int>& val){
   OptionError check_err = check_option(key, SPUD_INT, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
 
-  vector<int> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<int> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
   }
   
-  option = option_handle;
+  val = val_handle;
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, vector<int>& option, const vector<int>& default_val){
+OptionError OptionManager::get_option(const string& key, vector<int>& val, const vector<int>& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
   
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
-OptionError OptionManager::get_option(const string& key, vector< vector<int> >& option){
+OptionError OptionManager::get_option(const string& key, vector< vector<int> >& val){
   OptionError check_err = check_option(key, SPUD_INT, 2);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
@@ -270,56 +266,56 @@ OptionError OptionManager::get_option(const string& key, vector< vector<int> >& 
     return shape_err;
   }
   
-  vector<int> option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  vector<int> val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
   }
   
-  option.clear();
+  val.clear();
   for(int i = 0;i < shape[0];i++){
-    option.push_back(vector<int>(shape[1]));
+    val.push_back(vector<int>(shape[1]));
     for(int j = 0;j < shape[1];j++){
-      option[i][j] = option_handle[(i * shape[0]) + j];
+      val[i][j] = val_handle[(i * shape[0]) + j];
     }
   }
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, vector< vector<int> >& option, const vector< vector<int> >& default_val){
+OptionError OptionManager::get_option(const string& key, vector< vector<int> >& val, const vector< vector<int> >& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
 
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
-OptionError OptionManager::get_option(const string& key, string& option){
+OptionError OptionManager::get_option(const string& key, string& val){
   OptionError check_err = check_option(key, SPUD_STRING, 1);
   if(check_err != SPUD_NO_ERROR){
     return check_err;
   }
   
-  string option_handle;
-  OptionError get_err = manager.options->get_option(key, option_handle);
+  string val_handle;
+  OptionError get_err = manager.options->get_option(key, val_handle);
   if(get_err != SPUD_NO_ERROR){
     return get_err;
   }
   
-  option = option_handle;
+  val = val_handle;
   
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::get_option(const string& key, string& option, const string& default_val){
+OptionError OptionManager::get_option(const string& key, string& val, const string& default_val){
   if(!have_option(key)){
-    option = default_val;
+    val = default_val;
     return SPUD_NO_ERROR;
   }
   
-  return get_option(key, option);
+  return get_option(key, val);
 }
 
 OptionError OptionManager::add_option(const string& key){
@@ -335,14 +331,14 @@ OptionError OptionManager::add_option(const string& key){
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::set_option(const string& key, const double& option){
+OptionError OptionManager::set_option(const string& key, const double& val){
   logical_t new_key = !have_option(key);
 
-  vector<double> option_handle;
-  option_handle.push_back(option);
+  vector<double> val_handle;
+  val_handle.push_back(val);
   vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  OptionError set_err = manager.options->set_option(key, option_handle, 0, shape);
+  OptionError set_err = manager.options->set_option(key, val_handle, 0, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -352,13 +348,13 @@ OptionError OptionManager::set_option(const string& key, const double& option){
   return SPUD_NO_ERROR;
 }
       
-OptionError OptionManager::set_option(const string& key, const vector<double>& option){
+OptionError OptionManager::set_option(const string& key, const vector<double>& val){
   logical_t new_key = !have_option(key);
   
-  vector<double> option_handle = option;
+  vector<double> val_handle = val;
   vector<int> shape(2);
-  shape[0] = option.size();  shape[1] = -1;
-  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  shape[0] = val.size();  shape[1] = -1;
+  OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -368,26 +364,26 @@ OptionError OptionManager::set_option(const string& key, const vector<double>& o
   return SPUD_NO_ERROR;
 }
       
-OptionError OptionManager::set_option(const string& key, const vector< vector<double> >& option){
+OptionError OptionManager::set_option(const string& key, const vector< vector<double> >& val){
   logical_t new_key = !have_option(key);
   
-  vector<double> option_handle;
-  for(size_t i = 0;i < option.size();i++){
-    if(i > 0 and option[i].size() != option[0].size()){
+  vector<double> val_handle;
+  for(size_t i = 0;i < val.size();i++){
+    if(i > 0 and val[i].size() != val[0].size()){
       return SPUD_SHAPE_ERROR;
     }
-    for(size_t j = 0;j < option[i].size();j++){
-      option_handle.push_back(option[i][j]);
+    for(size_t j = 0;j < val[i].size();j++){
+      val_handle.push_back(val[i][j]);
     }
   }
   vector<int> shape(2);
-  shape[0] = option.size();
-  if(option.size() == 0){
+  shape[0] = val.size();
+  if(val.size() == 0){
     shape[1] = 0;
   }else{
-    shape[1] = option[0].size();
+    shape[1] = val[0].size();
   }
-  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -397,14 +393,14 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<do
   return SPUD_NO_ERROR;
 }
       
-OptionError OptionManager::set_option(const string& key, const int& option){
+OptionError OptionManager::set_option(const string& key, const int& val){
   logical_t new_key = !have_option(key);
   
-  vector<int> option_handle;
-  option_handle.push_back(option);
+  vector<int> val_handle;
+  val_handle.push_back(val);
   vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  OptionError set_err = manager.options->set_option(key, option_handle, 0, shape);
+  OptionError set_err = manager.options->set_option(key, val_handle, 0, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -414,13 +410,13 @@ OptionError OptionManager::set_option(const string& key, const int& option){
   return SPUD_NO_ERROR;
 }
       
-OptionError OptionManager::set_option(const string& key, const vector<int>& option){
+OptionError OptionManager::set_option(const string& key, const vector<int>& val){
   logical_t new_key = !have_option(key);
   
-  vector<int> option_handle = option;
+  vector<int> val_handle = val;
   vector<int> shape(2);
   shape[0] = -1;  shape[1] = -1;
-  OptionError set_err = manager.options->set_option(key, option_handle, 1, shape);
+  OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -430,26 +426,26 @@ OptionError OptionManager::set_option(const string& key, const vector<int>& opti
   return SPUD_NO_ERROR;
 }
       
-OptionError OptionManager::set_option(const string& key, const vector< vector<int> >& option){
+OptionError OptionManager::set_option(const string& key, const vector< vector<int> >& val){
   logical_t new_key = !have_option(key);
   
-  vector<int> option_handle;
-  for(size_t i = 0;i < option.size();i++){
-    if(i > 0 and option[i].size() != option[0].size()){
+  vector<int> val_handle;
+  for(size_t i = 0;i < val.size();i++){
+    if(i > 0 and val[i].size() != val[0].size()){
       return SPUD_SHAPE_ERROR;
     }
-    for(size_t j = 0;j < option[i].size();j++){
-      option_handle.push_back(option[i][j]);
+    for(size_t j = 0;j < val[i].size();j++){
+      val_handle.push_back(val[i][j]);
     }
   }
   vector<int> shape(2);
-  shape[0] = option.size();
-  if(option.size() == 0){
+  shape[0] = val.size();
+  if(val.size() == 0){
     shape[1] = 0;
   }else{
-    shape[1] = option[0].size();
+    shape[1] = val[0].size();
   }
-  OptionError set_err = manager.options->set_option(key, option_handle, 2, shape);
+  OptionError set_err = manager.options->set_option(key, val_handle, 2, shape);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -459,10 +455,10 @@ OptionError OptionManager::set_option(const string& key, const vector< vector<in
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::set_option(const string& key, const string& option){
+OptionError OptionManager::set_option(const string& key, const string& val){
   logical_t new_key = !have_option(key);
 
-  OptionError set_err = manager.options->set_option(key, option);
+  OptionError set_err = manager.options->set_option(key, val);
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }else if(new_key){
@@ -472,8 +468,8 @@ OptionError OptionManager::set_option(const string& key, const string& option){
   return SPUD_NO_ERROR;
 }
 
-OptionError OptionManager::set_option_attribute(const string& key, const string& option){
-  OptionError set_err = set_option(key, option);  
+OptionError OptionManager::set_option_attribute(const string& key, const string& val){
+  OptionError set_err = set_option(key, val);  
   if(set_err != SPUD_NO_ERROR){
     return set_err;
   }
@@ -1609,5 +1605,141 @@ string OptionManager::Option::data_as_string() const{
 }
 
 // END OF OptionManager::Option CLASS METHODS
+
+void load_options(const std::string& filename){
+  OptionManager::load_options(filename);
+  
+  return;
+}
+
+void write_options(const std::string& filename){
+  OptionManager::write_options(filename);
+  
+  return;
+}
+
+OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name){
+  return OptionManager::get_child_name(key, index, child_name);
+}
+
+int number_of_children(const std::string& key){
+  return OptionManager::number_of_children(key);
+}
+
+int option_count(const std::string& key){
+  return OptionManager::option_count(key);
+}
+
+logical_t have_option(const std::string& key){
+  return OptionManager::have_option(key);
+}
+
+OptionError get_option_type(const std::string& key, OptionType& type){
+  return OptionManager::get_option_type(key, type);
+}
+
+OptionError get_option_rank(const std::string& key, int& rank){
+  return OptionManager::get_option_rank(key, rank);
+}
+
+OptionError get_option_shape(const std::string& key, std::vector<int>& shape){
+  return OptionManager::get_option_shape(key, shape);
+}
+
+OptionError get_option(const std::string& key, double& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, double& val, const double& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+
+OptionError get_option(const std::string& key, std::vector<double>& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+      
+OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+
+OptionError get_option(const std::string& key, int& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, int& val, const int& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+      
+OptionError get_option(const std::string& key, std::vector<int>& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+      
+OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+
+OptionError get_option(const std::string& key, std::string& val){
+  return OptionManager::get_option(key, val);
+}
+
+OptionError get_option(const std::string& key, std::string& val, const std::string& default_val){
+  return OptionManager::get_option(key, val, default_val);
+}
+
+OptionError add_option(const std::string& key){
+  return OptionManager::add_option(key);
+}
+
+OptionError set_option(const std::string& key, const double& val){
+  return OptionManager::set_option(key, val);
+}
+  
+OptionError set_option(const std::string& key, const std::vector<double>& val){
+  return OptionManager::set_option(key, val);
+}
+      
+OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val){
+  return OptionManager::set_option(key, val);
+}
+
+OptionError set_option(const std::string& key, const int& val){
+  return OptionManager::set_option(key, val);
+}
+      
+OptionError set_option(const std::string& key, const std::vector<int>& val){
+  return OptionManager::set_option(key, val);
+}
+      
+OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val){
+  return OptionManager::set_option(key, val);
+}
+
+OptionError set_option(const std::string& key, const std::string& val){
+  return OptionManager::set_option(key, val);
+}
+
+OptionError set_option_attribute(const std::string& key, const std::string& val){
+  return OptionManager::set_option_attribute(key, val);
+}
+
+OptionError delete_option(const std::string& key){
+  return OptionManager::delete_option(key);
+}
 
 OptionManager OptionManager::manager;
