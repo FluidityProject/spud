@@ -660,6 +660,14 @@ Similar extensions can be made for an integer based \lstinline *integer_value* e
 \lstinline *real_dim_minus_one_symmetric_tensor* & A rank 2 tensor of reals with square dimensions equal to 1 less than the physical dimension specified.
 \end{longtable}
 
+\subsection{Including the base language in the schema}
+The base language is described in the file \verb+spud_base.rnc+.
+This file is installed in \verb+@prefix@/share/spud+, where the default
+value of \verb+@prefix@+ is \verb+/usr+. If the file is not installed
+in \verb+/usr/share/spud+ or \verb+/usr/local/share/spud+, the directory
+containing the file \verb+spud_base.rnc+ must be specified in the
+environment variable \verb+SPUD_SCHEMA_PATH+.
+
 \subsection{String data}
 
 \subsection{Symetric tensors}

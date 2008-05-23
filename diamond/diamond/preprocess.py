@@ -44,7 +44,12 @@ def preprocess(schemafile):
     # find the file
     file = None
     filename = include.attrib["href"]
-    possible_files = [os.path.join(os.path.dirname(schemafile), filename), filename]
+    possible_files = [os.path.join(os.path.dirname(schemafile), filename), filename, 
+        os.path.join("/usr/share/spud", filename), os.path.join("/usr/local/share/spud", filename)]
+    ssp = os.getenv("SPUD_SCHEMA_PATH")
+    if ssp is not none:
+      possible_files.append(os.path.join(ssp, filename))
+
     for possible_file in possible_files:
       try:
         file = open(possible_file)
@@ -54,6 +59,7 @@ def preprocess(schemafile):
 
     if file is None:
       debug.deprint("Error: could not located included file %s" % filename, 0)
+      debug.deprint("Path: %s" % possible_files)
       sys.exit(1)
 
     # parse the included xml file and steal all the nodes
