@@ -32,49 +32,49 @@
 #include "confdefs.h"
 #include "spud_enums.h"
 
-#define spud_load_options F77_FUNC(spud_load_options, SPUD_LOAD_OPTIONS)
-#define spud_write_options F77_FUNC(spud_write_options, SPUD_WRITE_OPTIONS)
-#define spud_get_child_name F77_FUNC(spud_get_child_name, SPUD_GET_CHILD_NAME)
-#define spud_number_of_children F77_FUNC(spud_number_of_children, SPUD_GET_NUMBER_OF_CHILDREN)
-#define spud_option_count F77_FUNC(spud_option_count, SPUD_OPTION_COUNT)
-#define spud_have_option F77_FUNC(spud_have_option, SPUD_HAVE_OPTION)
-#define spud_get_option_type F77_FUNC(spud_get_option_type, SPUD_GET_OPTION_TYPE)
-#define spud_get_option_rank F77_FUNC(spud_get_option_rank, SPUD_GET_OPTION_RANK)
-#define spud_get_option_shape F77_FUNC(spud_get_option_shape, SPUD_GET_OPTION_SHAPE)
-#define spud_get_option F77_FUNC(spud_get_option, SPUD_GET_OPTION)
-#define spud_add_option F77_FUNC(spud_add_option, SPUD_ADD_OPTION)
-#define spud_set_option F77_FUNC(spud_set_option, SPUD_SET_OPTION)
-#define spud_set_option_attribute F77_FUNC(spud_set_option_attribute, SPUD_SET_OPTION_ATTRIBUTE)
-#define spud_delete_option F77_FUNC(spud_delete_option, SPUD_DELETE_OPTION)
+#define cspud_load_options F77_FUNC(cspud_load_options, CSPUD_LOAD_OPTIONS)
+#define cspud_write_options F77_FUNC(cspud_write_options, CSPUD_WRITE_OPTIONS)
+#define cspud_get_child_name F77_FUNC(cspud_get_child_name, CSPUD_GET_CHILD_NAME)
+#define cspud_number_of_children F77_FUNC(cspud_number_of_children, CSPUD_GET_NUMBER_OF_CHILDREN)
+#define cspud_option_count F77_FUNC(cspud_option_count, CSPUD_OPTION_COUNT)
+#define cspud_have_option F77_FUNC(cspud_have_option, CSPUD_HAVE_OPTION)
+#define cspud_get_option_type F77_FUNC(cspud_get_option_type, CSPUD_GET_OPTION_TYPE)
+#define cspud_get_option_rank F77_FUNC(cspud_get_option_rank, CSPUD_GET_OPTION_RANK)
+#define cspud_get_option_shape F77_FUNC(cspud_get_option_shape, CSPUD_GET_OPTION_SHAPE)
+#define cspud_get_option F77_FUNC(cspud_get_option, CSPUD_GET_OPTION)
+#define cspud_add_option F77_FUNC(cspud_add_option, CSPUD_ADD_OPTION)
+#define cspud_set_option F77_FUNC(cspud_set_option, CSPUD_SET_OPTION)
+#define cspud_set_option_attribute F77_FUNC(cspud_set_option_attribute, CSPUD_SET_OPTION_ATTRIBUTE)
+#define cspud_delete_option F77_FUNC(cspud_delete_option, CSPUD_DELETE_OPTION)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  void spud_load_options(const char* filename, const int* filename_len);
-  void spud_write_options(const char* filename, const int* filename_len);
+  void cspud_load_options(const char* filename, const int* filename_len);
+  void cspud_write_options(const char* filename, const int* filename_len);
 
-  int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
+  int cspud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
 
-  int spud_number_of_children(const char* key, const int* key_len);
+  int cspud_number_of_children(const char* key, const int* key_len);
 
-  int spud_option_count(const char* key, const int* key_len);
+  int cspud_option_count(const char* key, const int* key_len);
 
-  int spud_have_option(const char* key, const int* key_len);
+  int cspud_have_option(const char* key, const int* key_len);
 
-  int spud_get_option_type(const char* key, const int* key_len, int* type);
-  int spud_get_option_rank(const char* key, const int* key_len, int* rank);
-  int spud_get_option_shape(const char* key, const int* key_len, int* shape);
+  int cspud_get_option_type(const char* key, const int* key_len, int* type);
+  int cspud_get_option_rank(const char* key, const int* key_len, int* rank);
+  int cspud_get_option_shape(const char* key, const int* key_len, int* shape);
 
-  int spud_get_option(const char* key, const int* key_len, void* val);
+  int cspud_get_option(const char* key, const int* key_len, void* val);
 
-  int spud_add_option(const char* key, const int* key_len);
+  int cspud_add_option(const char* key, const int* key_len);
 
-  int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
+  int cspud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
 
-  int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
+  int cspud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
 
-  int spud_delete_option(const char* key, const int* key_len);
+  int cspud_delete_option(const char* key, const int* key_len);
 
 #ifdef __cplusplus
 }

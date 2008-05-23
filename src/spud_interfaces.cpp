@@ -35,21 +35,21 @@ using namespace Spud;
 
 extern "C" {
 
-  void spud_load_options(const char* filename, const int* filename_len)
+  void cspud_load_options(const char* filename, const int* filename_len)
   {
     load_options(string(filename, *filename_len));
 
     return;
   }
 
-  void spud_write_options(const char* filename, const int* filename_len)
+  void cspud_write_options(const char* filename, const int* filename_len)
   {
     write_options(string(filename, *filename_len));
 
     return;
   }
 
-  int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
+  int cspud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
     string child_name_handle;
     OptionError get_name_err = get_child_name(string(key, *key_len), *index, child_name_handle);
     if(get_name_err != SPUD_NO_ERROR){
@@ -62,19 +62,19 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int spud_number_of_children(const char* key, const int* key_len){
+  int cspud_number_of_children(const char* key, const int* key_len){
     return number_of_children(string(key, *key_len));
   }
 
-  int spud_option_count(const char* key, const int* key_len){
+  int cspud_option_count(const char* key, const int* key_len){
     return option_count(string(key, *key_len));
   }
 
-  int spud_have_option(const char* key, const int* key_len){
+  int cspud_have_option(const char* key, const int* key_len){
     return have_option(string(key, *key_len)) ? 1 : 0;
   }
 
-  int spud_get_option_type(const char* key, const int* key_len, int* type){
+  int cspud_get_option_type(const char* key, const int* key_len, int* type){
     OptionType type_handle;
     OptionError get_type_err = get_option_type(string(key, *key_len), type_handle);
     if(get_type_err != SPUD_NO_ERROR){
@@ -86,11 +86,11 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int spud_get_option_rank(const char* key, const int* key_len, int* rank){
+  int cspud_get_option_rank(const char* key, const int* key_len, int* rank){
     return get_option_rank(string(key, *key_len), *rank);
   }
 
-  int spud_get_option_shape(const char* key, const int* key_len, int* shape){
+  int cspud_get_option_shape(const char* key, const int* key_len, int* shape){
     vector<int> shape_handle;
     OptionError get_shape_err = get_option_shape(string(key, *key_len), shape_handle);
     if(get_shape_err != SPUD_NO_ERROR){
@@ -105,7 +105,7 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int spud_get_option(const char* key, const int* key_len, void* val){
+  int cspud_get_option(const char* key, const int* key_len, void* val){
     string key_handle(key, *key_len);
 
     OptionType type;
@@ -196,11 +196,11 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int spud_add_option(const char* key, const int* key_len){
+  int cspud_add_option(const char* key, const int* key_len){
     return add_option(string(key, *key_len));
   }
 
-  int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
+  int cspud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
     string key_handle(key, *key_len);
 
     if(*type == SPUD_DOUBLE){
@@ -254,11 +254,11 @@ extern "C" {
     }
   }
 
-  int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
+  int cspud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
     return set_option_attribute(string(key, *key_len), string(val, *val_len));
   }
 
-  int spud_delete_option(const char* key, const int* key_len){
+  int cspud_delete_option(const char* key, const int* key_len){
     return delete_option(string(key, *key_len));
   }
 

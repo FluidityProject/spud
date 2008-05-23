@@ -34,19 +34,19 @@ module spud
   private
 
   integer, parameter, public :: &
-    & SPUD_REAL      = 0, &
-    & SPUD_INTEGER   = 1, &
-    & SPUD_NONE      = 2, &
-    & SPUD_CHARACTER = 3
+    & cspud_REAL      = 0, &
+    & cspud_INTEGER   = 1, &
+    & cspud_NONE      = 2, &
+    & cspud_CHARACTER = 3
 
   integer, parameter, public :: &
-    & SPUD_NO_ERROR                = 0, &
-    & SPUD_KEY_ERROR               = 1, &
-    & SPUD_TYPE_ERROR              = 2, &
-    & SPUD_RANK_ERROR              = 3, &
-    & SPUD_SHAPE_ERROR             = 4, &
-    & SPUD_NEW_KEY_WARNING         = -1, &
-    & SPUD_ATTR_SET_FAILED_WARNING = -2
+    & cspud_NO_ERROR                = 0, &
+    & cspud_KEY_ERROR               = 1, &
+    & cspud_TYPE_ERROR              = 2, &
+    & cspud_RANK_ERROR              = 3, &
+    & cspud_SHAPE_ERROR             = 4, &
+    & cspud_NEW_KEY_WARNING         = -1, &
+    & cspud_ATTR_SET_FAILED_WARNING = -2
 
   public :: &
     & load_options, &
@@ -88,101 +88,101 @@ module spud
 
   !! C interfaces
   interface
-    subroutine spud_load_options(key, key_len)
+    subroutine cspud_load_options(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-    end subroutine spud_load_options
+    end subroutine cspud_load_options
 
-    subroutine spud_write_options(key, key_len)
+    subroutine cspud_write_options(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-    end subroutine spud_write_options
+    end subroutine cspud_write_options
 
-    function spud_get_child_name(key, key_len, index, child_name, child_name_len)
+    function cspud_get_child_name(key, key_len, index, child_name, child_name_len)
       integer, intent(in) :: key_len
       integer, intent(in) :: child_name_len
       character(len = key_len), intent(in) :: key
       integer, intent(in) :: index
       character(len = child_name_len), intent(out) :: child_name
-      integer :: spud_get_child_name
-    end function spud_get_child_name
+      integer :: cspud_get_child_name
+    end function cspud_get_child_name
 
-    function spud_number_of_children(key, key_len)
+    function cspud_number_of_children(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-      integer :: spud_number_of_children
-    end function spud_number_of_children
+      integer :: cspud_number_of_children
+    end function cspud_number_of_children
 
-    function spud_option_count(key, key_len)
+    function cspud_option_count(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-      integer :: spud_option_count
-    end function spud_option_count
+      integer :: cspud_option_count
+    end function cspud_option_count
 
-    function spud_have_option(key, key_len)
+    function cspud_have_option(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-      integer :: spud_have_option
-    end function spud_have_option
+      integer :: cspud_have_option
+    end function cspud_have_option
 
-    function spud_get_option_type(key, key_len, option_type)
+    function cspud_get_option_type(key, key_len, option_type)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, intent(out) :: option_type
-      integer :: spud_get_option_type
-    end function spud_get_option_type
+      integer :: cspud_get_option_type
+    end function cspud_get_option_type
 
-    function spud_get_option_rank(key, key_len, option_rank)
+    function cspud_get_option_rank(key, key_len, option_rank)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, intent(out) :: option_rank
-      integer :: spud_get_option_rank
-    end function spud_get_option_rank
+      integer :: cspud_get_option_rank
+    end function cspud_get_option_rank
 
-    function spud_get_option_shape(key, key_len, shape)
+    function cspud_get_option_shape(key, key_len, shape)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, dimension(2), intent(out) :: shape
-      integer :: spud_get_option_shape
-    end function spud_get_option_shape
+      integer :: cspud_get_option_shape
+    end function cspud_get_option_shape
 
-    function spud_add_option(key, key_len)
+    function cspud_add_option(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-      integer :: spud_add_option
-    end function spud_add_option
+      integer :: cspud_add_option
+    end function cspud_add_option
 
-    function spud_set_option_attribute(key, key_len, val, val_len)
+    function cspud_set_option_attribute(key, key_len, val, val_len)
       integer, intent(in) :: key_len
       integer, intent(in) :: val_len
       character(len = key_len), intent(in) :: key
       character(len = val_len), intent(in) :: val
-      integer :: spud_set_option_attribute
-    end function spud_set_option_attribute
+      integer :: cspud_set_option_attribute
+    end function cspud_set_option_attribute
 
-    function spud_delete_option(key, key_len)
+    function cspud_delete_option(key, key_len)
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
-      integer :: spud_delete_option
-    end function spud_delete_option
+      integer :: cspud_delete_option
+    end function cspud_delete_option
   end interface
 
   !! Implicitly interfaced as can take multiple argument types
-  integer, external :: spud_get_option, spud_set_option
+  integer, external :: cspud_get_option, cspud_set_option
 
 contains
 
   subroutine load_options(filename)
     character(len = * ), intent(in) :: filename
 
-    call spud_load_options(filename, len_trim(filename))
+    call cspud_load_options(filename, len_trim(filename))
 
   end subroutine load_options
 
   subroutine write_options(filename)
     character(len = *), intent(in) :: filename
 
-    call spud_write_options(filename, len_trim(filename))
+    call cspud_write_options(filename, len_trim(filename))
 
   end subroutine write_options
 
@@ -196,12 +196,12 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     lchild_name = ""
-    lstat = spud_get_child_name(key, len_trim(key), index, lchild_name, len(lchild_name))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_get_child_name(key, len_trim(key), index, lchild_name, len(lchild_name))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -215,7 +215,7 @@ contains
 
     integer :: number_of_children
 
-    number_of_children = spud_number_of_children(key, len_trim(key))
+    number_of_children = cspud_number_of_children(key, len_trim(key))
 
   end function number_of_children
 
@@ -224,7 +224,7 @@ contains
 
     integer :: option_count
 
-    option_count = spud_option_count(key, len_trim(key))
+    option_count = cspud_option_count(key, len_trim(key))
 
   end function option_count
 
@@ -233,7 +233,7 @@ contains
 
     logical :: have_option
 
-    have_option = (spud_have_option(key, len_trim(key)) /= 0)
+    have_option = (cspud_have_option(key, len_trim(key)) /= 0)
 
   end function have_option
 
@@ -246,11 +246,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_get_option_type(key, len_trim(key), option_type)
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_get_option_type(key, len_trim(key), option_type)
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -266,11 +266,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_get_option_rank(key, len_trim(key), option_rank)
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_get_option_rank(key, len_trim(key), option_rank)
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -286,11 +286,11 @@ contains
     integer :: lstat, shape_store
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_get_option_shape(key, len_trim(key), option_shape(1:2))  ! Slicing required by GCC 4.2
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_get_option_shape(key, len_trim(key), option_shape(1:2))  ! Slicing required by GCC 4.2
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -312,19 +312,19 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_REAL, 0, (/-1, -1/), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_REAL, 0, (/-1, -1/), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -341,19 +341,19 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_REAL, 1, (/size(val), -1/), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_REAL, 1, (/size(val), -1/), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -371,19 +371,19 @@ contains
     real, dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_REAL, 2, shape(val), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_REAL, 2, shape(val), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val_handle)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val_handle)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -405,19 +405,19 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_INTEGER, 0, (/-1, -1/), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_INTEGER, 0, (/-1, -1/), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -434,19 +434,19 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_INTEGER, 1, (/size(val), -1/), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_INTEGER, 1, (/size(val), -1/), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -464,19 +464,19 @@ contains
     integer, dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = default
     else
-      call check_option(key, SPUD_INTEGER, 2, shape(val), lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_INTEGER, 2, shape(val), lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = spud_get_option(key, len_trim(key), val_handle)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), val_handle)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -500,25 +500,25 @@ contains
     integer, dimension(2) :: lshape
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     if(.not. have_option(key) .and. present(default)) then
       val = trim(default)
     else
-      call check_option(key, SPUD_CHARACTER, 1, stat = lstat)
-      if(lstat /= SPUD_NO_ERROR) then
+      call check_option(key, cspud_CHARACTER, 1, stat = lstat)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
       lshape = option_shape(key, stat)
       if(lshape(1) > len(val)) then
-        call option_error(key, SPUD_SHAPE_ERROR, stat)
+        call option_error(key, cspud_SHAPE_ERROR, stat)
         return
       end if
       lval = ""
-      lstat = spud_get_option(key, len_trim(key), lval)
-      if(lstat /= SPUD_NO_ERROR) then
+      lstat = cspud_get_option(key, len_trim(key), lval)
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
@@ -535,11 +535,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_add_option(key, len_trim(key))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_add_option(key, len_trim(key))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -554,11 +554,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 0, (/-1, -1/))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val, cspud_REAL, 0, (/-1, -1/))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -573,11 +573,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_REAL, 1, (/size(val), -1/))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val, cspud_REAL, 1, (/size(val), -1/))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -593,7 +593,7 @@ contains
     real, dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     do i = 1, size(val, 1)
@@ -602,8 +602,8 @@ contains
       end do
     end do
 
-    lstat = spud_set_option(key, len_trim(key), val_handle, SPUD_REAL, 2, shape(val_handle))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val_handle, cspud_REAL, 2, shape(val_handle))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -618,11 +618,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 0, (/-1, -1/))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val, cspud_INTEGER, 0, (/-1, -1/))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -637,11 +637,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_INTEGER, 1, (/size(val), -1/))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val, cspud_INTEGER, 1, (/size(val), -1/))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -657,7 +657,7 @@ contains
     integer, dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     do i = 1, size(val, 1)
@@ -666,8 +666,8 @@ contains
       end do
     end do
 
-    lstat = spud_set_option(key, len_trim(key), val_handle, SPUD_INTEGER, 2, shape(val_handle))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val_handle, cspud_INTEGER, 2, shape(val_handle))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -682,11 +682,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option(key, len_trim(key), val, SPUD_CHARACTER, 1, (/len_trim(val), -1/))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option(key, len_trim(key), val, cspud_CHARACTER, 1, (/len_trim(val), -1/))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -701,11 +701,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_set_option_attribute(key, len_trim(key), val, len_trim(val))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_set_option_attribute(key, len_trim(key), val, len_trim(val))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -719,11 +719,11 @@ contains
     integer :: lstat
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
-    lstat = spud_delete_option(key, len_trim(key))
-    if(lstat /= SPUD_NO_ERROR) then
+    lstat = cspud_delete_option(key, len_trim(key))
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
@@ -745,19 +745,19 @@ contains
     end if
 
     select case(error)
-      case(SPUD_NO_ERROR)
+      case(cspud_NO_ERROR)
         return
-      case(SPUD_KEY_ERROR)
+      case(cspud_KEY_ERROR)
         write(0, *) "Option key error. Key is: " // trim(key)
-      case(SPUD_TYPE_ERROR)
+      case(cspud_TYPE_ERROR)
         write(0, *) "Option type error. Key is: " // trim(key)
-      case(SPUD_RANK_ERROR)
+      case(cspud_RANK_ERROR)
         write(0, *) "Option rank error. Key is: " // trim(key)
-      case(SPUD_SHAPE_ERROR)
+      case(cspud_SHAPE_ERROR)
         write(0, *) "Option shape error. Key is: " // trim(key)
-      case(SPUD_NEW_KEY_WARNING)
+      case(cspud_NEW_KEY_WARNING)
         write(0, *) "Option warning. Key is not in the options tree: " // trim(key)
-      case(SPUD_ATTR_SET_FAILED_WARNING)
+      case(cspud_ATTR_SET_FAILED_WARNING)
         write(0, *) "Option warning. Option cannot be set as an attribute. Key is " // trim(key)
       case default
         write(0, *) "Unknown option error. Key is: " // trim(key)
@@ -781,37 +781,37 @@ contains
     integer, dimension(2) :: lshape
 
     if(present(stat)) then
-      stat = SPUD_NO_ERROR
+      stat = cspud_NO_ERROR
     end if
 
     ltype = option_type(key, lstat)
-    if(lstat /= SPUD_NO_ERROR) then
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
 
     lrank = option_rank(key, lstat)
-    if(lstat /= SPUD_NO_ERROR) then
+    if(lstat /= cspud_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
 
     if(type /= ltype) then
-      call option_error(key, SPUD_TYPE_ERROR, stat)
+      call option_error(key, cspud_TYPE_ERROR, stat)
       return
     else if(rank /= lrank) then
-      call option_error(key, SPUD_RANK_ERROR, stat)
+      call option_error(key, cspud_RANK_ERROR, stat)
       return
     else if(present(shape)) then
       lshape = option_shape(key, stat)
-      if(lstat /= SPUD_NO_ERROR) then
+      if(lstat /= cspud_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
       end if
 
       do i = 1, rank
         if(shape(i) /= lshape(i)) then
-          call option_error(key, SPUD_SHAPE_ERROR, stat)
+          call option_error(key, cspud_SHAPE_ERROR, stat)
           return
         end if
       end do
