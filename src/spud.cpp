@@ -719,8 +719,7 @@ namespace Spud{
     split_name(key, name, index, branch);
 
     if(name.empty()){
-      cerr << "ERROR: child name cannot be empty" << endl;
-      exit(-1);
+      return NULL;
     }
 
     multimap<string, OptionManager::Option>::const_iterator it;
