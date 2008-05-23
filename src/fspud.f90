@@ -84,7 +84,7 @@ module spud
       & set_option_character
   end interface
 
-  !! C interfaces
+  ! C interfaces
   interface
     subroutine cspud_load_options(key, key_len)
       integer, intent(in) :: key_len
@@ -165,7 +165,7 @@ module spud
     end function cspud_delete_option
   end interface
 
-  !! Implicitly interfaced as can take multiple argument types
+  ! Implicitly interfaced as can take multiple argument types
   integer, external :: cspud_get_option, cspud_set_option
 
 contains
@@ -766,8 +766,8 @@ contains
   end subroutine option_error
 
   subroutine check_option(key, type, rank, shape, stat)
-    !!< Check key existence, type, rank, and optionally shape, of the option
-    !!< with the supplied key
+    !!< Check existence, type, rank, and optionally shape, of the option with
+    !!< the supplied key
 
     character(len = *), intent(in) :: key
     integer, intent(in) :: type
@@ -780,6 +780,11 @@ contains
 
     if(present(stat)) then
       stat = SPUD_NO_ERROR
+    end if
+    
+    if(.not. have_option(key)) then
+      call option_error(key, SPUD_KEY_ERROR, stat)
+      return
     end if
 
     ltype = option_type(key, lstat)
