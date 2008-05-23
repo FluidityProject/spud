@@ -46,6 +46,7 @@
 #define cspud_set_option F77_FUNC(cspud_set_option, CSPUD_SET_OPTION)
 #define cspud_set_option_attribute F77_FUNC(cspud_set_option_attribute, CSPUD_SET_OPTION_ATTRIBUTE)
 #define cspud_delete_option F77_FUNC(cspud_delete_option, CSPUD_DELETE_OPTION)
+#define cspud_print_options F77_FUNC(cspud_print_options, CSPUD_PRINT_OPTIONS)
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,6 +76,8 @@ extern "C" {
   int cspud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
 
   int cspud_delete_option(const char* key, const int* key_len);
+
+  void cspud_print_options();
 
 #ifdef __cplusplus
 }

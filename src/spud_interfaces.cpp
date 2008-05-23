@@ -262,4 +262,10 @@ extern "C" {
     return delete_option(string(key, *key_len));
   }
 
+  void cspud_print_options(){
+    print_options();
+
+    return;
+  }
+
 }

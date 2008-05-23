@@ -495,6 +495,12 @@ namespace Spud{
     return SPUD_NO_ERROR;
   }
 
+  void OptionManager::print_options(){
+    manager.options->print();
+
+    return;
+  }
+
   // PRIVATE METHODS
 
   OptionManager::OptionManager(){
@@ -1743,6 +1749,12 @@ namespace Spud{
 
   OptionError delete_option(const string& key){
     return OptionManager::delete_option(key);
+  }
+
+  void print_options(){
+    OptionManager::print_options();
+
+    return;
   }
 
 }

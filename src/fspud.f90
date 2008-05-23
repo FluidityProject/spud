@@ -60,7 +60,8 @@ module spud
     & add_option, &
     & set_option, &
     & set_option_attribute, &
-    & delete_option
+    & delete_option, &
+    & print_options
 
   interface get_option
     module procedure &
@@ -163,6 +164,9 @@ module spud
       character(len = key_len), intent(in) :: key
       integer :: cspud_delete_option
     end function cspud_delete_option
+
+    subroutine cspud_print_options()
+    end subroutine cspud_print_options
   end interface
 
   ! Implicitly interfaced as can take multiple argument types
@@ -728,6 +732,12 @@ contains
 
   end subroutine delete_option
 
+  subroutine print_options()
+
+    call cspud_print_options()
+
+  end subroutine print_options
+
   subroutine option_error(key, error, stat)
     !!< Handle option errors
 
@@ -781,7 +791,7 @@ contains
     if(present(stat)) then
       stat = SPUD_NO_ERROR
     end if
-    
+
     if(.not. have_option(key)) then
       call option_error(key, SPUD_KEY_ERROR, stat)
       return

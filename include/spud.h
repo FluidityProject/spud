@@ -98,6 +98,8 @@ namespace Spud{
 
       static OptionError delete_option(const std::string& key);
 
+      static void print_options();
+
     private:
 
       OptionManager();
@@ -416,6 +418,8 @@ namespace Spud{
   OptionError set_option_attribute(const std::string& key, const std::string& val);
 
   OptionError delete_option(const std::string& key);
+
+  void print_options();
 
 }
 
