@@ -319,4 +319,70 @@
     </element>
     <ref name="comment"/>
   </define>
+  <!-- A dim-1 x dim-1 real matrix (rank 2 tensor). -->
+  <define name="real_dim_minus_one_tensor">
+    <element name="real_value">
+      <attribute name="symmetric">
+        <value>false</value>
+      </attribute>
+      <attribute name="rank">
+        <value>2</value>
+      </attribute>
+      <!--
+        Setting dim1, dim2 to a function of dim allows the gui to set the
+        tensor to the right shape.
+      -->
+      <attribute name="dim1">
+        <value>dim-1</value>
+      </attribute>
+      <attribute name="dim2">
+        <value>dim-1</value>
+      </attribute>
+      <attribute name="shape">
+        <list>
+          <data type="integer"/>
+          <data type="integer"/>
+        </list>
+      </attribute>
+      <list>
+        <oneOrMore>
+          <data type="float"/>
+        </oneOrMore>
+      </list>
+    </element>
+    <ref name="comment"/>
+  </define>
+  <!-- A dim-1 x dim-1 real matrix (rank 2 tensor) constrained to be symmetric. -->
+  <define name="real_dim_minus_one_symmetric_tensor">
+    <element name="real_value">
+      <attribute name="symmetric">
+        <value>true</value>
+      </attribute>
+      <attribute name="rank">
+        <value>2</value>
+      </attribute>
+      <!--
+        Setting dim1, dim2 to a function of dim allows the gui to set the
+        tensor to the right shape.
+      -->
+      <attribute name="dim1">
+        <value>dim-1</value>
+      </attribute>
+      <attribute name="dim2">
+        <value>dim-1</value>
+      </attribute>
+      <attribute name="shape">
+        <list>
+          <data type="integer"/>
+          <data type="integer"/>
+        </list>
+      </attribute>
+      <list>
+        <oneOrMore>
+          <data type="float"/>
+        </oneOrMore>
+      </list>
+    </element>
+    <ref name="comment"/>
+  </define>
 </grammar>

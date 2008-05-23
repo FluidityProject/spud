@@ -191,3 +191,35 @@ real_dim_symmetric_tensor =
       },
       comment
    )
+
+# A dim-1 x dim-1 real matrix (rank 2 tensor).
+real_dim_minus_one_tensor =
+   (
+      element real_value{
+         attribute symmetric {"false"},
+         attribute rank { "2" },
+         # Setting dim1, dim2 to a function of dim allows the gui to set the
+         # tensor to the right shape.
+         attribute dim1 { "dim-1" },
+         attribute dim2 { "dim-1" },
+         attribute shape { list{xsd:integer, xsd:integer} },
+         list {xsd:float+}
+      },
+      comment
+   )
+
+# A dim-1 x dim-1 real matrix (rank 2 tensor) constrained to be symmetric.
+real_dim_minus_one_symmetric_tensor =
+   (
+      element real_value{
+         attribute symmetric {"true"},
+         attribute rank { "2" },
+         # Setting dim1, dim2 to a function of dim allows the gui to set the
+         # tensor to the right shape.
+         attribute dim1 { "dim-1" },
+         attribute dim2 { "dim-1" },
+         attribute shape { list{xsd:integer, xsd:integer} },
+         list {xsd:float+}
+      },
+      comment
+   )
