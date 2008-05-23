@@ -27,26 +27,12 @@
 */
 
 #include "confdefs.h"
-#include "fmangle.h"
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-#ifdef HAVE_PETSC
-#include "petsc.h"
-#endif
 
-extern "C" {
+extern "C"{
   void TESTNAME();
-  void set_global_debug_level_fc(int *val);
-  void set_pseudo2d_domain_fc(int* val);
 }
 
-int main(int argc, char **argv) 
-{
-  int val = 0;
-
-  set_global_debug_level_fc(&val);
-  set_pseudo2d_domain_fc(&val);
+int main(int argc, char **argv) {
 #ifdef HAVE_MPI
   MPI::Init(argc, argv);
 #endif
@@ -59,5 +45,4 @@ int main(int argc, char **argv)
 #endif
 
   return 0;
-
 }

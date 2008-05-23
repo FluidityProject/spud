@@ -34,15 +34,16 @@ CXX     = @CXX@
 CXXFLAGS= @CPPFLAGS@ @CXXFLAGS@ -Iinclude
 
 MAKE    = @MAKE@
-AR  = @AR@
+AR      = @AR@
 ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
-HEADERS=include/spud.h include/cspud.h include/spud_enums.h
+HEADERS = include/spud.h include/cspud.h include/spud_enums.h
+
+MODS = spud.mod
+OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
 
 VPATH = src/
-
-OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
 
 .SUFFIXES: .f90 .F90 .c .cpp .o .a
 
@@ -51,9 +52,14 @@ OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyx
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
-default: $(OBJS)
+default: libspud.a
+
+libspud.a: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
+test: libspud.a
+	@cd src/tests; $(MAKE)
+	
 .PHONY:doc
 
 doc: 
@@ -62,7 +68,7 @@ doc:
 install: libspud.a
 	@INSTALL@ -d $(DESTDIR)@prefix@/share/spud
 	@INSTALL@ $(LIB) $(DESTDIR)@prefix@/lib
-	@INSTALL@ spud.mod $(DESTDIR)@prefix@/include
+	@INSTALL@ $(MODS) $(DESTDIR)@prefix@/include
 	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
 	@INSTALL@ -d $(DESTDIR)@prefix@/bin
 	@INSTALL@ -m755 bin/spud-preprocess $(DESTDIR)@prefix@/bin
@@ -71,7 +77,8 @@ install: libspud.a
 
 clean:
 	@cd doc; $(MAKE) clean
-	rm -f *.o libspud.a spud.mod
+	rm -f *.o libspud.a $(MODS) $(OBJS)
+	@cd src/tests; $(MAKE) clean
 
 distclean:
 	@MAKE@ clean

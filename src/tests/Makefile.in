@@ -26,52 +26,43 @@
 #    USA
 
 FC      = @FC@
-FCFLAGS = @FCFLAGS@ -I../../include @MODINC_FLAG@../
+FCFLAGS = @FCFLAGS@ -I../..
 
-CC  = @CC@
-CFLAGS  = @CFLAGS@ -I../../include
-
-CXX = @CXX@ -I../../include
+CXX     = @CXX@
 CXXFLAGS= @CPPFLAGS@ @CXXFLAGS@ -I../../include
 
-LFLAGS  = @LFLAGS@
+LIBS = @LIBS@ ../../libspud.a
 
-LIBS = @LIBS@ @LAPACK_LIBS@
-
-# the test binaries NOT to be built
+# The test binaries NOT to be built
 DISABLED_TESTS=
 
-# the test programs to be built:
-TEST_BINARIES=$(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.F90)))
+# The test programs to be built
+TEST_BINARIES = $(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.F90)))
+
+test: unittest
 
 unittest: $(TEST_BINARIES)
-	ln -sf $(addprefix ../../src/tests/,$(TEST_BINARIES)) ../../bin/tests/
+	./$(TEST_BINARIES)
 
-.SUFFIXES: .f .f90 .F90 .F .c .cpp .o .a $(.SUFFIXES)
+.SUFFIXES: .f90 .F90 .c .cpp .o .a $(.SUFFIXES)
 
 %.o:	%.f90
 	$(FC) $(FCFLAGS) -c $<
 %.o:	%.F90
 	$(FC) $(FCFLAGS) -c $<
-%.o:	%.c
-	$(CC) $(CFLAGS) -c $<
 %.o:	%.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
-# creates a TESTNAME_main.o from test_main.cpp which calls the subroutine
+# Creates a TESTNAME_main.o from test_main.cpp which calls the subroutine
 # TESTNAME, that should be a subroutine in TESTNAME.F90
-%_main.o:
-	$(CXX) $(CXXFLAGS) -D TESTNAME=$(subst _main.o,,$@)_ -o $@ -c test_main.cpp @PROFILING_FLAG@
+%_main.o: unittest_tools.o
+	$(CXX) $(CXXFLAGS) -D TESTNAME=$(subst _main.o,,$@)_ -o $@ -c test_main.cpp
 
-# link this TESTNAME_main.o with TESTNAME.o from TESTNAME.F90
-%: %_main.o %.o lib/
-	$(CXX) -o $@ $(filter %.o,$^) -L../../lib/ -lfemtools $(LIBS) @PROFILING_FLAG@
-
-# make a temp sym-link to the directory containing libspud.
-lib/:
-	ln -s ../../lib
+# Link this TESTNAME_main.o with TESTNAME.o from TESTNAME.F90
+%: %_main.o %.o
+	$(CXX) -o $@ $(filter %.o,$^) unittest_tools.o  $(LIBS)
 
 clean:
 	rm -f $(TEST_BINARIES)
 	rm -f *.o *.mod
-	rm -f lib
+	rm -rf bin
