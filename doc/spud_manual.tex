@@ -663,10 +663,11 @@ Similar extensions can be made for an integer based \lstinline *integer_value* e
 \subsection{Including the base language in the schema}
 The base language is described in the file \verb+spud_base.rnc+.
 This file is installed in \verb+@prefix@/share/spud+, where the default
-value of \verb+@prefix@+ is \verb+/usr+. If the file is not installed
-in \verb+/usr/share/spud+ or \verb+/usr/local/share/spud+, the directory
-containing the file \verb+spud_base.rnc+ must be specified in the
-environment variable \verb+SPUD_SCHEMA_PATH+.
+value of \verb+@prefix@+ is \verb+/usr+. It may be referenced
+without prefixing the path. The top line of every spud schema should read
+\begin{verbatim}
+include "spud_base.rnc"
+\end{verbatim}
 
 \subsection{String data}
 

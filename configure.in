@@ -359,4 +359,4 @@ AC_SUBST(MAKE)
 # strip out #allow from start if there)
 cat confdefs.h | grep "^#[dua][enl][fdl][ieo][nfw]" | sed -e 's/^#allow//' > include/confdefs.h
 
-AC_OUTPUT(Makefile bin/spud-preprocess)
+AC_OUTPUT(Makefile bin/spud-preprocess diamond/diamond/preprocess.py)

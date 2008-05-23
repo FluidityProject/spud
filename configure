@@ -7253,7 +7253,7 @@ VERSION=`svnversion .`
 # strip out #allow from start if there)
 cat confdefs.h | grep "^#[dua][enl][fdl][ieo][nfw]" | sed -e 's/^#allow//' > include/confdefs.h
 
-ac_config_files="$ac_config_files Makefile bin/spud-preprocess"
+ac_config_files="$ac_config_files Makefile bin/spud-preprocess diamond/diamond/preprocess.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7825,6 +7825,7 @@ do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "bin/spud-preprocess") CONFIG_FILES="$CONFIG_FILES bin/spud-preprocess" ;;
+    "diamond/diamond/preprocess.py") CONFIG_FILES="$CONFIG_FILES diamond/diamond/preprocess.py" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
