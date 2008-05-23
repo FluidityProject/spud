@@ -1,3 +1,10 @@
+spud (0.2.3) unstable; urgency=low
+
+  * Changed python2.5 dependency to python
+  * Added spud-preprocess
+
+ -- David Ham <david.ham@imperial.ac.uk>  Fri, 23 May 2008 17:45:54 +0100
+
 spud (0.2.1) unstable; urgency=low
 
   * Caused package to conflict with and replace python-diamond.

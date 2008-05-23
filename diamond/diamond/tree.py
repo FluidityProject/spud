@@ -22,7 +22,8 @@ import cPickle as pickle
 import cStringIO as StringIO
 import re
 import zlib
-from lxml import etree
+
+import Ft.Xml
 
 import debug
 
@@ -230,37 +231,38 @@ class Tree:
     else:
       file = filename
 
-    xmlTree=etree.tostring(self.write_core(etree.Element(self.name)), pretty_print = True, xml_declaration = True,
-    	encoding="utf8")
-    
-    file.write(xmlTree)
-    file.close()
+    writer = Ft.Xml.MarkupWriter(file, indent=u'yes')
+    writer.startDocument()
+    self.write_core(writer)
+    writer.endDocument()
 
-  def write_core(self, tree):
+  def write_core(self, writer):
     """Write to XML; this is the part that recurses"""
-    
+    writer.startElement(unicode(self.name))
     for key in self.attrs.keys():
       val = self.attrs[key]
       output_val = val[1]
       if output_val is not None:
-        tree.set(unicode(key), unicode(output_val))
-        
+        writer.attribute(unicode(key), unicode(output_val))
+
     for child in self.children:
       if child.active is True:
-        sub_tree=etree.Element(child.name)
-        child.write_core(sub_tree)
-        tree.append(sub_tree)
+        child.write_core(writer)
       else:
         if child.cardinality == '?':
-          comment_buffer = StringIO.StringIO(etree.tostring(child.write_core(etree.Element(self.name))))
+          comment_buffer = StringIO.StringIO()
+          comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
+          comment_writer.startDocument()
+          child.write_core(comment_writer)
+          comment_writer.endDocument()
           comment_text = ("DIAMOND MAGIC COMMENT (inactive optional subtree %s):\n" % child.schemaname)
           comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-          tree.append(etree.Comment(unicode(comment_text)))
-        
-    if self.data is not None:
-      tree.text=(unicode(self.data))
+          writer.comment(unicode(comment_text))
 
-    return tree
+    if self.data is not None:
+      writer.text(unicode(self.data))
+
+    writer.endElement(unicode(self.name))
 
   def pickle(self):
     if hasattr(self, "xmlnode"):
@@ -461,16 +463,20 @@ class Choice:
     for choice in self.l:
       choice.parent = parent
 
-  def write_core(self, tree):
+  def write_core(self, writer):
     l = self.l
     for i in range(len(l)):
       if self.index == i:
         l[i].write_core(writer)
       else:
-        comment_buffer = StringIO.StringIO(etree.tostring(l[i].write_core(etree.Element(l[i].name))))
+        comment_buffer = StringIO.StringIO()
+        comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
+        comment_writer.startDocument()
+        l[i].write_core(comment_writer)
+        comment_writer.endDocument()
         comment_text = ("DIAMOND MAGIC COMMENT (neglected choice subtree %s):\n" % l[i].schemaname)
         comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-        tree.append(etree.Comment(unicode(comment_text)))
+        writer.comment(unicode(comment_text))
 
   def choices(self):
     return self.l
