@@ -97,8 +97,8 @@ interrogated via keys.
 
 \section{Option key syntax}
 
-The option key syntax is similar to both Unix file path syntax and
-XPath XML query syntax. Consider the simple example, \verb+simple.xml+:
+The option key syntax is similar to Unix file path syntax.
+Consider the simple example, \verb+simple.xml+:
 \begin{verbatim}
 <model_options>
   <simulation_name>
@@ -134,6 +134,7 @@ called \verb+simulation_name+ that is a child of the root element
 \verb+/geometry/dimension+ accesses the element \verb+dimension+ which
 in turn is a child of the root element.
 
+\subsection{Multiple elements}
 One of the restrictions that Spud places on RELAX NG schemas
 is that \emph{each element of the same name under the same parent
 must be differentiated by a \texttt{name} attribute}. An example will
@@ -196,9 +197,16 @@ by \verb+name+ by
 /geometry/mesh::VelocityMesh
 \end{verbatim}
 
-\subsection{Multiple elements}
-
 \subsection{Attributes}
+For simplicity, attributes of an element are treated the same as children
+of the element. Consider the example above: \verb+name+ is an attribute
+of the \verb+mesh+ element. The \verb+name+ of the first \verb+mesh+ element
+may be accessed by
+\begin{verbatim}
+/geometry/mesh[0]/name
+\end{verbatim}
+that is, the \verb+name+ attribute is accessed the same way as a child element
+called \verb+name+ would be.
 
 \section{Language specific features}
 
