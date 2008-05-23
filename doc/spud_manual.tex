@@ -55,7 +55,7 @@ options type:
 \section{Debian and Ubuntu packages}
 
 Debian and Ubuntu packages are available from the Applied Modelling and
-Computation Group at Imperial College London. The Debian repositiory may be
+Computation Group at Imperial College London. The Debian repository may be
 accessed by adding the following lines to \verb+/etc/apt/sources.list+:
 
 \begin{verbatim}
@@ -63,7 +63,7 @@ deb http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
 deb-src http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
 \end{verbatim}
 
-The Ubuntu repsository may be accessed via the following lines:
+The Ubuntu repository may be accessed via the following lines:
 
 \begin{verbatim}
 deb http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
@@ -95,9 +95,106 @@ tree of nested elements in the xml. Nodes in this tree are indexed by
 strings so that the options tree is a form of dictionary in which values are
 interrogated via keys. 
 
-\section{Option path syntax}
+\section{Option key syntax}
 
-The option key syntax is similar to Unix file path syntax ...
+The option key syntax is similar to both Unix file path syntax and
+XPath XML query syntax. Consider the simple example, \verb+simple.xml+:
+\begin{verbatim}
+<model_options>
+  <simulation_name>
+    <string_value lines="1">Basic simulation</string_value>
+  </simulation_name>
+  <geometry>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
+  </geometry>
+</model_options>                                                                                                                                                                                               
+\end{verbatim}
+
+The simulation name and the dimension of the geometry may be accessed
+using the following Fortran program:
+\begin{verbatim}
+program fetch_info
+  use spud
+  implicit none
+
+  integer :: dimension
+  character(len=255) :: simulation_name
+
+  call load_options("simple.xml")
+  call get_option("/simulation_name", simulation_name)
+  call get_option("/geometry/dimension", dimension)
+end program fetch_info
+\end{verbatim}
+
+The option key \verb+/simulation_name+ accesses the element
+called \verb+simulation_name+ that is a child of the root element
+(which in this case is called \verb+model_options+). The option key
+\verb+/geometry/dimension+ accesses the element \verb+dimension+ which
+in turn is a child of the root element.
+
+One of the restrictions that Spud places on RELAX NG schemas
+is that \emph{each element of the same name under the same parent
+must be differentiated by a \texttt{name} attribute}. An example will
+clarify what is valid. Consider the file \verb+complex_invalid.xml+:
+\begin{verbatim}
+<model_options>
+  <simulation_name>
+    <string_value lines="1">Basic simulation</string_value>
+  </simulation_name>
+  <geometry>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
+    <mesh>
+      <string_value type="filename" lines="1">mesh_A.msh</string_value>
+    </mesh>
+    <mesh>
+      <string_value type="filename" lines="1">mesh_B.msh</string_value>
+    </mesh>
+  </geometry>
+</model_options>                                                                                                                                                                                               
+\end{verbatim}
+
+This file is invalid as there are two \verb+mesh+ elements beneath the same
+\verb+geometry+ element, and they are not differentiated by a unique \verb+name+
+attribute. To make this file valid we must differentiate the two \verb+mesh+
+elements by adding a \verb+name+ attribute:
+
+\begin{verbatim}
+<model_options>
+  <simulation_name>
+    <string_value lines="1">Basic simulation</string_value>
+  </simulation_name>
+  <geometry>
+    <dimension>
+      <integer_value rank="0">3</integer_value>
+    </dimension>
+    <mesh name="PositionMesh">
+      <string_value type="filename" lines="1">mesh_A.msh</string_value>
+    </mesh>
+    <mesh name="VelocityMesh">
+      <string_value type="filename" lines="1">mesh_B.msh</string_value>
+    </mesh>
+  </geometry>
+</model_options>                                                                                                                                                                                               
+\end{verbatim}
+
+This file is now valid as the two \verb+mesh+ elements have different
+\verb+name+ values.
+
+To access these elements in the model, the option keys
+\begin{verbatim}
+/geometry/mesh[0]
+/geometry/mesh[1]
+\end{verbatim}
+may be used to access the elements in order, or they may be accessed
+by \verb+name+ by
+\begin{verbatim}
+/geometry/mesh::PositionMesh
+/geometry/mesh::VelocityMesh
+\end{verbatim}
 
 \subsection{Multiple elements}
 
@@ -126,7 +223,7 @@ will halt with an error message.
 \subsection{C}
 
 Since C does not itself have any namespacing facility, all exposed symbols
-have the prefix \lstinline[language=C]+spud_+.
+have the prefix \lstinline[language=C]+cspud_+.
 
 \subsection{C++}
 
