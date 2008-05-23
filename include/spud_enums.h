@@ -1,5 +1,5 @@
 /*  Copyright (C) 2006 Imperial College London and others.
-    
+
     Please see the AUTHORS file in the main source directory for a full list
     of copyright holders.
 
@@ -9,7 +9,7 @@
     Imperial College London
 
     C.Pain@Imperial.ac.uk
-    
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation,
@@ -43,7 +43,7 @@ namespace Spud{
     SPUD_NONE   = 2,
     SPUD_STRING = 3,
   };
-    
+
 #ifdef __cplusplus
   enum OptionError{
 #else

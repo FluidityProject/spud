@@ -1,5 +1,5 @@
 /*  Copyright (C) 2006 Imperial College London and others.
-    
+
     Please see the AUTHORS file in the main source directory for a full list
     of copyright holders.
 
@@ -9,7 +9,7 @@
     Imperial College London
 
     C.Pain@Imperial.ac.uk
-    
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation,
@@ -34,85 +34,86 @@ using namespace std;
 using namespace Spud;
 
 extern "C" {
+
   void spud_load_options(const char* filename, const int* filename_len)
   {
     load_options(string(filename, *filename_len));
 
     return;
   }
-  
+
   void spud_write_options(const char* filename, const int* filename_len)
   {
     write_options(string(filename, *filename_len));
 
     return;
   }
-  
+
   int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len){
     string child_name_handle;
     OptionError get_name_err = get_child_name(string(key, *key_len), *index, child_name_handle);
     if(get_name_err != SPUD_NO_ERROR){
       return get_name_err;
     }
-    
+
     int copy_len = (int)child_name_handle.size() > *child_name_len ? *child_name_len : child_name_handle.size();
     memcpy(child_name, child_name_handle.c_str(), copy_len);
-    
+
     return SPUD_NO_ERROR;
   }
 
   int spud_number_of_children(const char* key, const int* key_len){
     return number_of_children(string(key, *key_len));
   }
-  
+
   int spud_option_count(const char* key, const int* key_len){
     return option_count(string(key, *key_len));
   }
-  
+
   int spud_have_option(const char* key, const int* key_len){
     return have_option(string(key, *key_len)) ? 1 : 0;
   }
-  
+
   int spud_get_option_type(const char* key, const int* key_len, int* type){
     OptionType type_handle;
     OptionError get_type_err = get_option_type(string(key, *key_len), type_handle);
     if(get_type_err != SPUD_NO_ERROR){
       return get_type_err;
     }
-    
+
     *type = type_handle;
-    
+
     return SPUD_NO_ERROR;
   }
 
   int spud_get_option_rank(const char* key, const int* key_len, int* rank){
     return get_option_rank(string(key, *key_len), *rank);
   }
-  
+
   int spud_get_option_shape(const char* key, const int* key_len, int* shape){
     vector<int> shape_handle;
     OptionError get_shape_err = get_option_shape(string(key, *key_len), shape_handle);
     if(get_shape_err != SPUD_NO_ERROR){
       return get_shape_err;
     }
-    
+
     shape[0] = -1;  shape[1] = -1;
     for(size_t i = 0;i < shape_handle.size();i++){
       shape[i] = shape_handle[i];
     }
-    
+
     return SPUD_NO_ERROR;
   }
-  
+
   int spud_get_option(const char* key, const int* key_len, void* val){
     string key_handle(key, *key_len);
-  
+
     OptionType type;
     OptionError get_type_err = get_option_type(key_handle, type);
     if(get_type_err != SPUD_NO_ERROR){
       return get_type_err;
     }
-    
+
     int rank;
     OptionError get_rank_err = get_option_rank(key_handle, rank);
     if(get_rank_err != SPUD_NO_ERROR){
@@ -191,14 +192,14 @@ extern "C" {
     }else{
       return SPUD_TYPE_ERROR;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-  
+
   int spud_add_option(const char* key, const int* key_len){
     return add_option(string(key, *key_len));
   }
-  
+
   int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape){
     string key_handle(key, *key_len);
 
@@ -220,7 +221,7 @@ extern "C" {
             val_handle[i].push_back(((double*)val)[i * val_handle[0].size() + j]);
           }
         }
-        return set_option(key_handle, val_handle);    
+        return set_option(key_handle, val_handle);
       }else{
         return SPUD_RANK_ERROR;
       }
@@ -251,15 +252,14 @@ extern "C" {
     }else{
       return SPUD_TYPE_ERROR;
     }
-    
-    return SPUD_NO_ERROR;
   }
-   
+
   int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
     return set_option_attribute(string(key, *key_len), string(val, *val_len));
   }
-   
+
   int spud_delete_option(const char* key, const int* key_len){
     return delete_option(string(key, *key_len));
   }
+
 }

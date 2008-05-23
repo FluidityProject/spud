@@ -1,5 +1,5 @@
 /*  Copyright (C) 2006 Imperial College London and others.
-    
+
     Please see the AUTHORS file in the main source directory for a full list
     of copyright holders.
 
@@ -9,7 +9,7 @@
     Imperial College London
 
     C.Pain@Imperial.ac.uk
-    
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation,
@@ -38,13 +38,13 @@ namespace Spud{
 
   void OptionManager::load_options(const string& filename){
     manager.options->load_options(filename);
-    
+
     return;
   }
 
   void OptionManager::write_options(const string& filename){
     manager.options->write_options(filename);
-    
+
     return;
   }
 
@@ -54,7 +54,7 @@ namespace Spud{
     if(kids.size() < index){
       return SPUD_KEY_ERROR;
     }
-    
+
     child_name = kids[index];
 
     return SPUD_NO_ERROR;
@@ -63,7 +63,7 @@ namespace Spud{
   int OptionManager::number_of_children(const string& key){
     deque<string> kids;
     manager.options->list_children(key, kids);
-    
+
     return kids.size();
   }
 
@@ -74,15 +74,15 @@ namespace Spud{
   logical_t OptionManager::have_option(const string& key){
     return manager.options->have_option(key);
   }
-      
+
   OptionError OptionManager::get_option_type(const string& key, OptionType& type){
     Option* child = manager.options->get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }
-    
+
     type = child->option_type();
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -91,7 +91,7 @@ namespace Spud{
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }
-    
+
     rank = child->option_rank();
 
     return SPUD_NO_ERROR;
@@ -102,7 +102,7 @@ namespace Spud{
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }
-    
+
     shape = child->option_shape();
 
     return SPUD_NO_ERROR;
@@ -121,9 +121,9 @@ namespace Spud{
     }else if(val_handle.size() != 1){
       return SPUD_RANK_ERROR;
     }
-    
+
     val = val_handle[0];
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -132,11 +132,11 @@ namespace Spud{
       val = default_val;
       return SPUD_NO_ERROR;
     }
-    
+
     return get_option(key, val);
   }
 
-  OptionError OptionManager::get_option(const string& key, vector<double>& val){ 
+  OptionError OptionManager::get_option(const string& key, vector<double>& val){
     OptionError check_err = check_option(key, SPUD_DOUBLE, 1);
     if(check_err != SPUD_NO_ERROR){
       return check_err;
@@ -147,9 +147,9 @@ namespace Spud{
     if(get_err != SPUD_NO_ERROR){
       return get_err;
     }
-    
+
     val = val_handle;
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -158,7 +158,7 @@ namespace Spud{
       val = default_val;
       return SPUD_NO_ERROR;
     }
-    
+
     return get_option(key, val);
   }
 
@@ -173,13 +173,13 @@ namespace Spud{
     if(shape_err != SPUD_NO_ERROR){
       return shape_err;
     }
-    
+
     vector<double> val_handle;
     OptionError get_err = manager.options->get_option(key, val_handle);
     if(get_err != SPUD_NO_ERROR){
       return get_err;
     }
-    
+
     val.clear();
     for(int i = 0;i < shape[0];i++){
       val.push_back(vector<double>(shape[1]));
@@ -187,7 +187,7 @@ namespace Spud{
         val[i][j] = val_handle[(i * shape[0]) + j];
       }
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -199,7 +199,7 @@ namespace Spud{
 
     return get_option(key, val);
   }
-        
+
   OptionError OptionManager::get_option(const string& key, int& val){
     OptionError check_err = check_option(key, SPUD_INT, 0);
     if(check_err != SPUD_NO_ERROR){
@@ -213,9 +213,9 @@ namespace Spud{
     }else if(val_handle.size() != 1){
       return SPUD_RANK_ERROR;
     }
-    
+
     val = val_handle[0];
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -224,7 +224,7 @@ namespace Spud{
       val = default_val;
       return SPUD_NO_ERROR;
     }
-    
+
     return get_option(key, val);
   }
 
@@ -239,9 +239,9 @@ namespace Spud{
     if(get_err != SPUD_NO_ERROR){
       return get_err;
     }
-    
+
     val = val_handle;
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -250,7 +250,7 @@ namespace Spud{
       val = default_val;
       return SPUD_NO_ERROR;
     }
-    
+
     return get_option(key, val);
   }
 
@@ -265,13 +265,13 @@ namespace Spud{
     if(shape_err != SPUD_NO_ERROR){
       return shape_err;
     }
-    
+
     vector<int> val_handle;
     OptionError get_err = manager.options->get_option(key, val_handle);
     if(get_err != SPUD_NO_ERROR){
       return get_err;
     }
-    
+
     val.clear();
     for(int i = 0;i < shape[0];i++){
       val.push_back(vector<int>(shape[1]));
@@ -279,7 +279,7 @@ namespace Spud{
         val[i][j] = val_handle[(i * shape[0]) + j];
       }
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -297,15 +297,15 @@ namespace Spud{
     if(check_err != SPUD_NO_ERROR){
       return check_err;
     }
-    
+
     string val_handle;
     OptionError get_err = manager.options->get_option(key, val_handle);
     if(get_err != SPUD_NO_ERROR){
       return get_err;
     }
-    
+
     val = val_handle;
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -314,20 +314,20 @@ namespace Spud{
       val = default_val;
       return SPUD_NO_ERROR;
     }
-    
+
     return get_option(key, val);
   }
 
   OptionError OptionManager::add_option(const string& key){
     logical_t new_key = !have_option(key);
-    
+
     OptionError add_err = manager.options->add_option(key);
     if(add_err != SPUD_NO_ERROR){
       return add_err;
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -347,10 +347,10 @@ namespace Spud{
 
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::set_option(const string& key, const vector<double>& val){
     logical_t new_key = !have_option(key);
-    
+
     vector<double> val_handle = val;
     vector<int> shape(2);
     shape[0] = val.size();  shape[1] = -1;
@@ -360,13 +360,13 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::set_option(const string& key, const vector< vector<double> >& val){
     logical_t new_key = !have_option(key);
-    
+
     vector<double> val_handle;
     for(size_t i = 0;i < val.size();i++){
       if(i > 0 and val[i].size() != val[0].size()){
@@ -389,13 +389,13 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::set_option(const string& key, const int& val){
     logical_t new_key = !have_option(key);
-    
+
     vector<int> val_handle;
     val_handle.push_back(val);
     vector<int> shape(2);
@@ -406,13 +406,13 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::set_option(const string& key, const vector<int>& val){
     logical_t new_key = !have_option(key);
-    
+
     vector<int> val_handle = val;
     vector<int> shape(2);
     shape[0] = -1;  shape[1] = -1;
@@ -422,13 +422,13 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::set_option(const string& key, const vector< vector<int> >& val){
     logical_t new_key = !have_option(key);
-    
+
     vector<int> val_handle;
     for(size_t i = 0;i < val.size();i++){
       if(i > 0 and val[i].size() != val[0].size()){
@@ -451,7 +451,7 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -464,16 +464,16 @@ namespace Spud{
     }else if(new_key){
       return SPUD_NEW_KEY_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
   OptionError OptionManager::set_option_attribute(const string& key, const string& val){
-    OptionError set_err = set_option(key, val);  
+    OptionError set_err = set_option(key, val);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }
-    
+
     Option* child = manager.options->get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
@@ -482,16 +482,16 @@ namespace Spud{
     if(!is_attribute){
       return SPUD_ATTR_SET_FAILED_WARNING;
     }
-    
+
     return SPUD_NO_ERROR;
   }
-        
+
   OptionError OptionManager::delete_option(const string& key){
     OptionError del_err = manager.options->delete_option(key);
     if(del_err != SPUD_NO_ERROR){
       return del_err;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -523,7 +523,7 @@ namespace Spud{
     if(!have_option(key)){
       return SPUD_KEY_ERROR;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -535,7 +535,7 @@ namespace Spud{
     }else if(rank_handle != rank){
       return SPUD_RANK_ERROR;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -547,7 +547,7 @@ namespace Spud{
     }else if(type_handle != type){
       return SPUD_TYPE_ERROR;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
@@ -560,11 +560,11 @@ namespace Spud{
     check_err = check_type(key, type);
     if(check_err != SPUD_NO_ERROR){
       return check_err;
-    } 
+    }
     check_err = check_rank(key, rank);
     if(check_err != SPUD_NO_ERROR){
       return check_err;
-    } 
+    }
 
     return SPUD_NO_ERROR;
   }
@@ -580,13 +580,13 @@ namespace Spud{
     verbose_off();
     set_rank_and_shape(-1, vector<int>());
     is_attribute = false;
-    
+
     return;
   }
 
   OptionManager::Option::Option(const OptionManager::Option& inOption){
     *this = inOption;
-    
+
     return;
   }
 
@@ -595,7 +595,7 @@ namespace Spud{
     node_name = name;
     set_rank_and_shape(-1, vector<int>());
     is_attribute = false;
-    
+
     return;
   }
 
@@ -607,7 +607,7 @@ namespace Spud{
     verbose = inOption.verbose;
     if(verbose)
       cout << "const OptionManager::Option& OptionManager::Option::operator=(const OptionManager::Option& inOption)\n";
-    
+
     node_name = inOption.node_name;
     children = inOption.children;
 
@@ -617,7 +617,7 @@ namespace Spud{
     vector<int> shape(2);
     shape[0] = inOption.shape[0];  shape[1] = inOption.shape[1];
     set_rank_and_shape(inOption.rank, shape);
-    
+
     is_attribute = inOption.is_attribute;
 
     return *this;
@@ -633,7 +633,7 @@ namespace Spud{
       cerr << "WARNING: Failed to load options file" << endl;
       return;
     }
-    
+
     TiXmlNode *header = doc.FirstChild();
     TiXmlNode *fluidity_options = header->NextSibling();
 
@@ -642,7 +642,7 @@ namespace Spud{
 
     // Decend down through all the fluidity options
     TiXmlNode *option_node=0;
-    
+
     for(option_node=fluidity_options->FirstChild(); option_node; option_node=option_node->NextSibling()){
       if(option_node->ToElement()){
         parse_node("", option_node);
@@ -655,9 +655,9 @@ namespace Spud{
   void OptionManager::Option::write_options(const string& filename) const{
     if(verbose)
       cout << "void OptionManager::Option::write_options(const string& filename = " << filename << ") const\n";
-      
+
     TiXmlDocument doc;
-    
+
     // XML header
     TiXmlDeclaration* header = new TiXmlDeclaration("1.0", "", "");
     doc.LinkEndChild(header);
@@ -688,7 +688,7 @@ namespace Spud{
   void OptionManager::Option::list_children(const string& name, deque<string>& kids) const{
     if(verbose)
       cout << "void list_children(const string& name = " << name << ", deque<string>& kids) const\n";
-    
+
     kids.clear();
 
     const OptionManager::Option* descendant = get_child(name);
@@ -697,7 +697,7 @@ namespace Spud{
         kids.push_back(it->first);
       }
     }
-    
+
     return;
   }
 
@@ -746,7 +746,7 @@ namespace Spud{
 
     if(it == children.end()){
       return NULL;
-    }else if(branch.empty()){    
+    }else if(branch.empty()){
       return &(it->second);
     }else{
       return it->second.get_child(branch);
@@ -756,7 +756,7 @@ namespace Spud{
   OptionManager::Option* OptionManager::Option::get_child(const string& key){
     if(verbose)
       cout << "OptionManager::Option* OptionManager::Option::get_child(const string& key = " << key <<")\n";
-      
+
     if(!have_option(key)){
       return NULL;
     }else{
@@ -767,7 +767,7 @@ namespace Spud{
   int OptionManager::Option::option_count(const string& key) const{
     if(verbose)
       cout << "int OptionManager::Option::option_count(const string& key = " << key << ") const\n";
-    
+
     string name, branch;
     int index;
     split_name(key, name, index, branch);
@@ -775,7 +775,7 @@ namespace Spud{
     if(name.empty()){
       return 0;
     }
-    
+
     if(!children.count(name)){
       // Apparently there is no such child but lets check for "name::*"
       name += "::";
@@ -803,7 +803,7 @@ namespace Spud{
         }
       }
     }
-    
+
     return count;
   }
 
@@ -920,7 +920,7 @@ namespace Spud{
   OptionError OptionManager::Option::get_option(const string& key, vector<int>& val) const{
     if(verbose)
       cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", vector<int>& val)\n";
-      
+
     const OptionManager::Option* child = get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
@@ -948,13 +948,13 @@ namespace Spud{
     return create_child(key) == NULL ? SPUD_KEY_ERROR : SPUD_NO_ERROR;
   }
 
-  OptionError OptionManager::Option::set_option(const std::vector<double>& val, const int& rank, const std::vector<int>& shape){
+  OptionError OptionManager::Option::set_option(const vector<double>& val, const int& rank, const vector<int>& shape){
     if(verbose)
-      cout << "OptionError OptionManager::Option::set_option(const std::vector<double>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+      cout << "OptionError OptionManager::Option::set_option(const vector<double>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
     if(have_option("__value")){
       return set_option("__value", val, rank, shape);
-    }else{  
+    }else{
       data_double = val;
       OptionError set_err = set_option_type(SPUD_DOUBLE);
       if(set_err != SPUD_NO_ERROR){
@@ -968,13 +968,13 @@ namespace Spud{
     }
   }
 
-  OptionError OptionManager::Option::set_option(const std::vector<int>& val, const int& rank, const std::vector<int>& shape){
+  OptionError OptionManager::Option::set_option(const vector<int>& val, const int& rank, const vector<int>& shape){
     if(verbose)
-      cout << "OptionError OptionManager::Option::set_option(const std::vector<int>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+      cout << "OptionError OptionManager::Option::set_option(const vector<int>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
     if(have_option("__value")){
       return set_option("__value", val, rank, shape);
-    }else{  
+    }else{
       data_int = val;
       OptionError set_err = set_option_type(SPUD_INT);
       if(set_err != SPUD_NO_ERROR){
@@ -988,7 +988,7 @@ namespace Spud{
     }
   }
 
-  OptionError OptionManager::Option::set_option(const std::string& val){
+  OptionError OptionManager::Option::set_option(const string& val){
     if(verbose)
       cout << "OptionError OptionManager::Option::set_option(const string& val = " << val << ")\n";
 
@@ -1010,9 +1010,9 @@ namespace Spud{
     };
   }
 
-  OptionError OptionManager::Option::set_option(const std::string& key, const std::vector<double>& val, const int& rank, const std::vector<int>& shape){
+  OptionError OptionManager::Option::set_option(const string& key, const vector<double>& val, const int& rank, const vector<int>& shape){
     if(verbose)
-      cout << "OptionError OptionManager::Option::set_option(const std::string& key = " << key << ", const std::vector<double>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+      cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const vector<double>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
     OptionManager::Option* opt = create_child(key);
     if(opt == NULL){
@@ -1022,9 +1022,9 @@ namespace Spud{
     }
   }
 
-  OptionError OptionManager::Option::set_option(const std::string& key, const std::vector<int>& val, const int& rank, const std::vector<int>& shape){
+  OptionError OptionManager::Option::set_option(const string& key, const vector<int>& val, const int& rank, const vector<int>& shape){
     if(verbose)
-      cout << "OptionError OptionManager::Option::set_option(const std::string& key = " << key << ", const std::vector<int>& val, const int& rank = " << rank << ", const std::vector<int>& shape)\n";
+      cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const vector<int>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
     OptionManager::Option* opt = create_child(key);
     if(opt == NULL){
@@ -1052,14 +1052,14 @@ namespace Spud{
     if(children.size() == 0 and option_type() == SPUD_STRING){
       this->is_attribute = is_attribute;
     }
-    
+
     return this->is_attribute;
   }
 
   OptionError OptionManager::Option::set_attribute(const string& key, const string& val){
     if(verbose)
       cout << "OptionError OptionManager::Option::set_attribute(const string& key = " << key << ", const string& val = " << val << ")\n";
-    
+
     OptionManager::Option* opt = create_child(key);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
@@ -1080,7 +1080,7 @@ namespace Spud{
 
     string branch, name;
     split_name(key, name, branch);
-   
+
     OptionManager::Option* opt = get_child(name);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
@@ -1100,7 +1100,7 @@ namespace Spud{
   void OptionManager::Option::print(const string& prefix) const{
     cout << prefix << node_name;
     string lprefix = prefix + " ";
-    
+
     if(children.empty()){
       cout << ": ";
       if(!data_double.empty()){
@@ -1119,7 +1119,7 @@ namespace Spud{
       cout << endl;
     }else{
       cout << "/" << endl;
-      
+
       if(!data_double.empty()){
         cout << lprefix << "<value>: ";
         for(vector<double>::const_iterator i = data_double.begin();i != data_double.end();++i){
@@ -1140,7 +1140,7 @@ namespace Spud{
         i->second.print(lprefix + " ");
       }
     }
-    
+
     return;
   }
 
@@ -1162,7 +1162,7 @@ namespace Spud{
 
     if(key == "/" or key.empty())
       return this;
-    
+
     string branch, name;
     int index;
     split_name(key, name, index, branch);
@@ -1305,14 +1305,14 @@ namespace Spud{
       default:
         return SPUD_TYPE_ERROR;
     }
-    
+
     return SPUD_NO_ERROR;
   }
 
   void OptionManager::Option::parse_node(const string& root, const TiXmlNode* node){
     if(verbose)
-      cout << "void OptionManager::Option::parse_node(const string& root = " << root << ", const TiXmlNode* node)\n"; 
-    
+      cout << "void OptionManager::Option::parse_node(const string& root = " << root << ", const TiXmlNode* node)\n";
+
     // Should only deal with TiXmlNode::ELEMENT types
     if(node->Type() != TiXmlNode::ELEMENT){
       cerr << "WARNING - Non-element: " << root << " encountered" << endl;
@@ -1320,7 +1320,7 @@ namespace Spud{
     }
 
     const TiXmlElement* element = node->ToElement();
-    
+
     // Establish new base name of this node
     string basename = root + "/" + node->ValueStr();
     if(element->Attribute("name")){
@@ -1358,14 +1358,14 @@ namespace Spud{
         parse_node(basename, cnode);
         continue;
       }
-      
-      const TiXmlElement* celement = cnode->ToElement();      
-          
+
+      const TiXmlElement* celement = cnode->ToElement();
+
       if(cnode->ValueStr() == string("integer_value")){
         // Tokenise the data stored and convert to ints
         vector<string> tokens;
         tokenize(cnode->FirstChild()->ValueStr(), tokens);
-        
+
         // Find shape and rank
         int rank;
         vector<int> shape(2);
@@ -1377,13 +1377,13 @@ namespace Spud{
         }else if(rank == 2){
           istringstream(celement->Attribute("shape")) >> shape[0] >> shape[1];
         }
-        
+
         vector<int> val;
         val.resize(tokens.size());
         for(size_t i = 0;i<tokens.size();i++){
           istringstream(tokens[i]) >> val[i];
         }
-        
+
         set_option(basename + "/__value", val, rank, shape);
         for(const TiXmlAttribute* att = celement->FirstAttribute();att;att = att->Next()){
           string att_name(basename + "/__value/" + att->Name());
@@ -1393,7 +1393,7 @@ namespace Spud{
         // Tokenise the data stored and convert to doubles
         vector<string> tokens;
         tokenize(cnode->FirstChild()->ValueStr(), tokens);
-        
+
         // Find shape and rank
         int rank;
         vector<int> shape(2);
@@ -1405,12 +1405,12 @@ namespace Spud{
         }else if(rank == 2){
           istringstream(celement->Attribute("shape")) >> shape[0] >> shape[1];
         }
-              
+
         vector<double> val;
         val.resize(tokens.size());
         for(size_t i = 0;i<tokens.size();i++)
           istringstream(tokens[i]) >> val[i];
-              
+
         set_option(basename + "/__value", val, rank, shape);
         for(const TiXmlAttribute* att = celement->FirstAttribute();att;att = att->Next()){
           string att_name(basename + "/__value/" + att->Name());
@@ -1431,7 +1431,7 @@ namespace Spud{
   TiXmlElement* OptionManager::Option::to_element() const{
     if(verbose)
       cout << "TiXmlElement* OptionManager::Option:to_element(void) const\n";
-    
+
     if(is_attribute){
       cerr << "WARNING: Converting an attribute to an element" << endl;
     }
@@ -1446,12 +1446,12 @@ namespace Spud{
       ele->SetValue(node_name);
       ele->SetAttribute("name", name_attr);
     }
-    
+
     // Set data
     TiXmlText* data_ele = new TiXmlText("");
     data_ele->SetValue(data_as_string());
     ele->LinkEndChild(data_ele);
-    
+
     for(map<string, OptionManager::Option>::const_iterator iter = children.begin();iter != children.end();iter++){
       if(iter->second.is_attribute){
         // Add attribute
@@ -1489,43 +1489,43 @@ namespace Spud{
       cout << "void OptionManager::Option::tokenize(const string& str = " << str << ", vector<string>& tokens, const string& delimiters = " << delimiters << ")\n";
 
     tokens.clear();
-    
+
     // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    
+
     // Find first "non-delimiter".
     string::size_type pos     = str.find_first_of(delimiters, lastPos);
-    
+
     while (string::npos != pos || string::npos != lastPos){
       // Found a token, add it to the vector.
       tokens.push_back(str.substr(lastPos, pos - lastPos));
-      
+
       // Skip delimiters.  Note the "not_of"
       lastPos = str.find_first_not_of(delimiters, pos);
-      
+
       // Find next "non-delimiter"
       pos = str.find_first_of(delimiters, lastPos);
     }
-    
+
     return;
   }
 
   void OptionManager::Option::split_name(const string in, string& name, string& branch) const{
     if(verbose)
       cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, string& branch) const\n";
-   
+
     name = "";
     branch = "";
-    
+
     string valid_chars("/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
     string fullname = in.substr(0, min(in.size(), in.find_first_not_of(valid_chars)));
-   
+
     // Skip delimiters at beginning.
     string::size_type lastPos = fullname.find_first_not_of("/", 0);
     if(lastPos == string::npos){
       return;
     }
-    
+
     // Find next delimiter
     string::size_type pos = fullname.find_first_of("/", lastPos);
     if(pos == string::npos){
@@ -1535,16 +1535,16 @@ namespace Spud{
       branch = fullname.substr(pos, fullname.size()-pos);
     }
 
-    return;  
+    return;
   }
 
   void OptionManager::Option::split_name(const string in, string& name, int& index, string& branch) const{
     if(verbose)
       cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, int& index, string& branch) const\n";
-    
+
     index = -1;
     split_name(in, name, branch);
-    
+
     // Extract the index from the name if necessary
     string::size_type pos = name.find_first_of("[", 0);
     string::size_type lastPos = name.find_first_of("]", 0);
@@ -1552,14 +1552,14 @@ namespace Spud{
       istringstream(name.substr(pos + 1, lastPos - 1))>>index;
       name = name.substr(0, pos);
     }
-    
+
     return;
   }
 
   void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{
     if(verbose)
       cout << "void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const\n";
-    
+
     string::size_type firstPos = this->node_name.rfind("::");
     if(firstPos == string::npos or firstPos == this->node_name.size() - 2){
       node_name = this->node_name;
@@ -1568,7 +1568,7 @@ namespace Spud{
       node_name = this->node_name.substr(0, firstPos);
       name_attr = this->node_name.substr(firstPos + 2);
     }
-    
+
     return;
   }
 
@@ -1576,7 +1576,7 @@ namespace Spud{
     if(verbose)
       cout << "string OptionManager::Option::data_as_string(void) const\n";
 
-    ostringstream data_as_string; 
+    ostringstream data_as_string;
     switch(option_type()){
       case(SPUD_DOUBLE):
         for(unsigned int i = 0;i < data_double.size();i++){
@@ -1609,139 +1609,139 @@ namespace Spud{
   // The option manager
   OptionManager OptionManager::manager;
 
-  void load_options(const std::string& filename){
+  void load_options(const string& filename){
     OptionManager::load_options(filename);
-    
+
     return;
   }
 
-  void write_options(const std::string& filename){
+  void write_options(const string& filename){
     OptionManager::write_options(filename);
-    
+
     return;
   }
 
-  OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name){
+  OptionError get_child_name(const string& key, const unsigned& index, string& child_name){
     return OptionManager::get_child_name(key, index, child_name);
   }
 
-  int number_of_children(const std::string& key){
+  int number_of_children(const string& key){
     return OptionManager::number_of_children(key);
   }
 
-  int option_count(const std::string& key){
+  int option_count(const string& key){
     return OptionManager::option_count(key);
   }
 
-  logical_t have_option(const std::string& key){
+  logical_t have_option(const string& key){
     return OptionManager::have_option(key);
   }
 
-  OptionError get_option_type(const std::string& key, OptionType& type){
+  OptionError get_option_type(const string& key, OptionType& type){
     return OptionManager::get_option_type(key, type);
   }
 
-  OptionError get_option_rank(const std::string& key, int& rank){
+  OptionError get_option_rank(const string& key, int& rank){
     return OptionManager::get_option_rank(key, rank);
   }
 
-  OptionError get_option_shape(const std::string& key, std::vector<int>& shape){
+  OptionError get_option_shape(const string& key, vector<int>& shape){
     return OptionManager::get_option_shape(key, shape);
   }
 
-  OptionError get_option(const std::string& key, double& val){
+  OptionError get_option(const string& key, double& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, double& val, const double& default_val){
+  OptionError get_option(const string& key, double& val, const double& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
 
-  OptionError get_option(const std::string& key, std::vector<double>& val){
+  OptionError get_option(const string& key, vector<double>& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val){
+  OptionError get_option(const string& key, vector<double>& val, const vector<double>& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-        
-  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val){
+
+  OptionError get_option(const string& key, vector< vector<double> >& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val){
+  OptionError get_option(const string& key, vector< vector<double> >& val, const vector< vector<double> >& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
 
-  OptionError get_option(const std::string& key, int& val){
+  OptionError get_option(const string& key, int& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, int& val, const int& default_val){
+  OptionError get_option(const string& key, int& val, const int& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-        
-  OptionError get_option(const std::string& key, std::vector<int>& val){
+
+  OptionError get_option(const string& key, vector<int>& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val){
+  OptionError get_option(const string& key, vector<int>& val, const vector<int>& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-        
-  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val){
+
+  OptionError get_option(const string& key, vector< vector<int> >& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val){
+  OptionError get_option(const string& key, vector< vector<int> >& val, const vector< vector<int> >& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
 
-  OptionError get_option(const std::string& key, std::string& val){
+  OptionError get_option(const string& key, string& val){
     return OptionManager::get_option(key, val);
   }
 
-  OptionError get_option(const std::string& key, std::string& val, const std::string& default_val){
+  OptionError get_option(const string& key, string& val, const string& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
 
-  OptionError add_option(const std::string& key){
+  OptionError add_option(const string& key){
     return OptionManager::add_option(key);
   }
 
-  OptionError set_option(const std::string& key, const double& val){
-    return OptionManager::set_option(key, val);
-  }
-    
-  OptionError set_option(const std::string& key, const std::vector<double>& val){
-    return OptionManager::set_option(key, val);
-  }
-        
-  OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val){
+  OptionError set_option(const string& key, const double& val){
     return OptionManager::set_option(key, val);
   }
 
-  OptionError set_option(const std::string& key, const int& val){
-    return OptionManager::set_option(key, val);
-  }
-        
-  OptionError set_option(const std::string& key, const std::vector<int>& val){
-    return OptionManager::set_option(key, val);
-  }
-        
-  OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val){
+  OptionError set_option(const string& key, const vector<double>& val){
     return OptionManager::set_option(key, val);
   }
 
-  OptionError set_option(const std::string& key, const std::string& val){
+  OptionError set_option(const string& key, const vector< vector<double> >& val){
     return OptionManager::set_option(key, val);
   }
 
-  OptionError set_option_attribute(const std::string& key, const std::string& val){
+  OptionError set_option(const string& key, const int& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  OptionError set_option(const string& key, const vector<int>& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  OptionError set_option(const string& key, const vector< vector<int> >& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  OptionError set_option(const string& key, const string& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  OptionError set_option_attribute(const string& key, const string& val){
     return OptionManager::set_option_attribute(key, val);
   }
 
-  OptionError delete_option(const std::string& key){
+  OptionError delete_option(const string& key){
     return OptionManager::delete_option(key);
   }
 

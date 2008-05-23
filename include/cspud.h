@@ -1,5 +1,5 @@
 /*  Copyright (C) 2006 Imperial College London and others.
-    
+
     Please see the AUTHORS file in the main source directory for a full list
     of copyright holders.
 
@@ -9,7 +9,7 @@
     Imperial College London
 
     C.Pain@Imperial.ac.uk
-    
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation,
@@ -50,30 +50,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
   void spud_load_options(const char* filename, const int* filename_len);
   void spud_write_options(const char* filename, const int* filename_len);
-  
+
   int spud_get_child_name(const char* key, const int* key_len, const int* index, char* child_name, const int* child_name_len);
-  
+
   int spud_number_of_children(const char* key, const int* key_len);
-  
+
   int spud_option_count(const char* key, const int* key_len);
-  
+
   int spud_have_option(const char* key, const int* key_len);
-  
+
   int spud_get_option_type(const char* key, const int* key_len, int* type);
   int spud_get_option_rank(const char* key, const int* key_len, int* rank);
   int spud_get_option_shape(const char* key, const int* key_len, int* shape);
-  
+
   int spud_get_option(const char* key, const int* key_len, void* val);
-  
+
   int spud_add_option(const char* key, const int* key_len);
-  
+
   int spud_set_option(const char* key, const int* key_len, const void* val, const int* type, const int* rank, const int* shape);
 
   int spud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len);
-  
+
   int spud_delete_option(const char* key, const int* key_len);
+
 #ifdef __cplusplus
 }
 #endif
