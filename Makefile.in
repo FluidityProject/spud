@@ -39,8 +39,8 @@ ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
 HEADERS = include/spud.h include/cspud.h include/spud_enums.h
-
 MODS = spud.mod
+
 OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
 
 VPATH = src/
@@ -57,7 +57,9 @@ default: libspud.a
 libspud.a: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
-test: libspud.a
+test: unittest
+
+unittest: libspud.a
 	@cd src/tests; $(MAKE)
 	
 .PHONY:doc
@@ -80,7 +82,6 @@ clean:
 	rm -f *.o libspud.a $(MODS) $(OBJS)
 	@cd src/tests; $(MAKE) clean
 
-distclean:
-	@MAKE@ clean
-	rm -rf config.log config.status autom4te.cache Makefile
-
+distclean: clean
+	rm -fr config.log config.status autom4te.cache Makefile include/confdefs.h
+	@cd src/tests; $(MAKE) distclean

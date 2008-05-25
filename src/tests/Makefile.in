@@ -34,15 +34,15 @@ CXXFLAGS= @CPPFLAGS@ @CXXFLAGS@ -I../../include
 LIBS = @LIBS@ ../../libspud.a
 
 # The test binaries NOT to be built
-DISABLED_TESTS=
+DISABLED_TESTS = unittest_tools
 
 # The test programs to be built
-TEST_BINARIES = $(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.F90)))
+TEST_BINARIES = $(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.f90)))
 
 test: unittest
 
 unittest: $(TEST_BINARIES)
-	./$(TEST_BINARIES)
+	@PATH=.:$PATH; $(TEST_BINARIES)
 
 .SUFFIXES: .f90 .F90 .c .cpp .o .a $(.SUFFIXES)
 
@@ -54,7 +54,7 @@ unittest: $(TEST_BINARIES)
 	$(CXX) $(CXXFLAGS) -c $<
 
 # Creates a TESTNAME_main.o from test_main.cpp which calls the subroutine
-# TESTNAME, that should be a subroutine in TESTNAME.F90
+# TESTNAME, that should be a subroutine in TESTNAME.f90
 %_main.o: unittest_tools.o
 	$(CXX) $(CXXFLAGS) -D TESTNAME=$(subst _main.o,,$@)_ -o $@ -c test_main.cpp
 
@@ -65,4 +65,6 @@ unittest: $(TEST_BINARIES)
 clean:
 	rm -f $(TEST_BINARIES)
 	rm -f *.o *.mod
-	rm -rf bin
+
+distclean:
+	rm -f Makefile

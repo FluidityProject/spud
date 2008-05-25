@@ -1730,7 +1730,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 FCFLAGS="$FCFLAGS -I/usr/include"
 
 #
-# Name fluidity
+# Name spud
 #
 # Check whether --enable-debugging was given.
 if test "${enable_debugging+set}" = set; then
@@ -7208,9 +7208,6 @@ echo "$as_me: Turning on double 8 byte floating point numbers" >&6;}
     fi
   fi
   enable_dp="yes"
-
-  FLUIDITY="d$FLUIDITY"
-  FLADJOINT="d$FLADJOINT"
 
   CPPFLAGS="$CPPFLAGS -DDOUBLEP=1"
   FCFLAGS="$FCFLAGS $FORTRAN_REAL_8"

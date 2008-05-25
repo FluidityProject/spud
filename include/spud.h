@@ -118,8 +118,6 @@ namespace Spud{
 
       static OptionError check_option(const std::string& key, const OptionType& type, const int& rank);
 
-      static OptionManager manager;
-
       class Option{
 
         public:
@@ -369,57 +367,151 @@ namespace Spud{
       };
 
       Option* options;
+
+      static OptionManager manager;
   };
 
-  void load_options(const std::string& filename);
-  void write_options(const std::string& filename);
+  inline void load_options(const std::string& filename){
+    OptionManager::load_options(filename);
 
-  OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name);
+    return;
+  }
 
-  int number_of_children(const std::string& key);
+  inline void write_options(const std::string& filename){
+    OptionManager::write_options(filename);
 
-  int option_count(const std::string& key);
+    return;
+  }
 
-  logical_t have_option(const std::string& key);
+  inline OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name){
+    return OptionManager::get_child_name(key, index, child_name);
+  }
 
-  OptionError get_option_type(const std::string& key, OptionType& type);
-  OptionError get_option_rank(const std::string& key, int& rank);
-  OptionError get_option_shape(const std::string& key, std::vector<int>& shape);
+  inline int number_of_children(const std::string& key){
+    return OptionManager::number_of_children(key);
+  }
 
-  OptionError get_option(const std::string& key, double& val);
-  OptionError get_option(const std::string& key, double& val, const double& default_val);
-  OptionError get_option(const std::string& key, std::vector<double>& val);
-  OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val);
-  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val);
-  OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val);
+  inline int option_count(const std::string& key){
+    return OptionManager::option_count(key);
+  }
 
-  OptionError get_option(const std::string& key, int& val);
-  OptionError get_option(const std::string& key, int& val, const int& default_val);
-  OptionError get_option(const std::string& key, std::vector<int>& val);
-  OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val);
-  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val);
-  OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val);
+  inline logical_t have_option(const std::string& key){
+    return OptionManager::have_option(key);
+  }
 
-  OptionError get_option(const std::string& key, std::string& val);
-  OptionError get_option(const std::string& key, std::string& val, const std::string& default_val);
+  inline OptionError get_option_type(const std::string& key, OptionType& type){
+    return OptionManager::get_option_type(key, type);
+  }
 
-  OptionError add_option(const std::string& key);
+  inline OptionError get_option_rank(const std::string& key, int& rank){
+    return OptionManager::get_option_rank(key, rank);
+  }
 
-  OptionError set_option(const std::string& key, const double& val);
-  OptionError set_option(const std::string& key, const std::vector<double>& val);
-  OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val);
+  inline OptionError get_option_shape(const std::string& key, std::vector<int>& shape){
+    return OptionManager::get_option_shape(key, shape);
+  }
 
-  OptionError set_option(const std::string& key, const int& val);
-  OptionError set_option(const std::string& key, const std::vector<int>& val);
-  OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val);
+  inline OptionError get_option(const std::string& key, double& val){
+    return OptionManager::get_option(key, val);
+  }
 
-  OptionError set_option(const std::string& key, const std::string& val);
+  inline OptionError get_option(const std::string& key, double& val, const double& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
 
-  OptionError set_option_attribute(const std::string& key, const std::string& val);
+  inline OptionError get_option(const std::string& key, std::vector<double>& val){
+    return OptionManager::get_option(key, val);
+  }
 
-  OptionError delete_option(const std::string& key);
+  inline OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
 
-  void print_options();
+  inline OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val){
+    return OptionManager::get_option(key, val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
+
+  inline OptionError get_option(const std::string& key, int& val){
+    return OptionManager::get_option(key, val);
+  }
+
+  inline OptionError get_option(const std::string& key, int& val, const int& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::vector<int>& val){
+    return OptionManager::get_option(key, val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val){
+    return OptionManager::get_option(key, val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::string& val){
+    return OptionManager::get_option(key, val);
+  }
+
+  inline OptionError get_option(const std::string& key, std::string& val, const std::string& default_val){
+    return OptionManager::get_option(key, val, default_val);
+  }
+
+  inline OptionError add_option(const std::string& key){
+    return OptionManager::add_option(key);
+  }
+
+  inline OptionError set_option(const std::string& key, const double& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const std::vector<double>& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const int& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const std::vector<int>& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option(const std::string& key, const std::string& val){
+    return OptionManager::set_option(key, val);
+  }
+
+  inline OptionError set_option_attribute(const std::string& key, const std::string& val){
+    return OptionManager::set_option_attribute(key, val);
+  }
+
+  inline OptionError delete_option(const std::string& key){
+    return OptionManager::delete_option(key);
+  }
+
+  inline void print_options(){
+    OptionManager::print_options();
+
+    return;
+  }
 
 }
 
