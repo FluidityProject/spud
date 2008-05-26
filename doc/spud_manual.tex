@@ -271,10 +271,10 @@ Error values are greater than zero, warnings are negative and
 
 \begin{tabular}{lp{8cm}}
   \textbf{Error code} & \textbf{Interpretation}\\
-  \lstinline+SPUD_NO_ERROR+ & Returned for successful completion.\\
+  \lstinline+SPUD_NO_ERROR+ & Successful completion.\\
   \lstinline+SPUD_KEY_ERROR+ & The specified option is not present in the
   dictionary.\\
-  \lstinline+SPUD_TYPE_ERROR+ & The specified option has a different type
+  \lstinline+SPUD_ERROR+ & The specified option has a different type
   from that of the option argument provided.\\
   \lstinline+SPUD_RANK_ERROR+ & The specified option has a different rank
   from that of the option argument provided.\\
@@ -381,7 +381,7 @@ int Spud::number_of_children(const std::string& key)
 Returns the number of children under \lstinline+key+. This is mainly of use
 for debugging input files.
 
-Returns 0 if the specifed key does not exist in the options tree.
+Returns 0 if the specified key does not exist in the options tree.
 
 \subsection{option\_count}
 
@@ -463,10 +463,13 @@ function option_type(key, stat) result (type)
 int cspud_get_option_type(const char* key, const int* key_len, int* type)
 \end{lstlisting}
 
+\begin{lstlisting}[language=C++]
+Spud::OptionError Spud::get_option_type(const std::string& key,
+Spud::OptionType& type)
+\end{lstlisting}
+
 Returns the type of the option specified by \lstinline+key+. The type will
-be returned as one of the following named constants:
-\lstinline+SPUD_REAL+, \lstinline+SPUD_INTEGER+ and
-\lstinline+SPUD_CHARACTER+.
+be returned as one of the following named constants in \ref{sec:types}.
 
 Returns error code \lstinline+SPUD_KEY_ERROR+ if the supplied key does not
 exist in the options tree.
@@ -544,7 +547,9 @@ option_type val, option_type default_val)
 \end{lstlisting}
 
 This is the main method for retrieving option values from the options
-dictionary. For Fortran and C++ \lstinline[emph=option_type,emphstyle=\textit]+option_type+ can be any of the following values:
+dictionary. For Fortran and C++
+\lstinline[emph=option_type,emphstyle=\textit]+option_type+ can be any of the
+following values:
 
 \begin{tabular}{ll}
   \textbf{Fortran type} & \textbf{C++ type} \\
@@ -596,7 +601,7 @@ Spud::OptionError Spud::add_option(const std::string& key)
 \end{lstlisting}
 
 Creates a new option at the supplied key. If the option does not currently
-exist, creates the option (with data type \lstinline+SPUD_TYPE_NONE+) and
+exist, creates the option (with data type \lstinline+SPUD_NONE+) and
 returns error code \lstinline+SPUD_NEW_KEY_WARNING+.
 
 \subsection{set\_option}\label{sec:set_option}
@@ -651,8 +656,8 @@ Spud::OptionError Spud::set_option_attribute(const std::string& key,
 const std::string& val)
 \end{lstlisting}
 
-As \ref{sec:set_option}, but additional attempts to mark the option at the
-specified key as an attribute.
+As \lstinline+set_option+ (see \ref{sec:set_option}), but additionally attempts to mark the
+option at the specified key as an attribute.
 
 This routine can return the following error codes:
 \begin{itemize}
