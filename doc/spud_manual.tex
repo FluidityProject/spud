@@ -632,6 +632,77 @@ This routine can return the following error codes:
   \lstinline+SPUD_NEW_KEY_WARNING+.
 \end{itemize}
 
+\subsection{set\_option\_attribute}
+
+\begin{lstlisting}[language=fortran]
+subroutine set_option_attribute(key, val, stat)
+  character(len=*), intent(in) :: key
+  character(len=*), intent(in) :: val
+  integer, optional, intent(out) :: stat
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int int cspud_set_option_attribute(const char* key, const int* key_len,
+const char* val, const int* val_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+Spud::OptionError Spud::set_option_attribute(const std::string& key,
+const std::string& val)
+\end{lstlisting}
+
+As \ref{sec:set_option}, but additional attempts to mark the option at the
+specified key as an attribute.
+
+This routine can return the following error codes:
+\begin{itemize}
+\item If \lstinline+key+ matches an option but the shape, rank or type fails
+  to match currently existing option, returns an appropriate error code (see
+  \ref{sec:error_codes}).
+\item If \lstinline+key+ fails to match, creates a new option at the supplied
+  key, sets the option to \lstinline+val+ and returns error code
+  \lstinline+SPUD_NEW_KEY_WARNING+.
+\item If \lstinline+key+ matches an option, but the option has children, sets
+  the option to \lstinline+val+ and returns error code
+  \lstinline+SPUD_ATTR_SET_FAILED_WARNING+.
+\end{itemize}
+
+\subsection{delete\_option}
+
+\begin{lstlisting}[language=fortran]
+subroutine delete_option(key, stat)
+  integer, optional, intent(out) :: stat
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int cspud_delete_option(const char* key, const int* key_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+Spud::OptionError Spud::delete_option(const std::string& key)
+\end{lstlisting}
+
+Deletes the option at the specified key.
+
+Returns error code \lstinline+SPUD_KEY_ERROR+ if the supplied key does not
+exist in the options tree.
+
+\subsection{print\_options}
+
+\begin{lstlisting}[language=fortran]
+subroutine print_options()
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+void cspud_print_options()
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+void Spud::print_options()
+\end{lstlisting}
+
+Prints the entire options tree to standard output. Useful for debugging.
+
 \chapter{Spud base language}
 \lstset{language=rnc}
 
