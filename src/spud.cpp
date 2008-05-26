@@ -81,7 +81,7 @@ namespace Spud{
       return SPUD_KEY_ERROR;
     }
 
-    type = child->option_type();
+    type = child->get_option_type();
 
     return SPUD_NO_ERROR;
   }
@@ -92,7 +92,7 @@ namespace Spud{
       return SPUD_KEY_ERROR;
     }
 
-    rank = child->option_rank();
+    rank = child->get_option_rank();
 
     return SPUD_NO_ERROR;
   }
@@ -103,7 +103,7 @@ namespace Spud{
       return SPUD_KEY_ERROR;
     }
 
-    shape = child->option_shape();
+    shape = child->get_option_shape();
 
     return SPUD_NO_ERROR;
   }
@@ -823,12 +823,12 @@ namespace Spud{
     }
   }
 
-  OptionType OptionManager::Option::option_type() const{
+  OptionType OptionManager::Option::get_option_type() const{
     if(verbose)
-      cout << "OptionType FLOption::option_type(void) const\n";
+      cout << "OptionType FLOption::get_option_type(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.option_type();
+      return children.find("__value")->second.get_option_type();
     }
 
     if(!data_double.empty()){
@@ -843,23 +843,23 @@ namespace Spud{
   }
 
 
-  size_t OptionManager::Option::option_rank() const{
+  size_t OptionManager::Option::get_option_rank() const{
     if(verbose)
-      cout << "size_t FLOption::option_rank(void) const\n";
+      cout << "size_t FLOption::get_option_rank(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.option_rank();
+      return children.find("__value")->second.get_option_rank();
     }else{
       return rank;
     }
   }
 
-  vector<int> OptionManager::Option::option_shape() const{
+  vector<int> OptionManager::Option::get_option_shape() const{
     if(verbose)
-      cout << "vector<int> FLOption::option_shape(void) const\n";
+      cout << "vector<int> FLOption::get_option_shape(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.option_shape();
+      return children.find("__value")->second.get_option_shape();
     }else{
       vector<int> shape(2);
       shape[0] = this->shape[0];
@@ -874,7 +874,7 @@ namespace Spud{
 
     if(have_option("__value")){
       return get_option("__value", val);
-    }else if(option_type() != SPUD_DOUBLE){
+    }else if(get_option_type() != SPUD_DOUBLE){
       return SPUD_TYPE_ERROR;
     }else{
       val = data_double;
@@ -888,7 +888,7 @@ namespace Spud{
 
     if(have_option("__value")){
       return get_option("__value", val);
-    }else if(option_type() != SPUD_INT){
+    }else if(get_option_type() != SPUD_INT){
       return SPUD_TYPE_ERROR;
     }else{
       val = data_int;
@@ -902,7 +902,7 @@ namespace Spud{
 
     if(have_option("__value")){
       return get_option("__value", val);
-    }else if(option_type() != SPUD_STRING){
+    }else if(get_option_type() != SPUD_STRING){
       return SPUD_TYPE_ERROR;
     }else{
       val = data_string;
@@ -1054,7 +1054,7 @@ namespace Spud{
   logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute){
     if(verbose)
       cout << "logical_t OptionManager::Option::set_is_attribute(const logical_t& is_attribute = " << is_attribute << ")\n";
-    if(children.size() == 0 and option_type() == SPUD_STRING){
+    if(children.size() == 0 and get_option_type() == SPUD_STRING){
       this->is_attribute = is_attribute;
     }
 
@@ -1190,7 +1190,7 @@ namespace Spud{
         }
       }
       if(child == children.end()){
-        if(name == "__value" and option_type() != SPUD_NONE){
+        if(name == "__value" and get_option_type() != SPUD_NONE){
           cerr << "WARNING: Creating __value child for non null element - deleting parent data" << endl;
           set_option_type(SPUD_NONE);
         }
@@ -1235,7 +1235,7 @@ namespace Spud{
 
     logical_t set_attrs = false;
     if(rank > 0){
-      OptionType type = option_type();
+      OptionType type = get_option_type();
       set_attrs = (type == SPUD_DOUBLE or type == SPUD_INT);
     }
     switch(rank){
@@ -1465,7 +1465,7 @@ namespace Spud{
         TiXmlElement* child_ele = iter->second.to_element();
         if(iter->second.node_name == "__value"){
           // Detect data sub-element
-          switch(iter->second.option_type()){
+          switch(iter->second.get_option_type()){
             case(SPUD_DOUBLE):
               child_ele->SetValue("real_value");
               break;
@@ -1582,7 +1582,7 @@ namespace Spud{
       cout << "string OptionManager::Option::data_as_string(void) const\n";
 
     ostringstream data_as_string;
-    switch(option_type()){
+    switch(get_option_type()){
       case(SPUD_DOUBLE):
         for(unsigned int i = 0;i < data_double.size();i++){
           data_as_string << data_double[i];

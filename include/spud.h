@@ -149,6 +149,7 @@ namespace Spud{
             * Get the name of this element.
             */
           std::string get_name() const;
+
           /**
             * Get the attribute status for this element.
             */
@@ -173,9 +174,8 @@ namespace Spud{
           Option* get_child(const std::string& key);
 
           /**
-            * Get the number of elements at the supplied key.
-            * Searches un-named elements first, and if this is zero searches
-            * (from this highest element in the tree first) named elements.
+            * Get the number of elements at the supplied key. Searches all
+            * possible paths matching the given key.
             */
           int option_count(const std::string& key) const;
 
@@ -188,17 +188,17 @@ namespace Spud{
             * Get the type of the data in this element, or the __value child if
             * it exists.
             */
-          OptionType option_type() const;
+          OptionType get_option_type() const;
           /**
             * Get the rank of the data in this element, or the __value child if
             * it exists.
             */
-          size_t option_rank() const;
+          size_t get_option_rank() const;
           /**
             * Get the shape of the data in this element, or the __value child
             * if it exists.
             */
-          std::vector<int> option_shape() const;
+          std::vector<int> get_option_shape() const;
 
           /**
             * Get the double data from this element, or from the __value child
@@ -376,7 +376,6 @@ namespace Spud{
 
     return;
   }
-
   inline void write_options(const std::string& filename){
     OptionManager::write_options(filename);
 
@@ -402,11 +401,9 @@ namespace Spud{
   inline OptionError get_option_type(const std::string& key, OptionType& type){
     return OptionManager::get_option_type(key, type);
   }
-
   inline OptionError get_option_rank(const std::string& key, int& rank){
     return OptionManager::get_option_rank(key, rank);
   }
-
   inline OptionError get_option_shape(const std::string& key, std::vector<int>& shape){
     return OptionManager::get_option_shape(key, shape);
   }
@@ -414,55 +411,42 @@ namespace Spud{
   inline OptionError get_option(const std::string& key, double& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, double& val, const double& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector<double>& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector<double>& val, const std::vector<double>& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector< std::vector<double> >& val, const std::vector< std::vector<double> >& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, int& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, int& val, const int& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector<int>& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector<int>& val, const std::vector<int>& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, std::vector< std::vector<int> >& val, const std::vector< std::vector<int> >& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
-
   inline OptionError get_option(const std::string& key, std::string& val){
     return OptionManager::get_option(key, val);
   }
-
   inline OptionError get_option(const std::string& key, std::string& val, const std::string& default_val){
     return OptionManager::get_option(key, val, default_val);
   }
@@ -474,27 +458,21 @@ namespace Spud{
   inline OptionError set_option(const std::string& key, const double& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const std::vector<double>& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const std::vector< std::vector<double> >& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const int& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const std::vector<int>& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val){
     return OptionManager::set_option(key, val);
   }
-
   inline OptionError set_option(const std::string& key, const std::string& val){
     return OptionManager::set_option(key, val);
   }
