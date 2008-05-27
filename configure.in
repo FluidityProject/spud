@@ -287,40 +287,6 @@ if test "$FC" = "ifc" ; then
   FCFLAGS="-implicitnone -w95 $FCFLAGS"
 fi
 
-# Double precision
-if test -z "$FORTRAN_REAL_8" ; then
-    if test "$fcompiler" = "gfortran" ; then
-	FORTRAN_REAL_8="-fdefault-real-8"
-    elif test "$fcompiler" = "ifort"; then
-	FORTRAN_REAL_8="-r8"
-    elif test "$fcompiler" = "sunf95"; then
-  FORTRAN_REAL_8="-xtypemap=real:64,double:64"
-    else
-  FORTRAN_REAL_8="-r8"
-    fi
-fi
-
-AC_ARG_ENABLE(dp,
-[AC_HELP_STRING([--enable-dp[=flag]],
-[compile with 64 bit floating point numbers (default)])])
-
-if test "$enable_dp" = "no"
-  then
-  FORTRAN_REAL_8=""
-  AC_MSG_NOTICE([Selecting 4 byte floating point numbers])
-else
-  AC_MSG_NOTICE([Turning on double 8 byte floating point numbers])
-  if test -n "$enable_dp" ; then
-    if test "$enable_dp" != "yes" ; then
-      FORTRAN_REAL_8="$enable_dp"
-    fi
-  fi
-  enable_dp="yes"
-
-  CPPFLAGS="$CPPFLAGS -DDOUBLEP=1"
-  FCFLAGS="$FCFLAGS $FORTRAN_REAL_8"
-fi
-
 #####
 #
 LIBS="$LIBS -L./lib"

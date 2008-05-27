@@ -31,6 +31,8 @@ module spud
 
   private
 
+  integer, parameter :: D = kind(0.0D0)
+
   integer, parameter, public :: &
     & SPUD_REAL      = 0, &
     & SPUD_INTEGER   = 1, &
@@ -307,9 +309,9 @@ contains
 
   subroutine get_option_real_scalar(key, val, stat, default)
     character(len = *), intent(in) :: key
-    real, intent(out) :: val
+    real(D), intent(out) :: val
     integer, optional, intent(out) :: stat
-    real, optional, intent(in) :: default
+    real(D), optional, intent(in) :: default
 
     integer :: lstat
 
@@ -336,9 +338,9 @@ contains
 
   subroutine get_option_real_vector(key, val, stat, default)
     character(len = *), intent(in) :: key
-    real, dimension(:), intent(inout) :: val
+    real(D), dimension(:), intent(inout) :: val
     integer, optional, intent(out) :: stat
-    real, dimension(size(val)), optional, intent(in) :: default
+    real(D), dimension(size(val)), optional, intent(in) :: default
 
     integer :: lstat
 
@@ -365,12 +367,12 @@ contains
 
   subroutine get_option_real_tensor(key, val, stat, default)
     character(len = *), intent(in) :: key
-    real, dimension(:, :), intent(inout) :: val
+    real(D), dimension(:, :), intent(inout) :: val
     integer, optional, intent(out) :: stat
-    real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
+    real(D), dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
 
     integer :: i, j, lstat
-    real, dimension(size(val, 2), size(val, 1)) :: val_handle
+    real(D), dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
       stat = SPUD_NO_ERROR
@@ -550,7 +552,7 @@ contains
 
   subroutine set_option_real_scalar(key, val, stat)
     character(len = *), intent(in) :: key
-    real, intent(in) :: val
+    real(D), intent(in) :: val
     integer, optional, intent(out) :: stat
 
     integer :: lstat
@@ -569,7 +571,7 @@ contains
 
   subroutine set_option_real_vector(key, val, stat)
     character(len = *), intent(in) :: key
-    real, dimension(:), intent(in) :: val
+    real(D), dimension(:), intent(in) :: val
     integer, optional, intent(out) :: stat
 
     integer :: lstat
@@ -588,11 +590,11 @@ contains
 
   subroutine set_option_real_tensor(key, val, stat)
     character(len = *), intent(in) :: key
-    real, dimension(:, :), intent(in) :: val
+    real(D), dimension(:, :), intent(in) :: val
     integer, optional, intent(out) :: stat
 
     integer :: i, j, lstat
-    real, dimension(size(val, 2), size(val, 1)) :: val_handle
+    real(D), dimension(size(val, 2), size(val, 1)) :: val_handle
 
     if(present(stat)) then
       stat = SPUD_NO_ERROR

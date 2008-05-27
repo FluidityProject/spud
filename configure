@@ -1284,7 +1284,6 @@ Optional Features:
   --enable-shared         Compile objects with -fPIC to enable the 'make
                           shared' target.
   --enable-verbose        turns on super verbosity
-  --enable-dp=flag        compile with 64 bit floating point numbers (default)
   --enable-profiling      enable gprof profiling
 
 Some influential environment variables:
@@ -7173,44 +7172,6 @@ fi
 
 if test "$FC" = "ifc" ; then
   FCFLAGS="-implicitnone -w95 $FCFLAGS"
-fi
-
-# Double precision
-if test -z "$FORTRAN_REAL_8" ; then
-    if test "$fcompiler" = "gfortran" ; then
-	FORTRAN_REAL_8="-fdefault-real-8"
-    elif test "$fcompiler" = "ifort"; then
-	FORTRAN_REAL_8="-r8"
-    elif test "$fcompiler" = "sunf95"; then
-  FORTRAN_REAL_8="-xtypemap=real:64,double:64"
-    else
-  FORTRAN_REAL_8="-r8"
-    fi
-fi
-
-# Check whether --enable-dp was given.
-if test "${enable_dp+set}" = set; then
-  enableval=$enable_dp;
-fi
-
-
-if test "$enable_dp" = "no"
-  then
-  FORTRAN_REAL_8=""
-  { echo "$as_me:$LINENO: Selecting 4 byte floating point numbers" >&5
-echo "$as_me: Selecting 4 byte floating point numbers" >&6;}
-else
-  { echo "$as_me:$LINENO: Turning on double 8 byte floating point numbers" >&5
-echo "$as_me: Turning on double 8 byte floating point numbers" >&6;}
-  if test -n "$enable_dp" ; then
-    if test "$enable_dp" != "yes" ; then
-      FORTRAN_REAL_8="$enable_dp"
-    fi
-  fi
-  enable_dp="yes"
-
-  CPPFLAGS="$CPPFLAGS -DDOUBLEP=1"
-  FCFLAGS="$FCFLAGS $FORTRAN_REAL_8"
 fi
 
 #####
