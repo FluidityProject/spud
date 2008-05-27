@@ -607,7 +607,15 @@ class Diamond:
     return
     
   def on_console(self, widget = None):
-    dialogs.console(self.main_window, globals())
+    """
+    Launch a python console
+    """    
+    
+    # Construct the dictionary of locals that will be used by the interpretter
+    locals = globals()
+    locals["interface"] = self
+  
+    dialogs.console(self.main_window, locals)
     
     return
 

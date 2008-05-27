@@ -140,7 +140,7 @@ def console(parent, locals = None):
   Launch a python console.
   """
 
-  console_dialog = gtk.Dialog(parent = parent, buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+  console_dialog = gtk.Dialog(parent = parent, buttons = (gtk.STOCK_QUIT, gtk.RESPONSE_ACCEPT))
   console_dialog.set_default_size(400, 300)
   console_dialog.connect("response", close_dialog)
 
