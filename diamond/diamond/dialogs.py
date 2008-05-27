@@ -20,6 +20,8 @@ import traceback
 
 import gtk
 
+import pygtkconsole
+
 def prompt(parent, message, type = gtk.MESSAGE_QUESTION, has_cancel = False):
   """
   Display a simple Yes / No dialog. Returns one of gtk.RESPONSE_{YES,NO,CANCEL}.
@@ -132,6 +134,29 @@ def get_filename(title, action, filter_names_and_patterns = {}, folder_uri = Non
   else:
     filew.destroy()
     return None
+    
+def console(parent):
+  """
+  Launch a python console.
+  """
+
+  console_dialog = gtk.Dialog(parent = parent, buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+  console_dialog.set_default_size(400, 300)
+  console_dialog.connect("response", close_dialog)
+
+  scrolled_window = gtk.ScrolledWindow()
+  console_dialog.vbox.add(scrolled_window)
+  scrolled_window.show()
+
+  scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+
+  console_widget = pygtkconsole.GTKInterpreterConsole()
+  scrolled_window.add_with_viewport(console_widget)
+  console_widget.show()
+
+  console_dialog.run()
+  
+  return
 
 def prompt_response(dialog, response_id):
   """

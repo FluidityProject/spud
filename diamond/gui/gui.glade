@@ -165,6 +165,15 @@
                 <child>
                   <widget class="GtkMenu" id="menuitemHelp">
                     <child>
+                      <widget class="GtkMenuItem" id="help_console">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="label" translatable="yes">Console</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_console"/>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="help_about">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">gtk-about</property>
@@ -492,17 +501,6 @@
                 <property name="column_spacing">12</property>
                 <property name="row_spacing">12</property>
                 <child>
-                  <widget class="GtkEntry" id="search_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </widget>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                  </packing>
-                </child>
-                <child>
                   <widget class="GtkLabel" id="search_label">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
@@ -512,6 +510,17 @@
                   <packing>
                     <property name="x_options">GTK_FILL</property>
                     <property name="y_options"></property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkEntry" id="search_entry">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
                   </packing>
                 </child>
               </widget>

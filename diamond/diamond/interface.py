@@ -107,6 +107,7 @@ class Diamond:
                     "on_expand_all": self.on_expand_all,
                     "on_collapse_all": self.on_collapse_all,
                     "on_find": self.find.on_find,
+                    "on_console": self.on_console,
                     "on_about": self.on_about}
     self.gui.signal_autoconnect(signals)
 
@@ -603,6 +604,11 @@ class Diamond:
 
     self.treeview.collapse_all()
 
+    return
+    
+  def on_console(self, widget = None):
+    dialogs.console(self.main_window)
+    
     return
 
   def on_about(self, widget=None):
