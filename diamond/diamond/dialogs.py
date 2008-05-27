@@ -144,14 +144,8 @@ def console(parent, locals = None):
   console_dialog.set_default_size(400, 300)
   console_dialog.connect("response", close_dialog)
 
-  scrolled_window = gtk.ScrolledWindow()
-  console_dialog.vbox.add(scrolled_window)
-  scrolled_window.show()
-
-  scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
-
   console_widget = pygtkconsole.GTKInterpreterConsole(locals)
-  scrolled_window.add_with_viewport(console_widget)
+  console_dialog.vbox.add(console_widget)
   console_widget.show()
 
   console_dialog.run()
