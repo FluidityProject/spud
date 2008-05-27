@@ -607,7 +607,7 @@ class Diamond:
     return
     
   def on_console(self, widget = None):
-    dialogs.console(self.main_window)
+    dialogs.console(self.main_window, globals())
     
     return
 

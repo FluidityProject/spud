@@ -135,7 +135,7 @@ def get_filename(title, action, filter_names_and_patterns = {}, folder_uri = Non
     filew.destroy()
     return None
     
-def console(parent):
+def console(parent, locals = None):
   """
   Launch a python console.
   """
@@ -150,7 +150,7 @@ def console(parent):
 
   scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
 
-  console_widget = pygtkconsole.GTKInterpreterConsole()
+  console_widget = pygtkconsole.GTKInterpreterConsole(locals)
   scrolled_window.add_with_viewport(console_widget)
   console_widget.show()
 

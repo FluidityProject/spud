@@ -129,14 +129,14 @@ class GTKInterpreterConsole(gtk.ScrolledWindow):
   An InteractiveConsole for GTK. It's an actual widget,
   so it can be dropped in just about anywhere.
   """
-  def __init__(self):
+  def __init__(self, locals = None):
     gtk.ScrolledWindow.__init__(self)
     self.set_policy (gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
 
     self.text = gtk.TextView()
     self.text.set_wrap_mode(True)
 
-    self.interpreter = code.InteractiveInterpreter()
+    self.interpreter = code.InteractiveInterpreter(locals)
 
     self.completer = Completer(self.interpreter.locals)
     self.buffer = []
