@@ -144,11 +144,17 @@ def console(parent, locals = None):
   console_dialog.set_default_size(400, 300)
   console_dialog.connect("response", close_dialog)
 
+  stdout = sys.stdout
+  stderr = sys.stderr
+
   console_widget = pygtkconsole.GTKInterpreterConsole(locals)
   console_dialog.vbox.add(console_widget)
   console_widget.show()
 
   console_dialog.run()
+  
+  sys.stdout = stdout
+  sys.stderr = stderr
   
   return
 
