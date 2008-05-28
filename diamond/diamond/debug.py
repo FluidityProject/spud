@@ -24,6 +24,7 @@ maximum debug level.
 """
 
 import sys
+import sys as sys2
 
 class DebugLevel:
   """
@@ -52,8 +53,7 @@ class DebugLevel:
     Set the debug level.
     """
 
-    assert isinstance(level, int)
-    assert level >= 0
+    level = max(level, 0)
 
     try:
       self._level = min(level, self.GetMaxLevel())
@@ -74,8 +74,7 @@ class DebugLevel:
     Set the maximum debug level.
     """
 
-    assert isinstance(maxLevel, int)
-    assert maxLevel >= 0
+    maxLevel = max(maxLevel, 0)
 
     self._maxLevel = maxLevel
     self.SetLevel(self._level)
@@ -135,16 +134,14 @@ def deprint(msg, level = 1, newline = True, flush = True):
 
   return
 
+  interface.open_file(filename = "tests/square-convection/src/square-convection.flml")
+
 def dwrite(stream, msg, level = 1, newline = True, flush = True):
   """
   Print a debug message to the supplied file stream with supplied debug level.
   """
 
-  assert isinstance(stream, file)
-  assert isinstance(level, int)
-  assert level >= 0
-  assert isinstance(newline, bool)
-  assert isinstance(flush, bool)
+  level = max(level, 0)
 
   level = min(level, GetMaxDebugLevel())
 
