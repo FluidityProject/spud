@@ -20,11 +20,11 @@ Debugging module. Stores the program debug level and provides debugging output
 functions. Only debugging output with level less than or equal to the current
 debug level is output. Note that debugging output with level greater than the
 current maximum debug level is treated as having a level equal to the current
-maximum debug level.
+maximum debug level, and that debugging output with level less than zero is
+treated as having a level equal to zero.
 """
 
 import sys
-import sys as sys2
 
 class DebugLevel:
   """
@@ -140,7 +140,6 @@ def dwrite(stream, msg, level = 1, newline = True, flush = True):
   """
 
   level = max(level, 0)
-
   level = min(level, GetMaxDebugLevel())
 
   if level <= GetDebugLevel():

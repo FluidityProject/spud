@@ -67,13 +67,12 @@ def main():
   if ("-h", "") in opts:
     Help()
     return
-    
 
+  import diamond.config as config
   import diamond.dialogs as dialogs
   import diamond.interface as interface
   import diamond.schema as schema
   import diamond.tree as tree
-  import diamond.config as config
 
   try:
     import psyco

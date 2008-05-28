@@ -35,7 +35,7 @@
 
 \section{Building from source}
 
-Libspud is build using a standard autoconf system. It should be possible to
+Libspud is built using a standard autoconf system. It should be possible to
 build libspud and install it in \verb+/usr/local+ simply by typing:
 
 \begin{verbatim}
@@ -210,7 +210,7 @@ that is, the \verb+name+ attribute is accessed the same way as a child element
 called \verb+name+ would be.
 
 Attributes in the options tree must have string type data and have no children.
-If either of these rules are broken (e.g. via a (\ref{sec:set_option}) call )
+If either of these rules are broken (e.g. via a (\ref{sec:set_option}) call)
 then the attribute element will be unmarked as an attribute, will be treated as
 a normal element, and will appear in xml files written out by libspud as xml
 elements rather than element attributes.
@@ -238,16 +238,18 @@ will halt with an error message.
 \subsection{C}
 
 Since C does not itself have any namespacing facility, all exposed symbols
-have the prefix \lstinline[language=C]+cspud_+.
+have the prefix \lstinline[language=C]+cspud_+. Error codes are returned via
+function return values.
 
 \subsection{C++}
 
 The entire public C++ API of libspud is contained in the
-\lstinline[language=C++]+Spud+ namespace.
+\lstinline[language=C++]+Spud+ namespace. Error codes are returned via function
+return values.
 
 \section{Naming conventions}
 
-Where a routine returns it's main result via an argument (as is the case for
+Where a routine returns its main result via an argument (as is the case for
 a Fortran subroutine, for example), the routine's name starts with
 \lstinline[language=fortran]+get_+. The word
 \lstinline[language=fortran]+key+ is exclusively used to refer to a lookup key in
@@ -469,7 +471,7 @@ Spud::OptionType& type)
 \end{lstlisting}
 
 Returns the type of the option specified by \lstinline+key+. The type will
-be returned as one of the following named constants in \ref{sec:types}.
+be returned as one of the named constants in \ref{sec:types}.
 
 Returns error code \lstinline+SPUD_KEY_ERROR+ if the supplied key does not
 exist in the options tree.
@@ -656,8 +658,10 @@ Spud::OptionError Spud::set_option_attribute(const std::string& key,
 const std::string& val)
 \end{lstlisting}
 
-As \lstinline+set_option+ (see \ref{sec:set_option}), but additionally attempts to mark the
-option at the specified key as an attribute.
+As \lstinline+set_option+ (see \ref{sec:set_option}), but additionally attempts
+to mark the option at the specified key as an attribute. Note that
+\lstinline+set_option_attribute+ accepts only string data data for
+\lstinline+val+.
 
 This routine can return the following error codes:
 \begin{itemize}
@@ -667,8 +671,8 @@ This routine can return the following error codes:
 \item If \lstinline+key+ fails to match, creates a new option at the supplied
   key, sets the option to \lstinline+val+ and returns error code
   \lstinline+SPUD_NEW_KEY_WARNING+.
-\item If \lstinline+key+ matches an option, but the option has children, sets
-  the option to \lstinline+val+ and returns error code
+\item If \lstinline+key+ matches an option, but the existing option has
+  children, sets the option to \lstinline+val+ and returns error code
   \lstinline+SPUD_ATTR_SET_FAILED_WARNING+.
 \end{itemize}
 
@@ -829,7 +833,7 @@ include "spud_base.rnc"
 
 \subsection{String data}
 
-\subsection{Symetric tensors}
+\subsection{Symmetric tensors}
 
 \section{The base element}
 

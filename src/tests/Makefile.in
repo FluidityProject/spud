@@ -60,7 +60,7 @@ unittest: $(TEST_BINARIES)
 
 # Link this TESTNAME_main.o with TESTNAME.o from TESTNAME.F90
 %: %_main.o %.o
-	$(CXX) -o $@ $(filter %.o,$^) unittest_tools.o  $(LIBS)
+	$(CXX) -o $@ $(filter %.o,$^) unittest_tools.o $(LIBS)
 
 clean:
 	rm -f $(TEST_BINARIES)
