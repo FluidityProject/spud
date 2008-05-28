@@ -134,8 +134,6 @@ def deprint(msg, level = 1, newline = True, flush = True):
 
   return
 
-  interface.open_file(filename = "tests/square-convection/src/square-convection.flml")
-
 def dwrite(stream, msg, level = 1, newline = True, flush = True):
   """
   Print a debug message to the supplied file stream with supplied debug level.
