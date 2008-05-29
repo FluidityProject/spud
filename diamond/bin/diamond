@@ -114,7 +114,7 @@ def main():
     suffix = input_filename.split(".")[-1]
     try:
       input_schemafile = config.schemata[suffix][1]
-    except IndexError:
+    except:
       debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
       debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
       sys.exit(1)
