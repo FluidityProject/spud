@@ -1608,7 +1608,6 @@ class Diamond:
     self.node_comment.get_buffer().create_tag("comment_buffer_tag")
     self.node_comment.connect("focus-in-event", self.node_comment_focus_in)
     self.node_comment.connect("expose-event", self.node_comment_expose)
-    self.node_comment.handler_block_by_func(self.node_comment_expose)
 
     return
 
@@ -2457,7 +2456,6 @@ class Diamond:
       self.node_comment_interacted = True
       if comment_tree.data is None:
         self.node_comment.get_buffer().set_text("")
-      self.node_comment.handler_unblock_by_func(self.node_comment_expose)
 
     return
 
