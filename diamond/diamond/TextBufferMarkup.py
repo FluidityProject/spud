@@ -402,8 +402,3 @@ class SimpleEditor:
 
     def print_markup (self,*args):
         debug.dprint(self.ipb.get_text(), 0)
-
-if __name__ == '__main__':
-    se = SimpleEditor()
-    se.w.connect('delete-event',lambda *args: gtk.main_quit())
-    gtk.main()
