@@ -32,6 +32,8 @@ schemata = {}
 for dir in dirs:
   try:
     for file in os.listdir(dir):
+      if file[-1] == "~": 
+        continue # bloody emacs
       handle = open(os.path.join(dir, file))
       newSchemata = [x.strip() for x in handle]
       if len(newSchemata) != 2:
