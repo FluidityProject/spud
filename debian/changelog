@@ -1,3 +1,17 @@
+spud (0.2.5) unstable; urgency=low
+
+  * Bugfix for setting of rank and shape
+
+ -- David Ham <david.ham@imperial.ac.uk>  Mon, 02 Jun 2008 16:24:00 +0100
+
+spud (0.2.4) unstable; urgency=low
+
+  * Various diamond bugs reverted.
+  * Interface changes to libspud.
+  * Spud is now all double precision independent of compiler options.
+	
+ -- David Ham <david.ham@imperial.ac.uk>  Tue, 27 May 2008 15:14:08 +0100
+
 spud (0.2.3) unstable; urgency=low
 
   * Changed python2.5 dependency to python

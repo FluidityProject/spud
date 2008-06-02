@@ -27,6 +27,7 @@ Package: libspud-dev
 Architecture: any
 Depends: ${shlibs:Depends}
 Recommends: diamond
+Section: libdevel
 Suggests:
 Description: An automatic options system for scientific models.
  Spud is an automatic options system which reads an xml options file 
