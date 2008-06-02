@@ -88,18 +88,21 @@ module spud
   end interface
 
   ! C interfaces
-  interface
+  interface  
     subroutine cspud_load_options(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
     end subroutine cspud_load_options
 
     subroutine cspud_write_options(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
     end subroutine cspud_write_options
 
     function cspud_get_child_name(key, key_len, index, child_name, child_name_len)
+      implicit none
       integer, intent(in) :: key_len
       integer, intent(in) :: child_name_len
       character(len = key_len), intent(in) :: key
@@ -109,24 +112,28 @@ module spud
     end function cspud_get_child_name
 
     function cspud_number_of_children(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer :: cspud_number_of_children
     end function cspud_number_of_children
 
     function cspud_option_count(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer :: cspud_option_count
     end function cspud_option_count
 
     function cspud_have_option(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer :: cspud_have_option
     end function cspud_have_option
 
     function cspud_get_option_type(key, key_len, option_type)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, intent(out) :: option_type
@@ -134,6 +141,7 @@ module spud
     end function cspud_get_option_type
 
     function cspud_get_option_rank(key, key_len, option_rank)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, intent(out) :: option_rank
@@ -141,6 +149,7 @@ module spud
     end function cspud_get_option_rank
 
     function cspud_get_option_shape(key, key_len, shape)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer, dimension(2), intent(out) :: shape
@@ -148,12 +157,14 @@ module spud
     end function cspud_get_option_shape
 
     function cspud_add_option(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer :: cspud_add_option
     end function cspud_add_option
 
     function cspud_set_option_attribute(key, key_len, val, val_len)
+      implicit none
       integer, intent(in) :: key_len
       integer, intent(in) :: val_len
       character(len = key_len), intent(in) :: key
@@ -162,6 +173,7 @@ module spud
     end function cspud_set_option_attribute
 
     function cspud_delete_option(key, key_len)
+      implicit none
       integer, intent(in) :: key_len
       character(len = key_len), intent(in) :: key
       integer :: cspud_delete_option

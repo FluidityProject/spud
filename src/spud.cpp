@@ -854,7 +854,6 @@ namespace Spud{
     }
   }
 
-
   size_t OptionManager::Option::get_option_rank() const{
     if(verbose)
       cout << "size_t FLOption::get_option_rank(void) const\n";
