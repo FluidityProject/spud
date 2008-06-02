@@ -210,10 +210,35 @@ that is, the \verb+name+ attribute is accessed the same way as a child element
 called \verb+name+ would be.
 
 Attributes in the options tree must have string type data and have no children.
-If either of these rules are broken (e.g. via a (\ref{sec:set_option}) call)
+If either of these rules are broken (e.g. via a \ref{sec:set_option} call)
 then the attribute element will be unmarked as an attribute, will be treated as
 a normal element, and will appear in xml files written out by libspud as xml
 elements rather than element attributes.
+
+\subsection{Data elements}
+
+Data defined in the Spud base language (see \ref{sec:named_patterns}), such as
+\verb+integer_value+ or \verb+real_value+, are detected by libspud and stored in
+"\verb+__value+" children. e.g, for the following schema:
+
+\begin{verbatim}
+<model_options>
+  <real_parent>
+    <ref name="real_value"/>
+  </real_parent>
+</model_options>
+\end{verbatim}
+
+the data element "\verb+real_value+" has option key
+"\verb+/real_parent/__value+". Alternatively, the data element
+"\verb+real_value+" can be accessed directly with option key
+"\verb+/real_parent+" - i.e. libspud automatically navigates into
+"\verb+__value+" child elements when reading or setting options, if such a child
+element exists.
+
+Manually creating a "\verb+__value+" child for an element that already itself
+contains data will result in the data of the parent element being removed, and
+a warning message will be sent to standard error.
 
 \section{Language specific features}
 
@@ -737,7 +762,7 @@ is translated from compact to XML syntax using the software package Trang
 before use by Spud based tools like Diamond.
 
 
-\section{Base language named patterns}
+\section{Base language named patterns}\label{sec:named_patterns}
 The RELAX NG language allows different schemas to be imported into one
 another, which enables Spud to define a base language for schema developers.
 The Spud base language thus provides core schema objects (known in RELAX NG
