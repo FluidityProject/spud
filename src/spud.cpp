@@ -510,7 +510,7 @@ namespace Spud{
   }
 
   OptionManager::OptionManager(const OptionManager& manager){
-    cerr << "OptionManager copy constructor cannot be called" << endl;
+    cerr << "SPUD ERROR: OptionManager copy constructor cannot be called" << endl;
     exit(-1);
   }
 
@@ -521,7 +521,7 @@ namespace Spud{
   }
 
   OptionManager& OptionManager::operator=(const OptionManager& manager){
-    cerr << "OptionManager assignment operator cannot be called" << endl;
+    cerr << "SPUD ERROR: OptionManager assignment operator cannot be called" << endl;
     exit(-1);
   }
 
@@ -584,7 +584,11 @@ namespace Spud{
 
   OptionManager::Option::Option(){
     verbose_off();
-    set_rank_and_shape(-1, vector<int>());
+    OptionError set_err = set_rank_and_shape(-1, vector<int>());
+    if(set_err != SPUD_NO_ERROR){
+      cerr << "SPUD ERROR: Failed to set rank and shape" << endl;
+      exit(-1);
+    }
     is_attribute = false;
 
     return;
@@ -599,7 +603,11 @@ namespace Spud{
   OptionManager::Option::Option(string name){
     verbose_off();
     node_name = name;
-    set_rank_and_shape(-1, vector<int>());
+    OptionError set_err = set_rank_and_shape(-1, vector<int>());
+    if(set_err != SPUD_NO_ERROR){
+      cerr << "SPUD ERROR: Failed to set rank and shape" << endl;
+      exit(-1);
+    }
     is_attribute = false;
 
     return;
@@ -622,7 +630,11 @@ namespace Spud{
     data_string = inOption.data_string;
     vector<int> shape(2);
     shape[0] = inOption.shape[0];  shape[1] = inOption.shape[1];
-    set_rank_and_shape(inOption.rank, shape);
+    OptionError set_err = set_rank_and_shape(inOption.rank, shape);
+    if(set_err != SPUD_NO_ERROR){
+      cerr << "SPUD ERROR: Failed to set rank and shape" << endl;
+      exit(-1);
+    }
 
     is_attribute = inOption.is_attribute;
 
@@ -636,7 +648,7 @@ namespace Spud{
     TiXmlDocument doc(filename);
     doc.SetCondenseWhiteSpace(false);
     if(!doc.LoadFile()){
-      cerr << "WARNING: Failed to load options file" << endl;
+      cerr << "SPUD WARNING: Failed to load options file" << endl;
       return;
     }
 
@@ -673,7 +685,7 @@ namespace Spud{
     doc.LinkEndChild(root_node);
 
     if(!doc.SaveFile(filename)){
-      cerr << "WARNING: Failed to write options file" << endl;
+      cerr << "SPUD WARNING: Failed to write options file" << endl;
     }
 
     return;
@@ -1191,7 +1203,7 @@ namespace Spud{
       }
       if(child == children.end()){
         if(name == "__value" and get_option_type() != SPUD_NONE){
-          cerr << "WARNING: Creating __value child for non null element - deleting parent data" << endl;
+          cerr << "SPUD WARNING: Creating __value child for non null element - deleting parent data" << endl;
           set_option_type(SPUD_NONE);
         }
         child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(name)));
@@ -1229,7 +1241,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::set_rank_and_shape(const int& rank = " << rank << ", const vector<int>& shape)\n";
 
-    if((rank == -1 and shape.size() != 0) or ((int)shape.size() != rank and (int)shape.size() != 2)){
+    if((int)shape.size() != 2 and rank != -1 and (int)shape.size() != rank){
       return SPUD_SHAPE_ERROR;
     }
 
@@ -1320,7 +1332,7 @@ namespace Spud{
 
     // Should only deal with TiXmlNode::ELEMENT types
     if(node->Type() != TiXmlNode::ELEMENT){
-      cerr << "WARNING - Non-element: " << root << " encountered" << endl;
+      cerr << "SPUD WARNING - Non-element: " << root << " encountered" << endl;
       return;
     }
 
@@ -1335,7 +1347,7 @@ namespace Spud{
     // Ensure this path has been added
     OptionManager::Option* child = create_child(basename);
     if(child == NULL){
-      cerr << "ERROR: Unexpected failure when creating child element" << endl;
+      cerr << "SPUD ERROR: Unexpected failure when creating child element" << endl;
       exit(-1);
     }
 
@@ -1438,7 +1450,7 @@ namespace Spud{
       cout << "TiXmlElement* OptionManager::Option:to_element(void) const\n";
 
     if(is_attribute){
-      cerr << "WARNING: Converting an attribute to an element" << endl;
+      cerr << "SPUD WARNING: Converting an attribute to an element" << endl;
     }
 
     // Create new element
@@ -1478,7 +1490,7 @@ namespace Spud{
               child_ele->SetValue("string_value");
               break;
             default:
-              cerr << "ERROR: Invalid option type" << endl;
+              cerr << "SPUD ERROR: Invalid option type" << endl;
               exit(-1);
            }
         }
@@ -1604,7 +1616,7 @@ namespace Spud{
       case(SPUD_STRING):
         return data_string;
       default:
-        cerr << "ERROR: Invalid option type" << endl;
+        cerr << "SPUD ERROR: Invalid option type" << endl;
         exit(-1);
     }
   }
