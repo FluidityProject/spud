@@ -17,7 +17,6 @@
 
 import debug
 import tree
-import choice
 import preprocess
 
 import base64
@@ -28,8 +27,10 @@ import sys
 import cStringIO
 
 from lxml import etree
-
-import plist
+from Ft.Xml import Parse
+from Ft.Xml.XPath import Evaluate
+import Ft.Xml.cDomlette
+from Ft.Xml.Domlette import Print, PrettyPrint
 
 class Schema(object):
   def __init__(self, schemafile):
@@ -66,14 +67,13 @@ class Schema(object):
     """
 
     children = []
-    for child1 in element.iterchildren():
+    for child1 in element:
       if self.tag(child1) == "ref":
-        if not "name" in child1.keys():
+        if not "name" in child1.attrib.keys():
           debug.deprint("Warning: Encountered reference with no name")
           continue
 
-        name = child1.get("name")
-
+        name = child1.attrib["name"]
         xpath = self.tree.xpath('/t:grammar/t:define[@name="' + name + '"]',
                namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})
 
@@ -81,7 +81,8 @@ class Schema(object):
           debug.deprint("Warning: Schema reference %s not found" % name)
           continue
 
-        for child2 in self.element_children(xpath[0]):
+        node = xpath[0]
+        for child2 in self.element_children(node):
           children.append(child2)
       else:
         children.append(child1)
@@ -109,17 +110,13 @@ class Schema(object):
     if eid == ":start":
       node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
     else:
-      xpath = self.tree.xpath(eid)
-      if len(xpath) == 0:
-        debug.deprint("Warning: no element with XPath %s" % eid)
-        return []
-      node = xpath[0]
+      node = self.tree.xpath(eid)[0]
 
     results = []
 
     for child in self.element_children(node):
       self.append(results, self.to_tree(child))
-      
+
     return results
 
   def to_tree(self, element):
@@ -128,10 +125,6 @@ class Schema(object):
     facts = {}
     x = f(element, facts)
     return x
-
-  #############################################
-  # Beginning of schema processing functions. #
-  #############################################
 
   def cb_name(self, element, facts):
     name = element.text
@@ -142,16 +135,14 @@ class Schema(object):
     if "cardinality" in facts:
       newfacts["cardinality"] = facts["cardinality"]
 
-    if "name" in element.keys():
-      newfacts["name"] = element.get("name")
+    if "name" in element.attrib.keys():
+      newfacts["name"] = element.attrib["name"]
     else:
       debug.deprint("Warning: Encountered element with no name")
-
     newfacts['schemaname'] = self.tree.getpath(element)
 
     for child in self.element_children(element):
       tag = self.tag(child)
-
       if tag not in ['element', 'optional', 'zeroOrMore', 'oneOrMore']:
         f = self.callbacks[tag]
         x = f(child, newfacts)
@@ -160,16 +151,14 @@ class Schema(object):
       d = newfacts["datatype"]
       if isinstance(d, tuple):
         new_d = []
-
         for x in d:
-          if x is not None:
+          if not x is None:
             new_d.append(x)
-
         d = tuple(new_d)
         newfacts["datatype"] = d
         if len(d) == 0:
           newfacts["datatype"] = None
-        elif len(d) == 1 and isinstance(d[0], plist.List):
+        elif len(d) == 1 and isinstance(d[0], List):
           newfacts["datatype"] = d[0]
         else:
           l_values = []
@@ -181,7 +170,7 @@ class Schema(object):
               l_data.append(x)
 
           if len(l_data) > 1:
-            if "name" in element.keys():
+            if "name" in element.attrib.keys():
               debug.deprint("Warning: Element %s has multiple datatypes - using first one" % newfacts["name"])
             else:
               debug.deprint("Warning: Unnamed element has multiple datatypes - using first one")
@@ -209,12 +198,12 @@ class Schema(object):
     facts["datatype"] = tuple(l)
 
   def cb_attribute(self, element, facts):
-    if not "name" in element.keys():
+    if not "name" in element.attrib.keys():
       debug.deprint("Warning: Encountered attribute with no name")
       return
 
     newfacts = {}
-    name = element.get("name")
+    name = element.attrib["name"]
 
     for child in self.element_children(element):
       tag = self.tag(child)
@@ -280,7 +269,7 @@ class Schema(object):
                'double': float,
                'string': str}
 
-    datatype_name = element.get("type")
+    datatype_name = element.attrib["type"]
     l.append(mapping[datatype_name])
     if len(l) == 1:
       facts["datatype"] = l[0]
@@ -334,7 +323,7 @@ class Schema(object):
       if "schemaname" in facts:
         return
 
-      r = []
+      r = []      
       children = self.choice_children(self.element_children(element))
       
       # bloody simplified RNG
@@ -355,7 +344,7 @@ class Schema(object):
         f = self.callbacks[tag]
         self.append(r, f(child, newfacts))
 
-      return choice.Choice(r, **facts)
+      return tree.Choice(r, **facts)
 
   def cb_empty(self, element, facts):
     pass
@@ -376,7 +365,7 @@ class Schema(object):
         c = str(len(d))
         d = d[0]
 
-    l = plist.List(d, c)
+    l = List(d, c)
     if "datatype" in facts:
       e = list(facts["datatype"])
     else:
@@ -422,14 +411,11 @@ class Schema(object):
     debug.deprint("except element found. Yet to handle.", 0)
     sys.exit(1)
 
-  #######################################
-  # End of schema processing functions. #
-  #######################################
+  # End of schema processing functions.
 
   def tag(self, element):
     return element.tag.split('}')[-1]
 
-  # append - append either a list or single element 'x' to 'r'.
   def append(self, r, x):
     if x is None:
       return
@@ -441,19 +427,13 @@ class Schema(object):
 
     r.append(x)
 
-  ##########################################
-  # Beginning of XML processing functions. #
-  ##########################################
-
-  # read takes a file handle, constructs a generic in-memory representation using the
-  # the etree API, and then converts it to a tree of Tree and Choice elements.
   def read(self, xmlfile):
-    doc = etree.parse(xmlfile)
+    doc = Parse(xmlfile)
 
     self.lost_eles = ""
 
     datatree = self.valid_children(":start")[0]
-    xmlnode  = doc.getroot()
+    xmlnode  = doc.firstChild
     self.xml_read_merge(datatree, xmlnode)
     self.xml_read_core(datatree, xmlnode, doc)
 
@@ -469,45 +449,45 @@ class Schema(object):
     # the xmlnode contains the following information:
     # attribute values, data
     # merge the two.
-    
+
     datatree.xmlnode = xmlnode
-    xmlkeys = xmlnode.keys()
+    xmlkeys = [key for (namespace, key) in xmlnode.attributes.keys()]
 
     if datatree.__class__ is tree.Tree:
       to_set = datatree
-    elif datatree.__class__ is choice.Choice:
+    elif datatree.__class__ is tree.Choice:
       if "name" in xmlkeys:
-        xmlname = xmlnode.get("name")
+        xmlname = xmlnode.attributes[(None, "name")].value
         have_found = False
 
-        possibles = [tree_choice for tree_choice in datatree.choices() if tree_choice.name == xmlnode.tag]
+        possibles = [choice for choice in datatree.choices() if choice.name == xmlnode.localName]
         # first loop over the fixed-value names
-        for tree_choice in possibles:
-          if "name" not in tree_choice.attrs:
+        for choice in possibles:
+          if "name" not in choice.attrs:
             continue
 
-          datatype = tree_choice.attrs["name"][0]
+          datatype = choice.attrs["name"][0]
           if datatype == 'fixed':
-            treename = tree_choice.attrs["name"][1]
+            treename = choice.attrs["name"][1]
             if treename == xmlname:
               have_found = True
-              datatree.set_active_choice_by_ref(tree_choice)
+              datatree.set_active_choice_by_ref(choice)
               break
 
         # if we haven't found it, look for a generic name
         if have_found is False:
-          for tree_choice in possibles:
-            if "name" not in tree_choice.attrs:
+          for choice in possibles:
+            if "name" not in choice.attrs:
               continue
 
-            datatype = tree_choice.attrs["name"][0]
+            datatype = choice.attrs["name"][0]
             if datatype != 'fixed':
               have_found = True
-              datatree.set_active_choice_by_ref(tree_choice)
+              datatree.set_active_choice_by_ref(choice)
               break
 
       else:
-        datatree.set_active_choice_by_name(xmlnode.tag)
+        datatree.set_active_choice_by_name(xmlnode.localName)
 
       to_set = datatree.get_current_tree()
 
@@ -515,44 +495,60 @@ class Schema(object):
     for key in to_set.attrs.keys():
       if key in xmlkeys:
         try:
-          to_set.set_attr(key, xmlnode.get(key))
+          to_set.set_attr(key, xmlnode.attributes[(None, key)].value)
         except:
           pass
 
-    if xmlnode.text is not None:
-     try:
-       text=xmlnode.text.strip()
-       if text != "":
-         to_set.set_data(text)
-     except:
-       pass
-      
-
     # data.
-    for child in xmlnode.iterchildren(tag=etree.Element):
-      if child.tail is not None:
-         try:
-           text = child.tail.strip()
-           if text != "":
-             to_set.set_data(text)
-             break
-         except:
-           print "Failed to set data", to_set, tail, sys.exc_value
-           pass
+    for child in xmlnode.childNodes:
+      if child.__class__ is Ft.Xml.cDomlette.Text:
+        try:
+          data = child.data.strip()
+          if data != "":
+            to_set.set_data(child.data.strip())
+            break
+        except:
+          pass
 
     to_set.recompute_validity()
     datatree.recompute_validity()
 
-  ###########################################################################################
-  # construct the priority queue
-  # we treat compulsory nodes first, then descend through the cardinalities
-  ###########################################################################################  
-  
-  def construct_priority_queue(self, schemachildren):
+  def xml_read_core(self, datatree, xmlnode, rootdoc):
+    """This is the part that recurses, you see."""
+
+    assert len(datatree.children) == 0
+
+    # no information from XML to be had :-/
+    if xmlnode is None:
+      debug.deprint("Warning: Node %s with no XML information" % datatree.name)
+      datatree.add_children(self)
+      return
+
+    schemachildren = self.valid_children(datatree)
+    xmlchildren    = xmlnode.childNodes
+
+    # bins[schemachild.schemaname] will store the data associated with schemachild
+    bins = {}
+    for schemachild in schemachildren:
+      bins[schemachild.schemaname] = []
+
     # priority_queue will store the schemachildren, in the order in which
     # they query data from the XML
     priority_queue = []
-    
+
+    # used stores whether the xml node has been used or not
+    # we want to detect when xml nodes have been dropped
+    # due to schema changes
+    used = {}
+    for xml in xmlchildren:
+      if isinstance(xml, Ft.Xml.cDomlette.Element):
+        used[xml] = False
+
+    ###########################################################################################
+    # construct the priority queue
+    # we treat compulsory nodes first, then descend through the cardinalities
+    ###########################################################################################
+
     # compulsory first.
     for schemachild in schemachildren:
       if schemachild.cardinality == '':
@@ -572,41 +568,32 @@ class Schema(object):
     for schemachild in schemachildren:
       if schemachild.cardinality == '*':
         priority_queue.append(schemachild)
-        
-    return priority_queue
 
-  ###########################################################################################
-  # initialise the availability data
-  # avail[name][xmlnode] records whether xmlnode is available or not
-  ###########################################################################################
-  def init_avail_data(self, xmlnode, schemachildren):
-    used = {}
+    ###########################################################################################
+    # initialise the availability data
+    # avail[name][xmlnode] records whether xmlnode is available or not
+    ###########################################################################################
+
     avail = {}
-    
-    for xml in xmlnode.iterchildren(tag=etree.Element):
-      used[xml] = False
-    
     for schemachild in schemachildren:
       for name in schemachild.get_possible_names():
         avail[name] = {}
-
     for name in avail:
-      for xmldata in xmlnode.iterchildren(tag=name):
+      xml = Evaluate(name, contextNode=xmlnode)
+      for xmldata in xml:
         avail[name][xmldata] = True
-        
-    return (used, avail)
 
-  ###########################################################################################
-  # assign the available xml nodes to the children the schema says should be there
-  # in order of priority.
-  # xmls[schemachild.schemaname] is the list of xml nodes
-  # that schemachild should take
-  ###########################################################################################
-  def assign_xml_nodes(self, priority_queue, xmlnode, avail):   
+    ###########################################################################################
+    # assign the available xml nodes to the children the schema says should be there
+    # in order of priority.
+    # xmls[schemachild.schemaname] is the list of xml nodes
+    # that schemachild should take
+    ###########################################################################################
+
     xmls = {}
 
     for schemachild in priority_queue:
-      if schemachild.cardinality in ['', '?']:
+      if schemachild.cardinality == '' or schemachild.cardinality == '?':
         for curtree in schemachild.choices():
           name = curtree.name
 
@@ -617,16 +604,15 @@ class Schema(object):
               have_fixed_name = True
 
           if have_fixed_name is False:
-            xml = xmlnode.xpath(name)
+            xml = Evaluate(name, contextNode=xmlnode)
           else:
-            xml = xmlnode.xpath(name + '[@name="%s"]' % curtree.get_attr("name"))
+            xml = Evaluate(name + '[@name="%s"]' % curtree.get_attr("name"), contextNode=xmlnode)
 
           for xmldata in xml:
             if avail[name][xmldata]:
               avail[name][xmldata] = False
               xmls[schemachild.schemaname] = [xmldata]
-              break 
-
+              break
           if schemachild.schemaname not in xmls:
             if schemachild.cardinality == '':
               xmls[schemachild.schemaname] = copy.deepcopy([])
@@ -637,12 +623,9 @@ class Schema(object):
                 xmls[schemachild.schemaname] = [new_xmldata]
                 break
               else:
-#                print "===="
-#                print "Could not find %s" % schemachild.schemaname
-#                print "===="
                 xmls[schemachild.schemaname] = copy.deepcopy([])
 
-      elif schemachild.cardinality in ['*', '+']:
+      elif schemachild.cardinality == '*' or schemachild.cardinality == '+':
         xmls[schemachild.schemaname] = copy.deepcopy([])
         for curtree in schemachild.choices():
           name = curtree.name
@@ -654,28 +637,20 @@ class Schema(object):
               have_fixed_name = True
 
           if have_fixed_name is False:
-            xml = xmlnode.xpath(name)
+            xml = Evaluate(name, contextNode=xmlnode)
           else:
-            xml = xmlnode.xpath(name + '[@name="%s"]' % curtree.get_attr("name"))
+            xml = Evaluate(name + '[@name="%s"]' % curtree.get_attr("name"), contextNode=xmlnode)
 
           for xmldata in xml:
             if avail[name][xmldata]:
               avail[name][xmldata] = False
               xmls[schemachild.schemaname].append(xmldata)
-                
-    return xmls
 
-  ###########################################################################################
-  # now that we have assigned the xml nodes, loop through and grab them
-  # stuff the tree data in bins[schemachild.schemaname]
-  ###########################################################################################
-  def assign_xml_children(self, priority_queue, xmlnode, xmls, schemachildren, used, rootdoc):
-    # bins[schemachild.schemaname] will store the data associated with schemachild
-    bins = {}
+    ###########################################################################################
+    # now that we have assigned the xml nodes, loop through and grab them
+    # stuff the tree data in bins[schemachild.schemaname]
+    ###########################################################################################
 
-    for schemachild in schemachildren:
-      bins[schemachild.schemaname] = []
-      
     for schemachild in priority_queue:
       if schemachild.cardinality in ['', '?']:
         child = schemachild.copy()
@@ -685,8 +660,8 @@ class Schema(object):
           xmldata = xmls[schemachild.schemaname][0]
           used[xmldata] = True
           self.xml_read_merge(child, xmldata)
-          if xmldata.getroottree().getroot().tag != rootdoc.getroot().tag:
-            self.xml_read_core(child.get_current_tree(), xmldata, xmldata.getroottree())
+          if xmldata.ownerDocument is not rootdoc:
+            self.xml_read_core(child.get_current_tree(), xmldata, xmldata.ownerDocument)
             child.active = False
             child.recurse = False
         else:
@@ -720,87 +695,53 @@ class Schema(object):
         bins[schemachild.schemaname].append(child)
 
       # search for neglected choices
-      if schemachild.__class__ is choice.Choice and schemachild.cardinality in ['', '?']:
+      if schemachild.__class__ is tree.Choice and schemachild.cardinality in ['', '?']:
         for child in bins[schemachild.schemaname]:
 
-          # Does the child have a valid XML node attached?
           if not hasattr(child, "xmlnode"): continue
           if child.xmlnode is None: continue
 
           current_choice = child.get_current_tree()
-          for tree_choice in child.l:
-            if tree_choice is current_choice: continue
-
-            # The other choices are compressed and stored in a DIAMOND MAGIC comment. These
-            # should be read in and added to the in-memory tree.
-            hidden_xml = self.find_hidden_xmldata(tree_choice, child.xmlnode.getparent())
+          for choice in child.l:
+            if choice is current_choice: continue
+            hidden_xml = self.find_hidden_xmldata(choice, child.xmlnode.parentNode)
             if len(hidden_xml) > 0:
               new_xmldata = hidden_xml[0]
-              self.xml_read_merge(tree_choice, new_xmldata)
-              self.xml_read_core(tree_choice, new_xmldata, rootdoc)
-#            else:
-#              print "===="
-#              print "Could not find %s" % schemachild.schemaname
-#              print "===="
-                
-    return bins
+              self.xml_read_merge(choice, new_xmldata)
+              self.xml_read_core(choice, new_xmldata, new_xmldata.ownerDocument)
 
-  # find_hidden_xmldata looks for DIAMOND MAGIC COMMENTs in the given xmlnode, decompresses them, and adds
-  # them to the tree.
-  def find_hidden_xmldata(self, datatree, xmlnode):
-    hidden = []
-    for xmlchild in xmlnode.iterchildren(tag=etree.Comment):
-        text = xmlchild.text
-         # bingo.
-        data = text.split('\n')
-        name = data[0]
+    ###########################################################################################
+    # append the children to the datatree
+    # in the order the schema presents them
+    # order matters!
+    ###########################################################################################
 
-        if datatree.schemaname in name and "DIAMOND MAGIC COMMENT" in name:
-          pickle = data[1]
-          try:
-            doc = etree.fromstring(bz2.decompress(base64.b64decode(pickle)))
-          except:
-            print "Error reading compressed XML. Output follows:"
-            print "\"", bz2.decompress(base64.b64decode(pickle)), "\""
-            sys.exit(1)
-
-          # Iterate over all elements in this newly-decompressed subtree, and add them to the
-          # in-memory tree structure.
-          for child in doc.iterchildren(tag=etree.Element):
-            new_xmldata = child
-            hidden.append(new_xmldata)
-            break
-
-    return hidden
-  
-  # Loop over lost nodes, and store their XML so the user can be notified later.
-  def check_unused_nodes(self, used): 
-    for xml in used:
-      if used[xml] is False:
-        buf = cStringIO.StringIO()
-        buf.write(etree.tostring(xml, pretty_print = True))
-        s = buf.getvalue()
-        buf.close()
-        self.lost_eles += s
-  
-  # Append the children to the datatree in the order the schema presents them.
-  # Order matters here.
-  def append_children(self, schemachildren, datatree, bins):
     for schemachild in schemachildren:
       for child in bins[schemachild.schemaname]:
         child.set_parent(datatree)
-        datatree.children.append(child)  
-      
-  # Recurse down the in-memory XML tree, reading elements and merging their
-  # information into the in-memory Tree structure.
-  def read_children(self, datatree, rootdoc):
-    for schild in datatree.children:
+        datatree.children.append(child)
 
+    ###########################################################################################
+    # loop over lost xml nodes
+    ###########################################################################################
+    for xml in used:
+      if used[xml] is False:
+        buf = cStringIO.StringIO()
+        PrettyPrint(xml, stream=buf, encoding='utf-8')
+        s = buf.getvalue()
+        buf.close()
+        self.lost_eles += s
+
+    ###########################################################################################
+    # now do the same for the children
+    ###########################################################################################
+
+    for schild in datatree.children:
       if hasattr(schild, "recurse"):
         if schild.recurse is False:
           continue
 
-      if schild.__class__ is choice.Choice:
+      if schild.__class__ is tree.Choice:
         child = schild.get_current_tree()
       else:
         child = schild
@@ -808,27 +749,58 @@ class Schema(object):
       child.children = copy.copy([])
       self.xml_read_core(child, schild.xmlnode, rootdoc)
 
-  # xml_read_core recurses throughout the tree, calling xml_read_merge on the current node "xmlnode" and
-  # and reading information about the node's children.
-  def xml_read_core(self, datatree, xmlnode, rootdoc):
-    """This is the part that recurses, you see."""
-
-    assert len(datatree.children) == 0
-
-    # no information from XML to be had :-/
-    if xmlnode is None:
-      debug.deprint("Warning: Node %s with no XML information" % datatree.name)
-      datatree.add_children(self)
-      return
-
-    schemachildren = self.valid_children(datatree)
-    
-    priority_queue = self.construct_priority_queue(schemachildren) 
-    (used, avail) = self.init_avail_data(xmlnode, schemachildren)
-    xmls = self.assign_xml_nodes(priority_queue, xmlnode, avail)
-    bins = self.assign_xml_children(priority_queue, xmlnode, xmls, schemachildren, used, rootdoc)
-    self.append_children(schemachildren, datatree, bins)              
-    self.check_unused_nodes(used)
-    self.read_children(datatree, rootdoc)
-
     datatree.recompute_validity()
+
+  def find_hidden_xmldata(self, datatree, xmlnode):
+    # Let's look for DIAMOND MAGIC COMMENTs.
+
+    hidden = []
+    for xmlchild in xmlnode.childNodes:
+      if xmlchild.__class__ is Ft.Xml.cDomlette.Comment:
+        data = xmlchild.data
+        if datatree.schemaname in data and "DIAMOND MAGIC COMMENT" in data:
+          # bingo.
+          pickle = data.split('\n')[1]
+          doc = Parse(bz2.decompress(base64.b64decode(pickle)))
+          for child in doc.childNodes:
+            if child.__class__ is Ft.Xml.cDomlette.Element:
+              new_xmldata = child
+              hidden.append(new_xmldata)
+              break
+
+    return hidden
+
+class List:
+  def __init__(self, datatype, cardinality=''):
+    self.datatype = datatype
+    self.cardinality = cardinality
+
+  def __call__(self, val):
+    # input to this has to be a string
+    val = val.strip()
+    if "," in val:
+      x = val.split(",")
+    else:
+      x = val.split(" ")
+
+    if self.cardinality == '+':
+      assert len(x) > 0
+    elif self.cardinality == '':
+      assert len(x) == 1
+
+    try:
+      int_cardinality = int(self.cardinality)
+      assert len(x) == int_cardinality
+    except ValueError:
+      pass
+
+    for y in x:
+      z = self.datatype(y)
+
+    return " ".join(x)
+
+  def __str__(self):
+    return "list of " + str(self.datatype) + " of cardinality: " + self.cardinality
+
+  def __repr__(self):
+    return "list of " + str(self.datatype) + " of cardinality: " + self.cardinality

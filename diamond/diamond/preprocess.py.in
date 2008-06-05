@@ -45,16 +45,16 @@ def preprocess(schemafile):
     file = None
     filename = include.attrib["href"]
     possible_files = [os.path.join(os.path.dirname(schemafile), filename), filename]
-    possible_files.append(os.path.join("/usr/share/spud", filename))
+    ssp = "@prefix@/share/spud"
+    possible_files.append(os.path.join(ssp, filename))
     possible_files.append(os.path.join(os.path.dirname(__file__) + "/../../schema", filename))
 
     for possible_file in possible_files:
       try:
-        print "possible_file = '", possible_file, "'"
         file = open(possible_file)
         break
       except IOError:
-        print "IOError"
+        pass
 
     if file is None:
       debug.deprint("Error: could not located included file %s" % filename, 0)

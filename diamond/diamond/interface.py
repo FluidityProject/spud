@@ -32,8 +32,6 @@ import schema
 import tree
 import config
 import TextBufferMarkup
-import choice
-import plist
 
 try:
   gtk.Tooltip()
@@ -259,7 +257,7 @@ class Diamond:
     """
 
     if not self.saved:
-      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you want to save the current document before continuing?", gtk.MESSAGE_WARNING)
+      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you wish to continue?", gtk.MESSAGE_WARNING)
       if not prompt_response == gtk.RESPONSE_YES:
         return
 
@@ -398,15 +396,14 @@ class Diamond:
     std_input, std_output, err_output = os.popen3("xmllint --relaxng %s %s" % (self.schemafile, tmp.name))
     output = std_output.read()
 
-
-    # If there is no current filename, then Python errors out if you try to do
-    # file.name + ":". Handle the case of "Untitled" documents.
+	 # If there is no current filename, then Python errors out if you try to do
+	 # file.name + ":". Handle the case of "Untitled" documents.
     if self.filename is None:
     	output = output.replace("Untitled: ", "Line ")
     	output = output.replace("Untitled: ", "\nXML file")
     else:
-    	output = output.replace(self.filename, "Line ")
-    	output = output.replace(self.filename, "\nXML file")
+    	output = output.replace(file.name + ":", "Line ")
+    	output = output.replace(file.name, "\nXML file")
     	
     output = output.replace("Relax-NG validity error :", "")
     output = output.replace(" , ", ", ")
@@ -450,7 +447,7 @@ class Diamond:
       statistics.
       """
 
-      if isinstance(choice_or_tree, choice.Choice):
+      if isinstance(choice_or_tree, tree.Choice):
         counter["n_choice"] += 1
         if not self.choice_or_tree_is_hidden(choice_or_tree):
           counter["n_choice_visible"] += 1
@@ -737,7 +734,7 @@ class Diamond:
     """
 
     liststore = gtk.ListStore(str, gobject.TYPE_PYOBJECT)
-    if l.__class__ is choice.Choice:
+    if l.__class__ is tree.Choice:
       l = l.l # I'm really sorry about this, blame dham
 
     if not isinstance(l, list):
@@ -765,13 +762,13 @@ class Diamond:
         liststore = self.create_liststore(t)
         child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t])
         if recurse: self.set_treestore(child_iter, t.children, recurse)
-      elif t.__class__ is choice.Choice:
+      elif t.__class__ is tree.Choice:
         liststore = self.create_liststore(t)
-        ts_choice = t.get_current_tree()
-        if self.choice_or_tree_is_hidden(ts_choice):
+        choice = t.get_current_tree()
+        if self.choice_or_tree_is_hidden(choice):
           continue
-        child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice])
-        if recurse: self.set_treestore(child_iter, ts_choice.children, recurse)
+        child_iter = self.treestore.append(iter, [self.get_display_name(choice), liststore, t, choice])
+        if recurse: self.set_treestore(child_iter, choice.children, recurse)
 
     return
 
@@ -781,7 +778,7 @@ class Diamond:
     them to the choice or tree. This recurses.
     """
 
-    if isinstance(choice_or_tree, choice.Choice):
+    if isinstance(choice_or_tree, tree.Choice):
       for opt in choice_or_tree.choices():
         self.expand_choice_or_tree(opt)
     else:
@@ -858,7 +855,7 @@ class Diamond:
     # set the properties: colour, etc.
     if choice_or_tree.__class__ is tree.Tree:
       cellCombo.set_property("editable", False)
-    elif choice_or_tree.__class__ is choice.Choice:
+    elif choice_or_tree.__class__ is tree.Choice:
       cellCombo.set_property("editable", True)
 
     if self.treestore_iter_is_active(iter):
@@ -880,7 +877,7 @@ class Diamond:
     choice_or_tree = self.treestore.get_value(iter, 2)
     if choice_or_tree.__class__ is tree.Tree:
       cell.set_property("stock-id", None)
-    elif choice_or_tree.__class__ is choice.Choice:
+    elif choice_or_tree.__class__ is tree.Choice:
       cell.set_property("stock-id", gtk.STOCK_GO_DOWN)
 
     return
@@ -1188,7 +1185,7 @@ class Diamond:
         attrname = active_tree.attrs["name"][1]
         if attrname is not None:
           displayname = displayname + " (" + attrname + ")"
-    elif active_tree.__class__ is choice.Choice:
+    elif active_tree.__class__ is tree.Choice:
       displayname = self.get_display_name(active_tree.get_current_tree())
 
     return displayname
@@ -1372,7 +1369,7 @@ class Diamond:
     none found.
     """
 
-    if choice_or_tree is None or isinstance(choice_or_tree, choice.Choice):
+    if choice_or_tree is None or isinstance(choice_or_tree, tree.Choice):
       return None
 
     for child in choice_or_tree.children:
@@ -1393,7 +1390,7 @@ class Diamond:
 
     if self.choice_or_tree_is_hidden(choice_or_tree):
       return False
-    elif isinstance(choice_or_tree, choice.Choice):
+    elif isinstance(choice_or_tree, tree.Choice):
       if self.choice_or_tree_matches(text, choice_or_tree.get_current_tree(), False):
         return True
       elif recurse and self.find.search_gui.get_widget("searchInactiveChoiceSubtreesCheckButton").get_active():
@@ -1440,7 +1437,7 @@ class Diamond:
       yield None
     choice_or_tree = self.treestore.get_value(iter, 2)
 
-    if self.choice_or_tree_matches(text, choice_or_tree, isinstance(choice_or_tree, choice.Choice)):
+    if self.choice_or_tree_matches(text, choice_or_tree, isinstance(choice_or_tree, tree.Choice)):
       yield iter
 
     child_iter = self.treestore.iter_children(iter)
@@ -1510,7 +1507,7 @@ class Diamond:
     Create a string to be displayed in place of empty data / attributes.
     """
 
-    if isinstance(datatype, plist.List):
+    if isinstance(datatype, schema.List):
       if (isinstance(datatype.cardinality, int) and datatype.cardinality == 1) or datatype.cardinality == "":
         type_as_printable = self.type_name(datatype.datatype).lower()
       else:
@@ -2307,7 +2304,7 @@ class Diamond:
         return False
       elif not value_check == self.selected_node.data:
         self.selected_node.set_data(value_check)
-        if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, plist.List) and self.selected_node.datatype.cardinality == "+":
+        if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, schema.List) and self.selected_node.datatype.cardinality == "+":
           self.selected_node.child.set_attr("shape", str(len(value_check.split(" "))))
         self.paint_validity()
         self.set_saved(False)
@@ -2553,12 +2550,12 @@ class Diamond:
       return False
 
     if "dim2" in self.selected_node.child.attrs.keys():
-      if not self.selected_node.child.attrs["dim2"][0] == "fixed" or not self.selected_node.child.attrs["rank"][1] == "2" or not isinstance(self.selected_node.child.attrs["shape"][0], plist.List) or not self.selected_node.child.attrs["shape"][0].datatype is int or not str(self.selected_node.child.attrs["shape"][0].cardinality) == self.selected_node.child.attrs["rank"][1]:
+      if not self.selected_node.child.attrs["dim2"][0] == "fixed" or not self.selected_node.child.attrs["rank"][1] == "2" or not isinstance(self.selected_node.child.attrs["shape"][0], schema.List) or not self.selected_node.child.attrs["shape"][0].datatype is int or not str(self.selected_node.child.attrs["shape"][0].cardinality) == self.selected_node.child.attrs["rank"][1]:
         return False
     elif not self.selected_node.child.attrs["rank"][1] == "1" or not self.selected_node.child.attrs["shape"][0] is int:
         return False
 
-    if not isinstance(self.selected_node.datatype, plist.List) or not self.selected_node.datatype.cardinality == "+":
+    if not isinstance(self.selected_node.datatype, schema.List) or not self.selected_node.datatype.cardinality == "+":
       return False
 
     if not self.selected_node.child.attrs["shape"][1] == None:
