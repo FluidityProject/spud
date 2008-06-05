@@ -94,8 +94,6 @@ class Tree:
   def set_attr(self, attr, val):
     """Set an attribute."""
     (datatype, curval) = self.attrs[attr]
-    if datatype != "fixed":
-      print datatype, attr, val
     (invalid, newdata) = self.valid_data(datatype, val)
     if invalid:
       raise Exception, "invalid data: (%s, %s)" % (datatype, val)
