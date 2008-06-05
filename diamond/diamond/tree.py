@@ -22,10 +22,11 @@ import cPickle as pickle
 import cStringIO as StringIO
 import re
 import zlib
-
-import Ft.Xml
+from lxml import etree
+import sys
 
 import debug
+import choice
 
 class Tree:
   """This class maps pretty much 1-to-1 with an xml tree.
@@ -93,6 +94,8 @@ class Tree:
   def set_attr(self, attr, val):
     """Set an attribute."""
     (datatype, curval) = self.attrs[attr]
+    if datatype != "fixed":
+      print datatype, attr, val
     (invalid, newdata) = self.valid_data(datatype, val)
     if invalid:
       raise Exception, "invalid data: (%s, %s)" % (datatype, val)
@@ -164,7 +167,7 @@ class Tree:
     for child in self.children:
       if child.active is False: continue
 
-      if child.__class__ is Choice:
+      if child.__class__ is choice.Choice:
         child = child.get_current_tree()
 
       if child.valid is False:
@@ -231,38 +234,41 @@ class Tree:
     else:
       file = filename
 
-    writer = Ft.Xml.MarkupWriter(file, indent=u'yes')
-    writer.startDocument()
-    self.write_core(writer)
-    writer.endDocument()
+    xmlTree=etree.tostring(self.write_core(None), pretty_print = True, xml_declaration = True, encoding="utf8")
+    
+    file.write(xmlTree)
+    file.close()
 
-  def write_core(self, writer):
+  def write_core(self, parent):
     """Write to XML; this is the part that recurses"""
-    writer.startElement(unicode(self.name))
+
+    sub_tree=etree.Element(self.name)
+    
     for key in self.attrs.keys():
       val = self.attrs[key]
       output_val = val[1]
       if output_val is not None:
-        writer.attribute(unicode(key), unicode(output_val))
-
+        sub_tree.set(unicode(key), unicode(output_val))
+  
     for child in self.children:
       if child.active is True:
-        child.write_core(writer)
+        child.write_core(sub_tree)
       else:
         if child.cardinality == '?':
-          comment_buffer = StringIO.StringIO()
-          comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
-          comment_writer.startDocument()
-          child.write_core(comment_writer)
-          comment_writer.endDocument()
+          root=etree.Element(self.name)
+          child.write_core(root)
+          comment_buffer = StringIO.StringIO(etree.tostring(root))
           comment_text = ("DIAMOND MAGIC COMMENT (inactive optional subtree %s):\n" % child.schemaname)
           comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-          writer.comment(unicode(comment_text))
-
+          sub_tree.append(etree.Comment(unicode(comment_text)))
+        
     if self.data is not None:
-      writer.text(unicode(self.data))
+      sub_tree.text=(unicode(self.data))
+      
+    if parent is not None:
+      parent.append(sub_tree)
 
-    writer.endElement(unicode(self.name))
+    return sub_tree
 
   def pickle(self):
     if hasattr(self, "xmlnode"):
@@ -378,105 +384,3 @@ class Tree:
 
   def choices(self):
     return [self]
-
-class Choice:
-  def __init__(self, l, cardinality=''):
-    self.l = l
-    self.index = 0
-    name = ""
-    for choice in l:
-      assert choice.__class__ is Tree
-      name = name + choice.name + ":"
-    name = name[:-1]
-    self.name = name
-    self.schemaname = name
-    self.cardinality = cardinality
-    self.parent = None
-    self.set_default_active()
-
-  def set_default_active(self):
-    self.active = True
-    if self.cardinality == '?' or self.cardinality == '*':
-      self.active = False
-
-  def choose(self, i):
-    self.index = i
-
-  def find_tree(self, name):
-    for t in self.l:
-      if t.name == name:
-        return t
-
-    debug.deprint("self.name == %s" % self.name, 0)
-    for choice in self.l:
-      debug.deprint("choice.name == %s" % choice.name, 0)
-    raise Exception, "No such choice name: %s" % name
-
-  def set_active_choice_by_name(self, name):
-    matched = False
-    for t in self.l:
-      if t.name == name[0:len(t.name)]:
-        matched = True
-        self.index = self.l.index(t)
-
-    if not matched:
-      raise Exception, "no such name found"
-
-    self.recompute_validity()
-
-  def set_active_choice_by_ref(self, ref):
-    self.index = self.l.index(ref)
-    self.recompute_validity()
-
-  def get_current_tree(self):
-    return self.l[self.index]
-
-  def add_children(self, schema):
-    return self.get_current_tree().add_children(schema)
-
-  def pickle(self):
-    return base64.b64encode(bz2.compress(pickle.dumps(self)))
-
-  def recompute_validity(self):
-    self.get_current_tree().recompute_validity()
-
-  def copy(self):
-    new_choices = []
-    for choice in self.l:
-      new_choices.append(choice.copy())
-
-    new_choice = Choice(new_choices)
-    for attr in ["index", "name", "schemaname", "cardinality", "active"]:
-      setattr(new_choice, attr, copy.copy(getattr(self, attr)))
-
-    new_choice.set_parent(self.parent)
-    for choice in new_choice.l:
-      choice.children = copy.copy([])
-
-    return new_choice
-
-  def get_possible_names(self):
-    return [x.name for x in self.l]
-
-  def set_parent(self, parent):
-    self.parent = parent
-    for choice in self.l:
-      choice.parent = parent
-
-  def write_core(self, writer):
-    l = self.l
-    for i in range(len(l)):
-      if self.index == i:
-        l[i].write_core(writer)
-      else:
-        comment_buffer = StringIO.StringIO()
-        comment_writer = Ft.Xml.MarkupWriter(comment_buffer, indent=u'yes')
-        comment_writer.startDocument()
-        l[i].write_core(comment_writer)
-        comment_writer.endDocument()
-        comment_text = ("DIAMOND MAGIC COMMENT (neglected choice subtree %s):\n" % l[i].schemaname)
-        comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-        writer.comment(unicode(comment_text))
-
-  def choices(self):
-    return self.l
