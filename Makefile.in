@@ -38,10 +38,10 @@ AR      = @AR@
 ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
-HEADERS = include/spud.h include/cspud.h include/spud_enums.h
+HEADERS = include/spud.h include/cspud.h include/spud_enums.h include/tinystr.h include/tinyxml.h
 MODS = spud.mod
 
-OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxmlerror.o tinyxml.o tinyxmlparser.o
+OBJS = tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o spud.o spud_interfaces.o fspud.o
 
 VPATH = src/
 
