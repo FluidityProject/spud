@@ -739,7 +739,7 @@ namespace Spud{
       name += "::";
       int i = 0;
       for(it = children.begin();it != children.end();it++){
-        if(it->first.compare(0, name.size(), name) == 0){
+        if(it->first.size() == name.size() and it->first.compare(0, name.size(), name) == 0){
           if(index < 0 or i == index){
             break;
           }else{
@@ -1192,7 +1192,7 @@ namespace Spud{
       string name2 = name + "::";
       int i = 0;
       for(child = children.begin();child != children.end();child++){
-        if(child->first.compare(0, name2.size(), name2) == 0){
+        if(child->first.size() == name2.size() and child->first.compare(0, name2.size(), name2) == 0){
           if(index < 0 or i == index){
             break;
           }else{
