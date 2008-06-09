@@ -800,7 +800,7 @@ namespace Spud{
 
     int count = 0, i = 0;
     for(multimap<string, OptionManager::Option>::const_iterator it = children.begin();it != children.end();it++){
-      if(it->first.compare(0, name.size(), name) == 0){
+      if(it->first.size() == name.size() and it->first.compare(0, name.size(), name) == 0){
         if(index < 0){
           if(branch.empty()){
             count++;
