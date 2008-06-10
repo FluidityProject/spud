@@ -652,16 +652,22 @@ namespace Spud{
       return;
     }
 
-    TiXmlNode *header = doc.FirstChild();
-    TiXmlNode *fluidity_options = header->NextSibling();
+    TiXmlNode* header = doc.FirstChild();
+    while(header != NULL and header->Type() != TiXmlNode::DECLARATION){
+      header = header->NextSibling();
+    }
+    TiXmlNode* fluidity_options = doc.FirstChildElement();
+    if(fluidity_options == NULL){
+      cerr << "SPUD WARNING: Failed to find root node when loading options file" << endl;
+      return;
+    }
 
     // Set the name of this element
     node_name = fluidity_options->ValueStr();
 
     // Decend down through all the fluidity options
-    TiXmlNode *option_node=0;
-
-    for(option_node=fluidity_options->FirstChild(); option_node; option_node=option_node->NextSibling()){
+    TiXmlNode* option_node;
+    for(option_node = fluidity_options->FirstChildElement();option_node;option_node = option_node->NextSiblingElement()){
       if(option_node->ToElement()){
         parse_node("", option_node);
       }
@@ -793,14 +799,16 @@ namespace Spud{
       return 0;
     }
 
+    logical_t match_whole = true;
     if(!children.count(name)){
       // Apparently there is no such child but lets check for "name::*"
       name += "::";
+      match_whole = false;
     }
 
     int count = 0, i = 0;
     for(multimap<string, OptionManager::Option>::const_iterator it = children.begin();it != children.end();it++){
-      if(it->first.compare(0, name.size(), name) == 0){
+      if(it->first.compare(0, name.size(), name) == 0 and (not match_whole or it->first.size() == name.size())){
         if(index < 0){
           if(branch.empty()){
             count++;
