@@ -184,7 +184,7 @@ namespace Spud{
     for(int i = 0;i < shape[0];i++){
       val.push_back(vector<double>(shape[1]));
       for(int j = 0;j < shape[1];j++){
-        val[i][j] = val_handle[(i * shape[0]) + j];
+        val[i][j] = val_handle[(i * shape[1]) + j];
       }
     }
 
@@ -276,7 +276,7 @@ namespace Spud{
     for(int i = 0;i < shape[0];i++){
       val.push_back(vector<int>(shape[1]));
       for(int j = 0;j < shape[1];j++){
-        val[i][j] = val_handle[(i * shape[0]) + j];
+        val[i][j] = val_handle[(i * shape[1]) + j];
       }
     }
 
@@ -383,7 +383,7 @@ namespace Spud{
     }else{
       shape[1] = val[0].size();
     }
-    OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 2, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
