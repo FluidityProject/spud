@@ -38,13 +38,15 @@ subroutine test_fspud
   call set_tests("/real_scalar_value", test_real_scalar = 42.0_D)
   call set_tests("/real_vector_value", test_real_vector = (/42.0_D, 43.0_D/))
   call set_tests("/real_tensor_value", test_real_tensor = reshape((/42.0_D, 43.0_D, 44.0_D, 45.0_D, 46.0_D, 47.0_D/), (/2, 3/)))
+  call set_tests("/integer_scalar_value", test_integer_scalar = 42)
+  call set_tests("/integer_vector_value", test_integer_vector = (/42, 43/))
+  call set_tests("/integer_tensor_value", test_integer_tensor = reshape((/42, 43, 44, 45, 46, 47/), (/2, 3/)))
   
   ! Pre-existing tests
   call tests_old
   
 contains
 
-  
   subroutine set_tests(key, test_char, test_integer_scalar, test_integer_vector, test_integer_tensor, test_real_scalar, test_real_vector, test_real_tensor)
     character(len = *), intent(in) :: key
     character(len = *), optional, intent(in) :: test_char
@@ -60,8 +62,8 @@ contains
     
     character(len = 255) :: ltest_char
     integer :: ltest_integer_scalar
-    integer, dimension(:), allocatable :: ltest_integer_vector
-    integer, dimension(:, :), allocatable :: ltest_integer_tensor
+    integer, dimension(:), allocatable :: ltest_integer_vector, default_integer_vector
+    integer, dimension(:, :), allocatable :: ltest_integer_tensor, default_integer_tensor
     real(D) :: ltest_real_scalar
     real(D), dimension(:), allocatable :: ltest_real_vector, default_real_vector
     real(D), dimension(:, :), allocatable :: ltest_real_tensor, default_real_tensor
@@ -72,14 +74,17 @@ contains
       type = SPUD_INTEGER
       rank = 0
       shape = (/-1, -1/)
+      print *, "*** SET TESTS FOR INTEGER SCALAR ***"
     else if(present(test_integer_vector)) then
       type = SPUD_INTEGER
       rank = 1
       shape = (/size(test_integer_vector), -1/)
+      print *, "*** SET TESTS FOR INTEGER VECTOR ***"
     else if(present(test_integer_tensor)) then
       type = SPUD_INTEGER
       rank = 2
       shape = (/size(test_integer_tensor, 1), size(test_integer_tensor, 2)/)
+      print *, "*** SET TESTS FOR INTEGER TENSOR ***"
     else if(present(test_real_scalar)) then
       type = SPUD_REAL
       rank = 0
@@ -108,8 +113,20 @@ contains
     call report_test("[Option missing]", have_option(trim(key)), .false., "Missing option reported present")
     
     if(present(test_integer_scalar)) then
+      call set_option(trim(key), test_integer_scalar, stat)
+      call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+      call set_option(trim(key), test_integer_scalar, stat)
+      call report_test("[Set existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when setting option")
     else if(present(test_integer_vector)) then
+      call set_option(trim(key), test_integer_vector, stat)
+      call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+      call set_option(trim(key), test_integer_vector, stat)
+      call report_test("[Set existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when setting option")
     else if(present(test_integer_tensor)) then
+      call set_option(trim(key), test_integer_tensor, stat)
+      call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+      call set_option(trim(key), test_integer_tensor, stat)
+      call report_test("[Set existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when setting option")
     else if(present(test_real_scalar)) then
       call set_option(trim(key), test_real_scalar, stat)
       call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
@@ -149,7 +166,7 @@ contains
         call get_option(trim(key), ltest_real_scalar, stat)
         call report_test("[Rank error when extracting option data]", stat /= SPUD_RANK_ERROR, .false., "Returned incorrect error code when retrieving option data")
         call get_option(trim(key), ltest_real_scalar, stat, default = 0.0_D)
-        call report_test("[[Rank error when extracting option data with default argument]", stat /= SPUD_RANK_ERROR, .false., "Returned error code when retrieving option data")
+        call report_test("[Rank error when extracting option data with default argument]", stat /= SPUD_RANK_ERROR, .false., "Returned error code when retrieving option data")
       end if
       if(rank == 1) then
         allocate(ltest_real_vector(shape(1)))
@@ -226,6 +243,93 @@ contains
       deallocate(ltest_real_tensor)
       deallocate(default_real_vector)
       deallocate(default_real_tensor)
+    end if
+    if(type == SPUD_INTEGER) then
+      if(rank == 0) then
+        call get_option(trim(key), ltest_integer_scalar, stat)
+        call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+        call report_test("[Extracted correct option data]", (ltest_integer_scalar - test_integer_scalar) > tol, .false., "Retrieved incorrect option data")
+      else
+        call get_option(trim(key), ltest_integer_scalar, stat)
+        call report_test("[Rank error when extracting option data]", stat /= SPUD_RANK_ERROR, .false., "Returned incorrect error code when retrieving option data")
+        call get_option(trim(key), ltest_integer_scalar, stat, default = 0)
+        call report_test("[Rank error when extracting option data with default argument]", stat /= SPUD_RANK_ERROR, .false., "Returned error code when retrieving option data")
+      end if
+      if(rank == 1) then
+        allocate(ltest_integer_vector(shape(1)))
+        call get_option(trim(key), ltest_integer_vector, stat)
+        call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+        call report_test("[Extracted correct option data]", maxval(abs(ltest_integer_vector - test_integer_vector)) > tol, .false., "Retrieved incorrect option data")
+        deallocate(ltest_integer_vector)
+        allocate(ltest_integer_vector(shape(1) + 1))
+        call get_option(trim(key), ltest_integer_vector, stat)
+        call report_test("[Shape error when extracting option data]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+        allocate(default_integer_vector(shape(1)))
+        default_integer_vector = 0
+        call get_option(trim(key), ltest_integer_vector, stat, default = default_integer_vector)
+        call report_test("[Shape error when extracting option data with default argument]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+        deallocate(default_integer_vector)
+        deallocate(ltest_integer_vector)
+      else
+        allocate(ltest_integer_vector(3))
+        call get_option(trim(key), ltest_integer_vector, stat)
+        call report_test("[Rank error when extracting option data]", stat /= SPUD_RANK_ERROR, .false., "Returned incorrect error code when retrieving option data")
+        allocate(default_integer_vector(shape(1)))
+        default_integer_vector = 0
+        call get_option(trim(key), ltest_integer_vector, stat, default = default_integer_vector)
+        call report_test("[Rank error when extracting option data with default argument]", stat /= SPUD_RANK_ERROR, .false., "Returned error code when retrieving option data")
+        deallocate(default_integer_vector)
+        deallocate(ltest_integer_vector)
+      end if
+      if(rank == 2) then
+        allocate(ltest_integer_tensor(shape(1), shape(2)))
+        call get_option(trim(key), ltest_integer_tensor, stat)
+        call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+        call report_test("[Extracted correct option data]", maxval(abs(ltest_integer_tensor - test_integer_tensor)) > tol, .false., "Retrieved incorrect option data")
+        deallocate(ltest_integer_tensor)
+        allocate(ltest_integer_tensor(shape(1) + 1, shape(2) + 1))
+        call get_option(trim(key), ltest_integer_tensor, stat)
+        call report_test("[Shape error when extracting option data]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+        allocate(default_integer_tensor(shape(1) + 1, shape(2) + 1))
+        default_integer_tensor = 0
+        call get_option(trim(key), ltest_integer_tensor, stat, default = default_integer_tensor)
+        call report_test("[Shape error when extracting option data with default argument]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+        deallocate(default_integer_tensor)
+        deallocate(ltest_integer_tensor)
+      else
+        allocate(ltest_integer_tensor(3, 4))
+        call get_option(trim(key), ltest_integer_tensor, stat)
+        call report_test("[Rank error when extracting option data]", stat /= SPUD_RANK_ERROR, .false., "Returned incorrect error code when retrieving option data")
+        allocate(default_integer_tensor(shape(1), shape(2)))
+        default_integer_tensor = 0
+        call get_option(trim(key), ltest_integer_tensor, stat, default = default_integer_tensor)
+        call report_test("[Rank error when extracting option data with default argument]", stat /= SPUD_RANK_ERROR, .false., "Returned error code when retrieving option data")
+        deallocate(default_integer_tensor)
+        deallocate(ltest_integer_tensor)
+      end if        
+    else
+      allocate(ltest_integer_vector(3))
+      allocate(ltest_integer_tensor(3, 4))
+      allocate(default_integer_vector(3))      
+      default_integer_vector = 0
+      allocate(default_integer_tensor(3, 4)) 
+      default_integer_tensor = 0
+      call get_option(trim(key), ltest_integer_scalar, stat)
+      call report_test("[Type error when extracting option data]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      call get_option(trim(key), ltest_integer_scalar, stat, default = 0)
+      call report_test("[Type error when extracting option data with default argument]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      call get_option(trim(key), ltest_integer_vector, stat)
+      call report_test("[Type error when extracting option data]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      call get_option(trim(key), ltest_integer_vector, stat, default = default_integer_vector)
+      call report_test("[Type error when extracting option data with default argument]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      call get_option(trim(key), ltest_integer_tensor, stat)
+      call report_test("[Type error when extracting option data]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      call get_option(trim(key), ltest_integer_tensor, stat, default = default_integer_tensor)
+      call report_test("[Type error when extracting option data with default argument]", stat /= SPUD_TYPE_ERROR, .false., "Returned incorrect error code when retrieving option data")
+      deallocate(ltest_integer_vector)
+      deallocate(ltest_integer_tensor)
+      deallocate(default_integer_vector)
+      deallocate(default_integer_tensor)
     end if
     
     call delete_option(trim(key), stat)

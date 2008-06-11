@@ -415,7 +415,7 @@ namespace Spud{
 
     vector<int> val_handle = val;
     vector<int> shape(2);
-    shape[0] = -1;  shape[1] = -1;
+    shape[0] = val.size();  shape[1] = -1;
     OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
