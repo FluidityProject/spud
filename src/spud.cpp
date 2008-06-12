@@ -470,12 +470,15 @@ namespace Spud{
 
   OptionError OptionManager::set_option_attribute(const string& key, const string& val){
     OptionError set_err = set_option(key, val);
+    if(set_err != SPUD_NO_ERROR and set_err != SPUD_NEW_KEY_WARNING){
+      return set_err;
+    }
+
     Option* child = manager.options->get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
-    }    
+    }
     logical_t is_attribute = child->set_is_attribute(true);
-    
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }
