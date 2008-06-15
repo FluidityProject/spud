@@ -33,7 +33,7 @@ subroutine test_fspud
   implicit none
 
   integer, parameter :: D = kind(0.0D0)
-  real(D), parameter :: tol = 1.0e-6
+  real(D), parameter :: tol = 1.0e-6_D
     
   call set_and_get_tests("/real_scalar", test_real_scalar = 42.0_D)
   call set_and_get_tests("/real_vector", test_real_vector = (/42.0_D, 43.0_D/))
