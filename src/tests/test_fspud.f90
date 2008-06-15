@@ -486,7 +486,7 @@ contains
     call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
     call get_option(trim(key), test_real_scalar, stat, default = 42.0_D)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
-    call report_test("[Extracted correct option data (default)]", abs(test_real_scalar - 42.0) > tol, .false., "Retrieved incorrect option data")
+    call report_test("[Extracted correct option data (default)]", abs(test_real_scalar - 42.0_D) > tol, .false., "Retrieved incorrect option data")
     call get_option(trim(key), test_real_vector, stat)
     call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
     call get_option(trim(key), test_real_vector, stat, default = real_vector_default)
