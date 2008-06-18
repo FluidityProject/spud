@@ -1537,9 +1537,9 @@ namespace Spud{
     return;
   }
 
-  void OptionManager::Option::split_name(const string in, string& name, string& branch) const{
+  void OptionManager::Option::split_name(const string& in, string& name, string& branch) const{
     if(verbose)
-      cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, string& branch) const\n";
+      cout << "void OptionManager::Option::split_name(const string& in = " << in << ", string& name, string& branch) const\n";
 
     name = "";
     branch = "";
@@ -1565,9 +1565,9 @@ namespace Spud{
     return;
   }
 
-  void OptionManager::Option::split_name(const string in, string& name, int& index, string& branch) const{
+  void OptionManager::Option::split_name(const string& in, string& name, int& index, string& branch) const{
     if(verbose)
-      cout << "void OptionManager::Option::split_name(const string in = " << in << ", string& name, int& index, string& branch) const\n";
+      cout << "void OptionManager::Option::split_name(const string& in = " << in << ", string& name, int& index, string& branch) const\n";
 
     index = -1;
     split_name(in, name, branch);
