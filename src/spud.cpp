@@ -1125,9 +1125,10 @@ namespace Spud{
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else if(branch.empty()){
-      for(multimap<string, OptionManager::Option>::iterator it = children.begin();it != children.end();it++){
-        if(&it->second == opt){
-          children.erase(it);
+      pair<multimap< string, OptionManager::Option>::iterator, multimap<string, OptionManager::Option>::iterator> range = children.equal_range(name);
+      for(multimap< string, OptionManager::Option>::iterator iter = range.first;iter != range.second;iter++){
+        if(&iter->second == opt){
+          children.erase(iter);
           return SPUD_NO_ERROR;
         }
       }
