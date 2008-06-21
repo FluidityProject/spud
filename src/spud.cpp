@@ -43,7 +43,6 @@ namespace Spud{
   }
 
   void OptionManager::load_options(const string& filename){
-    clear_options();
     manager.options->load_options(filename);
 
     return;
