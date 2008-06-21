@@ -295,12 +295,12 @@ This will create a file called schema.rng in the same directory.
 \chapter{Libspud}
 
 Libspud provides C, C++ and Fortran interfaces for accessing the options
-specified in a Spud xml file.
+specified in a Spud XML file.
 
 \section{The options tree}
 
-Spud xml files are read into an in-memory tree structure which reflects the
-tree of nested elements in the xml. Nodes in this tree are indexed by
+Spud XML files are read into an in-memory tree structure which reflects the
+tree of nested elements in the XML. Nodes in this tree are indexed by
 strings, i.e. the options tree is a dictionary in which values are
 interrogated via keys.
 
@@ -421,7 +421,7 @@ called \verb+name+ would be.
 Attributes in the options tree must have string type data and have no children.
 If either of these rules are broken (e.g. via a \ref{sec:set_option} call)
 then the attribute element will be unmarked as an attribute, will be treated as
-a normal element, and will appear in xml files written out by libspud as xml
+a normal element, and will appear in XML files written out by libspud as XML
 elements rather than element attributes.
 
 \subsection{Data elements}
@@ -540,6 +540,23 @@ respectively.
   \lstinline+SPUD_CHARACTER+ & \lstinline+SPUD_STRING+
 \end{tabular}
 
+\subsection{clear\_options}
+
+\begin{lstlisting}[language=fortran]
+subroutine clear_options()
+end subroutine clear_options
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+void cclear_options()
+\end{lstlisting}
+
+\begin{lstlisting}
+void Spud::clear_options();
+\end{lstlisting}
+
+Clears the entire options tree.
+
 \subsection{load\_options}
 
 \begin{lstlisting}[language=fortran]
@@ -555,7 +572,8 @@ void cload_options(const char* key, const int* key_len)
 void Spud::load_options(const std::string& filename)
 \end{lstlisting}
 
-Reads the xml file \lstinline+filename+ into the options tree.
+Reads the XML file \lstinline+filename+ into the options tree. The options tree
+is cleared prior to loading the options file.
 
 \subsection{write\_options}
 
@@ -572,7 +590,7 @@ void cwrite_options(const char* filename, const int* filename_len)
 void write_options(const std::string& filename)
 \end{lstlisting}
 
-Writes the options tree out to the xml file \lstinline+filename+.
+Writes the options tree out to the XML file \lstinline+filename+.
 
 \subsection{get\_child\_name}
 
@@ -639,7 +657,7 @@ int Spud::option_count(const std::string& key)
 \end{lstlisting}
 
 Returns the number of options which match \lstinline+key+. Searches all possible
-paths matching the given key. For example, for the following xml file:
+paths matching the given key. For example, for the following XML file:
 
 \begin{verbatim}
 <model_options>
@@ -976,7 +994,7 @@ current system. This is specified in the \verb+schemata+ subdirectory of the
 \verb+schemata+ directory give the filename extension associated with a
 particular problem description language. The content of the file is two
 lines. The first line is the name of the problem description language while
-the second line contains the path of the xml syntax (\verb+.rng+) version of
+the second line contains the path of the XML syntax (\verb+.rng+) version of
 the corresponding schema.
 
 For example, the Fluidity package has a problem description language called

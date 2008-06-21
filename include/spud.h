@@ -49,6 +49,8 @@ namespace Spud{
   class OptionManager{
 
     public:
+    
+      static void clear_options();
 
       static void load_options(const std::string& filename);
       static void write_options(const std::string& filename);
@@ -109,7 +111,7 @@ namespace Spud{
       ~OptionManager();
 
       OptionManager& operator=(const OptionManager& manager);
-
+      
       static OptionError check_key(const std::string& key);
 
       static OptionError check_rank(const std::string& key, const int& rank);
@@ -117,6 +119,10 @@ namespace Spud{
       static OptionError check_type(const std::string& key, const OptionType& type);
 
       static OptionError check_option(const std::string& key, const OptionType& type, const int& rank);
+      
+      static OptionManager manager;
+      
+      void reset();
 
       class Option{
 
@@ -364,12 +370,16 @@ namespace Spud{
           logical_t is_attribute;
 
           logical_t verbose;
+          
       };
-
+      
       Option* options;
-
-      static OptionManager manager;
+      
   };
+  
+  inline void clear_options(){
+    OptionManager::clear_options();
+  }
 
   inline void load_options(const std::string& filename){
     OptionManager::load_options(filename);

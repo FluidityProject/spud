@@ -36,7 +36,14 @@ namespace Spud{
 
   // PUBLIC METHODS
 
+  void OptionManager::clear_options() {
+    manager.reset();
+    
+    return;
+  }
+
   void OptionManager::load_options(const string& filename){
+    clear_options();
     manager.options->load_options(filename);
 
     return;
@@ -577,7 +584,13 @@ namespace Spud{
 
     return SPUD_NO_ERROR;
   }
-
+  
+  void OptionManager::reset(){
+    delete options;
+    options = new Option;
+    
+    return;
+  }
 
   // End OptionManager CLASS METHODS
 

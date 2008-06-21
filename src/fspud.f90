@@ -88,7 +88,10 @@ module spud
   end interface
 
   ! C interfaces
-  interface  
+  interface
+    subroutine cspud_clear_options()
+    end subroutine cspud_clear_options
+    
     subroutine cspud_load_options(key, key_len)
       implicit none
       integer, intent(in) :: key_len
@@ -187,6 +190,10 @@ module spud
   integer, external :: cspud_get_option, cspud_set_option
 
 contains
+
+  subroutine clear_options()
+    call cspud_clear_options
+  end subroutine clear_options
 
   subroutine load_options(filename)
     character(len = * ), intent(in) :: filename

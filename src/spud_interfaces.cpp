@@ -35,6 +35,12 @@ using namespace Spud;
 
 extern "C" {
 
+  void cspud_clear_options(){
+    clear_options;
+    
+    return;
+  }
+
   void cspud_load_options(const char* filename, const int* filename_len)
   {
     load_options(string(filename, *filename_len));

@@ -35,13 +35,28 @@ subroutine test_fspud
   integer, parameter :: D = kind(0.0D0)
   real(D), parameter :: tol = 1.0e-6_D
     
+  print *, "*** SET AND GET TESTS FOR REAL SCALAR ***"
   call test_set_and_get_real_scalar("/real_scalar", 42.0_D)
+  
+  print *, "*** SET AND GET TESTS FOR REAL VECTOR ***"
   call test_set_and_get_real_vector("/real_vector", (/42.0_D, 43.0_D/))
+  
+  print *, "*** SET AND GET TESTS FOR REAL TENSOR ***"
   call test_set_and_get_real_tensor("/real_tensor", reshape((/42.0_D, 43.0_D, 44.0_D, 45.0_D, 46.0_D, 47.0_D/), (/2, 3/)))
+  
+  print *, "*** SET AND GET TESTS FOR INTEGER SCALAR ***"
   call test_set_and_get_integer_scalar("/integer_scalar", 42)
+  
+  print *, "*** SET AND GET TESTS FOR INTEGER VECTOR ***"
   call test_set_and_get_integer_vector("/integer_vector", (/42, 43/))
+  
+  print *, "*** SET AND GET TESTS FOR INTEGER TENSOR ***"
   call test_set_and_get_integer_tensor("/integer_tensor", reshape((/42, 43, 44, 45, 46, 47/), (/2, 3/)))
+  
+  print *, "*** SET AND GET TESTS FOR CHARACTER ***"
   call test_set_and_get_character("/character", "Forty Two")
+  
+  print *, "*** SET AND GET TESTS FOR TYPE NONE ***"
   call test_set_and_get_type_none("/type_none")
   
 contains
@@ -319,8 +334,6 @@ contains
     integer :: i, stat
     real(D) :: ltest_real_scalar, real_scalar_val
     
-    print *, "*** SET AND GET TESTS FOR REAL SCALAR ***"
-    
     call test_key_errors(key)
     
     do i = 1, 2
@@ -367,8 +380,6 @@ contains
     integer :: i, stat
     real(D), dimension(size(test_real_vector)) :: ltest_real_vector
     real(D), dimension(:), allocatable :: real_vector_default, real_vector_val
-    
-    print *, "*** SET AND GET TESTS FOR REAL VECTOR ***"
     
     call test_key_errors(key)
     
@@ -429,8 +440,6 @@ contains
     real(D), dimension(size(test_real_tensor, 1), size(test_real_tensor, 2)) :: ltest_real_tensor
     real(D), dimension(:, :), allocatable :: real_tensor_default, real_tensor_val
     
-    print *, "*** SET AND GET TESTS FOR REAL TENSOR ***"
-    
     call test_key_errors(key)
     
     do i = 1, 2
@@ -488,8 +497,6 @@ contains
 
     integer :: i, integer_scalar_val, ltest_integer_scalar, stat
     
-    print *, "*** SET AND GET TESTS FOR INTEGER SCALAR ***"
-    
     call test_key_errors(key)
     
     do i = 1, 2
@@ -536,9 +543,6 @@ contains
     integer :: i, stat
     integer, dimension(size(test_integer_vector)) :: ltest_integer_vector
     integer, dimension(:), allocatable :: integer_vector_default, integer_vector_val
-    
-    print *, "*** SET AND GET TESTS FOR INTEGER VECTOR ***"
- 
     
     call test_key_errors(key)
     
@@ -598,8 +602,6 @@ contains
     integer :: i, stat 
     integer, dimension(size(test_integer_tensor, 1), size(test_integer_tensor, 2)) :: ltest_integer_tensor
     integer, dimension(:, :), allocatable :: integer_tensor_default, integer_tensor_val
-    
-    print *, "*** SET AND GET TESTS FOR INTEGER TENSOR ***"
         
     call test_key_errors(key)
     
@@ -660,8 +662,6 @@ contains
     character(len = len_trim(test_character) + len(" Plus One")) :: character_val, ltest_character
     integer :: i, stat
     
-    print *, "*** SET AND GET TESTS FOR CHARACTER ***"
-    
     call test_key_errors(key)
     
     do i = 1, 2
@@ -711,8 +711,6 @@ contains
     character(len = *), intent(in) :: key
 
     integer :: i, stat
-    
-    print *, "*** SET AND GET TESTS FOR TYPE NONE ***"
     
     call test_key_errors(key)
     

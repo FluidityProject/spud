@@ -32,6 +32,7 @@
 #include "confdefs.h"
 #include "spud_enums.h"
 
+#define cspud_clear_options F77_FUNC(cspud_clear_options, CSPUD_CLEAR_OPTIONS)
 #define cspud_load_options F77_FUNC(cspud_load_options, CSPUD_LOAD_OPTIONS)
 #define cspud_write_options F77_FUNC(cspud_write_options, CSPUD_WRITE_OPTIONS)
 #define cspud_get_child_name F77_FUNC(cspud_get_child_name, CSPUD_GET_CHILD_NAME)
@@ -51,6 +52,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+  void cspud_clear_options();
 
   void cspud_load_options(const char* filename, const int* filename_len);
   void cspud_write_options(const char* filename, const int* filename_len);
