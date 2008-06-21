@@ -513,7 +513,7 @@ namespace Spud{
   // PRIVATE METHODS
 
   OptionManager::OptionManager(){
-    options = new OptionManager::Option();
+    options = new Option();
 
     return;
   }
@@ -726,13 +726,13 @@ namespace Spud{
 
   void OptionManager::Option::list_children(const string& name, deque<string>& kids) const{
     if(verbose)
-      cout << "void list_children(const string& name = " << name << ", deque<string>& kids) const\n";
+      cout << "void OptionManager::Option::list_children(const string& name = " << name << ", deque<string>& kids) const\n";
 
     kids.clear();
 
-    const OptionManager::Option* descendant = get_child(name);
+    const Option* descendant = get_child(name);
     if(descendant != NULL){
-      for(map<string, OptionManager::Option>::const_iterator it = descendant->children.begin();it != descendant->children.end();it++){
+      for(map<string, Option>::const_iterator it = descendant->children.begin();it != descendant->children.end();it++){
         kids.push_back(it->first);
       }
     }
@@ -755,7 +755,7 @@ namespace Spud{
       return NULL;
     }
 
-    multimap<string, OptionManager::Option>::const_iterator it;
+    multimap<string, Option>::const_iterator it;
     if(children.count(name) == 0){
       name += "::";
       int i = 0;
@@ -772,7 +772,7 @@ namespace Spud{
       if(index < 0){
         it = children.find(name);
       }else{
-        pair<multimap< string, OptionManager::Option>::const_iterator, multimap<string, OptionManager::Option>::const_iterator> range = children.equal_range(name);
+        pair<multimap< string, Option>::const_iterator, multimap<string, Option>::const_iterator> range = children.equal_range(name);
         it = range.first;
         for(size_t i = 0;it != range.second;it++, i++){
           if((int)i == index){
@@ -822,7 +822,7 @@ namespace Spud{
     }
 
     int count = 0, i = 0;
-    for(multimap<string, OptionManager::Option>::const_iterator it = children.begin();it != children.end();it++){
+    for(multimap<string, Option>::const_iterator it = children.begin();it != children.end();it++){
       if(it->first.compare(0, name.size(), name) == 0 and (not match_whole or it->first.size() == name.size())){
         if(index < 0){
           if(branch.empty()){
@@ -948,7 +948,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", vector<double>& val)\n";
 
-    const OptionManager::Option* child = get_child(key);
+    const Option* child = get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -960,7 +960,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", vector<int>& val)\n";
 
-    const OptionManager::Option* child = get_child(key);
+    const Option* child = get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -972,7 +972,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::get_option(const string& key = " << key << ", string& val = " << val << ")\n";
 
-    const OptionManager::Option* child = get_child(key);
+    const Option* child = get_child(key);
     if(child == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -1053,7 +1053,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const vector<double>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
-    OptionManager::Option* opt = create_child(key);
+    Option* opt = create_child(key);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -1065,7 +1065,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const vector<int>& val, const int& rank = " << rank << ", const vector<int>& shape)\n";
 
-    OptionManager::Option* opt = create_child(key);
+    Option* opt = create_child(key);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -1077,7 +1077,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::set_option(const string& key = " << key << ", const string& val = " << val <<")\n";
 
-    OptionManager::Option* opt = create_child(key);
+    Option* opt = create_child(key);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -1099,7 +1099,7 @@ namespace Spud{
     if(verbose)
       cout << "OptionError OptionManager::Option::set_attribute(const string& key = " << key << ", const string& val = " << val << ")\n";
 
-    OptionManager::Option* opt = create_child(key);
+    Option* opt = create_child(key);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else{
@@ -1120,12 +1120,18 @@ namespace Spud{
     string branch, name;
     split_name(key, name, branch);
 
-    OptionManager::Option* opt = get_child(name);
+    Option* opt = get_child(name);
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else if(branch.empty()){
-      pair<multimap< string, OptionManager::Option>::iterator, multimap<string, OptionManager::Option>::iterator> range = children.equal_range(name);
-      for(multimap< string, OptionManager::Option>::iterator iter = range.first;iter != range.second;iter++){
+      pair<multimap<string, Option>::iterator, multimap<string, Option>::iterator> range = children.equal_range(name);
+      for(multimap<string, Option>::iterator iter = range.first;iter != range.second;iter++){
+        if(&iter->second == opt){
+          children.erase(iter);
+          return SPUD_NO_ERROR;
+        }
+      }
+      for(multimap<string, Option>::iterator iter = children.begin();iter != children.end();iter++){
         if(&iter->second == opt){
           children.erase(iter);
           return SPUD_NO_ERROR;
@@ -1176,7 +1182,7 @@ namespace Spud{
         cout << lprefix << "<value>: " << data_string;
         cout << endl;
       }
-      for(map<string, OptionManager::Option>::const_iterator i = children.begin();i!=children.end();++i){
+      for(map<string, Option>::const_iterator i = children.begin();i!=children.end();++i){
         i->second.print(lprefix + " ");
       }
     }
@@ -1211,7 +1217,7 @@ namespace Spud{
       return NULL;
     }
 
-    multimap<string, OptionManager::Option>::iterator child;
+    multimap<string, Option>::iterator child;
     if(children.count(name) == 0){
       string name2 = name + "::";
       int i = 0;
@@ -1229,7 +1235,7 @@ namespace Spud{
           cerr << "SPUD WARNING: Creating __value child for non null element - deleting parent data" << endl;
           set_option_type(SPUD_NONE);
         }
-        child = children.insert(pair<string, OptionManager::Option>(name, OptionManager::Option(name)));
+        child = children.insert(pair<string, Option>(name, Option(name)));
         string new_node_name, name_attr;
         child->second.split_node_name(new_node_name, name_attr);
         if(name_attr.size() > 0){
@@ -1241,7 +1247,7 @@ namespace Spud{
       if(index < 0){
         child = children.find(name);
       }else{
-        pair<multimap< string, OptionManager::Option>::iterator, multimap<string, OptionManager::Option>::iterator> range = children.equal_range(name);
+        pair<multimap< string, Option>::iterator, multimap<string, Option>::iterator> range = children.equal_range(name);
         child = range.first;
         for(size_t i = 0;child != range.second;child++, i++){
           if((int)i == index){
@@ -1368,7 +1374,7 @@ namespace Spud{
     }
 
     // Ensure this path has been added
-    OptionManager::Option* child = create_child(basename);
+    Option* child = create_child(basename);
     if(child == NULL){
       cerr << "SPUD ERROR: Unexpected failure when creating child element" << endl;
       exit(-1);
@@ -1492,7 +1498,7 @@ namespace Spud{
     data_ele->SetValue(data_as_string());
     ele->LinkEndChild(data_ele);
 
-    for(map<string, OptionManager::Option>::const_iterator iter = children.begin();iter != children.end();iter++){
+    for(map<string, Option>::const_iterator iter = children.begin();iter != children.end();iter++){
       if(iter->second.is_attribute){
         // Add attribute
         ele->SetAttribute(iter->second.node_name, iter->second.data_as_string());
