@@ -53,7 +53,7 @@ def preprocess(schemafile):
         file = open(possible_file)
         break
       except IOError:
-        print "IOError"
+        debug.deprint("IOError when searching for included file " + filename, 1)
 
     if file is None:
       debug.deprint("Error: could not located included file %s" % filename, 0)
