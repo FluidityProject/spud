@@ -756,7 +756,7 @@ class Schema(object):
             sys.exit(1)
 
           # Comments generated using the 4suite API are incompatable with the new format. Notify the user.
-          if doc.find("<?xml version=") != -1:
+          if doc.text.find("<?xml version=") != -1:
             debug.dprint("File uses old-style magic comments. Ignoring.")
             return []
 
