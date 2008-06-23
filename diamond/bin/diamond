@@ -68,11 +68,11 @@ def main():
     Help()
     return
 
-  import diamond.config as config
-  import diamond.dialogs as dialogs
-  import diamond.interface as interface
-  import diamond.schema as schema
-  import diamond.tree as tree
+  import config
+  import dialogs
+  import interface
+  import schema
+  import tree
 
   try:
     import psyco
