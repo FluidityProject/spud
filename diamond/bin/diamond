@@ -26,10 +26,10 @@ import gtk.gdk
 import gobject
 
 # do this right at the start, so we can find the diamond modules
-diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
+diamond_path = os.path.join( os.path.dirname(__file__), os.pardir, "diamond" )
 sys.path.insert(0, diamond_path)
 
-import diamond.debug as debug
+import debug
 
 def Help():
   """
