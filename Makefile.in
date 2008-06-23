@@ -84,4 +84,5 @@ clean:
 
 distclean: clean
 	rm -fr config.log config.status autom4te.cache Makefile include/confdefs.h
+	rm -f bin/spud-preprocess diamond/diamond/preprocess.py
 	@cd src/tests; $(MAKE) distclean
