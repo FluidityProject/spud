@@ -536,7 +536,6 @@ class Schema(object):
              to_set.set_data(text)
              break
          except:
-           print "Failed to set data", to_set, tail, sys.exc_value
            pass
 
     to_set.recompute_validity()
@@ -753,13 +752,12 @@ class Schema(object):
           try:
             doc = etree.fromstring(bz2.decompress(base64.b64decode(pickle)))
           except:
-            print "Error reading compressed XML. Output follows:"
-            print "\"", bz2.decompress(base64.b64decode(pickle)), "\""
+            debug.deprint("Error reading compressed XML. Output: %s" % bz2.decompress(base64.b64decode(pickle)), 0)
             sys.exit(1)
 
           # Comments generated using the 4suite API are incompatable with the new format. Notify the user.
           if doc.find("<?xml version=") != -1:
-            print "Using old-style magic comments. Ignoring."
+            debug.dprint("File uses old-style magic comments. Ignoring.")
             return []
 
           # Iterate over all elements in this newly-decompressed subtree, and add them to the
