@@ -56,4 +56,4 @@ if len(schemata) == 0 and "-s" not in sys.argv:
 
 if __name__ == "__main__":
   for key in schemata:
-    print "%s: %s" % (key, schemata[key])
+    debug.dprint("%s: %s" % (key, schemata[key]), 0)

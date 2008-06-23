@@ -815,7 +815,7 @@ class Diamond:
       # fix for recursive schemata!
       child_active_tree = self.treestore.get_value(child_iter, 3)
       if child_active_tree.schemaname == active_tree.schemaname:
-        print "Warning: recursive schema elements not supported: %s" % active_tree.name
+        debug.deprint("Warning: recursive schema elements not supported: %s" % active_tree.name)
         child_iter = self.treestore.iter_next(child_iter)
         if child_iter is None: break
 
