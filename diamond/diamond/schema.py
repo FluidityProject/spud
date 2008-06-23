@@ -749,14 +749,15 @@ class Schema(object):
 
         if datatree.schemaname in name and "DIAMOND MAGIC COMMENT" in name:
           pickle = data[1]
+          uncompressed = bz2.decompress(base64.b64decode(pickle))
           try:
-            doc = etree.fromstring(bz2.decompress(base64.b64decode(pickle)))
+            doc = etree.fromstring(uncompressed)
           except:
             debug.deprint("Error reading compressed XML. Output: %s" % bz2.decompress(base64.b64decode(pickle)), 0)
             sys.exit(1)
 
           # Comments generated using the 4suite API are incompatable with the new format. Notify the user.
-          if doc.text.find("<?xml version=") != -1:
+          if uncompressed.find("<?xml version=") != -1:
             debug.dprint("File uses old-style magic comments. Ignoring.")
             return []
 
