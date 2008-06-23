@@ -11,6 +11,8 @@
 
 \lstloadlanguages{Fortran,C++,C}
 
+\lstset{basicstyle=\ttfamily}
+
 \lstdefinelanguage{rnc}
 {morekeywords={element,attribute},
   sensitive=false,
@@ -119,7 +121,7 @@ The Spud base language thus provides core schema objects (known in RELAX NG
 as patterns) that enable generic tools included in Spud to handle low level
 data in an elegant manner.
 
-For example the \lstinline *real_dim_symmetric_tensor* pattern is defined below:
+For example the \lstinline*real_dim_symmetric_tensor* pattern is defined below:
 \begin{lstlisting}
 # A dim x dim real matrix (rank 2 tensor) constrained to be symmetric.
 real_dim_symmetric_tensor =
@@ -148,7 +150,7 @@ perspective all the information required to import a symmetric tensor is
 available from Spud alongside the user's input.
 
 As can be seen above the principal element of the \lstinline
-*real_dim_symmetric_tensor* pattern is \lstinline *real_value*.
+*real_dim_symmetric_tensor* pattern is \lstinline*real_value*.
 Modification of the rank, shape and dimension attributes of this element
 allows the Spud based language to be expanded easily to incorporate other
 real data structures.  For instance, a rank 1 real vector with length equal
@@ -170,31 +172,31 @@ real_dim_vector =
    )
 \end{lstlisting}
 
-Similar extensions can be made for an integer based \lstinline *integer_value* element, while a \lstinline *string_value* element allows the definition of several character patterns known to Spud generic tools (such as the \lstinline *comment* pattern seen in the examples above).  This allows for the definition of the full Spud base language as follows:
+Similar extensions can be made for an integer based \lstinline*integer_value* element, while a \lstinline*string_value* element allows the definition of several character patterns known to Spud generic tools (such as the \lstinline*comment* pattern seen in the examples above).  This allows for the definition of the full Spud base language as follows:
 
 \noindent\begin{longtable}{lp{8cm}}
-\lstinline *comment* & A string value that allows users to annotate their input throughout the XML tree structure.  Included in all Spud base language patterns. \\
-\lstinline *anystring* & A string value for the input of any generic character string required in the options tree.  Suggests a display of 1 line within Spud based tools such as Diamond. \\
-\lstinline *filename* & A string value for the input of filenames in the options tree.  Allows the use of a file selector and suggests a display of 1 line within Spud based tools such as Diamond. \\
-\lstinline *python_code* & A string value for the input of python code into the options tree.  Suggests a display of 20 lines within Spud based tools such as Diamond. \\
-\lstinline *integer* & An integer value of rank 0 and length 1. \\
-\lstinline *integer_vector* & A rank 1 vector of integers of arbitrary length.  Spud tools record the shape of the input. \\
-\lstinline *integer_tensor* & A tensor of integers of arbitrary dimensions.  Spud tools record the shape of the input. \\
-\lstinline *integer_dim_vector* & A rank 1 vector of integers with length equal to the physical dimension specified. \\
-\lstinline *integer_dim_minus_one_vector* & A rank 1 vector of integers with length equal to 1 less than the physical dimension specified. \\
-\lstinline *integer_dim_tensor* & A rank 2 tensor of integers with square dimensions equal to the physical dimension specified. \\
-\lstinline *integer_dim_symmetric_tensor* & A rank 2 symmetric tensor of integers with square dimensions equal to the physical dimension specified. \\
-\lstinline *integer_dim_minus_one_tensor* & A rank 2 tensor of integers with square dimensions equal to 1 less than the physical dimension specified. \\
-\lstinline *integer_dim_minus_one_symmetric_tensor* & A rank 2 symmetric tensor of integers with square dimensions equal to 1 less than the physical dimension specified. \\
-\lstinline *real* & A real value of rank 0 and length 1. \\
-\lstinline *real_vector* & A rank 1 vector of reals of arbitrary length.  Spud tools record the shape of the input. \\
-\lstinline *real_tensor* & A rank 2 tensor of reals of arbitrary dimensions.  Spud tools record the shape of the input. \\
-\lstinline *real_dim_vector* & A rank 1 vector of reals with length equal to the physical dimension specified. \\
-\lstinline *real_dim_minus_one_vector* & A rank 1 vector of reals with length equal to 1 less than the physical dimension specified. \\
-\lstinline *real_dim_tensor* & A rank 2 tensor of reals with square dimensions equal to the physical dimension specified. \\
-\lstinline *real_dim_symmetric_tensor* & A rank 2 tensor of reals with square dimensions equal to the physical dimension specified. \\
-\lstinline *real_dim_minus_one_tensor* & A rank 2 tensor of reals with square dimensions equal to 1 less than the physical dimension specified. \\
-\lstinline *real_dim_minus_one_symmetric_tensor* & A rank 2 tensor of reals with square dimensions equal to 1 less than the physical dimension specified.
+\lstinline*comment* & A string value that allows users to annotate their input throughout the XML tree structure.  Included in all Spud base language patterns. \\
+\lstinline*anystring* & A string value for the input of any generic character string required in the options tree.  Suggests a display of 1 line within Spud based tools such as Diamond. \\
+\lstinline*filename* & A string value for the input of filenames in the options tree.  Allows the use of a file selector and suggests a display of 1 line within Spud based tools such as Diamond. \\
+\lstinline*python_code* & A string value for the input of python code into the options tree.  Suggests a display of 20 lines within Spud based tools such as Diamond. \\
+\lstinline*integer* & An integer value of rank 0 and length 1. \\
+\lstinline*integer_vector* & A rank 1 vector of integers of arbitrary length.  Spud tools record the shape of the input. \\
+\lstinline*integer_tensor* & A tensor of integers of arbitrary dimensions.  Spud tools record the shape of the input. \\
+\lstinline*integer_dim_vector* & A rank 1 vector of integers with length equal to the physical dimension specified. \\
+\lstinline*integer_dim_minus_one_vector* & A rank 1 vector of integers with length equal to 1 less than the physical dimension specified. \\
+\lstinline*integer_dim_tensor* & A rank 2 tensor of integers with square dimensions equal to the physical dimension specified. \\
+\lstinline*integer_dim_symmetric_tensor* & A rank 2 symmetric tensor of integers with square dimensions equal to the physical dimension specified. \\
+\lstinline*integer_dim_minus_one_tensor* & A rank 2 tensor of integers with square dimensions equal to 1 less than the physical dimension specified. \\
+\lstinline*integer_dim_minus_one_symmetric_tensor* & A rank 2 symmetric tensor of integers with square dimensions equal to 1 less than the physical dimension specified. \\
+\lstinline*real* & A real value of rank 0 and length 1. \\
+\lstinline*real_vector* & A rank 1 vector of reals of arbitrary length.  Spud tools record the shape of the input. \\
+\lstinline*real_tensor* & A rank 2 tensor of reals of arbitrary dimensions.  Spud tools record the shape of the input. \\
+\lstinline*real_dim_vector* & A rank 1 vector of reals with length equal to the physical dimension specified. \\
+\lstinline*real_dim_minus_one_vector* & A rank 1 vector of reals with length equal to 1 less than the physical dimension specified. \\
+\lstinline*real_dim_tensor* & A rank 2 tensor of reals with square dimensions equal to the physical dimension specified. \\
+\lstinline*real_dim_symmetric_tensor* & A rank 2 tensor of reals with square dimensions equal to the physical dimension specified. \\
+\lstinline*real_dim_minus_one_tensor* & A rank 2 tensor of reals with square dimensions equal to 1 less than the physical dimension specified. \\
+\lstinline*real_dim_minus_one_symmetric_tensor* & A rank 2 tensor of reals with square dimensions equal to 1 less than the physical dimension specified.
 \end{longtable}
 
 \subsection{Including the base language in the schema}
@@ -206,37 +208,91 @@ without prefixing the path. The top line of every spud schema should read
 include "spud_base.rnc"
 \end{verbatim}
 
-\subsection{String data}
+\subsection{The real\_value and integer\_value elements}
+
+As mentioned above, the \verb+real_value+ and \verb+integer_value+
+elements are the low-level implementations of the real and integer named
+patterns in the base language. The full schema syntax of these elements is
+illustrated by the definition of the \verb+real_dim_minus_one_tensor+
+pattern in the base language:
+\begin{lstlisting}
+# A dim-1 x dim-1 real matrix (rank 2 tensor).
+real_dim_minus_one_tensor =
+   (
+      element real_value{
+         attribute symmetric {"false"},
+         attribute rank { "2" },
+         # Setting dim1, dim2 to a function of dim allows the gui to set the
+         # tensor to the right shape.
+         attribute dim1 { "dim-1" },
+         attribute dim2 { "dim-1" },
+         attribute shape { list{xsd:integer, xsd:integer} },
+         list {xsd:float+}
+      },
+      comment
+   )
+\end{lstlisting}
+The \lstinline+symmetric+ and \lstinline+dim2+ attributes are only present
+if \lstinline+rank+ is 2 while the \lstinline+dim1+ and \lstinline+shape+
+attributes are only present where \lstinline+rank+ is at least 1. If
+\lstinline+rank+ is equal to 1 then \lstinline+shape+ will be a single
+\lstinline+xsd:integer+ rather than a list of 2. The \lstinline+dim1+ and
+\lstinline+dim2+ attributes are python expressions of the variable
+\lstinline+dim+.
+
+
+\subsection{The string\_value element}
+
+Customised string values, such as fixed strings or multiline strings, are
+constructed using the \lstinline+string_value+ element. This element wraps a
+string and a \lstinline+lines+ attribute. The \lstinline+lines+ attribute
+does not enforce a length on the string but is rather a hint to the user
+interface as to the size of string box which would be appropriate. The
+schema syntax of the \lstinline+string_value+ element is illustrated by the
+definition of the main \lstinline+anystring pattern+ from the base language:
+\begin{lstlisting}
+# A simple string
+anystring =
+   (
+      element string_value{
+         # Lines is a hint to the gui about the size of the text box.
+         # It is not an enforced limit on string length.
+         attribute lines { "1" },
+         xsd:string
+      },
+      comment
+   )
+\end{lstlisting}
+An example of a customised string is this choice of two available string
+values:
+\begin{lstlisting}
+## Format for dump files. Choose from fluidity dumpfile or vtk.
+element dump_format {
+   element string_value{
+      "fluidity dumpfile"|"vtk"
+   }
+}  
+\end{lstlisting}
 
 \subsection{Symmetric tensors}
 
-
-
-\section{The base element}
+Some of the Spud Base Language patterns refer to symmetric tensors. In every
+case, the full tensor is stored and retrieving the tensor using libspud. It
+is the responsibility of Spud user interface tools such as Diamond to
+enforce the symmetry of tensors input by the user.
 
 \section{Specifying problem dimension }
 
-\section{Restrictions on the base language}
-
-\section{Comments and annotations}
-
-There are three layers of comment which are applicable in Spud. The schema,
-as with any piece of source code, can contain comments which are of use to
-other developers editing the schema. Second, the schema can embed
-documentation for the problem description language. This documentation will
-be displayed to the model user by Diamond. The former comments are known as
-schema comments and are written with a single leading hash (\verb+#+)
-while the latter are known as schema annotations and are written with a
-double leading hash (\verb+##+). Schema annotations must be written
-immediately before the element they document. 
-
-Finally, the \verb+comment+ named pattern will cause diamond to associate a
-user comment box with the parent element. This enables users to document
-their problem description files. Each of the named patterns in the base
-language also includes the \verb+comment+ pattern so that every parameter in
-an input file can have a user comment associated with it. Figure
-\ref{fig:schema}\ shows a simple schema incorporating all three layers of
-comment.
+The dimension of the problem affects how all of the dimension-specific named
+patterns in the schema are handled. It is specified by having an
+integer-valued \lstinline+dimension+ element as a child of the
+\lstinline+geometry+ element which is in turn a child of the root
+element. Spud schemas are required to define \lstinline+dimension+ and
+\lstinline+geometry+ elements if they make use of any of the
+named patterns whose name includes the string \verb+dim+. Figure
+\ref{fig:schema}\ illustrates a trivial Spud schema in which the dimension
+attribute is given using a customised \lstinline+integer_value+ element
+which only permits the values 2 or 3 to be given.
 
 \begin{figure}[t]
 \begin{lstlisting}[language=rnc,frame=trBL]
@@ -270,11 +326,49 @@ start =
 \end{lstlisting}
 
   \caption{A trivial schema showing a schema comment, schema annotations and
-  a user comment pattern.}
+  a user comment pattern. The dimension of the problem is specified by the
+  dimension element under the geometry element.}
   \label{fig:schema}
 
 \end{figure}
 
+\section{Restrictions on the base language}
+
+In order to facilitate processing of schemas by libspud and Diamond, and in
+particular to make the presentation of a simple and intuitive user interface
+possible, several restrictions are imposed on RELAX NG schemas used in Spud.
+
+\begin{itemize}
+\item Choice nodes must be choices between single elements (e.g. a choice
+  between a OR (b AND c) is invalid).
+\item Elements with the same tag under the same parent are allowed. However,
+  at most one can be + (oneOrMore) or * (zeroOrMore). Elements with the same
+  tag under the same parent must each have a name attribute with a unique
+  value.
+\item \lstinline+name+ attributes may contain only alpha-numeric characters,
+  or characters in the set "\verb+/_:[]+"
+\item Recursive schema elements are not supported.
+\end{itemize}
+
+\section{Comments and annotations}
+
+There are three layers of comment which are applicable in Spud. The schema,
+as with any piece of source code, can contain comments which are of use to
+other developers editing the schema. Second, the schema can embed
+documentation for the problem description language. This documentation will
+be displayed to the model user by Diamond. The former comments are known as
+schema comments and are written with a single leading hash (\verb+#+)
+while the latter are known as schema annotations and are written with a
+double leading hash (\verb+##+). Schema annotations must be written
+immediately before the element they document. 
+
+Finally, the \verb+comment+ named pattern will cause diamond to associate a
+user comment box with the parent element. This enables users to document
+their problem description files. Each of the named patterns in the base
+language also includes the \verb+comment+ pattern so that every parameter in
+an input file can have a user comment associated with it. Figure
+\ref{fig:schema}\ shows a simple schema incorporating all three layers of
+comment.
 
 
 \section{Preprocessing the schema for use with Diamond}
@@ -307,7 +401,8 @@ interrogated via keys.
 \section{Option key syntax}
 
 The option key syntax is similar to Unix file path syntax.
-Consider the simple example, \verb+simple.xml+:
+Consider the simple example, \verb+simple.xml+, which is valid with respect
+to the schema in figure \ref{fig:schema}:
 \begin{verbatim}
 <model_options>
   <simulation_name>
@@ -449,8 +544,6 @@ Manually creating a "\verb+__value+" child for an element that already itself
 contains data will result in the data of the parent element being removed, and
 a warning message will be sent to standard error.
 
-\subsection{Root element suppression}
-
 
 \section{Language specific features}
 
@@ -464,8 +557,9 @@ than enforcing a foreign paradigm on one or all of the interfaces.
 
 \subsection{Fortran}
 
-All of the Fortran procedures as well as the named constants for data types
-(\ref{sec:types}) are encapsulated in the \lstinline+spud+ module.
+All of the Fortran procedures as well as the named constants for error codes
+(\ref{sec:error_codes}) and data types
+(\ref{sec:types})  are encapsulated in the \lstinline+spud+ module.
 
 Where a routine returns an error code, in Fortran this is achieved via the
 optional \stat argument. If \stat is not present and an error code other
