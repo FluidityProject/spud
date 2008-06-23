@@ -26,10 +26,10 @@ import gtk.gdk
 import gobject
 
 # do this right at the start, so we can find the diamond modules
-diamond_path = os.path.join( os.path.dirname(__file__), os.pardir, "diamond" )
+diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
 sys.path.insert(0, diamond_path)
 
-import debug as debug
+import diamond.debug as debug
 
 def Help():
   """
@@ -68,11 +68,11 @@ def main():
     Help()
     return
 
-  import config
-  import dialogs
-  import interface
-  import schema
-  import tree
+  import diamond.config as config
+  import diamond.dialogs as dialogs
+  import diamond.interface as interface
+  import diamond.schema as schema
+  import diamond.tree as tree
 
   try:
     import psyco
