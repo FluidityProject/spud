@@ -29,7 +29,7 @@ import gobject
 diamond_path = os.path.join( os.path.dirname(__file__), os.pardir, "diamond" )
 sys.path.insert(0, diamond_path)
 
-import diamond.debug as debug
+import debug as debug
 
 def Help():
   """
