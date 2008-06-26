@@ -37,10 +37,10 @@ build-libspud: config.status
 	$(MAKE) doc
 
 
-build-diamond: build-diamond-stamp config.status
+build-diamond: build-diamond-stamp 
 build-diamond-stamp: $(PYVERS:%=build-python%)
 	touch $@
-build-python%:
+build-python%: config.status
 # Force setuptools, but reset sys.argv[0] to 'setup.py' because setup.py files expect that.
 	cd diamond;python$* -c "import setuptools,sys;f='setup.py';sys.argv[0]=f;execfile(f,{'__file__':f,'__name__':'__main__'})" build
 	touch $@
