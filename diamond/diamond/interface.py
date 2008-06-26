@@ -145,6 +145,7 @@ class Diamond:
     # Hide the "Run fluidity asserts" menu item
     menu = self.gui.get_widget("menu")
     menu.get_children()[1].get_submenu().get_children()[1].hide()
+    menu.get_children()[1].get_submenu().get_children()[3].hide()
 
     return
 
