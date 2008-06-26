@@ -1,5 +1,11 @@
 from distutils.core import setup
 from distutils.extension import Extension
+import os
+
+try:
+  destdir = os.environ["DESTDIR"]
+except KeyError:
+  destdir = ""
 
 setup(
       name='diamond',
@@ -11,6 +17,6 @@ setup(
       packages = ['diamond'],
       package_dir = {'diamond': 'diamond'},
       scripts=["bin/diamond"],
-      data_files = [("/usr/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])],
+      data_files = [(destdir + "@prefix@/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])],
      )
 

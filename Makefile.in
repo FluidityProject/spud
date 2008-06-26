@@ -52,10 +52,13 @@ VPATH = src/
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
-default: libspud.a
+default: libspud.a build-diamond
 
 libspud.a: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+
+build-diamond:
+	cd diamond; python setup.py build; cd ..
 
 test: unittest
 
@@ -78,6 +81,7 @@ install: libspud.a
 	@INSTALL@ -m755 bin/spud-preprocess $(DESTDIR)@prefix@/bin
 	@INSTALL@ -m644 schema/spud_base.rnc $(DESTDIR)@prefix@/share/spud
 	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)@prefix@/share/spud
+	cd diamond;	python setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
 
 clean:
 	@cd doc; $(MAKE) clean
