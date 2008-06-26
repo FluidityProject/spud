@@ -69,10 +69,12 @@ doc:
 
 install: libspud.a
 	@INSTALL@ -d $(DESTDIR)@prefix@/share/spud
+	@INSTALL@ -d $(DESTDIR)@prefix@/lib
+	@INSTALL@ -d $(DESTDIR)@prefix@/include
+	@INSTALL@ -d $(DESTDIR)@prefix@/bin
 	@INSTALL@ $(LIB) $(DESTDIR)@prefix@/lib
 	@INSTALL@ $(MODS) $(DESTDIR)@prefix@/include
 	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
-	@INSTALL@ -d $(DESTDIR)@prefix@/bin
 	@INSTALL@ -m755 bin/spud-preprocess $(DESTDIR)@prefix@/bin
 	@INSTALL@ -m644 schema/spud_base.rnc $(DESTDIR)@prefix@/share/spud
 	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)@prefix@/share/spud
