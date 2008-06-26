@@ -32,12 +32,12 @@ build-libspud: config.status
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE)
+	$(MAKE) libspud.a
 	#docbook-to-man debian/fluidity.sgml > fluidity.1
 	$(MAKE) doc
 
 
-build-diamond: build-diamond-stamp
+build-diamond: build-diamond-stamp config.status
 build-diamond-stamp: $(PYVERS:%=build-python%)
 	touch $@
 build-python%:
@@ -55,7 +55,7 @@ clean:
 	dh_clean
 
 install-libspud: build-libspud install-prereq
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/libspud-dev
+	$(MAKE) install-libspud DESTDIR=$(CURDIR)/debian/libspud-dev
 
 install-diamond: build-diamond install-prereq $(PYVERS:%=install-python%)
 install-prereq:

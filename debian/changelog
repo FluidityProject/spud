@@ -1,3 +1,9 @@
+spud (0.99) unstable; urgency=low
+
+  * Release candidate
+
+ -- David Ham <david.ham@imperial.ac.uk>  Thu, 26 Jun 2008 15:48:25 +0100
+
 spud (0.9.1) unstable; urgency=low
 
   * Fix for file reading bug.

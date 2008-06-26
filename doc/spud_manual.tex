@@ -61,10 +61,33 @@ sudo apt-get update
 sudo apt-get build-depend spud
 \end{verbatim}
 
+\section{Obtaining the source}
+
+Spud is managed using Subversion. Version 1.0 can be obtained with the
+command:
+
+\begin{verbatim}
+svn co http://amcg.ese.ic.ac.uk/svn/spud/branches/1.0 spud
+\end{verbatim}
+
+the current development version is available via:
+
+\begin{verbatim}
+svn co http://amcg.ese.ic.ac.uk/svn/spud/trunk spud
+\end{verbatim}
+
+Debian and Ubuntu users can obtain the source package by adding the
+repository lines listed below and typing:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get source spud
+\end{verbatim}
+
 \section{Building from source}
 
-Libspud is built using a standard autoconf system. It should be possible to
-build libspud and install it in \verb+/usr/local+ simply by typing:
+Spud is built using a standard autoconf system. It should be possible to
+build spud and install it in \verb+/usr/local+ simply by typing:
 
 \begin{verbatim}
 ./configure
