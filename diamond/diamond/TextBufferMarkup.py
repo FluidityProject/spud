@@ -1,4 +1,6 @@
 ### Copyright (C) 2005 Thomas M. Hinkle
+### Copyright (C) 2007 Imperial College London and others.
+### Please see the AUTHORS file for a full list of contributors.
 ###
 ### This library is free software; you can redistribute it and/or
 ### modify it under the terms of the GNU General Public License as

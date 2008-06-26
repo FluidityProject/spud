@@ -2,7 +2,7 @@
 
 \usepackage{palatino}
 
-\title{Spud 1.0}
+\title{Spud 1.0 Manual}
 
 \usepackage{listings}
 \usepackage{hyperref,xspace}
@@ -39,6 +39,28 @@
 
 \section{Dependencies}
 
+Spud and Diamond depend on the following packages:
+
+\begin{itemize}
+\item Fortran, C and C++ compilers
+\item Python (\url{http://python.org/})
+\item Python setuptools (\url{http://peak.telecommunity.com/DevCenter/setuptools})
+\item PyGTK (\url{http://www.pygtk.org/})
+\item lxml (\url{http://codespeak.net/lxml/})
+\item Trang (\url{http://www.thaiopensource.com/relaxng/trang.html})
+\item libxml2 (\url{http://xmlsoft.org/})
+\item LaTeX (for the manual) (\url{http://www.latex-project.org/})
+\end{itemize}
+
+Users of Debian and Ubuntu should
+be able to install all the needed dependencies by adding the repository
+lines listed below and typing:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get build-depend spud
+\end{verbatim}
+
 \section{Building from source}
 
 Libspud is built using a standard autoconf system. It should be possible to
@@ -74,6 +96,13 @@ The Ubuntu repository may be accessed via the following lines:
 \begin{verbatim}
 deb http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
 deb-src http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
+\end{verbatim}
+
+or:
+
+\begin{verbatim}
+deb http://amcg.ese.ic.ac.uk/debian/ hardy main contrib non-free
+deb-src http://amcg.ese.ic.ac.uk/debian/ hardy main contrib non-free
 \end{verbatim}
 
 The Spud library and the base language are installed by the

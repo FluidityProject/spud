@@ -2,7 +2,10 @@
 
 #  GTK Interactive Console
 #  (C) 2003, Jon Anderson
-#  See www.python.org/2.2/license.html for
+#  (C) 2007 Imperial College London and others.
+# Please see the AUTHORS file for a full list of contributors.
+
+#  See www.python.org/2.2/license.htm for
 #  license details.
 #
 
