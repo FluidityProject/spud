@@ -1,3 +1,9 @@
+spud (1.0) unstable; urgency=low
+
+  * Initial release!
+
+ -- David Ham <david.ham@imperial.ac.uk>  Thu, 26 Jun 2008 18:05:51 +0100
+
 spud (0.99) unstable; urgency=low
 
   * Release candidate
