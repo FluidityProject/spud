@@ -631,7 +631,7 @@ class Diamond:
     about.set_name("Diamond")
     about.set_copyright("GPLv3")
     about.set_comments("A RELAX-NG-aware XML editor")
-    about.set_authors(["Patrick E. Farrell", "James R. Maddison"])
+    about.set_authors(["Patrick E. Farrell", "James R. Maddison", "Matthew T. Whitworth"])
     about.set_license("Diamond is free software: you can redistribute it and/or modify\n"+
                       "it under the terms of the GNU General Public License as published by\n"+
                       "the Free Software Foundation, either version 3 of the License, or\n"+
