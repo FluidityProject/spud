@@ -33,29 +33,32 @@ subroutine test_fspud
 
   integer, parameter :: D = kind(0.0D0)
   real(D), parameter :: tol = 1.0e-6_D
+  
+  print *, "*** Testing clear_options ***"
+  call test_clear_options("/type_none")
     
-  print *, "*** SET AND GET TESTS FOR REAL SCALAR ***"
+  print *, "*** Testing set_option and get_option for real scalar ***"
   call test_set_and_get_real_scalar("/real_scalar", 42.0_D)
   
-  print *, "*** SET AND GET TESTS FOR REAL VECTOR ***"
+  print *, "*** Testing set_option and get_option for real vector ***"
   call test_set_and_get_real_vector("/real_vector", (/42.0_D, 43.0_D/))
   
-  print *, "*** SET AND GET TESTS FOR REAL TENSOR ***"
+  print *, "*** Testing set_option and get_option for real tensor ***"
   call test_set_and_get_real_tensor("/real_tensor", reshape((/42.0_D, 43.0_D, 44.0_D, 45.0_D, 46.0_D, 47.0_D/), (/2, 3/)))
   
-  print *, "*** SET AND GET TESTS FOR INTEGER SCALAR ***"
+  print *, "*** Testing set_option and get_option for integer scalar ***"
   call test_set_and_get_integer_scalar("/integer_scalar", 42)
   
-  print *, "*** SET AND GET TESTS FOR INTEGER VECTOR ***"
+  print *, "*** Testing set_option and get_option for integer vector ***"
   call test_set_and_get_integer_vector("/integer_vector", (/42, 43/))
   
-  print *, "*** SET AND GET TESTS FOR INTEGER TENSOR ***"
+  print *, "*** Testing set_option and get_option for integer tensor ***"
   call test_set_and_get_integer_tensor("/integer_tensor", reshape((/42, 43, 44, 45, 46, 47/), (/2, 3/)))
   
-  print *, "*** SET AND GET TESTS FOR CHARACTER ***"
+  print *, "*** Testing set_option and get_option for character ***"
   call test_set_and_get_character("/character", "Forty Two")
   
-  print *, "*** SET AND GET TESTS FOR TYPE NONE ***"
+  print *, "*** Testing add_option and get_option ***"
   call test_set_and_get_type_none("/type_none")
   
 contains
@@ -316,7 +319,17 @@ contains
 
   end subroutine test_rank_errors_integer_tensor
   
-  subroutine test_delete(key)
+  subroutine test_add_new_option(key)
+    character(len = *), intent(in) :: key
+    
+    integer :: stat
+    
+    call add_option(trim(key), stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when adding option")
+  
+  end subroutine test_add_new_option
+  
+  subroutine test_delete_option(key)
     character(len = *), intent(in) :: key
     
     integer :: stat
@@ -324,7 +337,19 @@ contains
     call delete_option(trim(key), stat)
     call report_test("[Deleted option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when deleting option")
     
-  end subroutine test_delete
+  end subroutine test_delete_option
+  
+  subroutine test_clear_options(key)
+    character(len = *), intent(in) :: key
+    
+    integer :: stat
+    
+    call test_key_errors(key)
+    call test_add_new_option(key)
+    call clear_options()
+    call test_key_errors(key)
+    
+  end subroutine test_clear_options
   
   subroutine test_set_and_get_real_scalar(key, test_real_scalar)
     character(len = *), intent(in) :: key
@@ -366,7 +391,7 @@ contains
     
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -425,7 +450,7 @@ contains
     
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -484,7 +509,7 @@ contains
     
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -529,7 +554,7 @@ contains
    
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -588,7 +613,7 @@ contains
     
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -647,7 +672,7 @@ contains
     
     end do
 
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -700,7 +725,7 @@ contains
     
     end do
 
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
   
@@ -716,8 +741,7 @@ contains
     do i = 1, 2
       select case(i)
         case(1)
-          call add_option(trim(key), stat)
-          call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when adding option")
+          call test_add_new_option(key)
         case default
           call add_option(trim(key), stat)
           call report_test("[Add existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when adding option")
@@ -734,7 +758,7 @@ contains
     
     end do
     
-    call test_delete(key)
+    call test_delete_option(key)
 
     call test_key_errors(key)
     

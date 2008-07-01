@@ -35,7 +35,7 @@ using namespace Spud;
 extern "C" {
 
   void cspud_clear_options(){
-    clear_options;
+    clear_options();
     
     return;
   }

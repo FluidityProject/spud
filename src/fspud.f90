@@ -48,6 +48,7 @@ module spud
     & SPUD_ATTR_SET_FAILED_WARNING = -2
 
   public :: &
+    & clear_options, &
     & load_options, &
     & write_options, &
     & get_child_name, &
