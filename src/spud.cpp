@@ -1621,7 +1621,10 @@ namespace Spud{
     if(verbose)
       cout << "string OptionManager::Option::data_as_string(void) const\n";
 
+    numeric_limits< double > double_limits;
+
     ostringstream data_as_string;
+    data_as_string.precision(double_limits.digits10);
     switch(get_option_type()){
       case(SPUD_DOUBLE):
         for(unsigned int i = 0;i < data_double.size();i++){

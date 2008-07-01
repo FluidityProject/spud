@@ -33,6 +33,7 @@
 #include <cassert>
 #include <deque>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
 #include <string>
