@@ -29,7 +29,7 @@
 #ifndef CSPUD_H
 #define CSPUD_H
 
-#include "confdefs.h"
+#include "spud_config.h"
 #include "spud_enums.h"
 
 #define cspud_clear_options F77_FUNC(cspud_clear_options, CSPUD_CLEAR_OPTIONS)

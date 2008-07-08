@@ -27,6 +27,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/spud.h)
+AC_CONFIG_HEADERS(include/spud_config.h)
 
 # This is to get around some odd behavious of some fortran compilers
 FCFLAGS="$FCFLAGS -I/usr/include"
@@ -314,12 +315,5 @@ AC_SUBST(VERSION)
 AC_SUBST(ARFLAGS)
 AC_SUBST(LINKER)
 AC_SUBST(MAKE)
-
-# It appears this is not good practice but...go sue me
-
-# let's try getting include/confdefs.h a different way...
-# (take only lines starting with "#defin" or "#undef" or "#allow" and
-# strip out #allow from start if there)
-cat confdefs.h | grep "^#[dua][enl][fdl][ieo][nfw]" | sed -e 's/^#allow//' > include/confdefs.h
 
 AC_OUTPUT(Makefile bin/spud-preprocess diamond/diamond/preprocess.py src/tests/Makefile diamond/setup.py)

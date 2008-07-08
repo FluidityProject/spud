@@ -38,10 +38,10 @@ AR      = @AR@
 ARFLAGS = @ARFLAGS@
 
 LIB = libspud.a
-HEADERS = include/spud.h include/cspud.h include/spud_enums.h include/tinystr.h include/tinyxml.h
-MODS = spud.mod
 
-OBJS = tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o spud.o spud_interfaces.o fspud.o
+HEADERS = include/cspud.h include/spud.h include/spud_config.h include/spud_enums.h include/tinystr.h include/tinyxml.h
+MODS = spud.mod
+OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o
 
 VPATH = src/
 
@@ -93,6 +93,7 @@ clean:
 	@cd src/tests; $(MAKE) clean
 
 distclean: clean
-	rm -fr config.log config.status autom4te.cache Makefile include/confdefs.h
+	rm -fr config.log config.status autom4te.cache Makefile
+	rm -f include/spud_config.h
 	rm -f bin/spud-preprocess diamond/diamond/preprocess.py
 	@cd src/tests; $(MAKE) distclean

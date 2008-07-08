@@ -1,14 +1,16 @@
+/* include/spud_config.h.  Generated from spud_config.h.in by configure.  */
 /*  Copyright (C) 2006 Imperial College London and others.
-    
+
     Please see the AUTHORS file in the main source directory for a full list
     of copyright holders.
 
+    Prof. C Pain
     Applied Modelling and Computation Group
     Department of Earth Science and Engineering
     Imperial College London
 
-    David.Ham@Imperial.ac.uk
-    
+    C.Pain@Imperial.ac.uk
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation,
@@ -25,28 +27,6 @@
     USA
 */
 
-#include <stdlib.h>
-#include <unistd.h>
+#define F77_FUNC(name,NAME) name ## _
 
-#include "spud_config.h"
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
-extern "C"{
-  void TESTNAME();
-}
-
-int main(int argc, char **argv) {
-#ifdef HAVE_MPI
-  MPI::Init(argc, argv);
-  chdir(getenv("PWD"));
-#endif
-  TESTNAME();
-#ifdef HAVE_MPI
-  MPI::Finalize();
-#endif
-
-  return 0;
-}
+/* #undef HAVE_MPI */
