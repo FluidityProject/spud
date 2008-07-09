@@ -728,13 +728,13 @@ class Schema(object):
           for tree_choice in child.l:
             if tree_choice is current_choice: continue
 
-            # The other choices are compressed and stored in a DIAMOND MAGIC comment. These
-            # should be read in and added to the in-memory tree.
-            hidden_xml = self.find_hidden_xmldata(tree_choice, child.xmlnode.getparent())
-            if len(hidden_xml) > 0:
-              new_xmldata = hidden_xml[0]
-              self.xml_read_merge(tree_choice, new_xmldata)
-              self.xml_read_core(tree_choice, new_xmldata, rootdoc)
+#            # The other choices are compressed and stored in a DIAMOND MAGIC comment. These
+#            # should be read in and added to the in-memory tree.
+#            hidden_xml = self.find_hidden_xmldata(tree_choice, child.xmlnode.getparent())
+#            if len(hidden_xml) > 0:
+#              new_xmldata = hidden_xml[0]
+#              self.xml_read_merge(tree_choice, new_xmldata)
+#              self.xml_read_core(tree_choice, new_xmldata, rootdoc)
                 
     return bins
 

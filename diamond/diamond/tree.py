@@ -251,14 +251,14 @@ class Tree:
     for child in self.children:
       if child.active is True:
         child.write_core(sub_tree)
-      else:
-        if child.cardinality == '?':
-          root=etree.Element(self.name)
-          child.write_core(root)
-          comment_buffer = StringIO.StringIO(etree.tostring(root))
-          comment_text = ("DIAMOND MAGIC COMMENT (inactive optional subtree %s):\n" % child.schemaname)
-          comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-          sub_tree.append(etree.Comment(unicode(comment_text)))
+#      else:
+#        if child.cardinality == '?':
+#          root=etree.Element(self.name)
+#          child.write_core(root)
+#          comment_buffer = StringIO.StringIO(etree.tostring(root))
+#          comment_text = ("DIAMOND MAGIC COMMENT (inactive optional subtree %s):\n" % child.schemaname)
+#          comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
+#          sub_tree.append(etree.Comment(unicode(comment_text)))
         
     if self.data is not None:
       sub_tree.text=(unicode(self.data))
