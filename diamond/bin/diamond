@@ -185,9 +185,11 @@ def main():
         i.open_file(filename = f)
       except:
         i.set_saved(False, f)
+    i.main_window.window.set_cursor(None)
     i.statusbar.clear_statusbar()
 
   i.statusbar.set_statusbar("Loading ...")
+  i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
   gobject.idle_add(initialise, i, input_schemafile, input_filename)
   while gtk.events_pending():
     gtk.main_iteration()

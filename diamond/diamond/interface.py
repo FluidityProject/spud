@@ -303,8 +303,12 @@ class Diamond:
     if self.filename is None:
       return self.on_save_as(widget)
     else:
+      self.statusbar.set_statusbar("Saving ...")
+      self.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
       self.tree.write(self.filename)
       self.set_saved(True)
+      self.statusbar.clear_statusbar()
+      self.main_window.window.set_cursor(None)
       return True
 
     return False
@@ -333,8 +337,12 @@ class Diamond:
         filename += ".xml"
 
       # Save the file
+      self.statusbar.set_statusbar("Saving ...")
+      self.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
       self.tree.write(filename)
       self.set_saved(True, filename)
+      self.statusbar.clear_statusbar()
+      self.main_window.window.set_cursor(None)
       return True
 
     return False
