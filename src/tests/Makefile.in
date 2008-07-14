@@ -42,7 +42,9 @@ default: test
 
 test: unittest
 
-unittest: $(TEST_BINARIES)
+test-binaries: $(TEST_BINARIES)
+
+unittest: test-binaries
 	@PATH=.:$PATH; $(TEST_BINARIES)
 
 .SUFFIXES: .f90 .F90 .c .cpp .o .a $(.SUFFIXES)

@@ -342,8 +342,6 @@ contains
   subroutine test_clear_options(key)
     character(len = *), intent(in) :: key
     
-    integer :: stat
-    
     call test_key_errors(key)
     call test_add_new_option(key)
     call clear_options()
