@@ -1085,7 +1085,21 @@ class Diamond:
     name_tree = active_tree
     name = ""
     while name_tree is not None:
-      name = "/" + name_tree.name + name
+      if "name" in name_tree.attrs and name_tree.attrs["name"][1] is not None:
+        used_name = name_tree.name + '[@name="%s"]' % name_tree.attrs["name"][1]
+      elif name_tree.parent is not None and name_tree.parent.count_children_by_schemaname(name_tree.schemaname) > 1:
+        siblings = [x for x in name_tree.parent.children if x.schemaname == name_tree.schemaname]
+        i = 0
+        for sibling in siblings:
+          if sibling is name_tree:
+            break
+          else:
+            i = i + 1
+        used_name = name_tree.name + "[%s]" % i
+      else:
+        used_name = name_tree.name
+
+      name = "/" + used_name + name
       name_tree = name_tree.parent
     self.statusbar.set_statusbar(name)
 
