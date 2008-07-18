@@ -235,7 +235,6 @@ class Tree:
     xmlTree=etree.tostring(self.write_core(None), pretty_print = True, xml_declaration = True, encoding="utf8")
     
     file.write(xmlTree)
-    file.close()
 
   def write_core(self, parent):
     """Write to XML; this is the part that recurses"""

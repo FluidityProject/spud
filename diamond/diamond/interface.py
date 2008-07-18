@@ -97,6 +97,10 @@ class Diamond:
 
     self.statusbar = DiamondStatusBar(self.gui.get_widget("statusBar"))
     self.find      = DiamondFindDialog(self, gladefile)
+    self.plugin_buttonbox = self.gui.get_widget("plugin_buttonbox")
+    self.plugin_buttonbox.set_layout(gtk.BUTTONBOX_START)
+    self.plugin_buttonbox.show()
+    self.plugin_buttons = []
 
     signals     =  {"on_new": self.on_new,
                     "on_quit": self.on_quit,
@@ -1106,11 +1110,27 @@ class Diamond:
     self.statusbar.set_statusbar(name)
     self.current_xpath = name
 
+    self.clear_plugin_buttons()
+
     for plugin in plugins.plugins:
       if plugin.matches(name):
-        print "Here we would add a button with name %s" % plugin.name
+        self.add_plugin_button(plugin)
 
     return
+
+  def clear_plugin_buttons(self):
+    for button in self.plugin_buttons:
+      self.plugin_buttonbox.remove(button)
+    
+    self.plugin_buttons = []
+
+  def add_plugin_button(self, plugin):
+    button = gtk.Button(label=plugin.name)
+    button.connect('clicked', self.plugin_handler, plugin)
+    button.show()
+
+    self.plugin_buttons.append(button)
+    self.plugin_buttonbox.add(button)
 
   def plugin_handler(self, widget, plugin):
     f = StringIO.StringIO()
