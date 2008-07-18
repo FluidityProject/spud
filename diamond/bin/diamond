@@ -28,6 +28,7 @@ import gobject
 # do this right at the start, so we can find the diamond modules
 diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
 sys.path.insert(0, diamond_path)
+gtk.gdk.threads_init()
 
 import diamond.debug as debug
 
@@ -75,12 +76,12 @@ def main():
   import diamond.tree as tree
   import diamond.plugins as plugins
 
-  try:
-    import psyco
-    psyco.full()
-    debug.dprint("Using Psyco specialising compiler")
-  except ImportError:
-    debug.dprint("Unable to use Psyco module")
+#  try:
+#    import psyco
+#    psyco.full()
+#    debug.dprint("Using Psyco specialising compiler")
+#  except ImportError:
+#    debug.dprint("Unable to use Psyco module")
 
   try:
     input_filename = args[0]

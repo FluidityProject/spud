@@ -1,6 +1,11 @@
 import os
 import os.path
 import sys
+import thread
+
+import gtk.gdk
+
+import debug
 
 plugins = []
 
@@ -11,10 +16,14 @@ class PluginDetails(object):
     self.cb = cb
 
   def matches(self, xpath):
-    return self.applies(xpath)
+    try:
+      return self.applies(xpath)
+    except Exception:
+      debug.deprint("Warning: plugin %s raised an exception in matching function." % self.name, 0)
+      return False
 
   def execute(self, xml, xpath):
-    self.cb(xml, xpath)
+    thread.start_new_thread(self.cb, (xml, xpath))
 
 def register_plugin(applies, name, cb):
   global plugins
@@ -36,3 +45,10 @@ def configure_plugins(suffix):
           module = __import__(module_name)
     except OSError:
       pass
+
+def cb_decorator(f):
+  def wrapper(*args, **kwargs):
+    gtk.gdk.threads_enter()
+    f(*args, **kwargs)
+    gtk.gdk.threads_leave()
+  return wrapper
