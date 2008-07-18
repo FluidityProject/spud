@@ -20,6 +20,7 @@ import os.path
 import re
 import tempfile
 import webbrowser
+import cStringIO as StringIO
 
 import pango
 import gobject
@@ -33,6 +34,7 @@ import config
 import plist
 import schema
 import tree
+import plugins
 import TextBufferMarkup
 
 try:
@@ -1102,8 +1104,19 @@ class Diamond:
       name = "/" + used_name + name
       name_tree = name_tree.parent
     self.statusbar.set_statusbar(name)
+    self.current_xpath = name
+
+    for plugin in plugins.plugins:
+      if plugin.matches(name):
+        print "Here we would add a button with name %s" % plugin.name
 
     return
+
+  def plugin_handler(self, widget, plugin):
+    f = StringIO.StringIO()
+    self.tree.write(f)
+    xml = f.getvalue()
+    plugin.execute(xml, self.current_xpath)
 
   def get_selected_row(self, selection=None):
     """

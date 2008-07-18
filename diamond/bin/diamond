@@ -73,6 +73,7 @@ def main():
   import diamond.interface as interface
   import diamond.schema as schema
   import diamond.tree as tree
+  import diamond.plugins as plugins
 
   try:
     import psyco
@@ -174,6 +175,9 @@ def main():
                "Schema file: " + str(input_schemafile) + "\n" + \
                "Logo file:   " + str(logofile) + "\n" + \
                "Input file:  " + str(input_filename) + "\n")
+
+
+  plugins.configure_plugins(suffix)
 
   i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
 
