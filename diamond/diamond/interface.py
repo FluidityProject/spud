@@ -48,7 +48,7 @@ Here are some notes about the code:
 Important fields:
   file_path: the directory containing the current file (the working directory or directory of last opened / saved file if no file is open)
   filename: output filename of the current file
-  data_paths: paths to important Diamond data (e.g. geometry dimension).
+  data_paths: paths (from the root node) to important Diamond data (e.g. geometry dimension)
   geometry_dim_tree: MixedTree, with parent equal to the geometry dimension tree and child equal to the geometry dimension data subtree
   gladefile: input Glade file
   gui: GUI GladeXML object
@@ -91,7 +91,7 @@ If there are bugs in writing out, see tree.write.
 
 class Diamond:
   def __init__(self, gladefile, schemafile = None, logofile = None, input_filename = None, 
-      dim_path = "/fluidity_options/geometry/dimension", suffix=None):
+      dim_path = "/geometry/dimension", suffix=None):
     self.gladefile = gladefile
     self.gui = gtk.glade.XML(self.gladefile)
 
@@ -140,6 +140,7 @@ class Diamond:
     self.schemafile_path = os.getcwd()
     self.filename = None
     self.schemafile = None
+    self.init_datatree()    
     self.set_saved(True)
     self.open_file(None, None)
 
@@ -1362,7 +1363,11 @@ class Diamond:
     perform checks to test that the geometry dimension node is valid.
     """
 
-    iter = self.get_treestore_iter_from_xmlpath(self.data_paths["dim"])
+    if self.tree is None:
+      self.geometry_dim_tree = None
+      return
+
+    iter = self.get_treestore_iter_from_xmlpath("/" + self.tree.name + self.data_paths["dim"])
     if iter is None:
       self.geometry_dim_tree = None
       return
@@ -1379,14 +1384,22 @@ class Diamond:
         return
       parent = parent.parent
 
-    for opt in painted_tree.datatype:
+    if isinstance(painted_tree.datatype, tuple):
+      possible_dims = painted_tree.datatype
+    elif painted_tree.datatype == "fixed":
+      possible_dims = [painted_tree.data]
+    else:
+      self.geometry_dim_tree = None
+      return
+      
+    for opt in possible_dims:
       try:
         test = int(opt)
         assert test > 0
       except:
         self.geometry_dim_tree = None
         return
-
+      
     self.geometry_dim_tree = painted_tree
 
   def treestore_iter_is_active(self, iter):
@@ -2598,9 +2611,11 @@ class Diamond:
     it is intended to be used to store tensor or vector data.
     """
 
+    # Check that a geometry is defined
     if self.geometry_dim_tree is None:
       return False
 
+    # Check that this element has calculable and positive dimensions
     if isinstance(self.geometry_dim_tree.datatype, tuple):
       possible_dims = self.geometry_dim_tree.datatype
     else:
@@ -2613,23 +2628,31 @@ class Diamond:
       except:
         return False
 
+    # All tensor elements must be of MixedTree type
     if not isinstance(self.selected_node, MixedTree):
       return False
 
+    # The element must have dim1, rank and shape attributes
     if not "dim1" in self.selected_node.child.attrs.keys() or not "rank" in self.selected_node.child.attrs.keys() or not "shape" in self.selected_node.child.attrs.keys():
       return False
+    # The dim1 and rank attributes must be of fixed type
     if not self.selected_node.child.attrs["dim1"][0] == "fixed" or not self.selected_node.child.attrs["rank"][0] == "fixed":
       return False
 
     if "dim2" in self.selected_node.child.attrs.keys():
+      # If a dim2 attribute is specified, it must be of fixed type and the rank must be 2
+      # Also, the shape attribute must be a list of integers with cardinality equal to the rank
       if not self.selected_node.child.attrs["dim2"][0] == "fixed" or not self.selected_node.child.attrs["rank"][1] == "2" or not isinstance(self.selected_node.child.attrs["shape"][0], plist.List) or not self.selected_node.child.attrs["shape"][0].datatype is int or not str(self.selected_node.child.attrs["shape"][0].cardinality) == self.selected_node.child.attrs["rank"][1]:
         return False
-    elif not self.selected_node.child.attrs["rank"][1] == "1" or not self.selected_node.child.attrs["shape"][0] is int:
-        return False
+    # Otherwise, the rank must be one and the shape an integer
+    elif not self.selected_node.child.attrs["rank"][1] == "1" or not self.selected_node.child.attrs["shape"][0] is int: 
+      return False
 
+    # The data for the element must be a list of one or more
     if not isinstance(self.selected_node.datatype, plist.List) or not self.selected_node.datatype.cardinality == "+":
       return False
 
+    # If the shape has been set, check that it has a valid value
     if not self.selected_node.child.attrs["shape"][1] == None:
       if self.geometry_dim_tree.data is None:
         return False
