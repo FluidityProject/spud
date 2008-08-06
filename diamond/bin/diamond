@@ -100,7 +100,7 @@ def main():
 
   # Let's find a schema.
 
-  suffix = None
+  suffix = "xml"
 
   # if the user specifies a schema on the command line, use that.
 
