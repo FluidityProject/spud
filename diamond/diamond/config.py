@@ -39,11 +39,11 @@ for dir in dirs:
       if len(newSchemata) < 2:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)
         continue
+      newSchemata[1] = os.path.expandvars(newSchemata[1])
       if not os.path.exists(newSchemata[1]):
         debug.deprint("Warning: not a valid path: %s" % newSchemata[1], 0)
         debug.deprint("schema type not registered")
         continue
-      newSchemata[1] = os.path.expandvars(newSchemata[1])
       schemata[file] = tuple(newSchemata)
       debug.dprint("Registered schema type: " + file)
   except OSError:
