@@ -118,6 +118,12 @@ class Schema(object):
 
     for child in self.element_children(node):
       self.append(results, self.to_tree(child))
+
+    if eid == ":start" and len(results) != 1:
+      debug.deprint("Error: there must be exactly one root element in an XML document, but found:", 0)
+      for result in results:
+        debug.deprint("  %s" % result.name, 0)
+      sys.exit(1)
       
     return results
 
