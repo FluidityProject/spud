@@ -1087,6 +1087,19 @@ class Diamond:
     self.selected_node = self.get_painted_tree(iter)
     self.update_options_frame()
 
+    name = self.get_xpath(active_tree)
+    self.statusbar.set_statusbar(name)
+    self.current_xpath = name
+
+    self.clear_plugin_buttons()
+
+    for plugin in plugins.plugins:
+      if plugin.matches(name):
+        self.add_plugin_button(plugin)
+
+    return
+
+  def get_xpath(self, active_tree):
     # get the name to paint on the statusbar
     name_tree = active_tree
     name = ""
@@ -1107,16 +1120,7 @@ class Diamond:
 
       name = "/" + used_name + name
       name_tree = name_tree.parent
-    self.statusbar.set_statusbar(name)
-    self.current_xpath = name
-
-    self.clear_plugin_buttons()
-
-    for plugin in plugins.plugins:
-      if plugin.matches(name):
-        self.add_plugin_button(plugin)
-
-    return
+    return name
 
   def clear_plugin_buttons(self):
     for button in self.plugin_buttons:
@@ -1190,7 +1194,17 @@ class Diamond:
     # record the choice in the datatree
     choice.set_active_choice_by_ref(ref)
     new_active_tree = choice.get_current_tree()
+
+    name = self.get_xpath(new_active_tree)
+    self.statusbar.set_statusbar(name)
     self.treestore.set(iter, 3, new_active_tree)
+    self.current_xpath = name
+
+    self.clear_plugin_buttons()
+
+    for plugin in plugins.plugins:
+      if plugin.matches(name):
+        self.add_plugin_button(plugin)
 
     self.remove_children(iter)
     self.expand_treestore(iter)
