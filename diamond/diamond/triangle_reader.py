@@ -10,7 +10,8 @@ from enthought.mayavi.core.file_data_source import FileDataSource
 from enthought.mayavi.core.pipeline_info import PipelineInfo
 from enthought.mayavi.core.traits import DEnum
 from os import path
-from numpy import loadtxt, array
+from numpy import array, fromstring
+from re import compile, MULTILINE
 
 ######################################################################
 # `TriangleReader` class
@@ -19,42 +20,57 @@ class TriangleReader(FileDataSource):
     """
     Reader for the Triangle file format: <http://tetgen.berlios.de/fformats.html>
     Outputs an unstructured grid dataset.
-    Open the .face file to construct a surface mesh comprised of triangles.
-    Open the .ele file to construct a solid mesh comprised of tetrahedra.
+    Supports opening .face files to construct a surface mesh comprised of triangles
+    and .ele files to construct a solid mesh comprised of tetrahedra.
     """
 
     # The version of this class.  Used for persistence.
     __version__ = 0
 
-    # The VTK dataset to manage.
-    _grid = Instance(tvtk.UnstructuredGrid, args=(), allow_none=False)
-    _basename = String
-    _numbered_from = Int
-
     # Information about what this object can produce.
     output_info = PipelineInfo(datasets=['unstructured_grid'],
                                attribute_types=['any'],
-                               attributes=['any'])
+                               attributes=['scalars'])
 
+    # The active point scalar name.
     point_scalars_name = DEnum(values_name='_point_scalars_list',
                                desc='scalar point data attribute to use')
 
+    # The active cell scalar name.
     cell_scalars_name = DEnum(values_name='_cell_scalars_list',
                                desc='scalar cell data attribute to use')
 
+    ########################################
+    # Private traits.
+
+    # These private traits store the list of available data
+    # attributes.  The non-private traits use these lists internally.
     _cell_scalars_list = List(String)
     _point_scalars_list = List(String)
 
+    # The VTK dataset to manage.
+    _grid = Instance(tvtk.UnstructuredGrid, args=(), allow_none=False)
+
+    # The basename of the file which has been loaded.
+    _basename = String
+
+    # Indicates whether nodes are numbered from 0 or 1 (the file
+    # format allows both).
+    _numbered_from = Int
+
+    # This filter allows us to change the attributes of the data
+    # object and will ensure that the pipeline is properly taken care
+    # of.
     _assign_attribute = Instance(tvtk.AssignAttribute, args=(), allow_none=False)
 
     ########################################
-    # The view
+    # The view.
 
     view = View(Item(name='point_scalars_name'),
                 Item(name='cell_scalars_name'))
 
     ########################################
-    # `FileDataSource` interface
+    # `FileDataSource` interface.
 
     def initialize(self, base_file_name):
         split = path.splitext(base_file_name)
@@ -62,32 +78,34 @@ class TriangleReader(FileDataSource):
         extension = split[1]
 
         self._grid.points = tvtk.Points()
+        self._grid.points.data_type = 'double'
         self._assign_attribute.input = self._grid
 
-        self.read_node_file()
+        self._read_node_file()
         if (extension == '.face'):
-            self.read_face_file()
+            self._read_face_file()
         else:
-            self.read_ele_file()
+            self._read_ele_file()
 
         self.outputs = [self._assign_attribute.output]
         self.name = 'Triangle file (%s%s)' %(path.basename(self._basename), extension)
 
     ########################################
-    # File reading methods
+    # File reading methods.
 
-    def read_node_file(self):
+    def _read_node_file(self):
+        """
+        Loads data from {basename}.node, and inserts points and point
+        scalars into the unstructured grid.
+        """
         file_name = '%s.node' %self._basename
 
-        file = open(file_name)
-        first_line, line_number = self.read_first_line(file)
-        second_line_number = self.get_second_line_number(line_number, file)
-        file.close()
-
-        points, dimensions, attributes, boundary_marker = map(int, first_line)
-
-        # Load all data into array
-        data_array = loadtxt(file_name, skiprows=second_line_number-1)
+        # Load all data.
+        all_data = self._get_data(file_name)
+        # Grab values from the first line of data file.
+        points, dimensions, attributes, boundary_marker = map(int, all_data[0:4])
+        # Reshape remainder of array.
+        data_array = all_data[4:].reshape(points, 1+dimensions+attributes+boundary_marker)
 
         self._numbered_from = int(data_array[0][0])
 
@@ -96,65 +114,91 @@ class TriangleReader(FileDataSource):
 
         for i in range(attributes):
             attribute_array = data_array[:, (i+dimensions+1):(i+dimensions+2)]
-            self.add_attribute_array(attribute_array, i, 'point')
+            self._add_attribute_array(attribute_array, i, 'point')
 
         if (boundary_marker):
             boundary_marker_array = data_array[:, (dimensions+attributes+1):(dimensions+attributes+2)]
-            self.add_boundary_marker_array(boundary_marker_array, 'point')
+            self._add_boundary_marker_array(boundary_marker_array, 'point')
 
 
-    def read_face_file(self):
+    def _read_face_file(self):
+        """
+        Loads data from {basename}.face, and inserts triangle cells and cell
+        scalars into the unstructured grid.
+        """
         file_name = '%s.face' %self._basename
 
-        file = open(file_name)
-        first_line, line_number = self.read_first_line(file)
-        second_line_number = self.get_second_line_number(line_number, file)
-        file.close()
-
-        faces, boundary_marker = map(int, first_line)
-
-        # Load all data into array
-        data_array = loadtxt(file_name, skiprows=second_line_number-1)
+        # Load all data.
+        all_data = self._get_data(file_name)
+        # Grab values from the first line of data file.
+        faces, boundary_marker = map(int, all_data[0:2])
+        # Reshape remainder of array.
+        data_array = all_data[2:].reshape(faces, 4+boundary_marker)
 
         nodes_array = data_array[:, 1:4]
-        # 5 is cell type for triangles
-        map(lambda x:self.insert_cell(x, 5), nodes_array)
+        # 5 is cell type for triangles.
+        map(lambda x:self._insert_cell(x, 5), nodes_array)
 
         if (boundary_marker):
             boundary_marker_array = data_array[:, 4:5]
-            self.add_boundary_marker_array(boundary_marker_array, 'cell')
+            self._add_boundary_marker_array(boundary_marker_array, 'cell')
 
 
-    def read_ele_file(self):
+    def _read_ele_file(self):
+        """
+        Loads data from {basename}.ele, and inserts tetrahedron cells and cell
+        scalars into the unstructured grid.
+        """
         file_name = '%s.ele' %self._basename
 
-        file = open(file_name)
-        first_line, line_number = self.read_first_line(file)
-        second_line_number = self.get_second_line_number(line_number, file)
-        file.close()
-
-        tetrahedra, nodes_per_tetrahedron, attributes =  map(int, first_line)
-
-        # Load all data into array
-        data_array = loadtxt(file_name, skiprows=second_line_number-1)
+        # Load all data.
+        all_data = self._get_data(file_name)
+        # Grab values from the first line of data file.
+        tetrahedra, nodes_per_tetrahedron, attributes =  map(int, all_data[0:3])
+        # Reshape remainder of array.
+        data_array = all_data[3:].reshape(tetrahedra, 1+nodes_per_tetrahedron+attributes)
 
         nodes_array = data_array[:, 1:(nodes_per_tetrahedron+1)]
-        # 10 is cell type for tetrahedra
-        map(lambda x:self.insert_cell(x, 10), nodes_array)
+        # 10 is cell type for tetrahedra.
+        map(lambda x:self._insert_cell(x, 10), nodes_array)
 
         for i in range(attributes):
             attribute_array = data_array[:, (i+nodes_per_tetrahedron+1):(i+nodes_per_tetrahedron+2)]
-            self.add_attribute_array(attribute_array, i, 'cell')
+            self._add_attribute_array(attribute_array, i, 'cell')
 
 
-    def insert_cell(self, nodes_array, cell_type):
-        #ids = tvtk.IdList()
+    def _get_data(self, file_name):
+        """
+        Returns a 1D array containing all the data from the given file.
+        """
+        file = open(file_name)
+        file_string = file.read()
+
+        # Strip comments.
+        pattern = compile('#.*$', MULTILINE)
+        file_string = pattern.sub('', file_string)
+
+        # Load all data into array.
+        return fromstring(file_string, dtype=float, sep=" ")
+
+    ########################################
+    # Unstructured grid construction
+    # methods.
+
+    def _insert_cell(self, nodes_array, cell_type):
+        """
+        Inserts a cell of type cell_type to the unstructured grid
+        which has the nodes given in nodes_array.
+        """
         nodes_array = array(map(lambda x:int(x-self._numbered_from), nodes_array))
-        #ids.from_array(nodes_array)
         self._grid.insert_next_cell(cell_type, nodes_array)
 
 
-    def add_attribute_array(self, attribute_array, i, type):
+    def _add_attribute_array(self, attribute_array, i, type):
+        """
+        Adds the given attribute array to either point_data or
+        cell_data of the unstructured grid.
+        """
         attribute_array_name = 'Attribute %i' %i
         if (type == 'cell'): # .ele file attributes are of type Int
             tvtk_attribute_array = tvtk.IntArray(name=attribute_array_name)
@@ -169,7 +213,11 @@ class TriangleReader(FileDataSource):
             self._set_data_name(type, 'Attribute 0')
 
 
-    def add_boundary_marker_array(self, boundary_marker_array, type):
+    def _add_boundary_marker_array(self, boundary_marker_array, type):
+        """
+        Adds the given boundary marker array to either point_data or
+        cell_data of the unstructured grid.
+        """
         boundary_marker_array_name = 'Boundary Marker'
         tvtk_boundary_marker_array = tvtk.IntArray(name=boundary_marker_array_name)
         tvtk_boundary_marker_array.from_array(boundary_marker_array)
@@ -177,30 +225,9 @@ class TriangleReader(FileDataSource):
         getattr(self, '_%s_scalars_list' %type).append(boundary_marker_array_name)
         self._set_data_name(type, 'Boundary Marker')
 
-
-    def read_first_line(self, file):
-        first_line = self.read_line(file)
-        line_number = 1
-        while (not first_line):
-            first_line = self.read_line(file)
-            line_number += 1
-        return first_line, line_number
-
-
-    def get_second_line_number(self, line_number, file):
-        second_line = self.read_line(file)
-        line_number += 1
-        while (not second_line):
-            second_line = self.read_line(file)
-            line_number += 1
-        return line_number
-
-
-    def read_line(self, file):
-        return file.readline().partition('#')[0].split()
-
-
-    # Taken and modified from SetActiveAttribute filter:
+    ########################################
+    # Methods taken and modified from
+    # SetActiveAttribute filter.
 
     def _point_scalars_name_changed(self, value):
         self._set_data_name('point', value)
@@ -211,6 +238,10 @@ class TriangleReader(FileDataSource):
 
 
     def _set_data_name(self, attr_type, value):
+        """
+        Sets the selected point or cell scalar to be active, and
+        deactivates the scalar of the other type.
+        """
         if value is None:
             return
 
@@ -224,11 +255,12 @@ class TriangleReader(FileDataSource):
         method = getattr(data, 'set_active_scalars')
         method(value)
 
-        # Deactivate other attribute
+        # Deactivate other attribute.
         method = getattr(other_data, 'set_active_scalars')
         method(None)
 
         self._assign_attribute.assign(value, 'SCALARS', attr_type.upper()+'_DATA')
         self._assign_attribute.update()
-        # Fire an event, so the changes propagate
+
+        # Fire an event, so the changes propagate.
         self.data_changed = True
