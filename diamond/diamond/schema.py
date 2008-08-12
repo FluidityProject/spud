@@ -634,14 +634,14 @@ class Schema(object):
           if schemachild.schemaname not in xmls:
             if schemachild.cardinality == '':
               xmls[schemachild.schemaname] = copy.deepcopy([])
-            elif schemachild.cardinality == '?':
-              hidden_xmldata = self.find_hidden_xmldata(schemachild, xmlnode)
-              if len(hidden_xmldata) > 0:
-                new_xmldata = hidden_xmldata[0]
-                xmls[schemachild.schemaname] = [new_xmldata]
-                break
-              else:
-                xmls[schemachild.schemaname] = copy.deepcopy([])
+#            elif schemachild.cardinality == '?':
+#              hidden_xmldata = self.find_hidden_xmldata(schemachild, xmlnode)
+#              if len(hidden_xmldata) > 0:
+#                new_xmldata = hidden_xmldata[0]
+#                xmls[schemachild.schemaname] = [new_xmldata]
+#                break
+#              else:
+#                xmls[schemachild.schemaname] = copy.deepcopy([])
 
       elif schemachild.cardinality in ['*', '+']:
         xmls[schemachild.schemaname] = copy.deepcopy([])
