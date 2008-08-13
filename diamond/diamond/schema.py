@@ -640,8 +640,8 @@ class Schema(object):
 #                new_xmldata = hidden_xmldata[0]
 #                xmls[schemachild.schemaname] = [new_xmldata]
 #                break
-#              else:
-#                xmls[schemachild.schemaname] = copy.deepcopy([])
+            else:
+              xmls[schemachild.schemaname] = copy.deepcopy([])
 
       elif schemachild.cardinality in ['*', '+']:
         xmls[schemachild.schemaname] = copy.deepcopy([])
@@ -762,7 +762,7 @@ class Schema(object):
             debug.deprint("Error reading compressed XML. Output: %s" % bz2.decompress(base64.b64decode(pickle)), 0)
             sys.exit(1)
 
-          # Comments generated using the 4suite API are incompatable with the new format. Notify the user.
+          # Comments generated using the 4suite API are incompatable with the new format.
           if uncompressed.find("<?xml version=") != -1:
             debug.dprint("File uses old-style magic comments. Ignoring.")
             return []
