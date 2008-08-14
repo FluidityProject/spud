@@ -28,7 +28,6 @@ import gobject
 # do this right at the start, so we can find the diamond modules
 diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
 sys.path.insert(0, diamond_path)
-gtk.gdk.threads_init()
 
 import diamond.debug as debug
 
@@ -199,6 +198,7 @@ def main():
   while gtk.events_pending():
     gtk.main_iteration()
 
+  gtk.gdk.threads_init()
   gtk.main()
 
   return
