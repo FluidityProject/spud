@@ -77,8 +77,6 @@ class TriangleReader(FileDataSource):
         self._basename = split[0]
         extension = split[1]
 
-        self._grid.points = tvtk.Points()
-        self._grid.points.data_type = 'double'
         self._assign_attribute.input = self._grid
 
         self._read_node_file()
@@ -109,8 +107,8 @@ class TriangleReader(FileDataSource):
 
         self._numbered_from = int(data_array[0][0])
 
-        points_array = data_array[:, 1:(1+dimensions)]
-        map(self._grid.points.insert_next_point, points_array)
+        points_array = array(data_array[:, 1:(1+dimensions)], 'double')
+        self._grid.points = points_array
 
         for i in range(attributes):
             attribute_array = data_array[:, (i+dimensions+1):(i+dimensions+2)]
@@ -135,9 +133,9 @@ class TriangleReader(FileDataSource):
         # Reshape remainder of array.
         data_array = all_data[2:].reshape(faces, 4+boundary_marker)
 
-        nodes_array = data_array[:, 1:4]
-        # 5 is cell type for triangles.
-        map(lambda x:self._insert_cell(x, 5), nodes_array)
+        nodes_array = data_array[:, 1:4] - self._numbered_from
+        cell_type = tvtk.Triangle().cell_type
+        self._grid.set_cells(cell_type, nodes_array)
 
         if (boundary_marker):
             boundary_marker_array = data_array[:, 4:5]
@@ -158,9 +156,9 @@ class TriangleReader(FileDataSource):
         # Reshape remainder of array.
         data_array = all_data[3:].reshape(tetrahedra, 1+nodes_per_tetrahedron+attributes)
 
-        nodes_array = data_array[:, 1:(nodes_per_tetrahedron+1)]
-        # 10 is cell type for tetrahedra.
-        map(lambda x:self._insert_cell(x, 10), nodes_array)
+        nodes_array = data_array[:, 1:(nodes_per_tetrahedron+1)] - self._numbered_from
+        cell_type = tvtk.Tetra().cell_type
+        self._grid.set_cells(cell_type, nodes_array)
 
         for i in range(attributes):
             attribute_array = data_array[:, (i+nodes_per_tetrahedron+1):(i+nodes_per_tetrahedron+2)]
@@ -175,7 +173,7 @@ class TriangleReader(FileDataSource):
         file_string = file.read()
 
         # Strip comments.
-        pattern = compile('#.*$', MULTILINE)
+        pattern = compile('#.*?$', MULTILINE)
         file_string = pattern.sub('', file_string)
 
         # Load all data into array.
@@ -184,15 +182,6 @@ class TriangleReader(FileDataSource):
     ########################################
     # Unstructured grid construction
     # methods.
-
-    def _insert_cell(self, nodes_array, cell_type):
-        """
-        Inserts a cell of type cell_type to the unstructured grid
-        which has the nodes given in nodes_array.
-        """
-        nodes_array = array(map(lambda x:int(x-self._numbered_from), nodes_array))
-        self._grid.insert_next_cell(cell_type, nodes_array)
-
 
     def _add_attribute_array(self, attribute_array, i, type):
         """
