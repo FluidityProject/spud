@@ -43,7 +43,15 @@ def configure_plugins(suffix):
       for file in os.listdir(dir):
         module_name, ext = os.path.splitext(file)
         if ext == ".py":
-          module = __import__(module_name)
+          try:
+            module = __import__(module_name)
+          except:
+            debug.deprint("Plugin raised an exception:", 0)
+            tb = traceback.format_exception(sys.exc_info()[0] ,sys.exc_info()[1], sys.exc_info()[2])
+            tb_msg = ""
+            for tbline in tb:
+              tb_msg += tbline
+            debug.deprint(tb_msg, 0)
     except OSError:
       pass
 
