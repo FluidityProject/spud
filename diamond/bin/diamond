@@ -52,6 +52,19 @@ def Help():
 
 def main():
 
+  # Detach from controlling terminal
+  try:
+    pid = os.fork()
+    if pid == 0:
+      os.setsid()
+      pid = os.fork()
+      if pid != 0:
+        os._exit(0)
+    else:
+      os._exit(0)
+  except:
+    pass
+
   try:
     opts, args = getopt.getopt(sys.argv[1:], "hvs:")
   except:
