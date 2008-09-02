@@ -36,7 +36,7 @@ LIBS = @LIBS@ ../../libspud.a
 DISABLED_TESTS = unittest_tools
 
 # The test programs to be built
-TEST_BINARIES = $(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.f90)))
+TEST_BINARIES = $(addprefix bin/, $(filter-out $(DISABLED_TESTS), $(basename $(wildcard *.f90))))
 
 default: test
 
@@ -62,11 +62,13 @@ unittest: test-binaries
 	$(CXX) $(CXXFLAGS) -D TESTNAME=$(subst _main.o,,$@)_ -o $@ -c test_main.cpp
 
 # Link this TESTNAME_main.o with TESTNAME.o from TESTNAME.F90
-%: %_main.o %.o
+bin/%: %_main.o %.o
+	mkdir -p bin
 	$(CXX) -o $@ $(filter %.o,$^) unittest_tools.o $(LIBS)
 
 clean:
 	rm -f $(TEST_BINARIES)
+	rm -rf bin
 	rm -f *.o *.mod
 
 distclean:
