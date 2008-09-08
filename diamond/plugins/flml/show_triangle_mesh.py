@@ -38,9 +38,11 @@ def handle_click(xml, xpath):
     else:
         return
 
-    show_mesh(file_name)
+    # Find the number of dimensions so that we load the correct file
+    ndim = int(xml_root.xpath('/fluidity_options/geometry/dimension')[0].getchildren()[0].text)
+    show_mesh(file_name, ndim)
 
-def show_mesh(file_name):
+def show_mesh(file_name, ndim):
     mayavi_engine = Engine()
     mayavi_engine.start()
     mayavi_engine.new_scene()
@@ -51,7 +53,12 @@ def show_mesh(file_name):
 
     # Setup MayaVi pipeline
     src = TriangleReader()
-    src.initialize(file_name+'.face') # Opens the .face file
+    
+    if (ndim == 2):
+        src.initialize(file_name+'.edge') # Load the 2D .edge file
+    else:
+        src.initialize(file_name+'.face') # Load the 3D .face file
+
     mayavi_engine.add_source(src)
     # Add any filters, modules here in the order that they are to appear in the pipeline
     mayavi_engine.add_module(Surface())
