@@ -25,6 +25,8 @@ import gtk
 import gtk.gdk
 import gobject
 
+import thread
+
 # do this right at the start, so we can find the diamond modules
 diamond_path = os.path.join( os.path.dirname(__file__), os.pardir )
 sys.path.insert(0, diamond_path)
@@ -195,6 +197,8 @@ def main():
   i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
 
   def initialise(i, s, f):
+    gtk.gdk.threads_enter()
+    i.statusbar.set_statusbar("Loading ...")
     i.open_file(schemafile = s)
     if not f is None:
       try:
@@ -204,14 +208,12 @@ def main():
         i.set_saved(False, f)
     i.main_window.window.set_cursor(None)
     i.statusbar.clear_statusbar()
+    gtk.gdk.threads_leave()
 
-  i.statusbar.set_statusbar("Loading ...")
   i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
-  gobject.idle_add(initialise, i, input_schemafile, input_filename)
-  while gtk.events_pending():
-    gtk.main_iteration()
 
   gtk.gdk.threads_init()
+  thread.start_new_thread(initialise, (i, input_schemafile, input_filename))
   gtk.main()
 
   return
