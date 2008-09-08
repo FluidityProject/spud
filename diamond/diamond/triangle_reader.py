@@ -10,7 +10,7 @@ from enthought.mayavi.core.file_data_source import FileDataSource
 from enthought.mayavi.core.pipeline_info import PipelineInfo
 from enthought.mayavi.core.traits import DEnum
 from os import path
-from numpy import array, fromstring
+from numpy import array, append, fromstring
 from re import compile, MULTILINE
 
 ######################################################################
@@ -18,10 +18,14 @@ from re import compile, MULTILINE
 ######################################################################
 class TriangleReader(FileDataSource):
     """
-    Reader for the Triangle file format: <http://tetgen.berlios.de/fformats.html>
+    Reader for the Triangle file formats:
+        2D <http://www.cs.cmu.edu/~quake/triangle.html>
+            Supports opening .egde files to construct a surface mesh comprised of lines
+            and .ele files to construct a solid mesh comprised of triangles.
+        3D <http://tetgen.berlios.de/fformats.html>
+            Supports opening .face files to construct a surface mesh comprised of triangles
+            and .ele files to construct a solid mesh comprised of tetrahedra.
     Outputs an unstructured grid dataset.
-    Supports opening .face files to construct a surface mesh comprised of triangles
-    and .ele files to construct a solid mesh comprised of tetrahedra.
     """
 
     # The version of this class.  Used for persistence.
@@ -80,8 +84,8 @@ class TriangleReader(FileDataSource):
         self._assign_attribute.input = self._grid
 
         self._read_node_file()
-        if (extension == '.face'):
-            self._read_face_file()
+        if (extension == '.face' or extension == '.edge'):
+            self._read_face_edge_file(extension)
         else:
             self._read_ele_file()
 
@@ -108,6 +112,9 @@ class TriangleReader(FileDataSource):
         self._numbered_from = int(data_array[0][0])
 
         points_array = array(data_array[:, 1:(1+dimensions)], 'double')
+        if (dimensions == 2):
+            # Add a 0 to each point if it is 2D.
+            points_array = array(map (lambda a: append(a, 0), points_array))
         self._grid.points = points_array
 
         for i in range(attributes):
@@ -119,49 +126,62 @@ class TriangleReader(FileDataSource):
             self._add_boundary_marker_array(boundary_marker_array, 'point')
 
 
-    def _read_face_file(self):
+    def _read_face_edge_file(self, extension):
         """
-        Loads data from {basename}.face, and inserts triangle cells and cell
-        scalars into the unstructured grid.
+        Loads data from 2D {basename}.edge or 3D {basename}.face, and inserts
+        triangle/line cells and cell scalars into the unstructured grid.
         """
-        file_name = '%s.face' %self._basename
+        file_name = '%s%s' %(self._basename, extension)
+
+        if (extension == '.edge'):
+            # 2D. Expect two endpoints which form a line.
+            npoints = 2
+            cell_type = tvtk.Line().cell_type
+        else:
+            # 3D. Expect three points which form a triangle.
+            npoints = 3
+            cell_type = tvtk.Triangle().cell_type
 
         # Load all data.
         all_data = self._get_data(file_name)
         # Grab values from the first line of data file.
-        faces, boundary_marker = map(int, all_data[0:2])
+        faces_edges, boundary_marker = map(int, all_data[0:2])
         # Reshape remainder of array.
-        data_array = all_data[2:].reshape(faces, 4+boundary_marker)
+        data_array = all_data[2:].reshape(faces_edges, npoints+1+boundary_marker)
 
-        nodes_array = data_array[:, 1:4] - self._numbered_from
-        cell_type = tvtk.Triangle().cell_type
+        nodes_array = data_array[:, 1:npoints+1] - self._numbered_from
         self._grid.set_cells(cell_type, nodes_array)
 
         if (boundary_marker):
-            boundary_marker_array = data_array[:, 4:5]
+            boundary_marker_array = data_array[:, npoints+1:npoints+2]
             self._add_boundary_marker_array(boundary_marker_array, 'cell')
 
 
     def _read_ele_file(self):
         """
-        Loads data from {basename}.ele, and inserts tetrahedron cells and cell
-        scalars into the unstructured grid.
+        Loads data from {basename}.ele, and inserts triangle/tetrahedron cells
+        and cell scalars into the unstructured grid.
         """
         file_name = '%s.ele' %self._basename
 
         # Load all data.
         all_data = self._get_data(file_name)
         # Grab values from the first line of data file.
-        tetrahedra, nodes_per_tetrahedron, attributes =  map(int, all_data[0:3])
+        tet_tri, nodes_per_tet_tri, attributes =  map(int, all_data[0:3])
         # Reshape remainder of array.
-        data_array = all_data[3:].reshape(tetrahedra, 1+nodes_per_tetrahedron+attributes)
+        data_array = all_data[3:].reshape(tet_tri, 1+nodes_per_tet_tri+attributes)
 
-        nodes_array = data_array[:, 1:(nodes_per_tetrahedron+1)] - self._numbered_from
-        cell_type = tvtk.Tetra().cell_type
+        nodes_array = data_array[:, 1:(nodes_per_tet_tri+1)] - self._numbered_from
+
+        if (nodes_per_tet_tri == 3):
+            cell_type = tvtk.Triangle().cell_type
+        else:
+            cell_type = tvtk.Tetra().cell_type
+
         self._grid.set_cells(cell_type, nodes_array)
 
         for i in range(attributes):
-            attribute_array = data_array[:, (i+nodes_per_tetrahedron+1):(i+nodes_per_tetrahedron+2)]
+            attribute_array = data_array[:, (i+nodes_per_tet_tri+1):(i+nodes_per_tet_tri+2)]
             self._add_attribute_array(attribute_array, i, 'cell')
 
 
