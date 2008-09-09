@@ -1328,10 +1328,15 @@ class Diamond:
     if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
       painted_tree.active = False
-    elif lock_geometry_dim and not self.geometry_dim_tree is None and not self.geometry_dim_tree.data is None and active_tree is self.geometry_dim_tree.parent:
-      data_tree = tree.Tree(painted_tree.child.name, painted_tree.child.schemaname, datatype = "fixed")
-      data_tree.data = painted_tree.data
-      painted_tree = MixedTree(painted_tree, data_tree)
+    elif lock_geometry_dim and not self.geometry_dim_tree is None and not self.geometry_dim_tree.data is None:
+      if active_tree is self.geometry_dim_tree:
+        data_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, datatype = "fixed")
+        data_tree.data = painted_tree.data
+        painted_tree = MixedTree(painted_tree, data_tree)
+      elif isinstance(self.geometry_dim_tree, MixedTree) and active_tree is self.geometry_dim_tree.parent:
+        data_tree = tree.Tree(painted_tree.child.name, painted_tree.child.schemaname, datatype = "fixed")
+        data_tree.data = painted_tree.data
+        painted_tree = MixedTree(painted_tree, data_tree)
 
     return painted_tree
 
@@ -1373,7 +1378,11 @@ class Diamond:
       return
 
     painted_tree = self.get_painted_tree(iter, False)
-    if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
+    if isinstance(painted_tree, MixedTree):
+       if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
+         self.geometry_dim_tree = None
+         return
+    elif not painted_tree.datatype == "fixed":
       self.geometry_dim_tree = None
       return
 

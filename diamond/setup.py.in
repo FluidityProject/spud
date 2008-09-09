@@ -9,7 +9,7 @@ except KeyError:
 
 setup(
       name='diamond',
-      version='0.1b',
+      version='1.0',
       description="Fluidity preprocessor",
       author = "The ICOM team",
       author_email = "patrick.farrell@imperial.ac.uk",
