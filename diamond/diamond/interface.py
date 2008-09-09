@@ -1373,7 +1373,7 @@ class Diamond:
       return
 
     painted_tree = self.get_painted_tree(iter, False)
-    if not isinstance(painted_tree, MixedTree) or (not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed"):
+    if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
       self.geometry_dim_tree = None
       return
 
@@ -1401,6 +1401,8 @@ class Diamond:
         return
       
     self.geometry_dim_tree = painted_tree
+    
+    return
 
   def treestore_iter_is_active(self, iter):
     """
