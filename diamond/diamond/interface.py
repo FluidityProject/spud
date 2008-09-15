@@ -275,8 +275,10 @@ class Diamond:
     if self.suffix is None:
       for xmlname in config.schemata:
         filter_names_and_patterns[config.schemata[xmlname][0]] = "*." + xmlname
-    else:
+    elif self.suffix in config.schemata.keys():
       filter_names_and_patterns[config.schemata[self.suffix][0]] = "*." + self.suffix
+    else:
+      filter_names_and_patterns[self.suffix] = "*." + self.suffix
 
     filename = dialogs.get_filename(title = "Open XML file", action = gtk.FILE_CHOOSER_ACTION_OPEN, filter_names_and_patterns = filter_names_and_patterns, folder_uri = self.file_path)
 
@@ -333,8 +335,10 @@ class Diamond:
     if self.suffix is None:
       for xmlname in config.schemata:
         filter_names_and_patterns[config.schemata[xmlname][0]] = "*." + xmlname
-    else:
+    elif self.suffix in config.schemata.keys():
       filter_names_and_patterns[config.schemata[self.suffix][0]] = "*." + self.suffix
+    else:
+      filter_names_and_patterns[self.suffix] = "*." + self.suffix
 
     filename = dialogs.get_filename(title = "Save XML file", action = gtk.FILE_CHOOSER_ACTION_SAVE, filter_names_and_patterns = filter_names_and_patterns, folder_uri = self.file_path)
 
@@ -630,8 +634,10 @@ class Diamond:
     """    
     
     # Construct the dictionary of locals that will be used by the interpretter
-    locals = globals()
-    locals["interface"] = self
+    locals = {}
+    locals["interface"] = globals()
+    locals["diamond_gui"] = self
+
   
     dialogs.console(self.main_window, locals)
     
@@ -1368,10 +1374,12 @@ class Diamond:
     perform checks to test that the geometry dimension node is valid.
     """
 
+    # The tree must exist
     if self.tree is None:
       self.geometry_dim_tree = None
       return
 
+    # A geometry dimension element must exist
     iter = self.get_treestore_iter_from_xmlpath("/" + self.tree.name + self.data_paths["dim"])
     if iter is None:
       self.geometry_dim_tree = None
@@ -1379,13 +1387,18 @@ class Diamond:
 
     painted_tree = self.get_painted_tree(iter, False)
     if isinstance(painted_tree, MixedTree):
+       # If the geometry dimension element has a hidden data element, it must
+       # have datatype tuple or fixed
        if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
          self.geometry_dim_tree = None
          return
     elif not painted_tree.datatype == "fixed":
+      # Otherwise, only fixed datatype is permitted
       self.geometry_dim_tree = None
       return
 
+    # All parents of the geometry dimension element must have cardinality ""
+    # (i.e. not ?, * or +).
     parent = painted_tree.parent
     while not parent is None:
       if not parent.cardinality == "":
@@ -1393,6 +1406,7 @@ class Diamond:
         return
       parent = parent.parent
 
+    # All possible geometry dimensions must be positive integers
     if isinstance(painted_tree.datatype, tuple):
       possible_dims = painted_tree.datatype
     elif painted_tree.datatype == "fixed":
@@ -1400,7 +1414,6 @@ class Diamond:
     else:
       self.geometry_dim_tree = None
       return
-      
     for opt in possible_dims:
       try:
         test = int(opt)
@@ -1409,6 +1422,7 @@ class Diamond:
         self.geometry_dim_tree = None
         return
       
+    # A valid geometry dimension element has been located
     self.geometry_dim_tree = painted_tree
     
     return

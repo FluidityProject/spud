@@ -126,6 +126,11 @@ class OutputStream:
       self.view.scroll_to_mark(self.mark, 0, True, 1, 1)
 
     self.buffer.insert_with_tags(end,text,self.style)
+    
+  def flush(self):
+    self.view.queue_draw()
+  
+    return
 
 class GTKInterpreterConsole(gtk.ScrolledWindow):
   """
