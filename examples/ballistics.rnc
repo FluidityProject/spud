@@ -20,7 +20,10 @@ start =
          element geometry {
             element dimension {
                ## Only 2D simulations are suppored by ballistics.
-               "2"
+               element integer_value {
+                  attribute rank {"0"},
+                  "2"
+               }
             }
          }
       }
@@ -37,7 +40,7 @@ timestepping_options =
             ## The time at which the simulation should stop.
             real
          },
-         element timestepping_scheme {
+         element time_integration_scheme {
             ## The algorithm which will be used to move the projectiles. 
             ## explicit_euler is the first order unstable numeric scheme.
             ## analytic is the analytic solution.

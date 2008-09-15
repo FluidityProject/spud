@@ -26,8 +26,13 @@ e.g. 9.8</a:documentation>
       <!-- The + means one or more projectiles. -->
       <element name="geometry">
         <element name="dimension">
-          <value>2</value>
-          <a:documentation>Only 2D simulations are suppored by ballistics.</a:documentation>
+          <element name="integer_value">
+            <a:documentation>Only 2D simulations are suppored by ballistics.</a:documentation>
+            <attribute name="rank">
+              <value>0</value>
+            </attribute>
+            <value>2</value>
+          </element>
         </element>
       </element>
     </element>
@@ -44,7 +49,7 @@ e.g. 9.8</a:documentation>
           <a:documentation>The time at which the simulation should stop.</a:documentation>
         </ref>
       </element>
-      <element name="timestepping_scheme">
+      <element name="time_integration_scheme">
         <element name="string_value">
           <a:documentation>The algorithm which will be used to move the projectiles. 
 explicit_euler is the first order unstable numeric scheme.
