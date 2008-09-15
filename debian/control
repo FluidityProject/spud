@@ -10,7 +10,7 @@ XS-Python-Version: >= 2.5
 Package: diamond
 Architecture: all
 Depends: python-gtk2, python-lxml, libxml2-utils, python, spudtools
-Recommends: trang, python-psyco
+Recommends: python-psyco
 Suggests: 
 Conflicts: python-diamond
 Replaces: python-diamond
@@ -39,6 +39,8 @@ Package: spudtools
 Architecture: all
 Depends: ${shlibs:Depends}, trang-amcg
 Recommends: diamond
+Conflicts: libspud-dev (<1.0.6)
+Replaces: libspud-dev (<1.0.6)
 Section: science
 Suggests:
 Description: An automatic options system for scientific models.
