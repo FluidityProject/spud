@@ -9,8 +9,6 @@ ifndef NOBIBTEX
 	$(MAKE) NOBIBTEX=true --assume-new $^ $@;fi
 endif
 
-PSFILES=spud_manual.pdf
-
 # We don't rm *.ps *.pdf because that might clobber image files. Instead, put any
 # ps files which should go in $(PSFILES)
 clean: 
