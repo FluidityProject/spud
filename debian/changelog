@@ -1,3 +1,30 @@
+spud (1.0.4) unstable; urgency=low
+
+  * Diamond plugins now work.
+  * Added examples directory and ballistics example.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Mon, 15 Sep 2008 13:56:52 +0100
+
+spud (1.0.3) hardy; urgency=low
+
+  * Move the GDK thread initialisation call.
+  * If you think you understand threads, you don't
+    understand threads.
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Thu, 14 Aug 2008 17:27:52 +0100
+
+spud (1.0.2) hardy; urgency=low
+
+  * Fix infinite loop on load due to awkward schema changes. 
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Thu, 14 Aug 2008 11:29:18 +0100
+
+spud (1.0.1) hardy; urgency=low
+
+  * Fix a few bugs.
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Tue, 29 Jul 2008 14:50:07 +0100
+
 spud (1.0) unstable; urgency=low
 
   * Initial release!
