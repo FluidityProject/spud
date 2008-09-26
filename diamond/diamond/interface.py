@@ -758,8 +758,9 @@ class Diamond:
     cellCombo.set_property("editable", True)
     cellCombo.set_property("has-entry", False)
 
+    # Node column
     column = gtk.TreeViewColumn("Node", cellCombo, text=0)
-    column.set_property("expand", True)
+    column.set_property("expand", False)
     column.set_resizable(True)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
