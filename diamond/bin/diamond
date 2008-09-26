@@ -45,6 +45,7 @@ def Help():
                "\n" + \
                "-h               Display this message\n" + \
                "-s [SCHEMAFILE]  Use the supplied schema file\n" + \
+               "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error", 0)
 
@@ -66,7 +67,7 @@ def main():
     pass
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hvs:")
+    opts, args = getopt.getopt(sys.argv[1:], "hvs:t:")
   except:
     Help()
     sys.exit(1)
@@ -87,13 +88,6 @@ def main():
   import diamond.schema as schema
   import diamond.tree as tree
   import diamond.plugins as plugins
-
-#  try:
-#    import psyco
-#    psyco.full()
-#    debug.dprint("Using Psyco specialising compiler")
-#  except ImportError:
-#    debug.dprint("Unable to use Psyco module")
 
   try:
     input_filename = args[0]
@@ -117,10 +111,12 @@ def main():
   # if the user specifies a schema on the command line, use that.
 
   input_schemafile = None
+  input_schematron_file = None
   for opt in opts:
     if opt[0] == "-s":
       input_schemafile = opt[1]
-      break
+    elif opt[0] == "-t":
+      input_schematron_file = opt[1]
 
   # if the user has specified a file to work on, use the suffix as a key
 
@@ -156,14 +152,24 @@ def main():
     debug.deprint("Could not find schemafile %s!" % input_schemafile, 0)
     sys.exit(1)
 
+  if input_schematron_file is not None:
+    # ensure that the specified schematron file actually exists!
+    try:
+      os.stat(input_schematron_file)
+    except OSError:
+      debug.deprint("Could not find Schematron file %s!" % input_schematron_file, 0)
+      sys.exit(1)
+
   if input_filename is not None:
     try:
       os.stat(input_filename)
     except OSError:
        pass
 
+  # Import the GUI Glade file.
+
   gladefile = None
-  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"), "/usr/share/diamond/gui/gui.glade"]:
+  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"), "/usr/local/share/diamond/gui/gui.glade"]:
     try:
       os.stat(possible_gladefile)
       gladefile = possible_gladefile
@@ -174,6 +180,7 @@ def main():
     debug.deprint("Cannot locate GUI!", 0)
     sys.exit(1)
 
+  # If input_schemafile doesn't exist, use the fluidity_options schema.
   if input_schemafile == None:
     for possible_schemafile in [os.path.join(diamond_path, "fluidity_options.rng"), "/usr/share/diamond/schema/fluidity_options.rng"]:
       try:
@@ -188,7 +195,6 @@ def main():
                "Schema file: " + str(input_schemafile) + "\n" + \
                "Logo file:   " + str(logofile) + "\n" + \
                "Input file:  " + str(input_filename) + "\n")
-
 
   plugins.configure_plugins(suffix)
 

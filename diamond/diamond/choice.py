@@ -26,6 +26,8 @@ import tree
 class Choice:
   def __init__(self, l, cardinality=''):
     self.l = l
+    if l == []:
+      raise Exception
     self.index = 0
     name = ""
     for choice in l:
@@ -76,6 +78,7 @@ class Choice:
     return self.l[self.index]
 
   def add_children(self, schema):
+    print "add_children", schema
     return self.get_current_tree().add_children(schema)
 
   def pickle(self):

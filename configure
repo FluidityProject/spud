@@ -7202,10 +7202,6 @@ fi
 
 VERSION=`svnversion .`
 
-
-
-
-
 ac_config_files="$ac_config_files Makefile bin/spud-preprocess diamond/diamond/preprocess.py src/tests/Makefile diamond/setup.py examples/Makefile"
 
 cat >confcache <<\_ACEOF

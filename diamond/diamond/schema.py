@@ -30,6 +30,49 @@ import plist
 import preprocess
 import tree
 
+###############################
+#     LIBRARY FUNCTIONS       #
+###############################
+
+# find_hidden_xmldata looks for DIAMOND MAGIC COMMENT children in the given xmlnode, decompresses them, and adds
+# them to the tree.
+def find_hidden_xmldata(datatree, xmlnode):
+  hidden = []
+  for xmlchild in xmlnode.iterchildren(tag=etree.Comment):
+    text = xmlchild.text
+    data = text.split('\n')
+    name = data[0]
+
+    # A DIAMOND MAGIC comment should contain those words on the first line of the comment.
+    if datatree.schemaname in name and "DIAMOND MAGIC COMMENT" in name:
+      pickle = data[1]
+      uncompressed = bz2.decompress(base64.b64decode(pickle))
+      try:
+        doc = etree.fromstring(uncompressed)
+      except:
+        print "Error reading compressed XML. Output follows:"
+        print "\"", bz2.decompress(base64.b64decode(pickle)), "\""
+        sys.exit(1)
+
+      # Comments generated using the 4suite API, which included an XML declaration,
+      # are incompatable with the new format. Notify the user.
+      if uncompressed.find("<?xml version=") != -1:
+         print "Using old-style magic comments. Ignoring."
+         return []
+
+      # Iterate over all elements in this newly-decompressed subtree, and add them to the
+      # in-memory tree structure.
+      for child in doc.iterchildren(tag=etree.Element):
+        new_xmldata = child
+        hidden.append(new_xmldata)
+        break
+
+  return hidden
+
+##########################
+#     SCHEMA CLASS       #
+##########################
+
 class Schema(object):
   def __init__(self, schemafile):
     p = etree.XMLParser(remove_comments=True)
@@ -52,7 +95,9 @@ class Schema(object):
                       'text': self.cb_text,
 		      'anyName' : self.cb_anyname,
 		      'nsName' : self.cb_nsname,
-		      'except' : self.cb_except}
+		      'except' : self.cb_except,
+                      'ignore' : self.cb_ignore,
+                      'notAllowed' : self.cb_notallowed}
                       
     self.lost_eles = ""
   
@@ -65,7 +110,7 @@ class Schema(object):
     """
 
     children = []
-    for child1 in element.iterchildren():
+    for child1 in element.iterchildren(tag=etree.Element):
       if self.tag(child1) == "ref":
         if not "name" in child1.keys():
           debug.deprint("Warning: Encountered reference with no name")
@@ -106,7 +151,11 @@ class Schema(object):
       eid = eid.schemaname
 
     if eid == ":start":
-      node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+      try:
+        node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+      except:
+        debug.deprint("No valid start node found. Are you using a library Relax-NG file like spud_base.rng?", 0)
+        sys.exit(0)
     else:
       xpath = self.tree.xpath(eid)
       if len(xpath) == 0:
@@ -157,7 +206,7 @@ class Schema(object):
     for child in self.element_children(element):
       tag = self.tag(child)
 
-      if tag not in ['element', 'optional', 'zeroOrMore', 'oneOrMore']:
+      if tag not in ['element', 'optional', 'zeroOrMore', 'oneOrMore', 'ignore']:
         f = self.callbacks[tag]
         x = f(child, newfacts)
 
@@ -283,7 +332,11 @@ class Schema(object):
     mapping = {'integer': int,
                'float': float,
                'double': float,
-               'string': str}
+               'string': str,
+               'ID' : str,
+               'anyURI' : str,
+               'IDREF' : int,
+               'NMTOKEN' : str}
 
     datatype_name = element.get("type")
     l.append(mapping[datatype_name])
@@ -417,22 +470,33 @@ class Schema(object):
 
   def cb_anyname(self, element, facts):
     debug.deprint("anyName element found. Yet to handle.", 0)
-    sys.exit(1)
+#    sys.exit(1)
 
   def cb_nsname(self, element, facts):
     debug.deprint("nsName element found. Yet to handle.", 0)
-    sys.exit(1)
+#    sys.exit(1)
 
   def cb_except(self, element, facts):
     debug.deprint("except element found. Yet to handle.", 0)
-    sys.exit(1)
+#    sys.exit(1)
+
+  def cb_ignore(self, element, facts):
+    pass
+
+  def cb_notallowed(self, element, facts):
+    debug.dprint("notallowed element found. Yet to handle.", 0)
 
   #######################################
   # End of schema processing functions. #
   #######################################
 
   def tag(self, element):
-    return element.tag.split('}')[-1]
+    # Ignore non-RelaxNG elements. Is this the best way to handle it? 
+    namespace = element.tag.split('}')[0]
+    if namespace.find("relaxng") != -1:
+      return element.tag.split('}')[-1]
+    else:
+      return "ignore"
 
   # append - append either a list or single element 'x' to 'r'.
   def append(self, r, x):
@@ -524,6 +588,7 @@ class Schema(object):
         except:
           pass
 
+    # Get the text value (the node's data)
     if xmlnode.text is not None:
      try:
        text=xmlnode.text.strip()
@@ -642,7 +707,6 @@ class Schema(object):
 #                break
             else:
               xmls[schemachild.schemaname] = copy.deepcopy([])
-
       elif schemachild.cardinality in ['*', '+']:
         xmls[schemachild.schemaname] = copy.deepcopy([])
         for curtree in schemachild.choices():

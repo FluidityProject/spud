@@ -18,6 +18,7 @@
 import os
 import os.path
 import re
+import sys
 import tempfile
 import webbrowser
 import cStringIO as StringIO
@@ -33,9 +34,12 @@ import choice
 import config
 import plist
 import schema
+import scherror
 import tree
 import plugins
 import TextBufferMarkup
+import StringIO
+from lxml import etree
 
 try:
   gtk.Tooltip()
@@ -90,17 +94,20 @@ If there are bugs in writing out, see tree.write.
 """
 
 class Diamond:
-  def __init__(self, gladefile, schemafile = None, logofile = None, input_filename = None, 
+  def __init__(self, gladefile, schemafile = None, schematron_file = None, logofile = None, input_filename = None, 
       dim_path = "/geometry/dimension", suffix=None):
     self.gladefile = gladefile
     self.gui = gtk.glade.XML(self.gladefile)
 
     self.statusbar = DiamondStatusBar(self.gui.get_widget("statusBar"))
     self.find      = DiamondFindDialog(self, gladefile)
+
     self.plugin_buttonbox = self.gui.get_widget("plugin_buttonbox")
     self.plugin_buttonbox.set_layout(gtk.BUTTONBOX_START)
     self.plugin_buttonbox.show()
     self.plugin_buttons = []
+
+    self.scherror  = scherror.DiamondSchemaError(self, gladefile, schemafile, schematron_file)
 
     signals     =  {"on_new": self.on_new,
                     "on_quit": self.on_quit,
@@ -108,14 +115,17 @@ class Diamond:
                     "on_open_schema": self.on_open_schema,
                     "on_save": self.on_save,
                     "on_save_as": self.on_save_as,
-                    "on_validate": self.on_validate,
+                    "on_validate": self.scherror.on_validate,
+                    "on_validate_schematron": self.scherror.on_validate_schematron,
                     "on_fluidity_asserts": self.on_fluidity_asserts,
                     "on_statistics": self.on_statistics,
                     "on_visualise": self.on_visualise,
                     "on_expand_all": self.on_expand_all,
                     "on_collapse_all": self.on_collapse_all,
                     "on_find": self.find.on_find,
+                    "on_go_to_node": self.on_go_to_node,
                     "on_console": self.on_console,
+                    "on_display_properties_toggled": self.on_display_properties_toggled,
                     "on_about": self.on_about}
     self.gui.signal_autoconnect(signals)
 
@@ -149,12 +159,26 @@ class Diamond:
     if not schemafile is None:
       self.open_file(schemafile = schemafile, filename = input_filename)
 
-    # Hide the "Run fluidity asserts" menu item
+    # Hide specific menu items, such as "Run fluidity asserts", "Visualise initial setup"
+    # and "Validate schematron"
     menu = self.gui.get_widget("menu")
-    menu.get_children()[1].get_submenu().get_children()[1].hide()
-    menu.get_children()[1].get_submenu().get_children()[3].hide()
+
+    if not self.program_exists("flcheck"):
+      # Gray the "Run fluidity asserts" option
+      menu.get_children()[4].get_submenu().get_children()[3].set_property("sensitive", False)
+
+    if not self.program_exists("popstate"):
+     # Gray the "Visualise initial setup" option
+      menu.get_children()[4].get_submenu().get_children()[4].set_property("sensitive", False)
+
+    if schematron_file is None:
+      menu.get_children()[3].get_submenu().get_children()[1].set_property("sensitive", False)
 
     return
+
+  def program_exists(self, name):
+    ret = os.system("which %s > /dev/null" % name)
+    return ret == 0
 
   ### MENU ###
 
@@ -212,6 +236,7 @@ class Diamond:
         self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
 
       self.schemafile = schemafile
+      self.scherror.schema_file = schemafile # Update the scherror instance's idea of the schema file
       self.init_datatree()
 
       if filename is not None:
@@ -245,6 +270,8 @@ class Diamond:
     self.set_saved(True, filename)
     self.selected_node = None
     self.update_options_frame()
+
+    self.scherror.destroy_error_list()
 
     return
 
@@ -402,45 +429,13 @@ class Diamond:
 
     return
 
-  def on_validate(self, widget=None):
-    """
-    Actions > Validate. This writes out the XML to a temporary file, then calls
-    xmllint on it. (I didn't use the Xvif validation capabilities because the error
-    messages are worse than useless; xmllint actually gives line numbers and such).
-    """
-
-    if self.schemafile is None:
-      dialogs.error(self.main_window, "No schema file open")
-      return
-
-    tmp = tempfile.NamedTemporaryFile()
-    self.tree.write(tmp.name)
-    std_input, std_output, err_output = os.popen3("xmllint --relaxng %s %s" % (self.schemafile, tmp.name))
-    output = std_output.read()
-
-    # If there is no current filename, then Python errors out if you try to do
-    # file.name + ":". Handle the case of "Untitled" documents.
-    if self.filename is None:
-    	output = output.replace("Untitled: ", "Line ")
-    	output = output.replace("Untitled: ", "\nXML file")
-    else:
-    	output = output.replace(self.filename, "Line ")
-    	output = output.replace(self.filename, "\nXML file")
-    	
-    output = output.replace("Relax-NG validity error :", "")
-    output = output.replace(" , ", ", ")
-    output = output.replace("Expecting", "expecting")
-
-    if len(output) == 0:
-      output = "XML file validated successfully"
-
-    dialogs.long_message(self.main_window, output)
-
+  def on_display_properties_toggled(self, widget=None):
+    self.options_frame.set_property("visible", not self.options_frame.get_property("visible"))
     return
 
   def on_fluidity_asserts(self, widget=None):
     """
-    Run the fluidity asserts program when Actions > Run fluidity asserts is called.
+    Run the fluidity asserts program when Tools > Run fluidity asserts is called.
     """
 
     if self.schemafile is None:
@@ -534,7 +529,7 @@ class Diamond:
     counter["total_attr_visible"] = 0
     counter["n_data_visible"] = 0
 
-    tree_count(self.tree, counter)
+    tree_count(self.tree, counter)    
     
     output = "Whole tree statistics:\n" + \
              "\n" + \
@@ -610,12 +605,49 @@ class Diamond:
 
     return
 
+  def set_cell_node(self, iter):
+      node = self.get_painted_tree(iter)
+
+      if isinstance(node, MixedTree):
+        node = node.child
+
+      if node.data is not None:
+        self.data_renderer.set_property("foreground", "black")
+        self.treestore.set_value(iter, 4, node.data)
+      elif isinstance(node, tree.Tree) and not node.not_editable():
+        self.data_renderer.set_property("foreground", "gray")
+
+        datatype = ""
+
+        if isinstance(node.datatype, plist.List):
+          datatype = "(" + node.datatype.datatype.__name__ + ")"
+        elif isinstance(node.datatype, tuple):
+          datatype = str(node.datatype)
+        else:
+          datatype = node.datatype.__name__
+
+        self.treestore.set_value(iter, 4, datatype)
+
+  def expand_fill_data(self, model, path, iter, user_data):
+      return self.set_cell_node(iter)
+
+  def on_go_to_node(self, widget=None):
+   """
+   Go to a node, identified by an XPath
+   """
+
+   dialog = dialogs.GoToDialog(self)
+   xpath = dialog.run()
+
+   return
+
   def on_expand_all(self, widget=None):
     """
     Show the whole tree.
     """
 
     self.treeview.expand_all()
+    self.treestore.foreach(self.expand_fill_data, None)
 
     return
 
@@ -633,11 +665,10 @@ class Diamond:
     Launch a python console
     """    
     
-    # Construct the dictionary of locals that will be used by the interpretter
+    # Construct the dictionary of locals that will be used by the interpreter
     locals = {}
     locals["interface"] = globals()
     locals["diamond_gui"] = self
-
   
     dialogs.console(self.main_window, locals)
     
@@ -692,6 +723,7 @@ class Diamond:
       self.tree = None
     else:
       l = self.s.valid_children(":start")
+
       self.tree = l[0]
       self.set_treestore(None, l)
 
@@ -711,6 +743,13 @@ class Diamond:
 
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
+    try:  # allow for possibility of no tooltips (like elsewhere)
+      self.treeview.connect("query-tooltip", self.on_tooltip)
+      self.treeview.set_property("has-tooltip", True)
+    except:
+      pass
+
+    self.treeview.set_property("rules-hint", True)
 
     model = gtk.ListStore(str, str, gobject.TYPE_PYOBJECT)
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
@@ -721,6 +760,7 @@ class Diamond:
 
     column = gtk.TreeViewColumn("Node", cellCombo, text=0)
     column.set_property("expand", True)
+    column.set_resizable(True)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
     self.choicecell = choiceCell = gtk.CellRendererPixbuf()
@@ -736,9 +776,21 @@ class Diamond:
     imgcolumn.set_cell_data_func(cellPicture, self.set_cellpicture_cardinality)
     optionsTree.append_column(imgcolumn)
 
-    # display name, gtk.ListStore containing the display names of possible choices, pointer to node in self.tree -- a choice or a tree, pointer to currently active tree
-    self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
+    # mtw07 - add column for quick preview of data.
+    self.data_renderer = gtk.CellRendererText()
+    self.data_renderer.set_property("editable", True)
+    self.data_renderer.connect("edited", self.on_cell_edit)
+    self.data_renderer.connect("editing-started", self.on_cell_edit_start)
+
+    self.data_col = data_col = gtk.TreeViewColumn("Data", self.data_renderer, text=4)
+    data_col.set_property("expand", True)
+    data_col.set_property("sizing", gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+    optionsTree.append_column(data_col)
+
+    # display name, gtk.ListStore containing the display names of possible choices, pointer to node in self.tree -- a choice or a tree, pointer to currently active tree and its data.
+    self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, str)
     self.treeview.set_model(self.treestore)
+#    self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
 
     optionsTree.get_selection().connect("changed", self.on_select_row)
     self.treeview.get_selection().set_select_function(self.options_tree_select_func)
@@ -784,14 +836,24 @@ class Diamond:
           continue
 
         liststore = self.create_liststore(t)
-        child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t])
+
+        # Convert node data, if it exists, to a string
+        data = ""
+        node_data = t.data
+        if node_data is not None:
+#          if t.__class__ is str:
+#            if len(t) > 4: # Trim the string if it's long
+#              node_data = t[:4] + ".."
+          
+          data = str(node_data)
+        child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
         if recurse: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if self.choice_or_tree_is_hidden(ts_choice):
           continue
-        child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice])
+        child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
         if recurse: self.set_treestore(child_iter, ts_choice.children, recurse)
 
     return
@@ -872,6 +934,7 @@ class Diamond:
     liststore = self.treestore.get_value(iter, 1)
     choice_or_tree = self.treestore.get_value(iter, 2)
     active_tree = self.treestore.get_value(iter, 3)
+    data = self.treestore.get_value(iter, 4)
 
     # set the model for the cellcombo, where it gets the possible choices for the name
     cellCombo.set_property("model", liststore)
@@ -952,6 +1015,93 @@ class Diamond:
 
     return
 
+  def on_tooltip(self, widget, x, y, keyboard_mode, tooltip):
+    y-=25 # It's hardcoded. Gtk doesn't offer a way to get at the column height without a lot more code.
+    (tx, ty) = self.treeview.convert_bin_window_to_tree_coords(x, y)
+    pathinfo = self.treeview.get_path_at_pos(x, y)
+
+    if pathinfo is None:
+      return False
+
+    path = pathinfo[0]
+    column = pathinfo[1]
+
+    if path is None:
+      return
+
+    ctitle = column.get_title()
+
+    iter = self.treestore.get_iter(path)
+
+    # Get the tree or choice pointed to by the iterator.
+    tree = self.treestore.get_value(iter, 2)
+
+    if tree.__class__ is choice.Choice:
+      tree = tree.get_current_tree()
+
+    if ctitle == "Node":
+      if tree.doc is None:
+        text = "(No documentation)"
+      else:
+        text = tree.doc
+    elif ctitle == "Data":
+      comment_tree = self.get_comment(tree)
+
+      if comment_tree is None:
+        text = "(No comment)"
+      else:
+        text = comment_tree.data
+    else:
+      return False
+
+    tooltip.set_text(text)    
+    return True
+
+  def on_cell_edit(self, cellr, path, new_text):
+    iter = self.treestore.get_iter(path)
+    node = self.selected_node
+
+    if new_text == "":
+      return
+
+    # mtw07 - Check whether the data is valid or not. If so, update the treeview
+    # and internal model. GTK automatically clears the text field if we don't
+    # add the new data to the treestore.
+    (invalid, data) = node.valid_data(node.datatype, new_text)
+
+    if invalid:
+      try:
+        name = node.datatype.__name__
+        dialogs.error(self.main_window, "Invalid data type. A %s is required." % name)
+      except:
+        pass
+      return
+
+    self.treestore.set_value(iter, 4, new_text)
+    node.data = new_text
+
+    # Update the node data box.
+    self.node_data.get_buffer().set_text(new_text)
+
+    # Update the validation errors list.
+    if self.scherror.errlist_is_open():
+      if self.scherror.errlist_type == 0:
+         self.scherror.on_validate_schematron()
+      else:
+         self.scherror.on_validate()
+
+    return
+
+  def on_cell_edit_start(self, cellrenderer, editable, path):
+    iter = self.treestore.get_iter(path)
+    node = self.selected_node
+
+    # If the cell has (<type>) in it, clear it for the user to enter data.
+    if node.datatype is not None and node.data is None:
+      editable.set_text("")
+
+    return True
+
   def on_treeview_clicked(self, treeview, event):
     """
     This routine is called every time the mouse is clicked on the treeview on the
@@ -964,18 +1114,26 @@ class Diamond:
       return
 
     pathinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
+
     if pathinfo is None:
       return
 
     path = pathinfo[0]
     col = pathinfo[1]
-    if col is not self.imgcolumn:
-      return
 
     iter = self.treestore.get_iter(path)
     (name, combobox_liststore, choice_or_tree, active_tree) = self.treestore.get(iter, 0, 1, 2, 3)
     parent_iter = self.treestore.iter_parent(iter)
-    parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    if parent_iter == None:
+      parent_tree = None
+    else:
+      parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    self.update_data_column(self.treestore, iter)
+
+    if col is not self.imgcolumn:
+      return
 
     if choice_or_tree.cardinality == "":
       return
@@ -1012,7 +1170,7 @@ class Diamond:
         new_tree = parent_tree.add_inactive_instance(choice_or_tree)
         liststore = self.create_liststore(new_tree)
         iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-          new_tree.get_current_tree()])
+          new_tree.get_current_tree(), ""])
         self.expand_treestore(iter)
         self.set_saved(False)
 
@@ -1028,7 +1186,7 @@ class Diamond:
           new_tree = parent_tree.add_inactive_instance(choice_or_tree)
           liststore = self.create_liststore(new_tree)
           iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-            new_tree.get_current_tree()])
+            new_tree.get_current_tree(), ""])
           self.expand_treestore(iter)
           self.set_saved(False)
       else: # count > 2
@@ -1045,11 +1203,12 @@ class Diamond:
           new_tree = parent_tree.add_inactive_instance(choice_or_tree)
           liststore = self.create_liststore(new_tree)
           iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-            new_tree.get_current_tree()])
+            new_tree.get_current_tree(), ""])
           self.expand_treestore(iter)
           self.set_saved(False)
 
     parent_tree.recompute_validity()
+
     self.on_select_row(self.treeview.get_selection())
 
     self.treeview.queue_draw()
@@ -1093,6 +1252,15 @@ class Diamond:
 
     self.selected_node = self.get_painted_tree(iter)
     self.update_options_frame()
+
+    node = self.selected_node
+
+    if isinstance(node, MixedTree):
+      node = node.child
+
+    # TODO: Handle tuple datatypes. Is it possible in a Gtk treeview column?
+    if not isinstance(node.datatype, tuple):
+      self.data_renderer.set_property("editable", not (node.not_editable()))
 
     name = self.get_xpath(active_tree)
     self.statusbar.set_statusbar(name)
@@ -1163,6 +1331,18 @@ class Diamond:
     else:
       return paths[0]
 
+  def update_data_column(self, model, itParent):
+    """
+    Update the data column in the treeview. Used when a user expands a row.
+    """
+
+    iter = model.iter_children(itParent)
+
+    while iter is not None:
+      self.set_cell_node(iter)
+      iter = model.iter_next(iter)
+   
+
   def on_activate_row(self, treeview, iter, path):
     """
     Called when you double click or press Enter on a row.
@@ -1174,6 +1354,10 @@ class Diamond:
       treeview.collapse_row(path)
     else:
       treeview.expand_row(path, False)
+
+      # Update the data column for the newly expanded row.
+      (model, itParent) = self.treeview.get_selection().get_selected()
+      self.update_data_column(model, itParent)
 
     return
 
@@ -1269,15 +1453,27 @@ class Diamond:
 
     return displayname
 
+  def get_treeview_iter(self, selection):
+    """
+    Get a treeview iterator object, given a selection.
+    """
+
+    path = self.get_selected_row(selection)
+    if path is None:
+      return None
+
+    return self.treestore.get_iter(path)
+
   def update_painted_name(self):
     """
     This updates the treestore (and the liststore for the gtk.CellRendererCombo)
     with a new name, when the name="xxx" attribute is changed.
     """
 
-    path = self.get_selected_row(self.treeview.get_selection())
-    if path is None: return
-    iter = self.treestore.get_iter(path)
+    iter = self.get_treeview_iter(self.treeview.get_selection())
+    if iter is None:
+      return
+
     liststore = self.treestore.get_value(iter, 1)
     active_tree = self.treestore.get_value(iter, 3)
     new_name = self.get_display_name(active_tree)
@@ -1522,7 +1718,6 @@ class Diamond:
         comment = self.get_comment(choice_or_tree)
         if not comment is None and not comment.data is None and not text_re.search(comment.data) is None:
           return True
-
         elif recurse:
           for opt in choice_or_tree.children:
             if self.choice_or_tree_matches(text, opt, recurse, True):
@@ -1668,6 +1863,12 @@ class Diamond:
     """
     Initialise the RHS.
     """
+
+    # mtw07 - TODO: set the visibility of the options frame, depending on the value in the schema file.
+    self.options_frame = self.gui.get_widget("optionsFrame")
+
+    # Display the right hand side by default.
+    self.options_frame.set_property("visible", True)
 
     self.node_desc = self.gui.get_widget("nodeDescription")
     self.node_desc.set_buffer(TextBufferMarkup.PangoBuffer())
@@ -2154,7 +2355,6 @@ class Diamond:
       except:
         pass
     else:
-      self.node_data.get_buffer().set_text(self.selected_node.data)
       if self.selected_node.datatype == "fixed":
         self.node_data.set_cursor_visible(False)
         self.node_data.set_editable(False)
@@ -2345,6 +2545,8 @@ class Diamond:
       self.paint_validity()
       self.set_saved(False)
       self.node_data_interacted = False
+      iter = self.get_treeview_iter(self.treeview.get_selection())
+      self.treestore.set_value(iter, 4, self.node_data.get_active_text())
 
     return
 
@@ -2390,6 +2592,12 @@ class Diamond:
     if store_success:
       self.node_data_revert()
 
+    if self.scherror.errlist_is_open():
+      if self.scherror.errlist_type == 0:
+         self.scherror.on_validate_schematron()
+      else:
+         self.scherror.on_validate()
+
     return store_success
 
   def node_data_entry_store(self):
@@ -2417,6 +2625,8 @@ class Diamond:
         if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, plist.List) and self.selected_node.datatype.cardinality == "+":
           self.selected_node.child.set_attr("shape", str(len(value_check.split(" "))))
         self.paint_validity()
+	iter = self.get_treeview_iter(self.treeview.get_selection())
+        self.treestore.set_value(iter, 4, new_data)
         self.set_saved(False)
         self.node_data_interacted = False
 
@@ -2516,6 +2726,7 @@ class Diamond:
         self.node_comment.set_property("has-tooltip", False)
       except:
         pass
+
       return
 
     comment_tree = self.get_comment(self.selected_node)
@@ -2607,12 +2818,12 @@ class Diamond:
     tree.Tree.
     """
 
-    check = self.selected_node.valid_data(val_type, val)
-    if not check[0] and isinstance(check[1], str) and not check[1] == "":
-      if not check[1] == val and self.validity_check(check[1], val_type) is None:
+    (invalid, data) = self.selected_node.valid_data(val_type, val)
+    if not invalid and isinstance(data, str) and not data == "":
+      if not data == val and self.validity_check(data, val_type) is None:
         return None
       else:
-        return check[1]
+        return data
     else:
       dialogs.error(self.main_window, "Invalid value entered")
       return None

@@ -182,6 +182,12 @@ def radio_dialog(title, message, choices, logo):
   r = RadioDialog(title, message, choices, logo)
   return r.data
 
+def message_box(window, title, message):
+  dialog = gtk.MessageDialog(window, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, message)
+  dialog.set_title(title)
+  dialog.connect("response", close_dialog)
+  dialog.run()
+
 class RadioDialog:
   def __init__(self, title, message, choices, logo):
     self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -242,4 +248,25 @@ class RadioDialog:
 
   def radio_callback(self, widget, data):
     self.data = data
+
+class GoToDialog:
+  def __init__(self, parent):
+    self.goto_gui = gtk.glade.XML(parent.gladefile, root="GoToDialog")
+    self.dialog_box = self.goto_gui.get_widget("GoToDialog")
+    self.dialog_box.set_modal(True)
+
+  def run(self):
+    signals =      {"goto_activate": self.on_goto_activate,
+                    "cancel_activate": self.on_cancel_activate}
+
+    self.goto_gui.signal_autoconnect(signals)
+
+    self.dialog_box.show()
+    return ""
+
+  def on_goto_activate(self, widget=None):
+    print "goto"
+
+  def on_cancel_activate(self, widget=None):
+    print "cancel"
 
