@@ -662,7 +662,7 @@ namespace Spud{
     TiXmlDocument doc(filename);
     doc.SetCondenseWhiteSpace(false);
     if(!doc.LoadFile()){
-      cerr << "SPUD WARNING: Failed to load options file" << endl;
+      cerr << "SPUD WARNING: Failed to load options file " << filename << endl;
       return;
     }
 
