@@ -1350,6 +1350,24 @@ class Diamond:
     """
 
     path = self.get_selected_row(self.treeview.get_selection())
+    iter = self.treestore.get_iter(path)
+    (name, combobox_liststore, choice_or_tree, active_tree) = self.treestore.get(iter, 0, 1, 2, 3)
+    parent_iter = self.treestore.iter_parent(iter)
+    if parent_iter == None:
+      parent_tree = None
+    else:
+      parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    if choice_or_tree.cardinality == "?":
+      if choice_or_tree.active is True:
+        choice_or_tree.active = False
+        self.set_saved(False)
+      else:
+        choice_or_tree.active = True
+        self.set_saved(False)
+    if parent_tree is not None:
+      parent_tree.recompute_validity()
+
     if path is None: return
     if treeview.row_expanded(path):
       treeview.collapse_row(path)
