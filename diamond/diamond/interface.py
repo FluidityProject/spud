@@ -2852,7 +2852,7 @@ class Diamond:
     Check to see if the supplied data is a valid tree name.
     """
 
-    valid_chars = "/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ"
+    valid_chars = "_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ"
     for char in val:
       if not char in valid_chars:
         dialogs.error(self.main_window, "Invalid value entered")
