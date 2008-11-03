@@ -1562,7 +1562,7 @@ namespace Spud{
     name = "";
     branch = "";
 
-    string valid_chars("_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
+    string valid_chars("/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
     string fullname = in.substr(0, min(in.size(), in.find_first_not_of(valid_chars)));
 
     // Skip delimiters at beginning.
@@ -1622,7 +1622,6 @@ namespace Spud{
       cout << "string OptionManager::Option::data_as_string(void) const\n";
 
     numeric_limits< double > double_limits;
-
     ostringstream data_as_string;
     data_as_string.precision(double_limits.digits10);
     switch(get_option_type()){
