@@ -760,7 +760,7 @@ class Diamond:
 
     # Node column
     column = gtk.TreeViewColumn("Node", cellCombo, text=0)
-    column.set_property("expand", False)
+    column.set_property("expand", True)
     column.set_resizable(True)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
@@ -783,10 +783,10 @@ class Diamond:
     self.data_renderer.connect("edited", self.on_cell_edit)
     self.data_renderer.connect("editing-started", self.on_cell_edit_start)
 
-    self.data_col = data_col = gtk.TreeViewColumn("Data", self.data_renderer, text=4)
-    data_col.set_property("expand", True)
-    data_col.set_property("sizing", gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-    optionsTree.append_column(data_col)
+#    self.data_col = data_col = gtk.TreeViewColumn("Data", self.data_renderer, text=4)
+#    data_col.set_property("expand", True)
+#    data_col.set_property("sizing", gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+#    optionsTree.append_column(data_col)
 
     # display name, gtk.ListStore containing the display names of possible choices, pointer to node in self.tree -- a choice or a tree, pointer to currently active tree and its data.
     self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, str)
