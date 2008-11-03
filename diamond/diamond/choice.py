@@ -78,7 +78,6 @@ class Choice:
     return self.l[self.index]
 
   def add_children(self, schema):
-    print "add_children", schema
     return self.get_current_tree().add_children(schema)
 
   def pickle(self):
