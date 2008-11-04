@@ -37,8 +37,9 @@ import schema
 import scherror
 import tree
 import plugins
-import TextBufferMarkup
 import StringIO
+import TextBufferMarkup
+
 from lxml import etree
 
 try:
@@ -2374,6 +2375,7 @@ class Diamond:
       except:
         pass
     else:
+      self.node_data.get_buffer().set_text(self.selected_node.data)
       if self.selected_node.datatype == "fixed":
         self.node_data.set_cursor_visible(False)
         self.node_data.set_editable(False)
