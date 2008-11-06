@@ -1360,10 +1360,7 @@ class Diamond:
       parent_tree = self.treestore.get_value(parent_iter, 3)
 
     if choice_or_tree.cardinality == "?":
-      if choice_or_tree.active is True:
-        choice_or_tree.active = False
-        self.set_saved(False)
-      else:
+      if choice_or_tree.active is False:
         choice_or_tree.active = True
         self.set_saved(False)
     if parent_tree is not None:
