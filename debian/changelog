@@ -1,3 +1,9 @@
+spud (1.0.7) unstable; urgency=low
+
+  * Include spud-set and related changes to Diamond and the manual.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Thu, 08 Jan 2009 17:52:43 +0000
+
 spud (1.0.6) unstable; urgency=low
 
   * Cause spudtools to conflict with older libspud-dev
