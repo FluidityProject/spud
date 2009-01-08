@@ -127,7 +127,8 @@ class Diamond:
                     "on_go_to_node": self.on_go_to_node,
                     "on_console": self.on_console,
                     "on_display_properties_toggled": self.on_display_properties_toggled,
-                    "on_about": self.on_about}
+                    "on_about": self.on_about,
+                    "on_copy_spud_path": self.on_copy_spud_path}
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -711,6 +712,16 @@ class Diamond:
     about.show()
 
     return
+
+
+  def on_copy_spud_path(self, widget=None):
+    path = self.get_selected_row(self.treeview.get_selection())
+    iter = self.treestore.get_iter(path)
+    active_tree = self.treestore.get_value(iter, 3)
+    name = self.get_xpath(active_tree)
+    clipboard = gtk.clipboard_get()
+    clipboard.set_text(name)
+    clipboard.store()
 
   ## LHS ###
 
