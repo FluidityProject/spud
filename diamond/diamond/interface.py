@@ -1432,6 +1432,7 @@ class Diamond:
 
     self.remove_children(iter)
     self.expand_treestore(iter)
+    self.treeview.expand_row(path, False)
 
     self.set_saved(False)
     self.selected_node = self.get_painted_tree(iter)

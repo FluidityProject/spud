@@ -220,7 +220,7 @@ class Tree:
       outlist.append(tree)
 
       for tree in outlist:
-        if tree.cardinality == '+':
+        if tree.cardinality in ['+', '*']:
           inactive_list = [x for x in outlist if x.schemaname == tree.schemaname and x.active is False]
           if len(inactive_list) > 0: continue
           else:
