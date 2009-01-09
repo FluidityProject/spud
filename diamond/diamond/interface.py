@@ -165,6 +165,8 @@ class Diamond:
     # and "Validate schematron"
     menu = self.gui.get_widget("menu")
 
+    menu.get_children()[4].get_submenu().get_children()[1].set_property("visible", False)
+
     if not self.program_exists("flcheck"):
       # Gray the "Run fluidity asserts" option
       menu.get_children()[4].get_submenu().get_children()[3].set_property("sensitive", False)
@@ -716,6 +718,9 @@ class Diamond:
 
   def on_copy_spud_path(self, widget=None):
     path = self.get_selected_row(self.treeview.get_selection())
+    if path is None:
+      debug.deprint("No selection.")
+      return
     iter = self.treestore.get_iter(path)
     active_tree = self.treestore.get_value(iter, 3)
     name = self.get_xpath(active_tree)
