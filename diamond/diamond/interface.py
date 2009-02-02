@@ -3178,6 +3178,6 @@ def render_whitespace(desc):
 	    prev_line_new_para=False
 	
 	# Default case
-	newdesc=newdesc+line
+	newdesc=newdesc+line+" "
 	
     return newdesc
