@@ -1,3 +1,9 @@
+spud (1.0.8) unstable; urgency=low
+
+  * Include new formatting of whitespace in comments.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Mon, 02 Feb 2009 15:25:33 +0000
+
 spud (1.0.7) unstable; urgency=low
 
   * Include spud-set and related changes to Diamond and the manual.

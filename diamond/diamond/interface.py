@@ -2037,6 +2037,8 @@ class Diamond:
     Set the node description.
     """
 
+    desc=render_whitespace(desc)
+
     self.node_desc_link_bounds = self.link_bounds(desc)
 
     if not len(self.node_desc_link_bounds) == 0:
@@ -3140,3 +3142,42 @@ class DiamondStatusBar:
     self.statusbar.push(self.context_id, "")
 
     return
+
+def render_whitespace(desc):
+    ''' Render the line wrapping in desc as follows:
+
+    * Newlines followed by 0-1 spaces are ignored.
+    * Blank lines start new paragraphs.
+    * Newlines followed by more than 1 space are honoured.
+    '''
+
+    prev_line_literal=False
+    prev_line_new_para=False
+    newdesc=""
+
+    for line in desc.split("\n"):
+	if (line[:1]==" "):
+	    # Literal line with leading blanks.
+	    newdesc=newdesc+"\n"+line
+	    prev_line_literal=True
+	    prev_line_new_para=False
+	    continue
+
+	if (line.strip()==""):
+	    # New paragraph.
+	    newdesc=newdesc+"\n"
+	    prev_line_literal=False
+	    prev_line_new_para=True
+
+	if prev_line_literal:
+	    newdesc=newdesc+"\n"
+	    prev_line_literal=False
+	    
+	if prev_line_new_para:
+	    newdesc=newdesc+"   "
+	    prev_line_new_para=False
+	
+	# Default case
+	newdesc=newdesc+line
+	
+    return newdesc
