@@ -602,7 +602,7 @@ class Diamond:
       os.chdir(cwd)
       output = err_output.read()
       if len(output) > 0:
-        dialogs.long_message(self.main_window, output + "\npopstate enocuntered an error.\n")
+        dialogs.long_message(self.main_window, output + "\npopstate encountered an error.\n")
         return
 
     os.spawnvp(os.P_NOWAIT, mayavi_cmd, [mayavi_cmd, "-d", name + "_0.vtu", "-m", "SurfaceMap", "-m", "SurfaceMap"])
