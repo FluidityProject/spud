@@ -1789,45 +1789,45 @@ class Diamond:
 
   ### RHS ###
   
-  def render_whitespace(desc):
-      """
-      Render the line wrapping in desc as follows:
+  def render_whitespace(self, desc):
+    """
+    Render the line wrapping in desc as follows:
 
-      * Newlines followed by 0-1 spaces are ignored.
-      * Blank lines start new paragraphs.
-      * Newlines followed by more than 1 space are honoured.
-      """
+    * Newlines followed by 0-1 spaces are ignored.
+    * Blank lines start new paragraphs.
+    * Newlines followed by more than 1 space are honoured.
+    """
 
-      prev_line_literal=False
-      prev_line_new_para=False
-      newdesc=""
+    prev_line_literal=False
+    prev_line_new_para=False
+    newdesc=""
 
-      for line in desc.split("\n"):
-        if (line[:1]==" "):
-            # Literal line with leading blanks.
-            newdesc=newdesc+"\n"+line
-            prev_line_literal=True
-            prev_line_new_para=False
-            continue
+    for line in desc.split("\n"):
+      if (line[:1]==" "):
+          # Literal line with leading blanks.
+          newdesc=newdesc+"\n"+line
+          prev_line_literal=True
+          prev_line_new_para=False
+          continue
 
-        if (line.strip()==""):
-            # New paragraph.
-            newdesc=newdesc+"\n"
-            prev_line_literal=False
-            prev_line_new_para=True
+      if (line.strip()==""):
+          # New paragraph.
+          newdesc=newdesc+"\n"
+          prev_line_literal=False
+          prev_line_new_para=True
 
-        if prev_line_literal:
-            newdesc=newdesc+"\n"
-            prev_line_literal=False
-            
-        if prev_line_new_para:
-            newdesc=newdesc+"   "
-            prev_line_new_para=False
-      
-        # Default case
-        newdesc=newdesc+line+" "
-  
-      return newdesc
+      if prev_line_literal:
+          newdesc=newdesc+"\n"
+          prev_line_literal=False
+          
+      if prev_line_new_para:
+          newdesc=newdesc+"   "
+          prev_line_new_para=False
+    
+      # Default case
+      newdesc=newdesc+line+" "
+
+    return newdesc
 
   def link_bounds(self, text):
     """
@@ -2077,7 +2077,7 @@ class Diamond:
     Set the node description.
     """
 
-    desc = render_whitespace(desc)
+    desc = self.render_whitespace(desc)
 
     self.node_desc_link_bounds = self.link_bounds(desc)
 
