@@ -1788,6 +1788,46 @@ class Diamond:
     return
 
   ### RHS ###
+  
+  def render_whitespace(desc):
+      """
+      Render the line wrapping in desc as follows:
+
+      * Newlines followed by 0-1 spaces are ignored.
+      * Blank lines start new paragraphs.
+      * Newlines followed by more than 1 space are honoured.
+      """
+
+      prev_line_literal=False
+      prev_line_new_para=False
+      newdesc=""
+
+      for line in desc.split("\n"):
+        if (line[:1]==" "):
+            # Literal line with leading blanks.
+            newdesc=newdesc+"\n"+line
+            prev_line_literal=True
+            prev_line_new_para=False
+            continue
+
+        if (line.strip()==""):
+            # New paragraph.
+            newdesc=newdesc+"\n"
+            prev_line_literal=False
+            prev_line_new_para=True
+
+        if prev_line_literal:
+            newdesc=newdesc+"\n"
+            prev_line_literal=False
+            
+        if prev_line_new_para:
+            newdesc=newdesc+"   "
+            prev_line_new_para=False
+      
+        # Default case
+        newdesc=newdesc+line+" "
+  
+      return newdesc
 
   def link_bounds(self, text):
     """
@@ -2037,7 +2077,7 @@ class Diamond:
     Set the node description.
     """
 
-    desc=render_whitespace(desc)
+    desc = render_whitespace(desc)
 
     self.node_desc_link_bounds = self.link_bounds(desc)
 
@@ -2662,7 +2702,7 @@ class Diamond:
         if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, plist.List) and self.selected_node.datatype.cardinality == "+":
           self.selected_node.child.set_attr("shape", str(len(value_check.split(" "))))
         self.paint_validity()
-	iter = self.get_treeview_iter(self.treeview.get_selection())
+        iter = self.get_treeview_iter(self.treeview.get_selection())
         self.treestore.set_value(iter, 4, new_data)
         self.set_saved(False)
         self.node_data_interacted = False
@@ -3142,42 +3182,3 @@ class DiamondStatusBar:
     self.statusbar.push(self.context_id, "")
 
     return
-
-def render_whitespace(desc):
-    ''' Render the line wrapping in desc as follows:
-
-    * Newlines followed by 0-1 spaces are ignored.
-    * Blank lines start new paragraphs.
-    * Newlines followed by more than 1 space are honoured.
-    '''
-
-    prev_line_literal=False
-    prev_line_new_para=False
-    newdesc=""
-
-    for line in desc.split("\n"):
-	if (line[:1]==" "):
-	    # Literal line with leading blanks.
-	    newdesc=newdesc+"\n"+line
-	    prev_line_literal=True
-	    prev_line_new_para=False
-	    continue
-
-	if (line.strip()==""):
-	    # New paragraph.
-	    newdesc=newdesc+"\n"
-	    prev_line_literal=False
-	    prev_line_new_para=True
-
-	if prev_line_literal:
-	    newdesc=newdesc+"\n"
-	    prev_line_literal=False
-	    
-	if prev_line_new_para:
-	    newdesc=newdesc+"   "
-	    prev_line_new_para=False
-	
-	# Default case
-	newdesc=newdesc+line+" "
-	
-    return newdesc
