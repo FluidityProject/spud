@@ -1790,43 +1790,50 @@ class Diamond:
   ### RHS ###
   
   def render_whitespace(self, desc):
-    """
-    Render the line wrapping in desc as follows:
-
+    ''' Render the line wrapping in desc as follows:
+    
     * Newlines followed by 0-1 spaces are ignored.
     * Blank lines start new paragraphs.
     * Newlines followed by more than 1 space are honoured.
-    """
+    '''
 
     prev_line_literal=False
     prev_line_new_para=False
     newdesc=""
 
     for line in desc.split("\n"):
-      if (line[:1]==" "):
-          # Literal line with leading blanks.
-          newdesc=newdesc+"\n"+line
-          prev_line_literal=True
-          prev_line_new_para=False
-          continue
 
-      if (line.strip()==""):
-          # New paragraph.
-          newdesc=newdesc+"\n"
-          prev_line_literal=False
-          prev_line_new_para=True
+        if (line[:1]==" "):
+            # Literal line with leading blanks.
+            newdesc=newdesc+"\n"+line
+            prev_line_literal=True
+            prev_line_new_para=False
+            continue
 
-      if prev_line_literal:
-          newdesc=newdesc+"\n"
-          prev_line_literal=False
-          
-      if prev_line_new_para:
-          newdesc=newdesc+"   "
-          prev_line_new_para=False
+        if (line.strip()==""):
+            # New paragraph.
+
+            # Collapse multiple new paragraphs into one, except when
+            # following a literal line.
+            if (prev_line_new_para and not prev_line_literal):
+                continue
+
+            newdesc=newdesc+"\n"
+            prev_line_new_para=True                
+            continue
+
+        if prev_line_literal:
+            newdesc=newdesc+"\n"
+            prev_line_literal=False
+            prev_line_new_para=False
+            
+        if prev_line_new_para:
+            newdesc=newdesc+"   "
+            prev_line_new_para=False
+        
+        # Default case
+        newdesc=newdesc+line+" "
     
-      # Default case
-      newdesc=newdesc+line+" "
-
     return newdesc
 
   def link_bounds(self, text):
