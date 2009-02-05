@@ -332,6 +332,7 @@ class Schema(object):
     mapping = {'integer': int,
                'float': float,
                'double': float,
+               'decimal': float,
                'string': str,
                'ID' : str,
                'anyURI' : str,
