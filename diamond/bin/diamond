@@ -147,7 +147,8 @@ def main():
   # ensure that the specified schema actually exists!
 
   try:
-    os.stat(input_schemafile)
+    if 'http' not in input_schemafile:
+      os.stat(input_schemafile)
   except OSError:
     debug.deprint("Could not find schemafile %s!" % input_schemafile, 0)
     sys.exit(1)

@@ -27,7 +27,9 @@ dirs = [os.path.join(homedir, ".diamond", "schemata")]
 if sys.platform != "win32" and sys.platform != "win64":
   dirs.append("/etc/diamond/schemata")
 
-schemata = {}
+# Here we hard-code a default for flml
+# so that users don't have to tweak this to run it.
+schemata = {'flml': ('Fluidity markup language', 'http://amcg.ese.ic.ac.uk/svn/fluidity/trunk/tools/fluidity_options.rng')}
 
 for dir in dirs:
   try:
@@ -41,7 +43,7 @@ for dir in dirs:
         continue
       # Expand environment variables in the schema path
       newSchemata[1] = os.path.expandvars(newSchemata[1])
-      if not os.path.exists(newSchemata[1]):
+      if not os.path.exists(newSchemata[1]) and 'http' not in newSchemata[1]:
         debug.deprint("Warning: not a valid path: %s" % newSchemata[1], 0)
         debug.deprint("schema type not registered")
         continue

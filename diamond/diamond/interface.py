@@ -229,7 +229,7 @@ class Diamond:
       if schemafile is None:
         self.s = None
       else:
-        if not schemafile[0] == "/":
+        if not schemafile[0] == "/" and 'http' not in schemafile:
           schemafile = os.getcwd() + "/" + schemafile
         try:
           s_read = schema.Schema(schemafile)
