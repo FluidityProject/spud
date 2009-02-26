@@ -70,6 +70,9 @@ module spud
       & get_option_real_scalar, &
       & get_option_real_vector, &
       & get_option_real_tensor, &
+      & get_option_real_scalar_sp, &
+      & get_option_real_vector_sp, &
+      & get_option_real_tensor_sp, &
       & get_option_integer_scalar, &
       & get_option_integer_vector, &
       & get_option_integer_tensor, &
@@ -81,6 +84,9 @@ module spud
       & set_option_real_scalar, &
       & set_option_real_vector, &
       & set_option_real_tensor, &
+      & set_option_real_scalar_sp, &
+      & set_option_real_vector_sp, &
+      & set_option_real_tensor_sp, &
       & set_option_integer_scalar, &
       & set_option_integer_vector, &
       & set_option_integer_tensor, &
@@ -419,6 +425,109 @@ contains
 
   end subroutine get_option_real_tensor
 
+  subroutine get_option_real_scalar_sp(key, val, stat, default)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, intent(out) :: val
+    integer, optional, intent(out) :: stat
+    real, optional, intent(in) :: default
+
+    real(D) :: lval
+    integer :: lstat
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, SPUD_REAL, 0, (/-1, -1/), lstat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+      lstat = cspud_get_option(key, len_trim(key), lval)
+      val=lval
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+
+  end subroutine get_option_real_scalar_sp
+
+  subroutine get_option_real_vector_sp(key, val, stat, default)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, dimension(:), intent(inout) :: val
+    integer, optional, intent(out) :: stat
+    real, dimension(size(val)), optional, intent(in) :: default
+
+    integer :: lstat
+    real(D), dimension(size(val)) :: lval
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, SPUD_REAL, 1, (/size(val), -1/), lstat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+      lstat = cspud_get_option(key, len_trim(key), lval)
+      val=lval
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+    end if
+
+  end subroutine get_option_real_vector_sp
+
+  subroutine get_option_real_tensor_sp(key, val, stat, default)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, dimension(:, :), intent(inout) :: val
+    integer, optional, intent(out) :: stat
+    real, dimension(size(val, 1), size(val, 2)), optional, intent(in) :: default
+
+    integer :: i, j, lstat
+    real(D), dimension(size(val, 2), size(val, 1)) :: val_handle
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    if(.not. have_option(key) .and. present(default)) then
+      val = default
+    else
+      call check_option(key, SPUD_REAL, 2, shape(val), lstat)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+      lstat = cspud_get_option(key, len_trim(key), val_handle)
+      if(lstat /= SPUD_NO_ERROR) then
+        call option_error(key, lstat, stat)
+        return
+      end if
+      do i = 1, size(val, 1)
+        do j = 1, size(val, 2)
+          val(i, j) = val_handle(j, i)
+        end do
+      end do
+    end if
+
+  end subroutine get_option_real_tensor_sp
+
   subroutine get_option_integer_scalar(key, val, stat, default)
     character(len = *), intent(in) :: key
     integer, intent(out) :: val
@@ -632,6 +741,80 @@ contains
     end if
 
   end subroutine set_option_real_tensor
+
+  subroutine set_option_real_scalar_sp(key, val, stat)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, intent(in) :: val
+    integer, optional, intent(out) :: stat
+
+    integer :: lstat
+    real(D) :: lval
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    lval = val
+    lstat = cspud_set_option(key, len_trim(key), lval, SPUD_REAL, 0, (/-1, -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+
+  end subroutine set_option_real_scalar_sp
+
+  subroutine set_option_real_vector_sp(key, val, stat)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, dimension(:), intent(in) :: val
+    integer, optional, intent(out) :: stat
+
+    integer :: lstat
+    real(D), dimension(size(val)) :: lval
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+    
+    lval=val
+    lstat = cspud_set_option(key, len_trim(key), lval, SPUD_REAL, 1, (/size(val), -1/))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+
+  end subroutine set_option_real_vector_sp
+
+  subroutine set_option_real_tensor_sp(key, val, stat)
+    ! Single precision version of routine. Note that values stored in the
+    ! dictionary are always double precision.
+    character(len = *), intent(in) :: key
+    real, dimension(:, :), intent(in) :: val
+    integer, optional, intent(out) :: stat
+
+    integer :: i, j, lstat
+    real(D), dimension(size(val, 2), size(val, 1)) :: val_handle
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    do i = 1, size(val, 1)
+      do j = 1, size(val, 2)
+        val_handle(j, i) = val(i, j)
+      end do
+    end do
+
+    lstat = cspud_set_option(key, len_trim(key), val_handle, SPUD_REAL, 2, shape(val_handle))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
+
+  end subroutine set_option_real_tensor_sp
 
   subroutine set_option_integer_scalar(key, val, stat)
     character(len = *), intent(in) :: key

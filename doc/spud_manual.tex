@@ -2,7 +2,7 @@
 
 \usepackage{palatino}
 
-\title{Spud 1.0.7 Manual}
+\title{Spud 1.0.9 Manual}
 
 \usepackage{listings}
 \usepackage{hyperref,xspace}
@@ -971,9 +971,12 @@ following values:
    \lstinline[language=C++]+std::string&+
 \end{tabular}
 
-In every case the type and shape of the argument must match that of the option
-in the dictionary. In C the returned argument is always a \lstinline+void+
-pointer and it is the responsibility of the user to match the size and type correctly.
+In Fortran, single precision interfaces are also provided in each of the
+above cases. However, these values will be stored in the options dictionary
+in double precision. In every case the type and shape of the argument must
+match that of the option in the dictionary. In C the returned argument is
+always a \lstinline+void+ pointer and it is the responsibility of the user
+to match the size and type correctly.
 
 This routine can return the following error codes:
 \begin{itemize}

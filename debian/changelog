@@ -1,3 +1,9 @@
+spud (1.0.9) unstable; urgency=low
+
+  * Include single precision Fortran interfaces for get_option and set_option.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Thu, 26 Feb 2009 14:48:10 +0000
+
 spud (1.0.8) unstable; urgency=low
 
   * Include new formatting of whitespace in comments.
