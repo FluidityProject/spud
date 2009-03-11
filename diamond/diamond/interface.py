@@ -218,54 +218,76 @@ class Diamond:
 
     return
 
-  def open_file(self, schemafile = "", filename = ""):
-    """
-    Handle opening or clearing of the current file and / or schema.
-    """
+  def load_schema(self, schemafile=""):
 
-    self.find.on_find_close_button()
+    # so, if the schemafile has already been opened, then ..
+    if schemafile == self.schemafile or schemafile == "":
+      return
 
-    if not schemafile == "" and not schemafile == self.schemafile:
-      if schemafile is None:
-        self.s = None
-      else:
-        if not schemafile[0] == "/" and 'http' not in schemafile:
-          schemafile = os.getcwd() + "/" + schemafile
-        try:
-          s_read = schema.Schema(schemafile)
-          self.s = s_read
-        except:
-          dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
-          return
-        self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
+    # if schemafile is None: clear the schema.
+    if schemafile is None:
+      self.s = None
+      self.schemafile = None
+      self.schemafile_path = none
+    # otherwise: let's load the new schema.
+    else:
+      # if we aren't using a http schema, and we're passed a relative filename, we
+      # need to absolut-ify it.
+      if 'http' not in schemafile:
+        schemafile = os.path.abspath(schemafile)
 
+      # now, let's try and read the schema.
+      try:
+        s_read = schema.Schema(schemafile)
+        self.s = s_read
+      except:
+        dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
+        return
+
+      self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
       self.schemafile = schemafile
-      self.scherror.schema_file = schemafile # Update the scherror instance's idea of the schema file
-      self.init_datatree()
+      self.scherror.schema_file = schemafile
 
-      if filename is not None:
-        self.open_file(filename = None)
+      # and let's clear the opened file too.
+      self.load_file(filename=None)
 
-    if not filename == "" and (not filename == self.filename or (filename is None and not self.saved)):
+  def load_file(self, filename=""):
+    # so, if the file has already been opened
+    if filename == "":
+      return
+
+    # if filename is None, let's clear out.
+    if filename is None:
       self.remove_children(None)
       self.init_datatree()
-      if not filename is None:
-        if not filename[0] == "/":
-          filename = os.getcwd() + "/" + filename
-        try:
-          tree_read, errors = self.s.read(filename)
-          if not errors == "":
-            dialogs.long_message(None, "WARNING: lost XML elements:\n" + errors)
-          self.tree = tree_read
-        except:
-          dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
-          return
+
+    if filename != self.filename:
+      # if we have a relative path, make it absolute
+      filename = os.path.abspath(filename)
+
+      try:
+        tree_read, errors = self.s.read(filename)
+        if errors != "":
+          dialogs.long_message(none, "Warning: lost xml elements:\n" + errors)
+        self.tree = tree_read
+      except:
+        dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
+        return
 
       self.treeview.freeze_child_notify()
       self.treeview.set_model(None)
       self.set_treestore(None, [self.tree], True)
       self.treeview.set_model(self.treestore)
       self.treeview.thaw_child_notify()
+
+  def open_file(self, schemafile = "", filename = ""):
+    """
+    Handle opening or clearing of the current file and / or schema.
+    """
+
+    self.find.on_find_close_button()
+    self.load_schema(schemafile)
+    self.load_file(filename)
 
     self.set_geometry_dim_tree()
 
@@ -289,6 +311,7 @@ class Diamond:
       if not prompt_response == gtk.RESPONSE_YES:
         return
     self.open_file(filename = None)
+    self.filename = None
 
     return
 
