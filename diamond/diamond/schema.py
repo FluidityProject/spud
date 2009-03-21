@@ -873,6 +873,9 @@ class Schema(object):
       else:
         child = schild
 
+      if schild.active is False:
+        continue
+
       child.children = copy.copy([])
       self.xml_read_core(child, schild.xmlnode, rootdoc)
 
@@ -886,7 +889,7 @@ class Schema(object):
     # no information from XML to be had :-/
     if xmlnode is None:
       debug.deprint("Warning: Node %s with no XML information" % datatree.name)
-      datatree.add_children(self)
+      if datatree.active: datatree.add_children(self)
       return
 
     schemachildren = self.valid_children(datatree)

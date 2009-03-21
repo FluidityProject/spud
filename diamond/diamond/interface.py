@@ -165,15 +165,19 @@ class Diamond:
     # and "Validate schematron"
     menu = self.gui.get_widget("menu")
 
+    # Disable statistics
     menu.get_children()[4].get_submenu().get_children()[1].set_property("visible", False)
+    
+    # Disable find
+    menu.get_children()[1].get_submenu().get_children()[0].set_property("visible", False)
 
     if not self.program_exists("flcheck"):
       # Gray the "Run fluidity asserts" option
-      menu.get_children()[4].get_submenu().get_children()[3].set_property("sensitive", False)
+      menu.get_children()[4].get_submenu().get_children()[3].set_property("visible", False)
 
     if not self.program_exists("popstate"):
      # Gray the "Visualise initial setup" option
-      menu.get_children()[4].get_submenu().get_children()[4].set_property("sensitive", False)
+      menu.get_children()[4].get_submenu().get_children()[4].set_property("visible", False)
 
     if schematron_file is None:
       menu.get_children()[3].get_submenu().get_children()[1].set_property("sensitive", False)
@@ -218,7 +222,7 @@ class Diamond:
 
     return
 
-  def load_schema(self, schemafile=""):
+  def load_schema(self, schemafile="", ):
 
     # so, if the schemafile has already been opened, then ..
     if schemafile == self.schemafile or schemafile == "":
@@ -247,9 +251,8 @@ class Diamond:
       self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
       self.schemafile = schemafile
       self.scherror.schema_file = schemafile
-
       # and let's clear the opened file too.
-      self.load_file(filename=None)
+      self.remove_children(None)
 
   def load_file(self, filename=""):
     # so, if the file has already been opened
@@ -888,14 +891,14 @@ class Diamond:
           
           data = str(node_data)
         child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
-        if recurse: self.set_treestore(child_iter, t.children, recurse)
+        if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if self.choice_or_tree_is_hidden(ts_choice):
           continue
         child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
-        if recurse: self.set_treestore(child_iter, ts_choice.children, recurse)
+        if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
     return
 
@@ -930,6 +933,10 @@ class Diamond:
 
     choice_or_tree = self.treestore.get_value(iter, 2)
     active_tree = self.treestore.get_value(iter, 3)
+    if active_tree.active is False:
+      return
+    if choice_or_tree.active is False:
+      return
 
     l = self.s.valid_children(active_tree.schemaname)
     l = active_tree.find_or_add(l)
@@ -1187,9 +1194,11 @@ class Diamond:
       if choice_or_tree.active is True:
         choice_or_tree.active = False
         self.set_saved(False)
+        self.remove_children(iter)
       else:
         choice_or_tree.active = True
         self.set_saved(False)
+        self.expand_treestore(iter)
 
     elif choice_or_tree.cardinality == "*":
       if choice_or_tree.active is True:
@@ -1199,20 +1208,22 @@ class Diamond:
         if count == 1:
           choice_or_tree.active = False
           self.set_saved(False)
+          self.remove_children(iter)
         else:
           confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
           if confirm == gtk.RESPONSE_YES:
             parent_tree.delete_child_by_ref(choice_or_tree)
             self.treestore.remove(iter)
             self.set_saved(False)
+            self.remove_children(iter)
       else:
         # Make this active, and add a new inactive instance
         choice_or_tree.active = True
         new_tree = parent_tree.add_inactive_instance(choice_or_tree)
         liststore = self.create_liststore(new_tree)
+        self.expand_treestore(iter)
         iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
           new_tree.get_current_tree(), ""])
-        self.expand_treestore(iter)
         self.set_saved(False)
 
     elif choice_or_tree.cardinality == "+":
@@ -1226,9 +1237,9 @@ class Diamond:
           choice_or_tree.active = True
           new_tree = parent_tree.add_inactive_instance(choice_or_tree)
           liststore = self.create_liststore(new_tree)
+          self.expand_treestore(iter)
           iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
             new_tree.get_current_tree(), ""])
-          self.expand_treestore(iter)
           self.set_saved(False)
       else: # count > 2
         if choice_or_tree.active is True:
@@ -1243,9 +1254,9 @@ class Diamond:
           choice_or_tree.active = True
           new_tree = parent_tree.add_inactive_instance(choice_or_tree)
           liststore = self.create_liststore(new_tree)
+          self.expand_treestore(iter)
           iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
             new_tree.get_current_tree(), ""])
-          self.expand_treestore(iter)
           self.set_saved(False)
 
     parent_tree.recompute_validity()

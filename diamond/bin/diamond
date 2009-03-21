@@ -202,13 +202,7 @@ def main():
   i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
 
   def initialise(i, s, f):
-    i.open_file(schemafile = s)
-    if not f is None:
-      try:
-        os.stat(f)
-        i.open_file(filename = f)
-      except:
-        i.set_saved(False, f)
+    i.open_file(schemafile = s, filename = f)
     i.main_window.window.set_cursor(None)
     i.statusbar.clear_statusbar()
 
