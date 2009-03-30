@@ -1413,6 +1413,7 @@ class Diamond:
       if choice_or_tree.active is False:
         choice_or_tree.active = True
         self.set_saved(False)
+        self.expand_treestore(iter)
     if parent_tree is not None:
       parent_tree.recompute_validity()
 
