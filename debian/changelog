@@ -1,3 +1,12 @@
+spud (1.0.11) unstable; urgency=low
+
+  * Make the schema parsing about 10x faster.
+    This is done by loading elements from the schema as they
+    are needed rather than all at initialisation.
+  * This necessitates the disabling of the find dialog for now. 
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Mon, 30 Mar 2009 15:29:35 +0100
+
 spud (1.0.10) unstable; urgency=low
 
   * Diamond now has the capability to pull schemas from the web. This also removes the need for many users to have .diamond/schemata/flml files as diamond automatically knows about the current Fluidity trunk schema.
