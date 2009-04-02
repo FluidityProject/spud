@@ -271,7 +271,7 @@ class Diamond:
       try:
         tree_read, errors = self.s.read(filename)
         if errors != "":
-          dialogs.long_message(none, "Warning: lost xml elements:\n" + errors)
+          dialogs.long_message(None, "Warning: lost xml elements:\n" + errors)
         self.tree = tree_read
       except:
         dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
