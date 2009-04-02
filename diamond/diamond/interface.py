@@ -232,7 +232,7 @@ class Diamond:
     if schemafile is None:
       self.s = None
       self.schemafile = None
-      self.schemafile_path = none
+      self.schemafile_path = None
     # otherwise: let's load the new schema.
     else:
       # if we aren't using a http schema, and we're passed a relative filename, we
