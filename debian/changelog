@@ -1,3 +1,11 @@
+spud (1.0.12) unstable; urgency=low
+
+  * Of course, as soon as you release you spot a bug.
+    Optional entries, when activated by double clicking,
+    are now populated.
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Mon, 30 Mar 2009 16:04:38 +0100
+
 spud (1.0.11) unstable; urgency=low
 
   * Make the schema parsing about 10x faster.
