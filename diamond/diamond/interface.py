@@ -1414,6 +1414,7 @@ class Diamond:
         choice_or_tree.active = True
         self.set_saved(False)
         self.expand_treestore(iter)
+        self.on_select_row(self.treeview.get_selection())
     if parent_tree is not None:
       parent_tree.recompute_validity()
 
