@@ -56,7 +56,10 @@ def preprocess(schemafile):
 
     for possible_file in possible_files:
       try:
-        file = open(possible_file)
+        if 'http' in possible_file:
+          file = urllib2.urlopen(possible_file)
+        else:
+          file = open(possible_file)
         break
       except IOError:
         debug.deprint("IOError when searching for included file " + filename, 1)
