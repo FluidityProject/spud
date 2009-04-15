@@ -7202,7 +7202,11 @@ fi
 
 VERSION=`svnversion .`
 
-ac_config_files="$ac_config_files Makefile bin/spud-preprocess diamond/diamond/preprocess.py src/tests/Makefile diamond/setup.py examples/Makefile"
+
+
+
+
+ac_config_files="$ac_config_files Makefile bin/spud-preprocess diamond/diamond/preprocess.py src/tests/Makefile diamond/setup.py examples/Makefile diamond/diamond/plugins.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7764,6 +7768,7 @@ do
     "src/tests/Makefile") CONFIG_FILES="$CONFIG_FILES src/tests/Makefile" ;;
     "diamond/setup.py") CONFIG_FILES="$CONFIG_FILES diamond/setup.py" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
+    "diamond/diamond/plugins.py") CONFIG_FILES="$CONFIG_FILES diamond/diamond/plugins.py" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

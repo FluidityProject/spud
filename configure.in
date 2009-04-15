@@ -316,4 +316,6 @@ AC_SUBST(ARFLAGS)
 AC_SUBST(LINKER)
 AC_SUBST(MAKE)
 
-AC_OUTPUT(Makefile bin/spud-preprocess diamond/diamond/preprocess.py src/tests/Makefile diamond/setup.py examples/Makefile)
+AC_OUTPUT(Makefile bin/spud-preprocess diamond/diamond/preprocess.py
+          src/tests/Makefile diamond/setup.py examples/Makefile
+          diamond/diamond/plugins.py)
