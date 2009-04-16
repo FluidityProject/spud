@@ -1562,8 +1562,7 @@ namespace Spud{
     name = "";
     branch = "";
 
-    string valid_chars("/_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ");
-    string fullname = in.substr(0, min(in.size(), in.find_first_not_of(valid_chars)));
+    string fullname = in.substr(0, min(in.size(), in.find_first_of(" ")));
 
     // Skip delimiters at beginning.
     string::size_type lastPos = fullname.find_first_not_of("/", 0);

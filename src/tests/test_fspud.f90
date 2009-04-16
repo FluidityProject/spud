@@ -63,7 +63,9 @@ subroutine test_fspud
   
   print *, "*** Testing set_option for integer scalar, with option name ***"
   call test_named_key("/type_none", "name", 42)
-  call print_options()
+  
+  print *, "*** Testing set_option for integer scalar, with option name (containing symbols) ***"
+  call test_named_key("/type_none", 'tricky_name!"£$%^&*()', 42)
   
 contains
   
@@ -771,6 +773,7 @@ contains
     character(len = *), intent(in) :: name
     integer, intent(in) :: test_integer
     
+    character(len = len_trim(name)) :: name_val
     integer :: stat, integer_val
     
     call set_option(trim(key) // "::" // name, test_integer, stat)
@@ -781,6 +784,9 @@ contains
     call get_option(trim(key) // "::" // name, integer_val, stat)
     call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data]", integer_val /= test_integer, .false., "Retrieved incorrect option data")
+    call get_option(trim(key) // "::" // trim(name) // "/name", name_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", trim(name_val) /= trim(name), .false., "Retrieved incorrect option data")
     
     call test_delete_option(key)
     
