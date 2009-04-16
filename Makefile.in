@@ -95,7 +95,9 @@ clean:
 	@cd src/tests; $(MAKE) clean
 
 distclean: clean
+	@cd src/tests; $(MAKE) distclean
 	rm -fr config.log config.status autom4te.cache Makefile
 	rm -f include/spud_config.h
-	rm -f bin/spud-preprocess diamond/diamond/preprocess.py
-	@cd src/tests; $(MAKE) distclean
+	rm -f Makefile src/tests/Makefile examples/Makefile
+	rm -f bin/spud-preprocess
+	rm -f diamond/setup.py diamond/diamond/plugins.py diamond/diamond/preprocess.py
