@@ -2,6 +2,7 @@
 
 import sys
 from lxml import etree
+import re
 
 # We will be filtering the children of the elements later,
 # to remove comments. Let's define a function to filter the stream:
@@ -26,8 +27,13 @@ tree = etree.parse(open(filename))
 root = tree.getroot()
 rootname = root.tag
 
+# Let's do some parsing.
+path = "/" + rootname + xpath
+pattern = r"""::([A-Za-z]*)/"""
+path = re.sub(pattern, r'[@name="\1"]', path)
+
 # Here we translate the spud-xpath to real XML xpath
-node = tree.xpath("/" + rootname + xpath)[0]
+node = tree.xpath(path)[0]
 
 # Now we need to find the <real_value> or <integer_value> etc. tag underneath it.
 child = filter(not_comment, node.getchildren())[0]
