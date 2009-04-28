@@ -90,7 +90,16 @@ def set_option(s, val):
   spud_code = typepy_map[py_type]
   c_type = ctype_map[py_type]
   c_val = c_type(val)
-  
-  out = cset_option(s, byref(c_int(len(s))), byref(c_val), byref(c_int(spud_code)), byref(c_int(0)), byref(c_int(1)))
+
+  shape_type = c_int * 2
+  if py_type is str:
+    shape = shape_type(len(val), -1)
+    rank = 1
+    out = cset_option(s, byref(c_int(len(s))), (c_val), byref(c_int(spud_code)), byref(c_int(rank)), shape)
+  else:
+    shape = shape_type(1, -1)
+    rank = 0
+    out = cset_option(s, byref(c_int(len(s))), byref(c_val), byref(c_int(spud_code)), byref(c_int(rank)), shape)
+
   if out != SPUD_NO_ERROR:
     raise spud_exceptions[out]
