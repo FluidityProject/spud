@@ -10,3 +10,5 @@ print libspud.get_option('/geometry/dimension')
 
 print libspud.option_shape('/geometry/dimension')
 print libspud.option_shape('/problem_type')
+
+libspud.write_options('test_out.flml')

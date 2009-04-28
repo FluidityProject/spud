@@ -119,3 +119,9 @@ def option_shape(s):
 
   return tuple(shape)
 
+cwrite_options = libspud.cspud_write_options_
+cwrite_options.restype = None
+cwrite_options.argtypes = [c_char_p, POINTER(c_int)]
+
+def write_options(filename):
+  cwrite_options(filename, byref(c_int(len(filename))))
