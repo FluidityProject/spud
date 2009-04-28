@@ -7,3 +7,6 @@ print libspud.get_option('/problem_type')
 print libspud.get_option('/geometry/dimension')
 libspud.set_option('/geometry/dimension', 3)
 print libspud.get_option('/geometry/dimension')
+
+print libspud.option_shape('/geometry/dimension')
+print libspud.option_shape('/problem_type')

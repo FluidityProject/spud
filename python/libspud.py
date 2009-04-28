@@ -71,7 +71,8 @@ def get_option(s):
   type = option_type(s)
   # assume scalar values for now ..
   if type is str:
-    val = create_string_buffer(255)
+    strlen = option_shape(s)[0]
+    val = create_string_buffer(strlen+1)
   else:
     val = ctype_map[type]()
 
@@ -103,3 +104,18 @@ def set_option(s, val):
 
   if out != SPUD_NO_ERROR:
     raise spud_exceptions[out]
+
+coption_shape = libspud.cspud_get_option_shape_
+coption_shape.argtypes = [c_char_p, POINTER(c_int), POINTER(c_int)]
+coption_shape.restype = int
+
+def option_shape(s):
+  shape_type = c_int * 2
+  shape = shape_type()
+  out = coption_shape(s, byref(c_int(len(s))), shape)
+
+  if out != SPUD_NO_ERROR:
+    raise spud_exceptions[out]
+
+  return tuple(shape)
+
