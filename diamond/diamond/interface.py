@@ -1347,6 +1347,9 @@ class Diamond:
 
       name = "/" + used_name + name
       name_tree = name_tree.parent
+
+    # and split off the root name:
+    name = '/' + '/'.join(name.split('/')[2:])
     return name
 
   def clear_plugin_buttons(self):
