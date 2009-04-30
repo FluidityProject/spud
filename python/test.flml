@@ -90,10 +90,33 @@
       <at_first_timestep/>
     </adaptive_timestep>
   </timestepping>
-  <physical_parameters/>
+  <physical_parameters>
+    <gravity>
+      <magnitude replaces="GRAVTY">
+        <real_value rank="0">1.0</real_value>
+      </magnitude>
+      <vector_field replaces="BSOUX BSOUY BSOUZ" name="GravityDirection" rank="1">
+        <prescribed>
+          <value name="WholeMesh">
+            <constant>
+              <real_value shape="2" dim1="dim" rank="1">1.0 2.0</real_value>
+            </constant>
+          </value>
+          <output/>
+          <stat>
+            <include_in_stat/>
+          </stat>
+          <detectors>
+            <exclude_from_detectors/>
+          </detectors>
+        </prescribed>
+      </vector_field>
+    </gravity>
+  </physical_parameters>
   <material_phase name="Material1">
     <scalar_field name="Density" rank="0">
       <diagnostic>
+        <algorithm name="Internal" material_phase_support="single"/>
         <mesh name="PressureMesh"/>
         <output/>
         <stat/>
@@ -113,7 +136,11 @@
         <mesh name="VelocityMesh"/>
         <value name="WholeMesh">
           <python>
-            <string_value lines="20" type="python">def val(X,t):&#x0A;   # Do not remove this comment&#x0A;   u =  0.25 * ((4*X[0] - 2) + (4*X[1] - 2)**3)&#x0A;   v = -0.25 * ((4*X[1] - 2) + (4*X[0] - 2)**3)&#x0A;   return [u, v]</string_value>
+            <string_value lines="20" type="python">def val(X,t):
+   # Do not remove this comment
+   u =  0.25 * ((4*X[0] - 2) + (4*X[1] - 2)**3)
+   v = -0.25 * ((4*X[1] - 2) + (4*X[0] - 2)**3)
+   return [u, v]</string_value>
           </python>
         </value>
         <output/>
@@ -156,6 +183,7 @@
     </vector_field>
     <scalar_field name="ControlVolumeCFLNumber" rank="0">
       <diagnostic>
+        <algorithm name="Internal" material_phase_support="single"/>
         <mesh name="PressureMesh"/>
         <output/>
         <stat/>
@@ -273,6 +301,7 @@
     </scalar_field>
     <scalar_field name="ScalarAbsoluteDifference" rank="0">
       <diagnostic field_name_b="MaterialVolumeFraction" field_name_a="AnalyticalMaterialVolumeFraction">
+        <algorithm name="Internal" material_phase_support="single"/>
         <mesh name="PressureMesh"/>
         <output/>
         <stat>
@@ -291,6 +320,7 @@
     </scalar_field>
     <scalar_field name="ControlVolumeDivergence" rank="0">
       <diagnostic field_name="Velocity">
+        <algorithm name="Internal" material_phase_support="single"/>
         <mesh name="PressureMesh"/>
         <output/>
         <stat/>
@@ -315,6 +345,7 @@
     </vector_field>
     <scalar_field name="MaterialVolumeFraction" rank="0">
       <diagnostic>
+        <algorithm name="Internal" material_phase_support="single"/>
         <mesh name="PressureMesh"/>
         <output/>
         <stat/>

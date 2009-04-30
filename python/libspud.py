@@ -125,3 +125,15 @@ cwrite_options.argtypes = [c_char_p, POINTER(c_int)]
 
 def write_options(filename):
   cwrite_options(filename, byref(c_int(len(filename))))
+
+coption_rank = libspud.cspud_get_option_rank_
+coption_rank.argtypes = [c_char_p, POINTER(c_int), POINTER(c_int)]
+coption_rank.restype = c_int
+
+def option_rank(s):
+  rank = c_int()
+  out = coption_rank(s, byref(c_int(len(s))), byref(rank))
+  if out != SPUD_NO_ERROR:
+    raise spud_exceptions[out]
+  return rank.value
+
