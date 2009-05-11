@@ -491,7 +491,7 @@ class Schema(object):
     if self.lost_eles != "":
       debug.deprint("WARNING: lost XML elements:\n" + self.lost_eles)
       
-    return self.valid_children(":start")[0], self.lost_eles
+    return datatree, self.lost_eles
 
   def xml_read_merge(self, datatree, xmlnode):
     # The datatree has the following set:
