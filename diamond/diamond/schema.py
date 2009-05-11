@@ -30,45 +30,6 @@ import plist
 import preprocess
 import tree
 
-###############################
-#     LIBRARY FUNCTIONS       #
-###############################
-
-# find_hidden_xmldata looks for DIAMOND MAGIC COMMENT children in the given xmlnode, decompresses them, and adds
-# them to the tree.
-def find_hidden_xmldata(datatree, xmlnode):
-  hidden = []
-  for xmlchild in xmlnode.iterchildren(tag=etree.Comment):
-    text = xmlchild.text
-    data = text.split('\n')
-    name = data[0]
-
-    # A DIAMOND MAGIC comment should contain those words on the first line of the comment.
-    if datatree.schemaname in name and "DIAMOND MAGIC COMMENT" in name:
-      pickle = data[1]
-      uncompressed = bz2.decompress(base64.b64decode(pickle))
-      try:
-        doc = etree.fromstring(uncompressed)
-      except:
-        print "Error reading compressed XML. Output follows:"
-        print "\"", bz2.decompress(base64.b64decode(pickle)), "\""
-        sys.exit(1)
-
-      # Comments generated using the 4suite API, which included an XML declaration,
-      # are incompatable with the new format. Notify the user.
-      if uncompressed.find("<?xml version=") != -1:
-         print "Using old-style magic comments. Ignoring."
-         return []
-
-      # Iterate over all elements in this newly-decompressed subtree, and add them to the
-      # in-memory tree structure.
-      for child in doc.iterchildren(tag=etree.Element):
-        new_xmldata = child
-        hidden.append(new_xmldata)
-        break
-
-  return hidden
-
 ##########################
 #     SCHEMA CLASS       #
 ##########################
@@ -122,7 +83,7 @@ class Schema(object):
                namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})
 
         if len(xpath) == 0:
-          debug.deprint("Warning: Schema reference %s not found" % name)
+          debug.deprint("Warning: Schema reference %s not found" % name, 0)
           continue
 
         for child2 in self.element_children(xpath[0]):
@@ -700,12 +661,6 @@ class Schema(object):
           if schemachild.schemaname not in xmls:
             if schemachild.cardinality == '':
               xmls[schemachild.schemaname] = copy.deepcopy([])
-#            elif schemachild.cardinality == '?':
-#              hidden_xmldata = self.find_hidden_xmldata(schemachild, xmlnode)
-#              if len(hidden_xmldata) > 0:
-#                new_xmldata = hidden_xmldata[0]
-#                xmls[schemachild.schemaname] = [new_xmldata]
-#                break
             else:
               xmls[schemachild.schemaname] = copy.deepcopy([])
       elif schemachild.cardinality in ['*', '+']:
@@ -799,48 +754,8 @@ class Schema(object):
           for tree_choice in child.l:
             if tree_choice is current_choice: continue
 
-#            # The other choices are compressed and stored in a DIAMOND MAGIC comment. These
-#            # should be read in and added to the in-memory tree.
-#            hidden_xml = self.find_hidden_xmldata(tree_choice, child.xmlnode.getparent())
-#            if len(hidden_xml) > 0:
-#              new_xmldata = hidden_xml[0]
-#              self.xml_read_merge(tree_choice, new_xmldata)
-#              self.xml_read_core(tree_choice, new_xmldata, rootdoc)
-                
     return bins
 
-  # find_hidden_xmldata looks for DIAMOND MAGIC COMMENTs in the given xmlnode, decompresses them, and adds
-  # them to the tree.
-  def find_hidden_xmldata(self, datatree, xmlnode):
-    hidden = []
-    for xmlchild in xmlnode.iterchildren(tag=etree.Comment):
-        text = xmlchild.text
-        data = text.split('\n')
-        name = data[0]
-
-        if datatree.schemaname in name and "DIAMOND MAGIC COMMENT" in name:
-          pickle = data[1]
-          uncompressed = bz2.decompress(base64.b64decode(pickle))
-          try:
-            doc = etree.fromstring(uncompressed)
-          except:
-            debug.deprint("Error reading compressed XML. Output: %s" % bz2.decompress(base64.b64decode(pickle)), 0)
-            sys.exit(1)
-
-          # Comments generated using the 4suite API are incompatable with the new format.
-          if uncompressed.find("<?xml version=") != -1:
-            debug.dprint("File uses old-style magic comments. Ignoring.")
-            return []
-
-          # Iterate over all elements in this newly-decompressed subtree, and add them to the
-          # in-memory tree structure.
-          for child in doc.iterchildren(tag=etree.Element):
-            new_xmldata = child
-            hidden.append(new_xmldata)
-            break
-
-    return hidden
-  
   # Loop over lost nodes, and store their XML so the user can be notified later.
   def check_unused_nodes(self, used): 
     for xml in used:
