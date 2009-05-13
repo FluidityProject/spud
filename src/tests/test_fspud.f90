@@ -60,12 +60,12 @@ subroutine test_fspud
   
   print *, "*** Testing add_option and get_option ***"
   call test_set_and_get_type_none("/type_none")
-  
+    
   print *, "*** Testing set_option for integer scalar, with option name ***"
-  call test_named_key("/type_none", "name", 42)
+  call test_named_key("/type_integer", "name", 42)
   
   print *, "*** Testing set_option for integer scalar, with option name (containing symbols) ***"
-  call test_named_key("/type_none", 'tricky_name!"£$%^&*()', 42)
+  call test_named_key("/type_integer", 'tricky_name!"£$%^&*()', 42)
   
 contains
   
@@ -774,7 +774,7 @@ contains
     integer, intent(in) :: test_integer
     
     character(len = len_trim(name)) :: name_val
-    integer :: stat, integer_val
+    integer :: integer_val, stat
     
     call set_option(trim(key) // "::" // name, test_integer, stat)
     call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
@@ -787,6 +787,16 @@ contains
     call get_option(trim(key) // "::" // trim(name) // "/name", name_val, stat)
     call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data]", trim(name_val) /= trim(name), .false., "Retrieved incorrect option data")
+    
+    call get_option(trim(key) // "[0]", integer_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", integer_val /= test_integer, .false., "Retrieved incorrect option data")
+    call get_option(trim(key) // "[0]" // "/name", name_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", trim(name_val) /= trim(name), .false., "Retrieved incorrect option data")
+    
+    call get_option(trim(key) // "[1]", integer_val, stat)
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
     
     call test_delete_option(key)
     
