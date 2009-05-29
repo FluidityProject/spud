@@ -264,6 +264,15 @@ class Diamond:
       self.remove_children(None)
       self.init_datatree()
 
+    if filename is not None:
+      try:
+        os.stat(filename)
+      except OSError:
+        self.filename = filename
+        self.set_saved(False)
+        self.remove_children(None)
+        self.init_datatree()
+
     if filename != self.filename:
       # if we have a relative path, make it absolute
       filename = os.path.abspath(filename)
