@@ -170,7 +170,9 @@ def main():
   # Import the GUI Glade file.
 
   gladefile = None
-  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"), "/usr/share/diamond/gui/gui.glade"]:
+  for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"),
+                             os.path.join(diamond_path, os.pardir, "share", "diamond", "gui", "gui.glade"),
+                             "/usr/share/diamond/gui/gui.glade"]:
     try:
       os.stat(possible_gladefile)
       gladefile = possible_gladefile
