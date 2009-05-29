@@ -171,7 +171,7 @@ def main():
 
   gladefile = None
   for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"),
-                             os.path.join(diamond_path, os.pardir, "share", "diamond", "gui", "gui.glade"),
+                             os.path.join(diamond_path, "share", "diamond", "gui", "gui.glade"),
                              "/usr/share/diamond/gui/gui.glade"]:
     try:
       os.stat(possible_gladefile)
