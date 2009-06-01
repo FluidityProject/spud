@@ -2370,6 +2370,7 @@ class Diamond:
       self.paint_validity()
       if iter_key == "name":
         self.update_painted_name()
+        self.on_select_row()
       self.set_saved(False)
 
     return
