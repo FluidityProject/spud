@@ -154,7 +154,7 @@ class Diamond:
     self.schemafile = None
     self.init_datatree()    
     self.set_saved(True)
-    self.open_file(None, None)
+    self.open_file(schemafile = None, filename = None)
 
     self.main_window.show()
 
@@ -222,56 +222,66 @@ class Diamond:
 
     return
 
-  def load_schema(self, schemafile="", ):
+  def close_schema(self):
+    if self.schemafile is None:
+      return
 
+    # clear the schema.
+    self.s = None
+    self.schemafile = None
+    self.schemafile_path = None
+    
+    return
+
+  def load_schema(self, schemafile):
     # so, if the schemafile has already been opened, then ..
-    if schemafile == self.schemafile or schemafile == "":
+    if schemafile == self.schemafile:
       return
 
-    # if schemafile is None: clear the schema.
-    if schemafile is None:
-      self.s = None
-      self.schemafile = None
-      self.schemafile_path = None
-    # otherwise: let's load the new schema.
-    else:
-      # if we aren't using a http schema, and we're passed a relative filename, we
-      # need to absolut-ify it.
-      if 'http' not in schemafile:
-        schemafile = os.path.abspath(schemafile)
+    # if we aren't using a http schema, and we're passed a relative filename, we
+    # need to absolut-ify it.
+    if 'http' not in schemafile:
+      schemafile = os.path.abspath(schemafile)
 
-      # now, let's try and read the schema.
-      try:
-        s_read = schema.Schema(schemafile)
-        self.s = s_read
-      except:
-        dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
-        return
-
-      self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
-      self.schemafile = schemafile
-      self.scherror.schema_file = schemafile
-      # and let's clear the opened file too.
-      self.remove_children(None)
-
-  def load_file(self, filename=""):
-    # so, if the file has already been opened
-    if filename == "":
+    # now, let's try and read the schema.
+    try:
+      s_read = schema.Schema(schemafile)
+      self.s = s_read
+    except:
+      dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
       return
 
-    # if filename is None, let's clear out.
-    if filename is None:
+    self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
+    self.schemafile = schemafile
+    self.scherror.schema_file = schemafile
+    # and let's clear the opened file too.
+    self.remove_children(None)
+    
+    return
+
+  def close_file(self):
+    if self.filename is None:
+      return
+  
+    # let's clear out.
+    self.remove_children(None)
+    self.init_datatree()
+
+    self.filename = None
+    
+    return
+
+  def load_file(self, filename):
+    if filename == self.filename:
+      return
+  
+    try:
+      os.stat(filename)
+    except OSError:
+      self.filename = filename
+      self.set_saved(False)
       self.remove_children(None)
       self.init_datatree()
-
-    if filename is not None:
-      try:
-        os.stat(filename)
-      except OSError:
-        self.filename = filename
-        self.set_saved(False)
-        self.remove_children(None)
-        self.init_datatree()
 
     if filename != self.filename:
       # if we have a relative path, make it absolute
@@ -298,8 +308,14 @@ class Diamond:
     """
 
     self.find.on_find_close_button()
-    self.load_schema(schemafile)
-    self.load_file(filename)
+    if schemafile is None:
+      self.close_schema()
+    elif not schemafile == "":
+      self.load_schema(schemafile)
+    if filename is None:
+      self.close_file()
+    elif not filename == "":
+      self.load_file(filename)
 
     self.set_geometry_dim_tree()
 
