@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Diamond.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import sys
 import traceback
 
@@ -105,7 +106,7 @@ def get_filename(title, action, filter_names_and_patterns = {}, folder_uri = Non
   filew.set_default_response(gtk.RESPONSE_OK)
 
   if not folder_uri is None:
-    filew.set_current_folder_uri("file://" + folder_uri)
+    filew.set_current_folder_uri("file://" + os.path.abspath(folder_uri))
 
   for filtername in filter_names_and_patterns:
     filter = gtk.FileFilter()
@@ -123,7 +124,7 @@ def get_filename(title, action, filter_names_and_patterns = {}, folder_uri = Non
   filter.set_name("All files")
   filter.add_pattern("*")
   filew.add_filter(filter)
-
+ 
   result = filew.run()
 
   if result == gtk.RESPONSE_OK:
