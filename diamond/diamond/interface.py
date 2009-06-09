@@ -267,7 +267,8 @@ class Diamond:
       self.filename = filename
       self.set_saved(False)
       self.remove_children(None)
-      self.init_datatree()
+      
+      return
 
     if filename != self.filename:
       # if we have a relative path, make it absolute
@@ -281,12 +282,8 @@ class Diamond:
       except:
         dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
         return
-
-      self.treeview.freeze_child_notify()
-      self.treeview.set_model(None)
-      self.set_treestore(None, [self.tree], True)
-      self.treeview.set_model(self.treestore)
-      self.treeview.thaw_child_notify()
+      
+    return
 
   def open_file(self, schemafile = "", filename = ""):
     """
@@ -302,6 +299,13 @@ class Diamond:
       self.close_file()
     elif not filename == "":
       self.load_file(filename)
+      
+    self.init_datatree()
+    self.treeview.freeze_child_notify()
+    self.treeview.set_model(None)
+    self.set_treestore(None, [self.tree], True)
+    self.treeview.set_model(self.treestore)
+    self.treeview.thaw_child_notify()
 
     self.set_geometry_dim_tree()
 
@@ -930,7 +934,7 @@ class Diamond:
       if tree.doc is None:
         text = "(No documentation)"
       else:
-        text = tree.doc
+        text = self.render_whitespace(tree.doc)
     elif ctitle == "Data":
       comment_tree = self.get_comment(tree)
 
