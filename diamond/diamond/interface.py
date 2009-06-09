@@ -216,7 +216,8 @@ class Diamond:
     self.s = None
     self.schemafile = None
     self.schemafile_path = None
-    
+    self.scherror.schema_file = None
+       
     return
 
   def load_schema(self, schemafile):
@@ -237,11 +238,12 @@ class Diamond:
       dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
       return
 
-    self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
     self.schemafile = schemafile
+    self.schemafile_path = os.path.dirname(schemafile) + os.path.sep
     self.scherror.schema_file = schemafile
-    # and let's clear the opened file too.
+    
     self.remove_children(None)
+    self.init_datatree()
     
     return
 
@@ -249,7 +251,6 @@ class Diamond:
     if self.filename is None:
       return
   
-    # let's clear out.
     self.remove_children(None)
     self.init_datatree()
 
@@ -258,7 +259,11 @@ class Diamond:
     return
 
   def load_file(self, filename):
+    # if we have a relative path, make it absolute
+    filename = os.path.abspath(filename)
+  
     if filename == self.filename:
+      print "not loading", filename
       return
   
     try:
@@ -266,22 +271,21 @@ class Diamond:
     except OSError:
       self.filename = filename
       self.set_saved(False)
-      self.remove_children(None)
+      
+      self.remove_children(None)      
+      self.init_datatree()
       
       return
-
-    if filename != self.filename:
-      # if we have a relative path, make it absolute
-      filename = os.path.abspath(filename)
-
-      try:
-        tree_read, errors = self.s.read(filename)
-        if errors != "":
-          dialogs.long_message(None, "Warning: lost xml elements:\n" + errors)
-        self.tree = tree_read
-      except:
-        dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
-        return
+      
+    try:
+      tree_read, errors = self.s.read(filename)
+      if errors != "":
+        dialogs.long_message(None, "Warning: lost xml elements:\n" + errors)
+      self.tree = tree_read
+      self.filename = filename
+    except:
+      dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
+      return
       
     return
 
@@ -300,7 +304,6 @@ class Diamond:
     elif not filename == "":
       self.load_file(filename)
       
-    self.init_datatree()
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
     self.set_treestore(None, [self.tree], True)
