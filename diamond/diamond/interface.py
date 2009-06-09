@@ -118,9 +118,6 @@ class Diamond:
                     "on_save_as": self.on_save_as,
                     "on_validate": self.scherror.on_validate,
                     "on_validate_schematron": self.scherror.on_validate_schematron,
-                    "on_fluidity_asserts": self.on_fluidity_asserts,
-                    "on_statistics": self.on_statistics,
-                    "on_visualise": self.on_visualise,
                     "on_expand_all": self.on_expand_all,
                     "on_collapse_all": self.on_collapse_all,
                     "on_find": self.find.on_find,
@@ -161,25 +158,14 @@ class Diamond:
     if not schemafile is None:
       self.open_file(schemafile = schemafile, filename = input_filename)
 
-    # Hide specific menu items, such as "Run fluidity asserts", "Visualise initial setup"
-    # and "Validate schematron"
+    # Hide specific menu items
     menu = self.gui.get_widget("menu")
-
-    # Disable statistics
-    menu.get_children()[4].get_submenu().get_children()[1].set_property("visible", False)
     
-    # Disable find
+    # Disable Find
     menu.get_children()[1].get_submenu().get_children()[0].set_property("visible", False)
 
-    if not self.program_exists("flcheck"):
-      # Gray the "Run fluidity asserts" option
-      menu.get_children()[4].get_submenu().get_children()[3].set_property("visible", False)
-
-    if not self.program_exists("popstate"):
-     # Gray the "Visualise initial setup" option
-      menu.get_children()[4].get_submenu().get_children()[4].set_property("visible", False)
-
     if schematron_file is None:
+      # Disable Validate Schematron
       menu.get_children()[3].get_submenu().get_children()[1].set_property("sensitive", False)
 
     return
@@ -486,178 +472,6 @@ class Diamond:
 
   def on_display_properties_toggled(self, widget=None):
     self.options_frame.set_property("visible", not self.options_frame.get_property("visible"))
-    return
-
-  def on_fluidity_asserts(self, widget=None):
-    """
-    Run the fluidity asserts program when Tools > Run fluidity asserts is called.
-    """
-
-    if self.schemafile is None:
-      dialogs.error(self.main_window, "No schema file open")
-      return
-
-    file = tempfile.NamedTemporaryFile()
-    self.tree.write(file.name)
-    std_input, std_output, err_output = os.popen3("flcheck %s" % (file.name))
-    output = err_output.read()
-    if len(output) == 0:
-      output = "XML file validated successfully"
-
-    dialogs.long_message(self.main_window, output)
-
-    return
-
-  def on_statistics(self, widget):
-    """
-    Display statistics about the current tree.
-    """
-
-    def tree_count(choice_or_tree, counter):
-      """
-      Recursively decend through the children of the supplied choice or tree collecting
-      statistics.
-      """
-
-      if isinstance(choice_or_tree, choice.Choice):
-        counter["n_choice"] += 1
-        if not self.choice_or_tree_is_hidden(choice_or_tree):
-          counter["n_choice_visible"] += 1
-        for opt in choice_or_tree.choices():
-          if len(opt.children) == 0:
-            self.expand_choice_or_tree(opt)
-
-          tree_count(opt, counter)
-      else:
-        counter["n_tree"] += 1
-        if not self.choice_or_tree_is_hidden(choice_or_tree):
-          counter["n_tree_visible"] += 1
-        painted_tree = self.get_painted_tree(choice_or_tree)
-        if isinstance(painted_tree, MixedTree):
-          parent = painted_tree.parent
-          child = painted_tree.child
-          while isinstance(parent, MixedTree):
-            parent = parent.parent
-          while isinstance(child, MixedTree):
-            child = child.child
-          if not parent.datatype is None:
-            counter["n_data_visible"] -= 1
-          if child.doc is None:
-            counter["n_no_doc_visible"] -= 1
-          else:
-            counter["n_doc_visible"] -= 1
-          if len(child.attrs) > 0:
-            counter["n_attr_visible"] -= 1
-            counter["total_attr_visible"] -= len(choice_or_tree.attrs)
-        if choice_or_tree.doc is None:
-          counter["n_no_doc"] += 1
-          counter["n_no_doc_visible"] += 1
-        else:
-          counter["n_doc"] += 1
-          counter["n_doc_visible"] += 1
-        if len(choice_or_tree.attrs) > 0:
-          counter["n_attr"] += 1
-          counter["total_attr"] += len(choice_or_tree.attrs)
-          counter["n_attr_visible"] += 1
-          counter["total_attr_visible"] += len(choice_or_tree.attrs)
-        if not choice_or_tree.datatype is None:
-          counter["n_data"] += 1
-          counter["n_data_visible"] += 1
-        for child in choice_or_tree.children:
-          tree_count(child, counter)
-
-      return
-
-    counter = {}
-    counter["n_choice"] = 0
-    counter["n_tree"] = 0
-    counter["n_doc"] = 0
-    counter["n_no_doc"] = 0
-    counter["n_attr"] = 0
-    counter["total_attr"] = 0
-    counter["n_data"] = 0
-    counter["n_choice_visible"] = 0
-    counter["n_tree_visible"] = 0
-    counter["n_doc_visible"] = 0
-    counter["n_no_doc_visible"] = 0
-    counter["n_attr_visible"] = 0
-    counter["total_attr_visible"] = 0
-    counter["n_data_visible"] = 0
-
-    tree_count(self.tree, counter)    
-    
-    output = "Whole tree statistics:\n" + \
-             "\n" + \
-             "Choices: " + str(counter["n_choice"]) + "\n" + \
-             "Trees: " + str(counter["n_tree"]) + "\n" + \
-             "Documented trees: " + str(counter["n_doc"]) + "\n" + \
-             "Undocumented trees: " + str(counter["n_no_doc"]) + "\n" + \
-             "Trees with attributes: " + str(counter["n_attr"]) + "\n" + \
-             "Attributes: " + str(counter["total_attr"]) + "\n" + \
-             "Trees with data: " + str(counter["n_data"]) + "\n" + \
-             "\n" + \
-             "Visible tree statistics:\n" + \
-             "\n" + \
-             "Choices: " + str(counter["n_choice_visible"]) + "\n" + \
-             "Trees: " + str(counter["n_tree_visible"]) + "\n" + \
-             "Documented trees: " + str(counter["n_doc_visible"]) + "\n" + \
-             "Undocumented trees: " + str(counter["n_no_doc_visible"]) + "\n" + \
-             "Trees with attributes: " + str(counter["n_attr_visible"]) + "\n" + \
-             "Attributes: " + str(counter["total_attr_visible"]) + "\n" + \
-             "Trees with data: " + str(counter["n_data_visible"]) + "\n"
-
-    dialogs.long_message(self.main_window, output)
-
-    return
-
-  def on_visualise(self, widget):
-    """
-    Uses popstate to generate a vtu of the initial set-up (in a temporary file)
-    abd launches MayaVi to visualise the vtu.
-    """
-
-    # Check popstate in PATH
-    # Check for / Find MayaVi
-    # Save to temporary file name
-    # Call popstate
-    # Call MayaVi
-
-    # TODO: make this check that meshes, at least,
-    # are set up.
-
-    ret = os.system("which popstate > /dev/null")
-    if ret != 0:
-      dialogs.error(self.main_window, "popstate binary not available. Have you installed fluidity tools?")
-      return
-
-    possible_mayavi_cmds = ["mayavi", "mayavi2"]
-    for i in range(len(possible_mayavi_cmds)):
-      ret = os.system("which " + possible_mayavi_cmds[i] + " > /dev/null")
-      if ret == 0:
-        mayavi_cmd = possible_mayavi_cmds[i]
-        break
-      elif i == len(possible_mayavi_cmds) - 1:
-        dialogs.error(self.main_window, "mayavi not available. Have you installed mayavi?")
-        return
-
-    tmp = tempfile.NamedTemporaryFile()
-    name = tmp.name
-    self.tree.write(name + ".xml")
-
-    std_input, std_output, err_output = os.popen3("popstate %s %s" % (name + ".xml", name))
-    output = err_output.read()
-    if len(output) > 0:
-      cwd = os.getcwd()
-      os.chdir(self.file_path)
-      std_input, std_output, err_output = os.popen3("popstate %s %s" % (name + ".xml", name))
-      os.chdir(cwd)
-      output = err_output.read()
-      if len(output) > 0:
-        dialogs.long_message(self.main_window, output + "\npopstate encountered an error.\n")
-        return
-
-    os.spawnvp(os.P_NOWAIT, mayavi_cmd, [mayavi_cmd, "-d", name + "_0.vtu", "-m", "SurfaceMap", "-m", "SurfaceMap"])
-
     return
 
   def set_cell_node(self, iter):
