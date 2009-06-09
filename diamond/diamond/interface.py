@@ -1059,9 +1059,9 @@ class Diamond:
           confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
           if confirm == gtk.RESPONSE_YES:
             parent_tree.delete_child_by_ref(choice_or_tree)
+            self.remove_children(iter)
             self.treestore.remove(iter)
             self.set_saved(False)
-            self.remove_children(iter)
       else:
         # Make this active, and add a new inactive instance
         choice_or_tree.active = True
