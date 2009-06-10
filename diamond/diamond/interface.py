@@ -526,7 +526,7 @@ class Diamond:
    """
 
    dialog = dialogs.GoToDialog(self)
-   xpath = dialog.run()
+   spudpath = dialog.run()
 
    return
 
@@ -608,7 +608,7 @@ class Diamond:
       return
     iter = self.treestore.get_iter(path)
     active_tree = self.treestore.get_value(iter, 3)
-    name = self.get_xpath(active_tree)
+    name = self.get_spudpath(active_tree)
     clipboard = gtk.clipboard_get()
     clipboard.set_text(name)
     clipboard.store()
@@ -1173,9 +1173,10 @@ class Diamond:
     if not isinstance(node.datatype, tuple):
       self.data_renderer.set_property("editable", not (node.not_editable()))
 
-    name = self.get_xpath(active_tree)
+    name = self.get_spudpath(active_tree)
     self.statusbar.set_statusbar(name)
-    self.current_xpath = name
+    self.current_spudpath = name
+    self.current_xpath = self.get_xpath(active_tree)
 
     self.clear_plugin_buttons()
 
@@ -1185,7 +1186,7 @@ class Diamond:
 
     return
 
-  def get_xpath(self, active_tree):
+  def get_spudpath(self, active_tree):
     # get the name to paint on the statusbar
     name_tree = active_tree
     name = ""
@@ -1209,6 +1210,30 @@ class Diamond:
 
     # and split off the root name:
     name = '/' + '/'.join(name.split('/')[2:])
+    return name
+
+  def get_xpath(self, active_tree):
+    # get the name to paint on the statusbar
+    name_tree = active_tree
+    name = ""
+    while name_tree is not None:
+      if "name" in name_tree.attrs and name_tree.attrs["name"][1] is not None:
+        used_name = name_tree.name + '[@name="%s"]' % name_tree.attrs["name"][1]
+      elif name_tree.parent is not None and name_tree.parent.count_children_by_schemaname(name_tree.schemaname) > 1:
+        siblings = [x for x in name_tree.parent.children if x.schemaname == name_tree.schemaname]
+        i = 0
+        for sibling in siblings:
+          if sibling is name_tree:
+            break
+          else:
+            i = i + 1
+        used_name = name_tree.name + "[%s]" % i
+      else:
+        used_name = name_tree.name
+
+      name = "/" + used_name + name
+      name_tree = name_tree.parent
+
     return name
 
   def clear_plugin_buttons(self):
@@ -1317,15 +1342,17 @@ class Diamond:
     choice.set_active_choice_by_ref(ref)
     new_active_tree = choice.get_current_tree()
 
-    name = self.get_xpath(new_active_tree)
+    name = self.get_spudpath(new_active_tree)
     self.statusbar.set_statusbar(name)
     self.treestore.set(iter, 3, new_active_tree)
-    self.current_xpath = name
+    self.current_spudpath = name
+    xpath = self.get_xpath(active_tree)
+    self.current_xpath = xpath
 
     self.clear_plugin_buttons()
 
     for plugin in plugins.plugins:
-      if plugin.matches(name):
+      if plugin.matches(xpath):
         self.add_plugin_button(plugin)
 
     self.remove_children(iter)
