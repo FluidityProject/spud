@@ -60,7 +60,8 @@ class Schema(object):
                       'ignore' : self.cb_ignore,
                       'notAllowed' : self.cb_notallowed}
                       
-    self.lost_eles = ""
+    self.lost_eles = []
+    self.added_eles = []
   
     return
 
@@ -481,17 +482,20 @@ class Schema(object):
   def read(self, xmlfile):
     doc = etree.parse(xmlfile)
 
-    self.lost_eles = ""
+    self.lost_eles = []
+    self.added_eles = []
 
     datatree = self.valid_children(":start")[0]
     xmlnode  = doc.getroot()
     self.xml_read_merge(datatree, xmlnode)
     self.xml_read_core(datatree, xmlnode, doc)
 
-    if self.lost_eles != "":
-      debug.deprint("WARNING: lost XML elements:\n" + self.lost_eles)
+    if len(self.lost_eles) != 0:
+      debug.deprint("WARNING: Lost XML elements:\n" + str(self.lost_eles))
+    if len(self.added_eles) != 0:
+      debug.deprint("WARNING: Added XML elements:\n" + str(self.added_eles))
       
-    return datatree, self.lost_eles
+    return datatree
 
   def xml_read_merge(self, datatree, xmlnode):
     # The datatree has the following set:
@@ -758,13 +762,18 @@ class Schema(object):
 
   # Loop over lost nodes, and store their XML so the user can be notified later.
   def check_unused_nodes(self, used): 
+    def xml2string(xml):
+      buf = cStringIO.StringIO()
+      buf.write(etree.tostring(xml, pretty_print = True))
+      s = buf.getvalue()
+      buf.close()
+      
+      return s
+  
     for xml in used:
       if used[xml] is False:
-        buf = cStringIO.StringIO()
-        buf.write(etree.tostring(xml, pretty_print = True))
-        s = buf.getvalue()
-        buf.close()
-        self.lost_eles += s
+        s = xml2string(xml)
+        self.lost_eles += [s]
   
   # Append the children to the datatree in the order the schema presents them.
   # Order matters here.
@@ -803,7 +812,7 @@ class Schema(object):
 
     # no information from XML to be had :-/
     if xmlnode is None:
-      debug.deprint("Warning: Node %s with no XML information" % datatree.name)
+      self.added_eles.append(datatree.name)
       if datatree.active: datatree.add_children(self)
       return
 
@@ -818,3 +827,6 @@ class Schema(object):
     self.read_children(datatree, rootdoc)
 
     datatree.recompute_validity()
+    
+  def read_errors(self):
+    return self.lost_eles, self.added_eles

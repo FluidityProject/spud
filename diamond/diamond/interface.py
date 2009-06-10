@@ -263,7 +263,6 @@ class Diamond:
     filename = os.path.abspath(filename)
   
     if filename == self.filename:
-      print "not loading", filename
       return
   
     try:
@@ -278,9 +277,23 @@ class Diamond:
       return
       
     try:
-      tree_read, errors = self.s.read(filename)
-      if errors != "":
-        dialogs.long_message(None, "Warning: lost xml elements:\n" + errors)
+      tree_read = self.s.read(filename)
+      
+      # Extract and display validation errors
+      lost_eles, added_eles = self.s.read_errors()
+      if len(lost_eles) > 0 or len(added_eles) > 0:
+        msg = ""
+        if len(lost_eles) > 0:
+          msg += "Warning: lost xml elements:\n"
+          for ele in lost_eles:
+            msg += ele + "\n"
+        if len(added_eles) > 0:
+          msg += "Warning: added xml elements:\n"
+          for ele in added_eles:
+            msg += ele + "\n"
+      
+        dialogs.long_message(self.main_window, msg)
+        
       self.tree = tree_read
       self.filename = filename
     except:
