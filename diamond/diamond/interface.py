@@ -1346,7 +1346,7 @@ class Diamond:
     self.statusbar.set_statusbar(name)
     self.treestore.set(iter, 3, new_active_tree)
     self.current_spudpath = name
-    xpath = self.get_xpath(active_tree)
+    xpath = self.get_xpath(new_active_tree)
     self.current_xpath = xpath
 
     self.clear_plugin_buttons()
