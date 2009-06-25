@@ -1,3 +1,9 @@
+spud (1.0.14) unstable; urgency=low
+
+  * Various bugfixes including to diamond validation.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Thu, 25 Jun 2009 15:01:27 +0100
+
 spud (1.0.13) unstable; urgency=low
 
   * Fix the None bug which prevents opening files with lost elements.
