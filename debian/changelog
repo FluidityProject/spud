@@ -1,8 +1,14 @@
-spud (1.0.14) unstable; urgency=low
+spud (1.0.15) intrepid; urgency=low
 
-  * Various bugfixes including to diamond validation.
+  * We need a new release for various minor bugs.
 
- -- David Ham <david.ham@imperial.ac.uk>  Thu, 25 Jun 2009 15:01:27 +0100
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Fri, 19 Jun 2009 13:30:53 +0100
+
+spud (1.0.14) intrepid; urgency=low
+
+  * We need a new release for various minor bugs.
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Mon, 01 Jun 2009 14:08:04 +0100
 
 spud (1.0.13) unstable; urgency=low
 
