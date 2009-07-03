@@ -62,10 +62,10 @@ subroutine test_fspud
   call test_set_and_get_type_none("/type_none")
     
   print *, "*** Testing set_option for integer scalar, with option name ***"
-  call test_named_key("/type_integer", "name", 42)
+  call test_named_key("/integer_scalar", "name", 42)
   
   print *, "*** Testing set_option for integer scalar, with option name (containing symbols) ***"
-  call test_named_key("/type_integer", 'tricky_name!"£$%^&*()', 42)
+  call test_named_key("/integer_scalar", 'tricky_name!"£$%^&*()', 42)
   
 contains
   
@@ -109,37 +109,37 @@ contains
     shape = option_shape(key, stat)
     call report_test("[Key error when extracting option shape]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option shape")
     call get_option(key, test_real_scalar, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_real_scalar, stat, default = 42.0_D)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", abs(test_real_scalar - 42.0_D) > tol, .false., "Retrieved incorrect option data")
     call get_option(key, test_real_vector, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_real_vector, stat, default = real_vector_default)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", maxval(abs(test_real_vector - real_vector_default)) > tol, .false., "Retrieved incorrect option data")
     call get_option(key, test_real_tensor, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_real_tensor, stat, default = real_tensor_default)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", maxval(abs(test_real_tensor - real_tensor_default)) > tol, .false., "Retrieved incorrect option data")
     call get_option(key, test_integer_scalar, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_integer_scalar, stat, default = 42)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", test_integer_scalar /= 42, .false., "Retrieved incorrect option data")
     call get_option(key, test_integer_vector, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_integer_vector, stat, default = integer_vector_default)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", count(test_integer_vector /= integer_vector_default) > 0, .false., "Retrieved incorrect option data")
     call get_option(key, test_integer_tensor, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_integer_tensor, stat, default = integer_tensor_default)
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", count(test_integer_tensor /= integer_tensor_default) > 0, .false., "Retrieved incorrect option data")
     call get_option(key, test_char, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(key, test_char, stat, default = "Forty Two")
     call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data (default)]", test_char /= "Forty Two", .false., "Retrieved incorrect option data")
@@ -343,6 +343,8 @@ contains
     call delete_option(key, stat)
     call report_test("[Deleted option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when deleting option")
     
+    call test_key_errors(key)
+    
   end subroutine test_delete_option
   
   subroutine test_clear_options(key)
@@ -396,8 +398,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_real_scalar
   
@@ -455,8 +455,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_real_vector
   
@@ -514,8 +512,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_real_tensor
   
@@ -559,8 +555,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_integer_scalar
   
@@ -618,8 +612,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_integer_vector
   
@@ -677,8 +669,6 @@ contains
     end do
 
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_integer_tensor
   
@@ -730,8 +720,6 @@ contains
     end do
 
     call test_delete_option(key)
-
-    call test_key_errors(key)
   
   end subroutine test_set_and_get_character
   
@@ -763,8 +751,6 @@ contains
     end do
     
     call test_delete_option(key)
-
-    call test_key_errors(key)
     
   end subroutine test_set_and_get_type_none
   
@@ -795,12 +781,12 @@ contains
     call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
     call report_test("[Extracted correct option data]", trim(name_val) /= trim(name), .false., "Retrieved incorrect option data")
     
+    call get_option(trim(key) // "[0]trailingtext", integer_val, stat)
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     call get_option(trim(key) // "[1]", integer_val, stat)
-    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option type")
+    call report_test("[Key error when extracting option data]", stat /= SPUD_KEY_ERROR, .false., "Returned incorrect error code when retrieving option data")
     
     call test_delete_option(key)
-    
-    call test_key_errors(key)
   
   end subroutine test_named_key
 

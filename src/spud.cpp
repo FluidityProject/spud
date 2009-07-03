@@ -748,7 +748,10 @@ namespace Spud{
 
     string name, branch;
     int index;
-    split_name(key, name, index, branch);
+    OptionError key_err = split_name(key, name, index, branch);
+    if(key_err != SPUD_NO_ERROR){
+      return NULL;
+    }
 
     if(name.empty()){
       return NULL;
@@ -807,7 +810,10 @@ namespace Spud{
 
     string name, branch;
     int index;
-    split_name(key, name, index, branch);
+    OptionError key_err = split_name(key, name, index, branch);
+    if(key_err != SPUD_NO_ERROR){
+      return 0;
+    }
 
     if(name.empty()){
       return 0;
@@ -1117,7 +1123,10 @@ namespace Spud{
       cout << "OptionError OptionManager::Option::delete_option(const string& key = " << key << ")\n";
 
     string branch, name;
-    split_name(key, name, branch);
+    OptionError key_err = split_name(key, name, branch);
+    if(key_err != SPUD_NO_ERROR){
+      return key_err;
+    }
 
     Option* opt = get_child(name);
     if(opt == NULL){
@@ -1210,7 +1219,10 @@ namespace Spud{
 
     string branch, name;
     int index;
-    split_name(key, name, index, branch);
+    OptionError key_err = split_name(key, name, index, branch);
+    if(key_err != SPUD_NO_ERROR){
+      return NULL;
+    }
 
     if(name.empty()){
       return NULL;
@@ -1555,9 +1567,9 @@ namespace Spud{
     return;
   }
 
-  void OptionManager::Option::split_name(const string& in, string& name, string& branch) const{
+  OptionError OptionManager::Option::split_name(const string& in, string& name, string& branch) const{
     if(verbose)
-      cout << "void OptionManager::Option::split_name(const string& in = " << in << ", string& name, string& branch) const\n";
+      cout << "OptionError OptionManager::Option::split_name(const string& in = " << in << ", string& name, string& branch) const\n";
 
     name = "";
     branch = "";
@@ -1567,7 +1579,7 @@ namespace Spud{
     // Skip delimiters at beginning.
     string::size_type lastPos = fullname.find_first_not_of("/", 0);
     if(lastPos == string::npos){
-      return;
+      return SPUD_NO_ERROR;
     }
 
     // Find next delimiter
@@ -1579,25 +1591,31 @@ namespace Spud{
       branch = fullname.substr(pos, fullname.size()-pos);
     }
 
-    return;
+    return SPUD_NO_ERROR;
   }
 
-  void OptionManager::Option::split_name(const string& in, string& name, int& index, string& branch) const{
+  OptionError OptionManager::Option::split_name(const string& in, string& name, int& index, string& branch) const{
     if(verbose)
-      cout << "void OptionManager::Option::split_name(const string& in = " << in << ", string& name, int& index, string& branch) const\n";
+      cout << "OptionError OptionManager::Option::split_name(const string& in = " << in << ", string& name, int& index, string& branch) const\n";
 
     index = -1;
-    split_name(in, name, branch);
+    OptionError key_err = split_name(in, name, branch);
+    if(key_err != SPUD_NO_ERROR){
+      return key_err;
+    }
 
     // Extract the index from the name if necessary
     string::size_type pos = name.find_first_of("[", 0);
     string::size_type lastPos = name.find_first_of("]", 0);
+    if(lastPos < name.size() - 1){      
+      return SPUD_KEY_ERROR;
+    }
     if((lastPos-pos) > 0){
       istringstream(name.substr(pos + 1, lastPos - 1))>>index;
       name = name.substr(0, pos);
     }
 
-    return;
+    return SPUD_NO_ERROR;
   }
 
   void OptionManager::Option::split_node_name(string& node_name, string& name_attr) const{

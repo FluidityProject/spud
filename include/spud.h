@@ -342,13 +342,13 @@ namespace Spud{
             * Split the supplied key into the highest child name (including its
             * index) and key from that sub-child.
             */
-          void split_name(const std::string& in, std::string& name, std::string& branch) const;
+          OptionError split_name(const std::string& in, std::string& name, std::string& branch) const;
           /**
             * Split the supplied key in into the highest child name (excluding
             * its index), the index of that sub-child, and the key from that
             * sub-child.
             */
-          void split_name(const std::string& in, std::string& name, int& index, std::string& branch) const;
+          OptionError split_name(const std::string& in, std::string& name, int& index, std::string& branch) const;
           /**
             * Split the name of this element into the key (excluding the name
             * attribute) and it's name attribute (which may be empty).
