@@ -397,6 +397,8 @@ class Diamond:
     one.
     """
 
+    self.node_data_store()
+
     if self.filename is None:
       return self.on_save_as(widget)
     else:
