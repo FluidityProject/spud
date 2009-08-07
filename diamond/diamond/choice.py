@@ -61,7 +61,7 @@ class Choice:
   def set_active_choice_by_name(self, name):
     matched = False
     for t in self.l:
-      if t.name == name[0:len(t.name)]:
+      if t.name == name.strip():
         matched = True
         self.index = self.l.index(t)
 
