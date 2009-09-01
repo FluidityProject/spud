@@ -181,14 +181,13 @@ class Diamond:
     Update the Diamond title based on the save status of the currently open file.
     """
 
-    title = ""
+    title = "Diamond: "
     if not self.saved:
       title += "*"
     if self.filename is None:
       title += "(Unsaved)"
     else:
-      title += self.filename.split("/")[len(self.filename.split("/")) - 1]
-    title += " - Diamond"
+      title += os.path.basename(self.filename) + " (%s)" % os.path.dirname(self.filename)
 
     self.main_window.set_title(title)
 
