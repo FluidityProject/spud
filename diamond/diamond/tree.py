@@ -235,7 +235,7 @@ class Tree:
     else:
       file = filename
 
-    xmlTree=etree.tostring(self.write_core(None), pretty_print = True, xml_declaration = True, encoding="utf8")
+    xmlTree=etree.tostring(self.write_core(None), pretty_print = True, xml_declaration = True, encoding="utf-8")
     
     file.write(xmlTree)
 
