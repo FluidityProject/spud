@@ -195,7 +195,8 @@ class RadioDialog:
     self.window.connect("delete_event", self.cleanup)
     self.window.set_title(title)
     self.window.set_position(gtk.WIN_POS_CENTER)
-    self.window.set_icon_from_file(logo)
+    if not logo is None:
+      self.window.set_icon_from_file(logo)
     self.window.show()
 
     #swindow = gtk.ScrolledWindow()
@@ -207,10 +208,11 @@ class RadioDialog:
     self.window.add(main_box)
     main_box.show()
 
-    image = gtk.Image()
-    image.set_from_file(logo)
-    main_box.pack_start(image, True, True, 0)
-    image.show()
+    if not logo is None:
+      image = gtk.Image()
+      image.set_from_file(logo)
+      main_box.pack_start(image, True, True, 0)
+      image.show()
 
     label = gtk.Label(message)
     main_box.add(label)
