@@ -394,6 +394,9 @@ contains
       call test_rank_errors_real_tensor(key)
       call test_type_errors_integer(key)
       call test_type_errors_character(key)
+      
+      call test_get_character(key // "/rank", "0")
+      call test_key_errors(key // "/shape")
     
     end do
     
@@ -451,6 +454,9 @@ contains
       call test_rank_errors_real_tensor(key)
       call test_type_errors_integer(key)
       call test_type_errors_character(key)
+      
+      call test_get_character(key // "/rank", "1")
+      call test_get_character(key // "/shape", int2str(size(test_real_vector)))
     
     end do
     
@@ -508,6 +514,9 @@ contains
       call test_rank_errors_real_vector(key)
       call test_type_errors_integer(key)
       call test_type_errors_character(key)
+      
+      call test_get_character(key // "/rank", "2")
+      call test_get_character(key // "/shape", int2str(size(test_real_tensor, 2)) // " " // int2str(size(test_real_tensor, 1)))
     
     end do
     
@@ -562,6 +571,7 @@ contains
     
       call test_get_integer_scalar(key, ltest_integer_scalar)
       call test_get_character(key // "/rank", "0")
+      call test_key_errors(key // "/shape")
    
     end do
     
@@ -619,6 +629,9 @@ contains
       call test_rank_errors_integer_scalar(key)
       call test_rank_errors_integer_tensor(key)
       call test_type_errors_character(key)
+      
+      call test_get_character(key // "/rank", "1")
+      call test_get_character(key // "/shape", int2str(size(test_integer_vector)))
     
     end do
     
@@ -676,6 +689,9 @@ contains
       call test_rank_errors_integer_scalar(key)
       call test_rank_errors_integer_vector(key)
       call test_type_errors_character(key)
+      
+      call test_get_character(key // "/rank", "2")
+      call test_get_character(key // "/shape", int2str(size(test_integer_tensor, 2)) // " " // int2str(size(test_integer_tensor, 1)))
     
     end do
 
@@ -738,6 +754,8 @@ contains
       end select
       
       call test_get_character(key, ltest_character)
+      call test_key_errors(key // "/rank")
+      call test_key_errors(key // "/shape")
           
     end do
 
@@ -769,6 +787,9 @@ contains
       call test_type_errors_real(key)
       call test_type_errors_integer(key)
       call test_type_errors_character(key)
+      
+      call test_key_errors(key // "/rank")
+      call test_key_errors(key // "/shape")
     
     end do
     

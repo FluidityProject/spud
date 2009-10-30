@@ -31,7 +31,7 @@ module unittest_tools
 
   private
   
-  public :: report_test
+  public :: report_test, int2str_len, int2str
   
 contains
 
@@ -55,5 +55,34 @@ contains
     end if
 
   end subroutine report_test
+  
+  pure function int2str_len(i)
+
+    !!< Count number of digits in i.
+
+    integer, intent(in) :: i
+    integer :: int2str_len 
+
+    if(i==0) then
+       int2str_len=1
+    else if (i>0) then
+       int2str_len = floor(log10(real(i)))+1
+    else
+       int2str_len = floor(log10(abs(real(i))))+2
+    end if
+
+  end function int2str_len
+
+  function int2str (i)
+
+    !!< Convert integer i into a string.
+    !!< This should only be used when forming option strings.
+
+    integer, intent(in) :: i
+    character(len=int2str_len(i)) :: int2str
+
+    write(int2str,"(i0)") i
+
+  end function int2str
   
 end module unittest_tools
