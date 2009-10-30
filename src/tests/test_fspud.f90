@@ -66,7 +66,7 @@ subroutine test_fspud
   
   print *, "*** Testing set_option for integer scalar, with option name (containing symbols) ***"
   call test_named_key("/integer_scalar", 'tricky_name!"£$%^&*()', 42)
-  
+    
 contains
   
   subroutine test_key_errors(key)
@@ -515,11 +515,36 @@ contains
   
   end subroutine test_set_and_get_real_tensor
   
+  subroutine test_get_integer_scalar(key, test_integer_scalar)
+    character(len = *), intent(in) :: key
+    integer, intent(in) :: test_integer_scalar
+    
+    integer :: integer_scalar_val, stat
+    
+    call test_key_present(key)
+    call test_type(key, SPUD_INTEGER)
+    call test_rank(key, 0)
+    call test_shape(key, (/-1, -1/))
+    
+    call get_option(key, integer_scalar_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", integer_scalar_val /= test_integer_scalar, .false., "Retrieved incorrect option data")
+    call get_option(key, integer_scalar_val, stat, default = test_integer_scalar + 1)
+    call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data with default argument]", integer_scalar_val /= test_integer_scalar, .false., "Retrieved incorrect option data")
+    
+    call test_type_errors_real(key)
+    call test_rank_errors_integer_vector(key)
+    call test_rank_errors_integer_tensor(key)
+    call test_type_errors_character(key)
+    
+  end subroutine test_get_integer_scalar
+  
   subroutine test_set_and_get_integer_scalar(key, test_integer_scalar)
     character(len = *), intent(in) :: key
     integer, intent(in) :: test_integer_scalar
 
-    integer :: i, integer_scalar_val, ltest_integer_scalar, stat
+    integer :: i, ltest_integer_scalar, stat
     
     call test_key_errors(key)
     
@@ -535,22 +560,8 @@ contains
           call report_test("[Set existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when setting option")
       end select
     
-      call test_key_present(key)
-      call test_type(key, SPUD_INTEGER)
-      call test_rank(key, 0)
-      call test_shape(key, (/-1, -1/))
-      
-      call get_option(key, integer_scalar_val, stat)
-      call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
-      call report_test("[Extracted correct option data]", integer_scalar_val /= ltest_integer_scalar, .false., "Retrieved incorrect option data")
-      call get_option(key, integer_scalar_val, stat, default = ltest_integer_scalar + 1)
-      call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
-      call report_test("[Extracted correct option data with default argument]", integer_scalar_val /= ltest_integer_scalar, .false., "Retrieved incorrect option data")
-      
-      call test_type_errors_real(key)
-      call test_rank_errors_integer_vector(key)
-      call test_rank_errors_integer_tensor(key)
-      call test_type_errors_character(key)
+      call test_get_integer_scalar(key, ltest_integer_scalar)
+      call test_get_character(key // "/rank", "0")
    
     end do
     
@@ -672,12 +683,44 @@ contains
   
   end subroutine test_set_and_get_integer_tensor
   
+  subroutine test_get_character(key, test_character)
+    character(len = *), intent(in) :: key
+    character(len = *), intent(in) :: test_character
+    
+    character(len = 0) :: short_character
+    character(len = len(test_character)) :: character_val
+    integer :: stat
+    
+    call test_key_present(key)
+    call test_type(key, SPUD_CHARACTER)
+    call test_rank(key, 1)
+    call test_shape(key, (/len_trim(test_character), -1/))
+    
+    call get_option(key, character_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", trim(character_val) /= trim(test_character), .false., "Retrieved incorrect option data")
+    call get_option(key, character_val, stat, default = trim(test_character) // " Plus One")
+    call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data with default argument]", trim(character_val) /= trim(test_character), .false., "Retrieved incorrect option data") 
+    if(len_trim(test_character) > 0) then
+      call get_option(key, short_character, stat)
+      call report_test("[Shape error when extracting option data]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+      call get_option(key, short_character, stat, default = "")
+      call report_test("[Shape error when extracting option data with default argument]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
+    else
+      write(0, *) "Warning: Zero length test character supplied - character shape test skipped"
+    end if
+    
+    call test_type_errors_real(key)
+    call test_type_errors_integer(key)
+    
+  end subroutine test_get_character
+  
   subroutine test_set_and_get_character(key, test_character)
     character(len = *), intent(in) :: key
     character(len = *), intent(in) :: test_character
 
-    character(len = 0) :: short_character
-    character(len = len_trim(test_character) + len(" Plus One")) :: character_val, ltest_character
+    character(len = len_trim(test_character) + len(" Plus One")) :: ltest_character
     integer :: i, stat
     
     call test_key_errors(key)
@@ -694,29 +737,8 @@ contains
           call report_test("[Set existing option]", stat /= SPUD_NO_ERROR, .false., "Returned error code when setting option")
       end select
       
-      call test_key_present(key)
-      call test_type(key, SPUD_CHARACTER)
-      call test_rank(key, 1)
-      call test_shape(key, (/len_trim(ltest_character), -1/))
-      
-      call get_option(key, character_val, stat)
-      call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
-      call report_test("[Extracted correct option data]", trim(character_val) /= trim(ltest_character), .false., "Retrieved incorrect option data")
-      call get_option(key, character_val, stat, default = trim(ltest_character) // " Plus One")
-      call report_test("[Extracted option data with default argument]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
-      call report_test("[Extracted correct option data with default argument]", trim(character_val) /= trim(ltest_character), .false., "Retrieved incorrect option data") 
-      if(len_trim(ltest_character) > 0) then
-        call get_option(key, short_character, stat)
-        call report_test("[Shape error when extracting option data]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
-        call get_option(key, short_character, stat, default = "")
-        call report_test("[Shape error when extracting option data with default argument]", stat /= SPUD_SHAPE_ERROR, .false., "Returned error code when retrieving option data")
-      else
-        write(0, *) "Warning: Zero length test character supplied - character shape test skipped"
-      end if
-      
-      call test_type_errors_real(key)
-      call test_type_errors_integer(key)
-    
+      call test_get_character(key, ltest_character)
+          
     end do
 
     call test_delete_option(key)

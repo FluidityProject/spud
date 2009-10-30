@@ -865,7 +865,7 @@ namespace Spud{
 
   OptionType OptionManager::Option::get_option_type() const{
     if(verbose)
-      cout << "OptionType FLOption::get_option_type(void) const\n";
+      cout << "OptionType OptionManager::Option::get_option_type(void) const\n";
 
     if(have_option("__value")){
       return children.find("__value")->second.get_option_type();
@@ -884,7 +884,7 @@ namespace Spud{
 
   size_t OptionManager::Option::get_option_rank() const{
     if(verbose)
-      cout << "size_t FLOption::get_option_rank(void) const\n";
+      cout << "size_t OptionManager::Option::get_option_rank(void) const\n";
 
     if(have_option("__value")){
       return children.find("__value")->second.get_option_rank();
@@ -895,7 +895,7 @@ namespace Spud{
 
   vector<int> OptionManager::Option::get_option_shape() const{
     if(verbose)
-      cout << "vector<int> FLOption::get_option_shape(void) const\n";
+      cout << "vector<int> OptionManager::Option::get_option_shape(void) const\n";
 
     if(have_option("__value")){
       return children.find("__value")->second.get_option_shape();
@@ -1117,7 +1117,6 @@ namespace Spud{
     }
   }
 
-
   OptionError OptionManager::Option::delete_option(const string& key){
     if(verbose)
       cout << "OptionError OptionManager::Option::delete_option(const string& key = " << key << ")\n";
@@ -1285,11 +1284,8 @@ namespace Spud{
       return SPUD_SHAPE_ERROR;
     }
 
-    logical_t set_attrs = false;
-    if(rank > 0){
-      OptionType type = get_option_type();
-      set_attrs = (type == SPUD_DOUBLE or type == SPUD_INT);
-    }
+    OptionType type = get_option_type();
+    logical_t set_attrs = (type == SPUD_DOUBLE or type == SPUD_INT);
     switch(rank){
       case(-1):
         this->rank = -1;
@@ -1300,6 +1296,11 @@ namespace Spud{
         this->rank = 0;
         this->shape[0] = -1;
         this->shape[1] = -1;
+        if(set_attrs){
+          ostringstream rank_as_string;
+          rank_as_string << this->rank;
+          set_attribute("rank", rank_as_string.str());
+        }
         break;
       case(1):
         this->rank = 1;
