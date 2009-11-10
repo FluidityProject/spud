@@ -187,7 +187,9 @@ class Diamond:
     if self.filename is None:
       title += "(Unsaved)"
     else:
-      title += os.path.basename(self.filename) + " (%s)" % os.path.dirname(self.filename)
+      title += os.path.basename(self.filename)
+      if len(os.path.dirname(self.filename)) > 0:
+        title += " (%s)" % os.path.dirname(self.filename)
 
     self.main_window.set_title(title)
 
