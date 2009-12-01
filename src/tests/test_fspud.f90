@@ -32,7 +32,7 @@ subroutine test_fspud
   implicit none
 
   integer, parameter :: D = kind(0.0D0)
-  real(D), parameter :: tol = 1.0e-6_D
+  real(D), parameter :: tol = epsilon(0.0)
   
   print *, "*** Testing clear_options ***"
   call test_clear_options("/type_none")
