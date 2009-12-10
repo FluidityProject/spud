@@ -36,32 +36,36 @@ MAKE    = @MAKE@
 AR      = @AR@
 ARFLAGS = @ARFLAGS@
 
-LIB = libspud.a
+LIB = libspud.la
 
 HEADERS = include/cspud.h include/spud.h include/spud_config.h include/spud_enums.h include/tinystr.h include/tinyxml.h
 MODS = spud.mod
-OBJS = fspud.o spud.o spud_interfaces.o tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o
+OBJS = spud.lo spud_interfaces.lo tinystr.lo tinyxml.lo tinyxmlerror.lo tinyxmlparser.lo
+FOBJS = fspud.lo
 
 VPATH = src/
 
-.SUFFIXES: .f90 .F90 .c .cpp .o .a
+.SUFFIXES: .f90 .F90 .c .cpp .lo .la
 
-.f90.o:
-	$(FC) $(FCFLAGS) -c $<
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -c $<
+.f90.lo:
+	libtool --mode=compile --tag=FC $(FC) $(FCFLAGS) -c $<
+.cpp.lo:
+	libtool --mode=compile --tag=CXX $(CXX) $(CXXFLAGS) -c $<
 
-default: libspud.a build-diamond
+default: libspud.la build-diamond
 
-libspud.a: $(OBJS)
-	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+libspud.la: $(OBJS) $(FOBJS)
+	libtool --mode=link --tag=FC $(FC) $(FCFLAGS) -o $(LIB) $(OBJS) $(FOBJS) -rpath @prefix@/lib # once with fortran for the static
+	cp .libs/libspud.a .
+	libtool --mode=link --tag=CXX $(CXX) $(CXXFLAGS) -o $(LIB) $(OBJS) -rpath @prefix@/lib # once without fortran for the shared
+	cp .libs/libspud.so .
 
 build-diamond:
 	cd diamond; python setup.py build; cd ..
 
 test: unittest
 
-unittest: libspud.a
+unittest: libspud.la
 	@cd src/tests; $(MAKE)
 
 .PHONY:doc
@@ -74,7 +78,8 @@ install: install-libspud install-spudtools install-diamond
 install-libspud: libspud.a
 	@INSTALL@ -d $(DESTDIR)@prefix@/lib
 	@INSTALL@ -d $(DESTDIR)@prefix@/include
-	@INSTALL@ $(LIB) $(DESTDIR)@prefix@/lib
+	@INSTALL@ libspud.a $(DESTDIR)@prefix@/lib
+	@INSTALL@ libspud.so $(DESTDIR)@prefix@/lib
 	@INSTALL@ $(MODS) $(DESTDIR)@prefix@/include
 	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
 
@@ -91,7 +96,8 @@ install-diamond:
 
 clean:
 	@cd doc; $(MAKE) clean
-	rm -f *.o libspud.a $(MODS) $(OBJS)
+	rm -f *.o libspud.a libspud.so *.o *.la *.mod *.lo
+	rm -rf .libs
 	@cd src/tests; $(MAKE) clean
 
 distclean: clean

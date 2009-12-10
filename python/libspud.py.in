@@ -41,7 +41,7 @@ spud_exceptions = {SPUD_KEY_ERROR: SpudKeyError,
                    SPUD_RANK_ERROR: SpudRankError,
                    SPUD_SHAPE_ERROR: SpudShapeError}
 
-libspud = cdll.LoadLibrary(os.getcwd() + '/_libspud.so')
+libspud = cdll.LoadLibrary('@prefix@'  + '/lib/libspud.so')
 
 cload_options = libspud.cspud_load_options_
 cload_options.argtypes = [c_char_p, POINTER(c_int)]
