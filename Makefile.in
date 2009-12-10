@@ -37,11 +37,11 @@ AR      = @AR@
 ARFLAGS = @ARFLAGS@
 
 LIB = libspud.la
+LIBS = @LIBS@
 
 HEADERS = include/cspud.h include/spud.h include/spud_config.h include/spud_enums.h include/tinystr.h include/tinyxml.h
 MODS = spud.mod
-OBJS = spud.lo spud_interfaces.lo tinystr.lo tinyxml.lo tinyxmlerror.lo tinyxmlparser.lo
-FOBJS = fspud.lo
+OBJS = spud.lo spud_interfaces.lo tinystr.lo tinyxml.lo tinyxmlerror.lo tinyxmlparser.lo fspud.lo
 
 VPATH = src/
 
@@ -54,11 +54,9 @@ VPATH = src/
 
 default: libspud.la build-diamond
 
-libspud.la: $(OBJS) $(FOBJS)
-	libtool --mode=link --tag=FC $(FC) $(FCFLAGS) -o $(LIB) $(OBJS) $(FOBJS) -rpath @prefix@/lib # once with fortran for the static
-	cp .libs/libspud.a .
-	libtool --mode=link --tag=CXX $(CXX) $(CXXFLAGS) -o $(LIB) $(OBJS) -rpath @prefix@/lib # once without fortran for the shared
-	cp .libs/libspud.so .
+libspud.la: $(OBJS)
+	libtool --mode=link --tag=FC $(FC) $(FCFLAGS) -o $(LIB) $(OBJS) $(LIBS) -rpath @prefix@/lib 
+	cp .libs/libspud.a .libs/libspud.so .
 
 build-diamond:
 	cd diamond; python setup.py build; cd ..

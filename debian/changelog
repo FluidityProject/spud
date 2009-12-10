@@ -1,3 +1,9 @@
+spud (1.0.17) karmic; urgency=low
+
+  * Use libtool to build a static and shared library 
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Thu, 10 Dec 2009 11:05:15 +0000
+
 spud (1.0.16) intrepid; urgency=low
 
   * Various bugfixes including to diamond validation.

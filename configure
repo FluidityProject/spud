@@ -6205,10 +6205,6 @@ if test "$FC" = "ifc" ; then
   FCFLAGS="-implicitnone -w95 $FCFLAGS"
 fi
 
-#####
-#
-LIBS="$LIBS -L./lib"
-
 ##############################################################
 # enable gprof profiling
 
@@ -6230,6 +6226,7 @@ fi
 
 
 VERSION=`svnversion .`
+
 
 
 

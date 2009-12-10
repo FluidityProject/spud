@@ -288,10 +288,6 @@ if test "$FC" = "ifc" ; then
   FCFLAGS="-implicitnone -w95 $FCFLAGS"
 fi
 
-#####
-#
-LIBS="$LIBS -L./lib"
-
 ##############################################################
 # enable gprof profiling
 
@@ -315,6 +311,7 @@ AC_SUBST(VERSION)
 AC_SUBST(ARFLAGS)
 AC_SUBST(LINKER)
 AC_SUBST(MAKE)
+AC_SUBST(LIBS)
 
 AC_OUTPUT(Makefile src/tests/Makefile examples/Makefile
           bin/spud-preprocess
