@@ -73,7 +73,7 @@ doc:
 
 install: install-libspud install-spudtools install-diamond
 
-install-libspud: libspud.a
+install-libspud: libspud.la
 	@INSTALL@ -d $(DESTDIR)@prefix@/lib
 	@INSTALL@ -d $(DESTDIR)@prefix@/include
 	@INSTALL@ libspud.a $(DESTDIR)@prefix@/lib
