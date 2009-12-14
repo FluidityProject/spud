@@ -137,3 +137,9 @@ def option_rank(s):
     raise spud_exceptions[out]
   return rank.value
 
+cprint_options = libspud.cspud_print_options_
+cprint_options.restype = None
+cprint_options.argtypes = []
+
+def print_options():
+  cprint_options()
