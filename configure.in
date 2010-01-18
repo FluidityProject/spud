@@ -94,18 +94,6 @@ LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FCLIBS $FLIBS"
 
 LINKER=$CXX
 
-AC_ARG_ENABLE(shared,
-[AC_HELP_STRING([--enable-shared],
-[Compile objects with -fPIC to enable the 'make shared' target.])])
-
-if test "$enable_shared" = "yes" ; then
-  PIC_FLAG="-fPIC"
-  FCFLAGS="$FCFLAGS $PIC_FLAG"
-  CXXFLAGS="$CXXFLAGS $PIC_FLAG"
-else
-  PIC_FLAG=""
-fi
-
 ##
 ## what compiler options work
 ##
