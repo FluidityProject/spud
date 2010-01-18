@@ -78,7 +78,7 @@ install-libspud: libspud.la
 	@INSTALL@ -d $(DESTDIR)@prefix@/lib
 	@INSTALL@ -d $(DESTDIR)@prefix@/include
 	@INSTALL@ libspud.a $(DESTDIR)@prefix@/lib
-	@INSTALL@ libspud.so $(DESTDIR)@prefix@/lib
+	(if test -f libspud.so; then @INSTALL@ libspud.so $(DESTDIR)@prefix@/lib; fi) || true
 	@INSTALL@ $(MODS) $(DESTDIR)@prefix@/include
 	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
 
