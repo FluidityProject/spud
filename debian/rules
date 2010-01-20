@@ -4,7 +4,7 @@ PACKAGE_NAME=diamond
 MODULE_NAME=diamond
 DEB_UPSTREAM_VERSION=1.0
 
-PYVERS=2.5
+PYVERS=$(shell pyversions -dv)
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -69,7 +69,7 @@ install-prereq:
 
 install-python%:
 # Force setuptools, but reset sys.argv[0] to 'setup.py' because setup.py files expect that.
-	cd diamond;python$* -c "import setuptools,sys;f='setup.py';sys.argv[0]=f;execfile(f,{'__file__':f,'__name__':'__main__'})" install		 --no-compile --single-version-externally-managed		 --root $(CURDIR)/debian/${PACKAGE_NAME}
+	cd diamond;python$* -c "import setuptools,sys;f='setup.py';sys.argv[0]=f;execfile(f,{'__file__':f,'__name__':'__main__'})" install --prefix=/usr --no-compile --single-version-externally-managed		 --root $(CURDIR)/debian/${PACKAGE_NAME}
 	mv debian/${PACKAGE_NAME}/usr/lib/python$*/site-packages/${MODULE_NAME}-${DEB_UPSTREAM_VERSION}-py$*.egg-info		 debian/${PACKAGE_NAME}/usr/lib/python$*/site-packages/${MODULE_NAME}.egg-info
 
 binary-arch: build-libspud install-libspud install-spudtools
