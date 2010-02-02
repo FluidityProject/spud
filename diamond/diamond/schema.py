@@ -812,7 +812,7 @@ class Schema(object):
 
     # no information from XML to be had :-/
     if xmlnode is None:
-      self.added_eles.append(datatree.name)
+      self.added_eles.append(self.readable_name(datatree))
       if datatree.active: datatree.add_children(self)
       return
 
@@ -830,3 +830,11 @@ class Schema(object):
     
   def read_errors(self):
     return self.lost_eles, self.added_eles
+
+  def readable_name(self, datatree):
+    output = ""
+    node = datatree
+    while node is not None:
+      output = node.name + '/' + output
+      node = node.parent
+    return '/' + output[:-1]
