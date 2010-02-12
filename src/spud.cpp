@@ -697,7 +697,7 @@ namespace Spud{
     TiXmlDocument doc;
 
     // XML header
-    TiXmlDeclaration* header = new TiXmlDeclaration("1.0", "", "");
+    TiXmlDeclaration* header = new TiXmlDeclaration("1.0", "utf-8", "");
     doc.LinkEndChild(header);
 
     // Root node
