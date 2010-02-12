@@ -2002,7 +2002,7 @@ class Diamond:
 
     for bounds in self.node_desc_link_bounds:
       if char_offset >= bounds[0] and char_offset <= bounds[1]:
-        webbrowser.open(self.render_whitespace(self.selected_node.doc)[bounds[0]:bounds[1]])
+        webbrowser.open(self.selected_node.doc[bounds[0]:bounds[1]])
         return
 
     return
@@ -2012,9 +2012,9 @@ class Diamond:
     Set the node description.
     """
 
-    desc = self.render_whitespace(desc)
-
     self.node_desc_link_bounds = self.link_bounds(desc)
+
+    desc = self.render_whitespace(desc)
 
     if not len(self.node_desc_link_bounds) == 0:
       new_desc = ""

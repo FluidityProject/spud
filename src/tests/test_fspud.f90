@@ -66,6 +66,9 @@ subroutine test_fspud
   
   print *, "*** Testing set_option for integer scalar, with option name (containing symbols) ***"
   call test_named_key("/integer_scalar", 'tricky_name!"£$%^&*()', 42)
+  
+  print *, "*** Testing set_option for integer scalar, with option index ***"
+  call test_indexed_key("/integer_scalar", 42)
     
 contains
   
@@ -832,5 +835,32 @@ contains
     call test_delete_option(key)
   
   end subroutine test_named_key
-
+  
+  subroutine test_indexed_key(key, test_integer)
+    character(len = *), intent(in) :: key
+    integer, intent(in) :: test_integer
+    
+    integer :: integer_val, stat
+    
+    call set_option(trim(key) // "[0]", test_integer, stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key)
+    
+    call set_option(trim(key) // "[1]", test_integer + 1, stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key)
+    
+    call get_option(trim(key) // "[0]", integer_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", integer_val /= test_integer, .false., "Retrieved incorrect option data")
+    
+    call get_option(trim(key) // "[1]", integer_val, stat)
+    call report_test("[Extracted option data]", stat /= SPUD_NO_ERROR, .false., "Returned error code when retrieving option data")
+    call report_test("[Extracted correct option data]", integer_val /= test_integer + 1, .false., "Retrieved incorrect option data")
+    
+    call test_delete_option(trim(key) // "[1]")
+    call test_delete_option(trim(key) // "[0]")
+    
+  end subroutine test_indexed_key
+    
 end subroutine test_fspud

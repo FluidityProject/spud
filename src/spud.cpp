@@ -1259,10 +1259,15 @@ namespace Spud{
       }else{
         pair<multimap< string, Option>::iterator, multimap<string, Option>::iterator> range = children.equal_range(name);
         child = range.first;
-        for(size_t i = 0;child != range.second;child++, i++){
+        size_t i;
+        for(i = 0;child != range.second;child++, i++){
           if((int)i == index){
             break;
           }
+        }
+        if(child == children.end() and index == (int)i){
+          child = children.insert(pair<string, Option>(name, Option(name)));
+          is_attribute = false;
         }
       }
     }
