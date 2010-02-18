@@ -343,7 +343,7 @@ namespace Spud{
     val_handle.push_back(val);
     vector<int> shape(2);
     shape[0] = -1;  shape[1] = -1;
-    OptionError set_err = manager.options->set_option(key + "/real_value", val_handle, 0, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 0, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -359,7 +359,7 @@ namespace Spud{
     vector<double> val_handle = val;
     vector<int> shape(2);
     shape[0] = val.size();  shape[1] = -1;
-    OptionError set_err = manager.options->set_option(key + "/real_value", val_handle, 1, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -388,7 +388,7 @@ namespace Spud{
     }else{
       shape[1] = val[0].size();
     }
-    OptionError set_err = manager.options->set_option(key + "/real_value", val_handle, 2, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 2, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -405,7 +405,7 @@ namespace Spud{
     val_handle.push_back(val);
     vector<int> shape(2);
     shape[0] = -1;  shape[1] = -1;
-    OptionError set_err = manager.options->set_option(key + "/integer_value", val_handle, 0, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 0, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -421,7 +421,7 @@ namespace Spud{
     vector<int> val_handle = val;
     vector<int> shape(2);
     shape[0] = val.size();  shape[1] = -1;
-    OptionError set_err = manager.options->set_option(key + "/integer_value", val_handle, 1, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 1, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -450,7 +450,7 @@ namespace Spud{
     }else{
       shape[1] = val[0].size();
     }
-    OptionError set_err = manager.options->set_option(key + "/integer_value", val_handle, 2, shape);
+    OptionError set_err = manager.options->set_option(key, val_handle, 2, shape);
     if(set_err != SPUD_NO_ERROR){
       return set_err;
     }else if(new_key){
@@ -461,19 +461,6 @@ namespace Spud{
   }
 
   OptionError OptionManager::set_option(const string& key, const string& val){
-    logical_t new_key = !have_option(key);
-
-    OptionError set_err = manager.options->set_option(key + "/string_value", val);
-    if(set_err != SPUD_NO_ERROR){
-      return set_err;
-    }else if(new_key){
-      return SPUD_NEW_KEY_WARNING;
-    }
-
-    return SPUD_NO_ERROR;
-  }
-
-  OptionError OptionManager::set_option_attr(const string& key, const string& val){
     logical_t new_key = !have_option(key);
 
     OptionError set_err = manager.options->set_option(key, val);
@@ -487,7 +474,7 @@ namespace Spud{
   }
 
   OptionError OptionManager::set_option_attribute(const string& key, const string& val){
-    OptionError set_err = set_option_attr(key, val);
+    OptionError set_err = set_option(key, val);
     if(set_err != SPUD_NO_ERROR and set_err != SPUD_NEW_KEY_WARNING){
       return set_err;
     }
