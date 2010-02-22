@@ -10,7 +10,7 @@ from enthought.mayavi.core.ui.engine_view import EngineView
 
 def plugin_applies(xpath):
     # Allow plugin to be used at any element which is under any mesh
-    return (xpath.startswith('/fluidity_options/geometry/mesh'))
+    return (xpath.startswith('/geometry/mesh'))
 
 @cb_decorator
 
