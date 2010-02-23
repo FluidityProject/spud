@@ -744,12 +744,57 @@ namespace Spud{
 
     const Option* descendant = get_child(name);
     if(descendant != NULL){
-      for(map<string, Option>::const_iterator it = descendant->children.begin();it != descendant->children.end();it++){
+      for(deque< pair<string, Option> >::const_iterator it = descendant->children.begin();it != descendant->children.end();it++){
         kids.push_back(it->first);
       }
     }
 
     return;
+  }
+
+  size_t OptionManager::Option::count(const string& key) const{
+    size_t cnt=0;
+    for(deque< pair<string, Option> >::const_iterator it=children.begin();it!=children.end();++it){
+      if(it->first == key)
+        cnt++;
+    }
+    return cnt;
+  }
+
+  deque< pair<string, OptionManager::Option> >::iterator OptionManager::Option::find(const string& key){
+    for(deque< pair<string, Option> >::iterator it=children.begin();it!=children.end();++it){
+      if(it->first == key)
+        return it;
+    }
+    return children.end();
+  }
+
+  deque< pair<string, OptionManager::Option> >::const_iterator OptionManager::Option::find(const string& key) const{
+    for(deque< pair<string, Option> >::const_iterator it=children.begin();it!=children.end();++it){
+      if(it->first == key)
+        return it;
+    }
+    return children.end();
+  }
+
+  deque< pair<string, OptionManager::Option> >::iterator OptionManager::Option::find_next(deque< pair<string, OptionManager::Option> >::iterator current, const string& key){
+    deque< pair<string, OptionManager::Option> >::iterator it = current;
+    it++;
+    for(;it!=children.end();++it){
+      if(it->first == key)
+        return it;
+    }
+    return children.end();
+  }
+
+  deque< pair<string, OptionManager::Option> >::const_iterator OptionManager::Option::find_next(deque< pair<string, OptionManager::Option> >::const_iterator current, const string& key) const{
+    deque< pair<string, Option> >::const_iterator it = current;
+    it++;
+    for(;it!=children.end();++it){
+      if(it->first == key)
+        return it;
+    }
+    return children.end();
   }
 
   const OptionManager::Option* OptionManager::Option::get_child(const string& key) const{
@@ -770,8 +815,8 @@ namespace Spud{
       return NULL;
     }
 
-    multimap<string, Option>::const_iterator it;
-    if(children.count(name) == 0){
+    deque< pair<string, Option> >::const_iterator it;
+    if(count(name) == 0){
       name += "::";
       int i = 0;
       for(it = children.begin();it != children.end();it++){
@@ -785,14 +830,14 @@ namespace Spud{
       }
     }else{
       if(index < 0){
-        it = children.find(name);
+        it = find(name);
       }else{
-        pair<multimap< string, Option>::const_iterator, multimap<string, Option>::const_iterator> range = children.equal_range(name);
-        it = range.first;
-        for(size_t i = 0;it != range.second;it++, i++){
+        it = find(name);
+        for(size_t i = 0;it!=children.end();i++){
           if((int)i == index){
             break;
           }
+          it = find_next(it, name);
         }
       }
     }
@@ -833,14 +878,14 @@ namespace Spud{
     }
 
     logical_t match_whole = true;
-    if(!children.count(name)){
+    if(!count(name)){
       // Apparently there is no such child but lets check for "name::*"
       name += "::";
       match_whole = false;
     }
 
     int count = 0, i = 0;
-    for(multimap<string, Option>::const_iterator it = children.begin();it != children.end();it++){
+    for(deque< pair<string, Option> >::const_iterator it = children.begin();it != children.end();it++){
       if(it->first.compare(0, name.size(), name) == 0 and (not match_whole or it->first.size() == name.size())){
         if(index < 0){
           if(branch.empty()){
@@ -881,7 +926,7 @@ namespace Spud{
       cout << "OptionType OptionManager::Option::get_option_type(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.get_option_type();
+      return find("__value")->second.get_option_type();
     }
 
     if(!data_double.empty()){
@@ -900,7 +945,7 @@ namespace Spud{
       cout << "size_t OptionManager::Option::get_option_rank(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.get_option_rank();
+      return find("__value")->second.get_option_rank();
     }else{
       return rank;
     }
@@ -911,7 +956,7 @@ namespace Spud{
       cout << "vector<int> OptionManager::Option::get_option_shape(void) const\n";
 
     if(have_option("__value")){
-      return children.find("__value")->second.get_option_shape();
+      return find("__value")->second.get_option_shape();
     }else{
       vector<int> shape(2);
       shape[0] = this->shape[0];
@@ -1144,14 +1189,15 @@ namespace Spud{
     if(opt == NULL){
       return SPUD_KEY_ERROR;
     }else if(branch.empty()){
-      pair<multimap<string, Option>::iterator, multimap<string, Option>::iterator> range = children.equal_range(name);
-      for(multimap<string, Option>::iterator iter = range.first;iter != range.second;iter++){
+      deque< pair<string, Option> >::iterator iter = find(name);
+      while(iter!=children.end()){
         if(&iter->second == opt){
           children.erase(iter);
           return SPUD_NO_ERROR;
         }
+        iter = find_next(iter, name);
       }
-      for(multimap<string, Option>::iterator iter = children.begin();iter != children.end();iter++){
+      for(iter = children.begin();iter != children.end();iter++){
         if(&iter->second == opt){
           children.erase(iter);
           return SPUD_NO_ERROR;
@@ -1202,7 +1248,7 @@ namespace Spud{
         cout << lprefix << "<value>: " << data_string;
         cout << endl;
       }
-      for(map<string, Option>::const_iterator i = children.begin();i!=children.end();++i){
+      for(deque< pair<string, Option> >::const_iterator i = children.begin();i!=children.end();++i){
         i->second.print(lprefix + " ");
       }
     }
@@ -1240,8 +1286,8 @@ namespace Spud{
       return NULL;
     }
 
-    multimap<string, Option>::iterator child;
-    if(children.count(name) == 0){
+    deque< pair<string, Option> >::iterator child;
+    if(count(name) == 0){
       string name2 = name + "::";
       int i = 0;
       for(child = children.begin();child != children.end();child++){
@@ -1258,28 +1304,29 @@ namespace Spud{
           cerr << "SPUD WARNING: Creating __value child for non null element - deleting parent data" << endl;
           set_option_type(SPUD_NONE);
         }
-        child = children.insert(pair<string, Option>(name, Option(name)));
+        children.push_back(pair<string, Option>(name, Option(name)));
         string new_node_name, name_attr;
-        child->second.split_node_name(new_node_name, name_attr);
+        children.rbegin()->second.split_node_name(new_node_name, name_attr);
         if(name_attr.size() > 0){
-          child->second.set_attribute("name", name_attr);
+          children.rbegin()->second.set_attribute("name", name_attr);
         }
         is_attribute = false;
       }
     }else{
       if(index < 0){
-        child = children.find(name);
+        child = find(name);
       }else{
-        pair<multimap< string, Option>::iterator, multimap<string, Option>::iterator> range = children.equal_range(name);
-        child = range.first;
+        child = find(name);
         size_t i;
-        for(i = 0;child != range.second;child++, i++){
+        for(i = 0;child != children.end();i++){
           if((int)i == index){
             break;
           }
+          child = find_next(child, name);
         }
         if(child == children.end() and index == (int)i){
-          child = children.insert(pair<string, Option>(name, Option(name)));
+          children.push_back(pair<string, Option>(name, Option(name)));
+          child = children.end(); child--;
           is_attribute = false;
         }
       }
@@ -1528,7 +1575,7 @@ namespace Spud{
     data_ele->SetValue(data_as_string());
     ele->LinkEndChild(data_ele);
 
-    for(map<string, Option>::const_iterator iter = children.begin();iter != children.end();iter++){
+    for(deque< pair<string, Option> >::const_iterator iter = children.begin();iter != children.end();iter++){
       if(iter->second.is_attribute){
         // Add attribute
         ele->SetAttribute(iter->second.node_name, iter->second.data_as_string());

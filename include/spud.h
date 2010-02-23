@@ -181,6 +181,22 @@ namespace Spud{
             */
           Option* get_child(const std::string& key);
 
+          /** Counts the number of elements with this key.
+           */
+          size_t count(const std::string& key) const;
+
+          /** Finds first element with this key.
+           */
+          std::deque< std::pair<std::string, Option> >::iterator find(const std::string& key);
+          std::deque< std::pair<std::string, Option> >::const_iterator find(const std::string& key) const;
+
+          /** Finds next element with this key after current iterator.
+           */
+          std::deque< std::pair<std::string, Option> >::iterator
+            find_next(std::deque< std::pair<std::string, Option> >::iterator current, const std::string& key);
+          std::deque< std::pair<std::string, Option> >::const_iterator
+            find_next(std::deque< std::pair<std::string, Option> >::const_iterator current, const std::string& key) const;
+
           /**
             * Get the number of elements at the supplied key. Searches all
             * possible paths matching the given key.
@@ -362,7 +378,7 @@ namespace Spud{
           std::string data_as_string() const;
 
           std::string node_name;
-          std::multimap<std::string, Option> children;
+          std::deque< std::pair<std::string, Option> > children;
 
           int rank, shape[2];
           std::vector<double> data_double;
