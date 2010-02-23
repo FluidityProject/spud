@@ -96,6 +96,7 @@ namespace Spud{
       static OptionError set_option(const std::string& key, const std::vector< std::vector<int> >& val);
 
       static OptionError set_option(const std::string& key, const std::string& val);
+      static OptionError set_option_attr(const std::string& key, const std::string& val);
 
       static OptionError set_option_attribute(const std::string& key, const std::string& val);
 
