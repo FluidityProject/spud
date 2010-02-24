@@ -1,3 +1,10 @@
+spud (1.0.18) unstable; urgency=low
+
+  * Update to set_option to insert __value elements when needed.
+  * utf-8 in xml headers rather than utf8.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Wed, 24 Feb 2010 18:03:40 +0000
+
 spud (1.0.17) karmic; urgency=low
 
   * Use libtool to build a static and shared library 
