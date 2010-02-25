@@ -2315,10 +2315,11 @@ class Diamond:
       import gtksourceview2
       buf = gtksourceview2.Buffer()
       lang_manager = gtksourceview2.LanguageManager()
-      python = lang_manager.get_language("python")
-      buf.set_language(python)
-      buf.set_highlight_syntax(True)
-      buf.set_highlight_matching_brackets(False)
+      if self.node_data_is_python_code():
+        python = lang_manager.get_language("python")
+        buf.set_language(python)
+        buf.set_highlight_syntax(True)
+        buf.set_highlight_matching_brackets(False)
       self.node_data = gtksourceview2.View(buffer=buf)
       self.node_data.set_auto_indent(True)
       self.node_data.set_insert_spaces_instead_of_tabs(True)
@@ -2866,6 +2867,23 @@ class Diamond:
         return False
 
     return True
+
+  def node_data_is_python_code(self):
+    """
+    Perform a series of tests on the current tree.Tree / MixedTree, to determine if
+    it is intended to be used to store python code data.
+    """
+    
+    if not isinstance(self.selected_node, MixedTree):
+      return False
+      
+    if not self.selected_node.datatype is str:
+      return False
+  
+    if "type" in self.selected_node.child.attrs.keys():
+      return self.selected_node.child.attrs["type"][1] == "python"
+    else:
+      return False
 
   def node_data_is_tensor(self):
     """
