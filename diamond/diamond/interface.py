@@ -2311,7 +2311,20 @@ class Diamond:
     self.node_data_frame.add(data_scrolled_window)
     data_scrolled_window.show()
 
-    self.node_data = gtk.TextView()
+    try:
+      import gtksourceview2
+      buf = gtksourceview2.Buffer()
+      lang_manager = gtksourceview2.LanguageManager()
+      python = lang_manager.get_language("python")
+      buf.set_language(python)
+      buf.set_highlight_syntax(True)
+      buf.set_highlight_matching_brackets(False)
+      self.node_data = gtksourceview2.View(buffer=buf)
+      self.node_data.set_auto_indent(True)
+      self.node_data.set_insert_spaces_instead_of_tabs(True)
+    except ImportError:
+      self.node_data = gtk.TextView()
+
     data_scrolled_window.add(self.node_data)
     self.node_data.show()
 
