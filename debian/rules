@@ -25,7 +25,7 @@ endif
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
 build-libspud: build-libspud-stamp
-build-libspud-stamp: build-libspud
+build-libspud-stamp:
 	touch $@
 
 build-libspud: config.status
@@ -108,10 +108,10 @@ binary-arch: build-libspud install-libspud install-spudtools
 	dh_md5sums
 	dh_builddeb
 
-binary-indep: build-diamond install-diamond
+binary-indep: build-diamond install-diamond build-libspud install-libspud install-spudtools
 	dh_testdir -i
 	dh_testroot -i
-	dh_pycentral -i
+	DH_PYCENTRAL=include-links dh_pycentral -i
 	dh_installdocs -i
 	dh_installdirs -i
 	dh_installexamples  -i
