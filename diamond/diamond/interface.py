@@ -2395,7 +2395,7 @@ class Diamond:
         self.node_data.set_cursor_visible(True)
         self.node_data.set_editable(True)
         self.node_data_buttons_hbox.show()
-        text_tag.set_property("foreground", "black")
+        #text_tag.set_property("foreground", "black")
       try:
         self.node_data.set_tooltip_text(self.type_summary(self.selected_node.datatype))
       except:
