@@ -1425,7 +1425,7 @@ class Diamond:
 
     path = self.get_selected_row(selection)
     if path is None:
-      return None
+      return self.get_treestore_iter_from_xmlpath(self.current_xpath)
 
     return self.treestore.get_iter(path)
 
