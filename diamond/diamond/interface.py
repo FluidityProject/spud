@@ -281,8 +281,10 @@ class Diamond:
       tree_read = self.s.read(filename)
       
       # Extract and display validation errors
+      saved = True
       lost_eles, added_eles = self.s.read_errors()
       if len(lost_eles) > 0 or len(added_eles) > 0:
+        saved = False
         msg = ""
         if len(lost_eles) > 0:
           msg += "Warning: lost xml elements:\n"
@@ -300,6 +302,8 @@ class Diamond:
     except:
       dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
       return
+
+    self.set_saved(saved, filename)
       
     return
 
@@ -328,7 +332,6 @@ class Diamond:
 
     self.treeview.get_selection().unselect_all()
 
-    self.set_saved(True, filename)
     self.selected_node = None
     self.update_options_frame()
 
