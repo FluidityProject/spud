@@ -210,7 +210,7 @@ cset_option_attribute.argtypes = [c_char_p, POINTER(c_int), c_char_p, POINTER(c_
 cset_option_attribute.restype = c_int
 
 def set_option_attribute(s, val):
-  out = cset_option_attribute(s, byref(c_int(len(s))), val, byref(c_int(len(s))))
+  out = cset_option_attribute(s, byref(c_int(len(s))), val, byref(c_int(len(val))))
   
   if out != SPUD_NO_ERROR:
     raise spud_exceptions[out]
