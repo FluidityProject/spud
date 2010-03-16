@@ -2880,6 +2880,13 @@ class Diamond:
     Perform a series of tests on the current tree.Tree / MixedTree, to determine if
     it is intended to be used to store python code data.
     """
+
+    try:
+       lang = self.selected_node.get_attr("language")
+       if lang == "python":
+         return True
+    except:
+      pass
     
     if not isinstance(self.selected_node, MixedTree):
       return False
