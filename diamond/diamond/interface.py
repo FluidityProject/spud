@@ -3007,9 +3007,12 @@ class MixedTree:
     return
 
   def set_attr(self, attr, val):
-    parent.set_attr(attr, val)
+    self.parent.set_attr(attr, val)
 
     return
+
+  def get_attr(self, attr):
+    return self.parent.get_attr(attr)
 
   def set_data(self, data):
     self.child.set_data(data)
