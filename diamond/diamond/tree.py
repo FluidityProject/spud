@@ -309,7 +309,7 @@ class Tree:
 
   def add_inactive_instance(self, tree):
     for t in self.children:
-      if t.name == tree.name and t.active is False:
+      if t.schemaname == tree.schemaname and t.active is False:
         return t
 
     new_tree = tree.copy()
