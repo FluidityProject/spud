@@ -2326,6 +2326,7 @@ class Diamond:
       self.node_data = gtksourceview2.View(buffer=buf)
       self.node_data.set_auto_indent(True)
       self.node_data.set_insert_spaces_instead_of_tabs(True)
+      self.node_data.set_tab_width(2)
       if self.node_data_is_python_code():
         font_desc = pango.FontDescription("monospace 10")
         if font_desc:
