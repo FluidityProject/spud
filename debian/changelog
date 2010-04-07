@@ -1,3 +1,9 @@
+spud (1.0.20) unstable; urgency=low
+
+  * Various interface bug fixes.
+
+ -- David Ham <david.ham@imperial.ac.uk>  Wed, 07 Apr 2010 14:01:17 +0100
+
 spud (1.0.19) unstable; urgency=low
 
   * Version 1.0.18 was broken on some platforms (karmic, debian unstable)
