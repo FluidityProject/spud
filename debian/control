@@ -37,7 +37,7 @@ Description: An automatic options system for scientific models.
 
 Package: spudtools
 Architecture: all
-Depends: ${shlibs:Depends}, trang-amcg
+Depends: ${shlibs:Depends}, trang (>= 20091111-1) | trang-amcg
 Recommends: diamond
 Conflicts: libspud-dev (<1.0.6)
 Replaces: libspud-dev (<1.0.6)
