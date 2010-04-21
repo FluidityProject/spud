@@ -672,6 +672,8 @@ namespace Spud{
     if(verbose)
       cout << "void OptionManager::Option::load_options(const string& filename = " << filename << ")\n";
 
+    delete_option("/");
+
     TiXmlDocument doc(filename);
     doc.SetCondenseWhiteSpace(false);
     if(!doc.LoadFile()){
