@@ -36,7 +36,14 @@ for dir in dirs:
     for file in os.listdir(dir):
       if file[-1] == "~": 
         continue # bloody emacs
-      handle = open(os.path.join(dir, file))
+      # Skip item gracefully here if there's a problem.
+      # This is useful if the schemata files are in a subversion
+      # repository and there's pesky .svn folders around.
+      try:
+        handle = open(os.path.join(dir, file))
+      except:
+        debug.deprint("Failure to examine entry " + file + " in folder " + dir + ".")
+        continue
       newSchemata = [x.strip() for x in handle]
       if len(newSchemata) < 2:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)

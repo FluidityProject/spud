@@ -44,10 +44,13 @@ def Help():
                "Options:\n" + \
                "\n" + \
                "-h               Display this message\n" + \
-               "-s [SCHEMAFILE]  Use the supplied schema file\n" + \
+               "-s [SCHEMAFILE]  Use the supplied schema file *\n" + \
                "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
-               "                 debugging information to standard output and standard error", 0)
+               "                 debugging information to standard output and standard error\n" + \
+               "\n" + \
+               "* Note: The locations of Spud schemas can also be defined in ~/.diamond/schemata/,\n" + \
+               "  see the Spud manual for further details.", 0)
 
   return
 
