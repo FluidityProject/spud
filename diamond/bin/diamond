@@ -23,6 +23,7 @@ import traceback
 
 import gtk
 import gtk.gdk
+gtk.gdk.threads_init()
 import gobject
 
 # do this right at the start, so we can find the diamond modules
@@ -213,11 +214,8 @@ def main():
 
   i.statusbar.set_statusbar("Loading ...")
   i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
-  gobject.idle_add(initialise, i, input_schemafile, input_filename)
-  while gtk.events_pending():
-    gtk.main_iteration()
+  initialise(i, input_schemafile, input_filename)
 
-  gtk.gdk.threads_init()
   gtk.main()
 
   return
