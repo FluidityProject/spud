@@ -131,6 +131,10 @@ def main():
     except:
       debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
       debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+      debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
+      debug.deprint("The file should have two lines in it:", 0)
+      debug.deprint("A Verbal Description Of The Language Purpose", 0)
+      debug.deprint("/path/to/the/schema/file.rng", 0)
       sys.exit(1)
 
   # if there is only one schema, use that
