@@ -1,3 +1,9 @@
+spud (1.0.21) maverick; urgency=low
+
+  * Schema for ICOM/Fluidity now points to release-candidate in a schemas directory
+
+ -- Tim Bond <tmb1@maelstrom>  Wed, 27 Oct 2010 15:32:51 +0100
+
 spud (1.0.20) unstable; urgency=low
 
   * Various interface bug fixes.
