@@ -1,8 +1,14 @@
+spud (1.0.22) maverick; urgency=low
+
+  * Schema for ICOM-Fluidity now points to 4.0-release.
+
+ -- Tim Bond <timothy.bond@imperial.ac.uk>  Thu, 11 Nov 2010 14:10:30 +0000
+
 spud (1.0.21) maverick; urgency=low
 
-  * Schema for ICOM/Fluidity now points to release-candidate in a schemas directory
+  * Schema for ICOM-Fluidity now points to release-candidate in a schemas directory.
 
- -- Tim Bond <tmb1@maelstrom>  Wed, 27 Oct 2010 15:32:51 +0100
+ -- Tim Bond <timothy.bond@imperial.ac.uk>  Wed, 27 Oct 2010 15:32:51 +0100
 
 spud (1.0.20) unstable; urgency=low
 
