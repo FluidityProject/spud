@@ -408,8 +408,16 @@ class Diamond:
     else:
       self.statusbar.set_statusbar("Saving ...")
       self.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
-      self.tree.write(self.filename)
+      try:
+        self.tree.write(self.filename)
+      except:
+        dialogs.error_tb(self.main_window, "Saving to \"" + self.filename + "\" failed")
+        self.statusbar.clear_statusbar()
+        self.main_window.window.set_cursor(None)
+        return False
+
       self.set_saved(True)
+
       self.statusbar.clear_statusbar()
       self.main_window.window.set_cursor(None)
       return True
@@ -653,7 +661,7 @@ class Diamond:
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
     try:  # allow for possibility of no tooltips (like elsewhere)
       self.treeview.connect("query-tooltip", self.on_tooltip)
-      self.treeview.set_property("has-tooltip", True)
+      self.treeview.set_property("has-tooltip", False)
     except:
       pass
 
@@ -2318,13 +2326,14 @@ class Diamond:
       import gtksourceview2
       buf = gtksourceview2.Buffer()
       lang_manager = gtksourceview2.LanguageManager()
-      buf.set_highlight_matching_brackets(False)
+      buf.set_highlight_matching_brackets(True)
       if self.node_data_is_python_code():
         python = lang_manager.get_language("python")
         buf.set_language(python)
         buf.set_highlight_syntax(True)
       self.node_data = gtksourceview2.View(buffer=buf)
       self.node_data.set_auto_indent(True)
+      self.node_data.set_highlight_current_line(True)
       self.node_data.set_insert_spaces_instead_of_tabs(True)
       self.node_data.set_tab_width(2)
       if self.node_data_is_python_code():

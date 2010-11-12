@@ -300,7 +300,8 @@ class Schema(object):
                'ID' : str,
                'anyURI' : str,
                'IDREF' : int,
-               'NMTOKEN' : str}
+               'NMTOKEN' : str,
+               'boolean': bool}
 
     datatype_name = element.get("type")
     l.append(mapping[datatype_name])
