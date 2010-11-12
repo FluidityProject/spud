@@ -62,6 +62,7 @@ module spud
     & add_option, &
     & set_option, &
     & set_option_attribute, &
+    & move_option, &
     & delete_option, &
     & print_options
 
@@ -180,6 +181,15 @@ module spud
       character(len = val_len), intent(in) :: val
       integer :: cspud_set_option_attribute
     end function cspud_set_option_attribute
+
+    function cspud_move_option(key1, key1_len, key2, key2_len)
+      implicit none
+      integer, intent(in) :: key1_len
+      integer, intent(in) :: key2_len
+      character(len = key1_len), intent(in) :: key1
+      character(len = key2_len), intent(in) :: key2
+      integer :: cspud_move_option
+    end function cspud_move_option
 
     function cspud_delete_option(key, key_len)
       implicit none
@@ -917,6 +927,25 @@ contains
     end if
 
   end subroutine set_option_attribute
+
+  subroutine move_option(key1, key2, stat)
+    character(len = *), intent(in) :: key1
+    character(len = *), intent(in) :: key2
+    integer, optional, intent(out) :: stat
+
+    integer :: lstat
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    lstat = cspud_move_option(key1, len_trim(key1), key2, len_trim(key2))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key1, lstat, stat)
+      return
+    end if
+
+  end subroutine move_option
 
   subroutine delete_option(key, stat)
     character(len = *), intent(in) :: key

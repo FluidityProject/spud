@@ -1083,6 +1083,7 @@ This routine can return the following error codes:
 
 \begin{lstlisting}[language=fortran]
 subroutine delete_option(key, stat)
+  character(len=*), intent(in) :: key
   integer, optional, intent(out) :: stat
 \end{lstlisting}
 
@@ -1098,6 +1099,25 @@ Deletes the option at the specified key.
 
 Returns error code \lstinline+SPUD_KEY_ERROR+ if the supplied key does not
 exist in the options tree.
+
+\subsection{move\_option}
+
+\begin{lstlisting}[language=fortran]
+subroutine move_option(key1, key2, stat)
+  character(len=*), intent(in) :: key1
+  character(len=*), intent(in) :: key2
+  integer, optional, intent(out) :: stat
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+int cspud_move_option(const char* key1, const int* key1_len, const char* key2, const int* key2_len)
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++]
+Spud::OptionError Spud::move_option(const std::string& key1, const std::string& key2)
+\end{lstlisting}
+
+Moves the entire options tree and all its children from key1 to key2.
 
 \subsection{print\_options}
 

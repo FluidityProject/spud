@@ -219,10 +219,22 @@ def set_option_attribute(s, val):
   
 cdelete_option = libspud.cspud_delete_option_
 cdelete_option.argtypes = [c_char_p, POINTER(c_int)]
-cdelete_option.restype = restype = c_int
+cdelete_option.restype = c_int
 
 def delete_option(s):
   out = cdelete_option(s, byref(c_int(len(s))))
+  
+  if out != SPUD_NO_ERROR:
+    raise spud_exceptions[out]
+
+  return
+
+cmove_option = libspud.cspud_move_option_
+cmove_option.argtypes = [c_char_p, POINTER(c_int), c_char_p, POINTER(c_int)]
+cmove_option.restype = c_int
+
+def move_option(s1, s2):
+  out = cmove_option(s1, byref(c_int(len(s1))), s2, byref(c_int(len(s2))))
   
   if out != SPUD_NO_ERROR:
     raise spud_exceptions[out]

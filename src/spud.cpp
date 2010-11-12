@@ -507,6 +507,15 @@ namespace Spud{
     return SPUD_NO_ERROR;
   }
 
+  OptionError OptionManager::move_option(const string& key1, const string& key2){
+    OptionError move_err = manager.options->move_option(key1, key2);
+    if(move_err != SPUD_NO_ERROR){
+      return move_err;
+    }
+    
+    return SPUD_NO_ERROR;
+  }
+
   OptionError OptionManager::delete_option(const string& key){
     OptionError del_err = manager.options->delete_option(key);
     if(del_err != SPUD_NO_ERROR){
@@ -801,7 +810,7 @@ namespace Spud{
 
   const OptionManager::Option* OptionManager::Option::get_child(const string& key) const{
     if(verbose)
-      cout << "const OptionManager::Option* OptionManager::Option::get_child((const string& key = " << key << ") const\n";
+      cout << "const OptionManager::Option* OptionManager::Option::get_child(const string& key = " << key << ") const\n";
 
     if(key == "/" or key.empty())
       return this;
@@ -1175,6 +1184,46 @@ namespace Spud{
       opt->set_is_attribute(true);
       return SPUD_NO_ERROR;
     }
+  }
+  
+  OptionError OptionManager::Option::move_option(const string& key1, const string& key2){
+    if(verbose)
+      cout << "OptionError OptionManager::Option::move_option(const string& key1 = " << key1 << ", const string& key2 = " << key2 << ")\n";
+
+    const Option* option1 = get_child(key1);
+    if(option1 == NULL){
+      return SPUD_KEY_ERROR;
+    }
+    
+    const Option* option2 = get_child(key2);
+    if(option2 != NULL){
+      return SPUD_KEY_ERROR;
+    }
+    
+    string::size_type lastPos = key2.find_last_not_of("/");
+    lastPos = key2.find_last_of("/", lastPos);
+    string key2_parent = key2.substr(0, lastPos);
+    string key2_name = key2.substr(lastPos + 1);
+    
+    Option* option2_parent = create_child(key2_parent);
+    if(option2_parent == NULL){
+      return SPUD_KEY_ERROR;
+    }
+
+    Option new_option1 = Option(*option1);
+    new_option1.node_name = key2_name;
+    string new_node_name, name_attr;
+    new_option1.split_node_name(new_node_name, name_attr);
+    if(name_attr.size() == 0){
+      option2_parent->children.push_back(pair<string, Option>(new_node_name, new_option1));
+    }else{
+      new_option1.set_attribute("name", name_attr);
+      option2_parent->children.push_back(pair<string, Option>(new_node_name + "::" + name_attr, new_option1));
+    }
+         
+    delete_option(key1);
+    
+    return SPUD_NO_ERROR;
   }
 
   OptionError OptionManager::Option::delete_option(const string& key){

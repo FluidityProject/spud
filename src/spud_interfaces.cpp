@@ -262,6 +262,10 @@ extern "C" {
   int cspud_set_option_attribute(const char* key, const int* key_len, const char* val, const int* val_len){
     return set_option_attribute(string(key, *key_len), string(val, *val_len));
   }
+  
+  int cspud_move_option(const char* key1, const int* key1_len, const char* key2, const int* key2_len){
+    return move_option(string(key1, *key1_len), string(key2, *key2_len));
+  }
 
   int cspud_delete_option(const char* key, const int* key_len){
     return delete_option(string(key, *key_len));

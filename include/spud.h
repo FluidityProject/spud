@@ -100,6 +100,8 @@ namespace Spud{
 
       static OptionError set_option_attribute(const std::string& key, const std::string& val);
 
+      static OptionError move_option(const std::string& key1, const std::string& key2);
+      
       static OptionError delete_option(const std::string& key);
 
       static void print_options();
@@ -170,7 +172,7 @@ namespace Spud{
           void list_children(const std::string& key, std::deque< std::string >& kids) const;
 
           /**
-            * Get the child of this element at the supplied key
+            * Get the child of this element at the supplied key.
             * Const version.
             */
           const Option* get_child(const std::string& key) const;
@@ -299,6 +301,11 @@ namespace Spud{
             * and mark the element as an attribute.
             */
           OptionError set_attribute(const std::string& key, const std::string& val);
+
+          /*
+           * Move an option.
+           */
+          OptionError move_option(const std::string& key1, const std::string& key2);
 
           /**
             * Delete the element at the supplied key.
@@ -507,6 +514,10 @@ namespace Spud{
 
   inline OptionError set_option_attribute(const std::string& key, const std::string& val){
     return OptionManager::set_option_attribute(key, val);
+  }
+
+  inline OptionError move_option(const std::string& key1, const std::string& key2){
+    return OptionManager::move_option(key1, key2);
   }
 
   inline OptionError delete_option(const std::string& key){

@@ -69,6 +69,9 @@ subroutine test_fspud
   
   print *, "*** Testing set_option for integer scalar, with option index ***"
   call test_indexed_key("/integer_scalar", 42)
+  
+  print *, "*** Testing move_option ***"
+  call test_move_option("/type_none", "/type_none_2")
     
 contains
   
@@ -862,5 +865,50 @@ contains
     call test_delete_option(trim(key) // "[0]")
     
   end subroutine test_indexed_key
+  
+  subroutine test_move_option(key1, key2)
+    character(len = *), intent(in) :: key1
+    character(len = *), intent(in) :: key2
+  
+    integer :: stat
+  
+    call add_option(trim(key1), stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    
+    call move_option(trim(key1), trim(key2))
+    call test_key_errors(key1)
+    call test_key_present(key2)
+    
+    call test_delete_option(key2)
+    
+    call add_option(trim(key1) // "::name", stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    call test_key_present(key1 // "::name")
+    
+    call move_option(trim(key1) // "::name", trim(key2) // "::name")
+    call test_key_errors(key1)
+    call test_key_errors(key1 // "::name")
+    call test_key_present(key2)
+    call test_key_present(key2 // "::name")
+    
+    call test_delete_option(key2)
+    
+    call add_option(trim(key1) // trim(key1), stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    call test_key_present(trim(key1) // key1)
+    
+    call move_option(trim(key1) // trim(key1), trim(key2) // trim(key2))
+    call test_key_present(key1)
+    call test_key_errors(trim(key1) // key1)
+    call test_key_present(key2)
+    call test_key_present(trim(key2) // key2)
+    
+    call test_delete_option(key1)
+    call test_delete_option(key2)
+  
+  end subroutine test_move_option
     
 end subroutine test_fspud
