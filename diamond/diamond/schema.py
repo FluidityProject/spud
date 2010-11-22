@@ -61,8 +61,10 @@ class Schema(object):
                       'ignore' : self.cb_ignore,
                       'notAllowed' : self.cb_notallowed}
                       
-    self.lost_eles = []
+    self.lost_eles  = []
     self.added_eles = []
+    self.lost_attrs  = []
+    self.added_attrs = []
   
     return
 
@@ -486,6 +488,8 @@ class Schema(object):
 
     self.lost_eles = []
     self.added_eles = []
+    self.lost_attrs  = []
+    self.added_attrs = []
 
     datatree = self.valid_children(":start")[0]
     xmlnode  = doc.getroot()
@@ -496,6 +500,10 @@ class Schema(object):
       debug.deprint("WARNING: Lost XML elements:\n" + str(self.lost_eles))
     if len(self.added_eles) != 0:
       debug.deprint("WARNING: Added XML elements:\n" + str(self.added_eles))
+    if len(self.lost_attrs) != 0:
+      debug.deprint("WARNING: Lost XML attributes:\n" + str(self.lost_attrs))
+    if len(self.added_eles) != 0:
+      debug.deprint("WARNING: Added XML attributes:\n" + str(self.added_attrs))
       
     return datatree
 
@@ -548,6 +556,11 @@ class Schema(object):
 
       to_set = datatree.get_current_tree()
 
+    # catch any lost XML attributes
+    for key in xmlkeys:
+      if key not in to_set.attrs.keys():
+        self.lost_attrs += [to_set.name + '/' + key]
+
     # attribute values.
     for key in to_set.attrs.keys():
       if key in xmlkeys:
@@ -555,6 +568,8 @@ class Schema(object):
           to_set.set_attr(key, xmlnode.get(key))
         except:
           pass
+      else:
+        self.added_attrs += [to_set.name + '/' + key]
 
     # Get the text value (the node's data)
     if xmlnode.text is not None:
@@ -831,7 +846,7 @@ class Schema(object):
     datatree.recompute_validity()
     
   def read_errors(self):
-    return self.lost_eles, self.added_eles
+    return self.lost_eles, self.added_eles, self.lost_attrs, self.added_attrs
 
   def readable_name(self, datatree):
     output = ""

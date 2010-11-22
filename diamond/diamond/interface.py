@@ -282,8 +282,8 @@ class Diamond:
       
       # Extract and display validation errors
       saved = True
-      lost_eles, added_eles = self.s.read_errors()
-      if len(lost_eles) > 0 or len(added_eles) > 0:
+      lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
+      if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
         saved = False
         msg = ""
         if len(lost_eles) > 0:
@@ -293,6 +293,14 @@ class Diamond:
         if len(added_eles) > 0:
           msg += "Warning: added xml elements:\n"
           for ele in added_eles:
+            msg += ele + "\n"
+        if len(lost_attrs) > 0:
+          msg += "Warning: lost xml attributes:\n"
+          for ele in lost_attrs:
+            msg += ele + "\n"
+        if len(added_attrs) > 0:
+          msg += "Warning: added xml attributes:\n"
+          for ele in added_attrs:
             msg += ele + "\n"
       
         dialogs.long_message(self.main_window, msg)
