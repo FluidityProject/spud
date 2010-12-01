@@ -1858,35 +1858,6 @@ class Diamond:
 
     return type_as_printable
 
-  def type_summary(self, datatype):
-    """
-    Create a summary string for use in datatype tooltips.
-    """
-
-    summary_of_type = "Type: "
-    if datatype is None:
-      summary_of_type += "None"
-    elif datatype == "fixed":
-      summary_of_type += "Fixed"
-    else:
-      if isinstance(datatype, tuple):
-        if isinstance(datatype[0], tuple):
-          summary_of_type += self.printable_type(datatype[1], False) + ", or one of "
-          opts = datatype[0]
-        else:
-          summary_of_type += "One of "
-          opts = datatype
-        summary_of_type += "["
-        for i in range(len(opts)):
-          summary_of_type += "\"" + str(opts[i]) + "\""
-          if i < len(opts) - 1:
-            summary_of_type += ", "
-        summary_of_type += "]"
-      else:
-        summary_of_type += self.printable_type(datatype, False)
-
-    return summary_of_type
-
   def init_options_frame(self):
     """
     Initialise the RHS.
@@ -2128,11 +2099,6 @@ class Diamond:
 
     iter = self.node_attrs.get_model().get_iter(path)
     iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    try:
-      self.node_attrs.set_tooltip_text(self.type_summary(self.selected_node.attrs[iter_key][0]))
-    except:
-      pass
 
     return
 
@@ -2386,10 +2352,6 @@ class Diamond:
       self.node_data_buttons_hbox.hide()
       self.node_data.get_buffer().set_text("No data")
       text_tag.set_property("foreground", "grey")
-      try:
-        self.node_data.set_tooltip_text(self.type_summary(self.selected_node.datatype))
-      except:
-        pass
     elif self.node_data_is_tensor():
       self.node_data.set_cursor_visible(False)
       self.node_data.set_editable(False)
@@ -2402,10 +2364,6 @@ class Diamond:
       self.node_data_buttons_hbox.show()
       self.node_data.get_buffer().set_text(self.printable_type(self.selected_node.datatype))
       text_tag.set_property("foreground", "blue")
-      try:
-        self.node_data.set_tooltip_text(self.type_summary(self.selected_node.datatype))
-      except:
-        pass
     else:
       self.node_data.get_buffer().set_text(self.selected_node.data)
       if self.selected_node.datatype == "fixed":
@@ -2418,10 +2376,6 @@ class Diamond:
         self.node_data.set_editable(True)
         self.node_data_buttons_hbox.show()
         #text_tag.set_property("foreground", "black")
-      try:
-        self.node_data.set_tooltip_text(self.type_summary(self.selected_node.datatype))
-      except:
-        pass
     buffer_bounds = self.node_data.get_buffer().get_bounds()
     self.node_data.get_buffer().apply_tag(text_tag, buffer_bounds[0], buffer_bounds[1])
 
@@ -2468,11 +2422,6 @@ class Diamond:
             entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
           else:
             entry.set_text(self.selected_node.data.split(" ")[(dim2 - j - 1) + (dim1 - i - 1) * dim2])
-
-          try:
-            entry.set_tooltip_text(self.type_summary(self.selected_node.datatype.datatype))
-          except:
-            pass
 
     self.node_data_interacted = [False for i in range(dim1 * dim2)]
 
@@ -2525,11 +2474,6 @@ class Diamond:
 
     if isinstance(self.selected_node.datatype[0], tuple) and not self.selected_node.data is None and not self.selected_node.data in self.selected_node.datatype[0]:
       self.node_data.child.set_text(self.selected_node.data)
-
-    try:
-      self.node_data.set_tooltip_text(self.type_summary(self.selected_node.datatype))
-    except:
-      pass
 
     self.node_data.connect("changed", self.node_data_combo_changed)
 
@@ -2807,10 +2751,6 @@ class Diamond:
         self.node_comment.set_cursor_visible(False)
         self.node_comment.set_editable(False)
         text_tag.set_property("foreground", "grey")
-      try:
-        self.node_comment.set_tooltip_text(self.type_summary(comment_tree.datatype))
-      except:
-        pass
 
     buffer_bounds = self.node_comment.get_buffer().get_bounds()
     self.node_comment.get_buffer().apply_tag(text_tag, buffer_bounds[0], buffer_bounds[1])
