@@ -1,3 +1,9 @@
+spud (1.0.23) maverick; urgency=low
+
+  * Include the latest diamond updates
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Thu, 03 Feb 2011 12:10:17 +0000
+
 spud (1.0.22) maverick; urgency=low
 
   * Schema for ICOM-Fluidity now points to 4.0-release.
