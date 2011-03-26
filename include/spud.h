@@ -101,7 +101,8 @@ namespace Spud{
       static OptionError set_option_attribute(const std::string& key, const std::string& val);
 
       static OptionError move_option(const std::string& key1, const std::string& key2);
-      
+      static OptionError copy_option(const std::string& key1, const std::string& key2);
+       
       static OptionError delete_option(const std::string& key);
 
       static void print_options();
@@ -306,6 +307,11 @@ namespace Spud{
            * Move an option.
            */
           OptionError move_option(const std::string& key1, const std::string& key2);
+
+          /*
+           * Copy an option.
+           */
+          OptionError copy_option(const std::string& key1, const std::string& key2);
 
           /**
             * Delete the element at the supplied key.
@@ -520,6 +526,9 @@ namespace Spud{
     return OptionManager::move_option(key1, key2);
   }
 
+  inline OptionError copy_option(const std::string& key1, const std::string& key2){
+    return OptionManager::copy_option(key1, key2);
+  }
   inline OptionError delete_option(const std::string& key){
     return OptionManager::delete_option(key);
   }

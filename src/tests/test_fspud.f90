@@ -72,7 +72,10 @@ subroutine test_fspud
   
   print *, "*** Testing move_option ***"
   call test_move_option("/type_none", "/type_none_2")
-    
+      
+  print *, "*** Testing copy_option ***"
+  call test_copy_option("/type_none", "/type_none_2")
+  
 contains
   
   subroutine test_key_errors(key)
@@ -910,5 +913,52 @@ contains
     call test_delete_option(key2)
   
   end subroutine test_move_option
+
+  subroutine test_copy_option(key1, key2)
+    character(len = *), intent(in) :: key1
+    character(len = *), intent(in) :: key2
+  
+    integer :: stat
+  
+    call add_option(trim(key1), stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    
+    call copy_option(trim(key1), trim(key2))    
+    call test_key_present(key1)
+    call test_key_present(key2)
+    
+    call test_delete_option(key2)
+    call test_delete_option(key1)
+    
+    call add_option(trim(key1) // "::name", stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    call test_key_present(key1 // "::name")
+    
+    call copy_option(trim(key1) // "::name", trim(key2) // "::name")
+    call test_key_present(key2)
+    call test_key_present(key2 // "::name")
+    call test_key_present(key1)
+    call test_key_present(key1 // "::name")
+
+    call test_delete_option(key2)
+    call test_delete_option(key1)
+    
+    call add_option(trim(key1) // trim(key1), stat)
+    call report_test("[New option]", stat /= SPUD_NEW_KEY_WARNING, .false., "Failed to return new key warning when setting option")
+    call test_key_present(key1)
+    call test_key_present(trim(key1) // key1)
+    
+    call copy_option(trim(key1) // trim(key1), trim(key2) // trim(key2))
+    call test_key_present(key1)
+    call test_key_present(trim(key1) // key1)
+    call test_key_present(key2)
+    call test_key_present(trim(key2) // key2)
+    
+    call test_delete_option(key1)
+    call test_delete_option(key2)
+  
+  end subroutine test_copy_option
     
 end subroutine test_fspud

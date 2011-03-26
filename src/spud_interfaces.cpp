@@ -267,6 +267,9 @@ extern "C" {
     return move_option(string(key1, *key1_len), string(key2, *key2_len));
   }
 
+  int cspud_copy_option(const char* key1, const int* key1_len, const char* key2, const int* key2_len){
+    return copy_option(string(key1, *key1_len), string(key2, *key2_len));
+  }
   int cspud_delete_option(const char* key, const int* key_len){
     return delete_option(string(key, *key_len));
   }

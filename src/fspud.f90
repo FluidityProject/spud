@@ -63,6 +63,7 @@ module spud
     & set_option, &
     & set_option_attribute, &
     & move_option, &
+    & copy_option, &
     & delete_option, &
     & print_options
 
@@ -190,6 +191,15 @@ module spud
       character(len = key2_len), intent(in) :: key2
       integer :: cspud_move_option
     end function cspud_move_option
+
+    function cspud_copy_option(key1, key1_len, key2, key2_len)
+      implicit none
+      integer, intent(in) :: key1_len
+      integer, intent(in) :: key2_len
+      character(len = key1_len), intent(in) :: key1
+      character(len = key2_len), intent(in) :: key2
+      integer :: cspud_copy_option
+    end function cspud_copy_option
 
     function cspud_delete_option(key, key_len)
       implicit none
@@ -946,6 +956,25 @@ contains
     end if
 
   end subroutine move_option
+
+  subroutine copy_option(key1, key2, stat)
+    character(len = *), intent(in) :: key1
+    character(len = *), intent(in) :: key2
+    integer, optional, intent(out) :: stat
+
+    integer :: lstat
+
+    if(present(stat)) then
+      stat = SPUD_NO_ERROR
+    end if
+
+    lstat = cspud_copy_option(key1, len_trim(key1), key2, len_trim(key2))
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key1, lstat, stat)
+      return
+    end if
+
+  end subroutine copy_option
 
   subroutine delete_option(key, stat)
     character(len = *), intent(in) :: key
