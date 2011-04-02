@@ -192,14 +192,9 @@ def main():
     sys.exit(1)
 
   # If input_schemafile doesn't exist, use the fluidity_options schema.
-  if input_schemafile == None:
-    for possible_schemafile in [os.path.join(diamond_path, "fluidity_options.rng"), "/usr/share/diamond/schema/fluidity_options.rng"]:
-      try:
-        os.stat(possible_schemafile)
-        input_schemafile = possible_schemafile
-        break
-      except OSError:
-        pass
+  if input_schemafile is None:
+    debug.deprint("Cannot locate schemafile!", 0)
+    sys.exit(1)
 
   debug.dprint("\n" + \
                "Glade file:  " + str(gladefile) + "\n" + \
