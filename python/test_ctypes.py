@@ -26,8 +26,8 @@ print libspud.get_option('/geometry/dimension')
 
 try:
   libspud.add_option('/foo')
-except libspud.SpudNewKeyWarning:
-  pass
+except libspud.SpudNewKeyWarning, e:
+  print "caugt libspud.SpudNewKeyWarning: "+e.message
 print libspud.option_count('/foo')
 
 libspud.set_option('/problem_type', 'helloworld')
@@ -35,11 +35,21 @@ print libspud.get_option('/problem_type')
 
 try:
   libspud.set_option_attribute('/foo/bar', 'foobar')
-except libspud.SpudNewKeyWarning:
-  pass
+except libspud.SpudNewKeyWarning, e:
+  print "caugt libspud.SpudNewKeyWarning: "+e.message
 print libspud.get_option('/foo/bar')
   
 libspud.delete_option('/foo')
 print libspud.option_count('/foo')
+
+try:
+  libspud.get_option('/foo')
+except libspud.SpudKeyError, e:
+  print "caugt libspud.SpudKeyError: "+e.message
+
+try:
+  libspud.get_option('/geometry')
+except libspud.SpudTypeError, e:
+  print "caugt libspud.SpudTypeError: "+e.message
 
 libspud.write_options('test_out.flml')

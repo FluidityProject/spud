@@ -27,22 +27,28 @@ SPUD_ATTR_SET_FAILED_WARNING = -2
 OPTION_PATH_LEN = 8192
 
 class SpudKeyError(Exception):
-  pass
+  def __init__(self, msg = "The specified option is not present in the dictionary."):
+    self.message = msg
 
 class SpudTypeError(Exception):
-  pass
+  def __init__(self, msg = "The specified option has a different type from that of the option argument provided."):
+    self.message = msg
 
 class SpudRankError(Exception):
-  pass
+  def __init__(self, msg = "The specified option has a different rank from that of the option argument provided."):
+    self.message = msg
 
 class SpudShapeError(Exception):
-  pass
+  def __init__(self, msg = "The specified option has a different shape from that of the option argument provided."):
+    self.message = msg
 
 class SpudNewKeyWarning(Exception):
-  pass
+  def __init__(self, msg = "The option being inserted is not already in the dictionary."):
+    self.message = msg
   
 class SpudAttrSetFailedWarning(Exception):
-  pass
+  def __init__(self, msg = "The option being set as an attribute can not be set as an attribute."):
+    self.message = msg
   
 spud_exceptions = {SPUD_KEY_ERROR: SpudKeyError,
                    SPUD_TYPE_ERROR: SpudTypeError,
@@ -161,6 +167,8 @@ def get_option(s):
   if type is str:
     strlen = get_option_shape(s)[0]
     val = create_string_buffer(strlen+1)
+  elif type is None:
+    raise spud_exceptions[SPUD_TYPE_ERROR]("No value exists at the given path")
   else:
     val = ctype_map[type]()
 
