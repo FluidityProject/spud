@@ -2,12 +2,25 @@
 
 \usepackage{palatino}
 
-\title{Spud 1.0.10 Manual}
+\title{Spud 1.0.24 Manual}
 
 \usepackage{listings}
 \usepackage{hyperref,xspace}
 \usepackage[margin=2cm]{geometry}
 \usepackage{longtable}
+\usepackage{color}
+
+\definecolor{DarkBlue}{rgb}{0.00,0.00,0.55}
+\hypersetup{
+    linkcolor   = DarkBlue,
+    anchorcolor = DarkBlue,
+    citecolor   = DarkBlue,
+    filecolor   = DarkBlue,
+    pagecolor   = DarkBlue,
+    urlcolor    = DarkBlue,
+    colorlinks  = true,
+    pdftitle    = {Spud 1.0.24 Manual},
+}
 
 \lstloadlanguages{Fortran,C++,C}
 
@@ -52,9 +65,8 @@ Spud and Diamond depend on the following packages:
 \item LaTeX (for the manual) (\url{http://www.latex-project.org/})
 \end{itemize}
 
-Users of Debian and Ubuntu should
-be able to install all the needed dependencies by adding the repository
-lines listed below and typing:
+Users of Ubuntu should
+be able to install all the needed dependencies by adding the repository listed below and typing:
 
 \begin{verbatim}
 sudo apt-get update
@@ -63,25 +75,10 @@ sudo apt-get build-depend spud
 
 \section{Obtaining the source}
 
-Spud is managed using Subversion. Version 1.0.10 can be obtained with the
-command:
+Spud source code is held in a bzr repository. The current development version is available via:
 
 \begin{verbatim}
-svn co http://amcg.ese.ic.ac.uk/svn/spud/branches/1.0.10 spud
-\end{verbatim}
-
-the current development version is available via:
-
-\begin{verbatim}
-svn co http://amcg.ese.ic.ac.uk/svn/spud/trunk spud
-\end{verbatim}
-
-Debian and Ubuntu users can obtain the source package by adding the
-repository lines listed below and typing:
-
-\begin{verbatim}
-sudo apt-get update
-sudo apt-get source spud
+bzr co lp:spud
 \end{verbatim}
 
 \section{Building from source}
@@ -103,29 +100,13 @@ options type:
 ./configure --help
 \end{verbatim}
 
-\section{Debian and Ubuntu packages}
+\section{Ubuntu packages}
 
-Debian and Ubuntu packages are available from the Applied Modelling and
-Computation Group at Imperial College London. The Debian repository may be
-accessed by adding the following lines to \verb+/etc/apt/sources.list+:
-
-\begin{verbatim}
-deb http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
-deb-src http://amcg.ese.ic.ac.uk/debian/ unstable main contrib non-free
-\end{verbatim}
-
-The Ubuntu repository may be accessed via the following lines:
+Ubuntu packages are available from a Launchpad repository managed by the Applied Modelling and Computation
+Group at Imperial College London. To add this repository to your system sources, run:
 
 \begin{verbatim}
-deb http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
-deb-src http://amcg.ese.ic.ac.uk/debian/ gutsy main contrib non-free
-\end{verbatim}
-
-or:
-
-\begin{verbatim}
-deb http://amcg.ese.ic.ac.uk/debian/ hardy main contrib non-free
-deb-src http://amcg.ese.ic.ac.uk/debian/ hardy main contrib non-free
+sudo apt-add-repository ppa:amcg/ppa
 \end{verbatim}
 
 The Spud library and the base language are installed by the
@@ -133,7 +114,7 @@ The Spud library and the base language are installed by the
 package. Both packages are built from the \verb+spud+ source package. Binary
 packages are supplied for the i386 and amd64 architectures.
 
-After adding the relevant lines to \verb+/etc/apt/sources.list+, install the
+After adding the repository, install the
 packages by typing:
 
 \begin{verbatim}
