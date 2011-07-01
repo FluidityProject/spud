@@ -170,15 +170,10 @@ def get_option(s):
   elif type is None:
     raise spud_exceptions[SPUD_TYPE_ERROR]("No value exists at the given path")
   else:
-    shape = get_option_shape(s)
     val_type = ctype_map[type]
-    for i in range(2):
-      if shape[i]>0: 
-        rank += 1
-        val_type = val_type*shape[i]
-      else:
-        # we assume below that shape[0] contains the length if rank==1
-        break 
+    rank = get_option_rank(s)
+    shape = get_option_shape(s)
+    for i in range(rank): val_type = val_type*shape[i]
     val = val_type()
 
   out = cget_option(s, byref(c_int(len(s))), byref(val))
