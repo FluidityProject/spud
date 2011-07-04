@@ -224,7 +224,7 @@ class Diamond:
   def load_schema(self, schemafile):
     # so, if the schemafile has already been opened, then ..
     if schemafile == self.schemafile:
-      self.statusbar.set_statusbar('Schema ' + schemafile + ' already loaded.')
+      self.statusbar.set_statusbar('Schema ' + schemafile + ' already loaded')
       return
 
     # if we aren't using a http schema, and we're passed a relative filename, we
