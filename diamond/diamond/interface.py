@@ -2312,7 +2312,7 @@ class Diamond:
       self.node_data.set_tab_width(2)
       if self.node_data_is_python_code():
         self.node_data.set_show_line_numbers(True)
-        font_desc = pango.FontDescription("monospace 10")
+        font_desc = pango.FontDescription("monospace")
         if font_desc:
           self.node_data.modify_font(font_desc)
     except ImportError:
