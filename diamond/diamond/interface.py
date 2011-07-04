@@ -70,6 +70,7 @@ Important fields:
   node_desc_link_bounds: a list of tuples corresponding to the start and end points of links in the current tree.Tree / MixedTree documentation
   options_tree_select_func_enabled: boolean, true if the options tree select function is enabled (used to overcome a nasty clash with the treeview clicked signal) - re-enabled on next options_tree_select_func call
   selected_node: a tree.Tree or MixedTree containing data to be displayed on the RHS
+  selected_iter: last iter set by on_select_row
   s: current schema
   saved: boolean, false if the current file has been edited
   schemafile: the current RNG schema file
@@ -1177,7 +1178,7 @@ class Diamond:
     if path is None:
       self.statusbar.clear_statusbar()
       return
-    iter = self.treestore.get_iter(path)
+    self.selected_iter = iter = self.treestore.get_iter(path)
     choice_or_tree = self.treestore.get_value(iter, 2)
 
     active_tree = self.treestore.get_value(iter, 3)
@@ -2622,7 +2623,8 @@ class Diamond:
         if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, plist.List) and self.selected_node.datatype.cardinality == "+":
           self.selected_node.child.set_attr("shape", str(len(value_check.split(" "))))
         self.paint_validity()
-        iter = self.get_treeview_iter(self.treeview.get_selection())
+        
+        iter = self.selected_iter
         self.treestore.set_value(iter, 4, new_data)
         self.set_saved(False)
         self.node_data_interacted = False
