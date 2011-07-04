@@ -667,6 +667,7 @@ class Diamond:
 
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
+    self.treeview.connect("key_press_event", self.on_treeview_key_press)
     try:  # allow for possibility of no tooltips (like elsewhere)
       self.treeview.connect("query-tooltip", self.on_tooltip)
       self.treeview.set_property("has-tooltip", False)
@@ -1167,6 +1168,20 @@ class Diamond:
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True
+
+  def on_treeview_key_press(self, treeview, event):
+    """
+    Called when treeview intercepts a key press. Collapse and expand rows.
+    """
+
+    if event.keyval == gtk.keysyms.Right:
+      self.treeview.expand_row(self.get_selected_row(), open_all = False)
+
+    if event.keyval == gtk.keysyms.Left:
+      self.treeview.collapse_row(self.get_selected_row())
+  
+    return
+
 
   def on_select_row(self, selection=None):
     """
