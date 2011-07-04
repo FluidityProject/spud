@@ -206,9 +206,14 @@ def main():
 
   i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
 
+  def initialise(i, s, f):
+    i.open_file(schemafile = s, filename = f)
+    i.main_window.window.set_cursor(None)
+    i.statusbar.clear_statusbar()
+
+  i.statusbar.set_statusbar("Loading ...")
   i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
-  i.open_file(schemafile = input_schemafile, filename = input_filename)
-  i.main_window.window.set_cursor(None)  
+  initialise(i, input_schemafile, input_filename)
 
   gtk.main()
 
