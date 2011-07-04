@@ -1,4 +1,5 @@
 import libspud
+print libspud.__file__
 
 libspud.load_options('test.flml')
 
@@ -24,10 +25,23 @@ print libspud.get_option('/geometry/dimension')
 libspud.set_option('/geometry/dimension', 3)
 print libspud.get_option('/geometry/dimension')
 
+list_path = '/material_phase::Material1/scalar_field::MaterialVolumeFraction/prognostic/boundary_conditions::LetNoOneLeave/surface_ids'
+print libspud.get_option_shape(list_path)
+print libspud.get_option_rank(list_path)
+print libspud.get_option(list_path)
+assert(libspud.get_option(list_path)==[7,8,9,10])
+
+tensor_path = '/material_phase::Material1/tensor_field::DummyTensor/prescribed/value::WholeMesh/anisotropic_asymmetric/constant'
+print libspud.get_option_shape(tensor_path)
+print libspud.get_option_rank(tensor_path)
+print libspud.get_option(tensor_path)
+assert(libspud.get_option(tensor_path)==[[1.0,2.0],[3.0,4.0]])
+
+
 try:
   libspud.add_option('/foo')
 except libspud.SpudNewKeyWarning, e:
-  print "caugt libspud.SpudNewKeyWarning: "+e.message
+  print "caught libspud.SpudNewKeyWarning: "+e.message
 print libspud.option_count('/foo')
 
 libspud.set_option('/problem_type', 'helloworld')
@@ -36,7 +50,7 @@ print libspud.get_option('/problem_type')
 try:
   libspud.set_option_attribute('/foo/bar', 'foobar')
 except libspud.SpudNewKeyWarning, e:
-  print "caugt libspud.SpudNewKeyWarning: "+e.message
+  print "caught libspud.SpudNewKeyWarning: "+e.message
 print libspud.get_option('/foo/bar')
   
 libspud.delete_option('/foo')
@@ -45,11 +59,11 @@ print libspud.option_count('/foo')
 try:
   libspud.get_option('/foo')
 except libspud.SpudKeyError, e:
-  print "caugt libspud.SpudKeyError: "+e.message
+  print "caught libspud.SpudKeyError: "+e.message
 
 try:
   libspud.get_option('/geometry')
 except libspud.SpudTypeError, e:
-  print "caugt libspud.SpudTypeError: "+e.message
+  print "caught libspud.SpudTypeError: "+e.message
 
 libspud.write_options('test_out.flml')
