@@ -224,6 +224,7 @@ class Diamond:
   def load_schema(self, schemafile):
     # so, if the schemafile has already been opened, then ..
     if schemafile == self.schemafile:
+      self.statusbar.set_statusbar('Schema ' + schemafile + ' already loaded')
       return
 
     # if we aren't using a http schema, and we're passed a relative filename, we
@@ -231,12 +232,16 @@ class Diamond:
     if 'http' not in schemafile:
       schemafile = os.path.abspath(schemafile)
 
+    self.statusbar.set_statusbar('Loading schema from ' + schemafile)
+
     # now, let's try and read the schema.
     try:
       s_read = schema.Schema(schemafile)
       self.s = s_read
+      self.statusbar.set_statusbar('Loaded schema from ' + schemafile)
     except:
       dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
+      self.statusbar.clear_statusbar()
       return
 
     self.schemafile = schemafile
@@ -1190,7 +1195,6 @@ class Diamond:
 
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
-      self.statusbar.clear_statusbar()
       return
     iter = self.treestore.get_iter(path)
     choice_or_tree = self.treestore.get_value(iter, 2)
