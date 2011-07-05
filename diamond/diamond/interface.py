@@ -2606,9 +2606,6 @@ class Diamond:
     else:
       store_success = self.node_data_entry_store()
 
-    if store_success:
-      self.node_data_revert()
-
     if self.scherror.errlist_is_open():
       if self.scherror.errlist_type == 0:
          self.scherror.on_validate_schematron()
