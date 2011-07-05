@@ -1965,6 +1965,8 @@ class Diamond:
 
     self.update_node_comment()
 
+    self.gui.get_widget("optionsFrame").queue_resize()
+    
     return
 
   def node_desc_mouse_over(self, widget, event):
@@ -2047,17 +2049,16 @@ class Diamond:
     Update the RHS attributes widget.
     """
 
-    iter = self.node_attrs.get_model().get_iter_first()
-    while iter is not None:
-      next_iter = self.node_attrs.get_model().iter_next(iter)
-      self.node_attrs.get_model().remove(iter)
-      iter = next_iter
+    self.node_attrs.get_model().clear()
 
     if self.selected_node is None:
       self.node_attrs.get_column(2).set_property("visible", False)
       self.node_attrs.get_column(0).queue_resize()
       self.node_attrs.get_column(1).queue_resize()
+    elif len(self.selected_node.attrs.keys()) == 0:
+      self.gui.get_widget("attributeFrame").set_property("visible", False)
     else:
+      self.gui.get_widget("attributeFrame").set_property("visible", True)
       for key in self.selected_node.attrs.keys():
         iter = self.node_attrs.get_model().append()
         self.node_attrs.get_model().set_value(iter, 0, key)
@@ -2604,9 +2605,6 @@ class Diamond:
       store_success = self.node_data_combo_store()
     else:
       store_success = self.node_data_entry_store()
-
-    if store_success:
-      self.node_data_revert()
 
     if self.scherror.errlist_is_open():
       if self.scherror.errlist_type == 0:
