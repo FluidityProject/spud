@@ -914,7 +914,7 @@ class Diamond:
     choice_or_tree = self.treestore.get_value(iter, 2)
     if choice_or_tree.cardinality == "":
       cell.set_property("stock-id", None)
-    elif choice_or_tree.cardinality == "?":
+    elif choice_or_tree.cardinality == "?" or choice_or_tree.cardinality == "*":
       if choice_or_tree.active:
         cell.set_property("stock-id", gtk.STOCK_REMOVE)
       else:
@@ -922,18 +922,10 @@ class Diamond:
     elif choice_or_tree.cardinality == "+":
       parent_tree = choice_or_tree.parent
       count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
-      if count == 2: # one active, one inactive
-        if choice_or_tree.active is True:
-          cell.set_property("stock-id", None)
-        elif choice_or_tree.active is False:
-          cell.set_property("stock-id", gtk.STOCK_ADD)
-      else:
-        if choice_or_tree.active:
-          cell.set_property("stock-id", gtk.STOCK_REMOVE)
-        else:
-          cell.set_property("stock-id", gtk.STOCK_ADD)
-    elif choice_or_tree.cardinality == "*":
-      if choice_or_tree.active is True:
+      
+      if choice_or_tree.active and count == 2: # one active, one inactive
+        cell.set_property("stock-id", None)
+      elif choice_or_tree.active:
         cell.set_property("stock-id", gtk.STOCK_REMOVE)
       else:
         cell.set_property("stock-id", gtk.STOCK_ADD)
