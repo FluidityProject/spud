@@ -298,7 +298,6 @@
                                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                 <child>
                                   <widget class="GtkTextView" id="nodeDescription">
-                                    <property name="height_request">50</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -322,7 +321,7 @@
                             </child>
                           </widget>
                           <packing>
-                            <property name="resize">False</property>
+                            <property name="resize">True</property>
                             <property name="shrink">False</property>
                           </packing>
                         </child>
@@ -350,7 +349,6 @@
                                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                         <child>
                                           <widget class="GtkTreeView" id="nodeAttributes">
-                                            <property name="height_request">50</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -371,7 +369,10 @@
                                     </child>
                                   </widget>
                                   <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
                                     <property name="padding">2</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -394,6 +395,7 @@
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">False</property>
                                     <property name="padding">2</property>
                                     <property name="position">1</property>
                                   </packing>
@@ -452,7 +454,6 @@
                                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                     <child>
                                       <widget class="GtkTextView" id="nodeComment">
-                                        <property name="height_request">100</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
