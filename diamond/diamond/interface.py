@@ -224,6 +224,7 @@ class Diamond:
   def load_schema(self, schemafile):
     # so, if the schemafile has already been opened, then ..
     if schemafile == self.schemafile:
+      self.statusbar.set_statusbar('Schema ' + schemafile + ' already loaded')
       return
 
     # if we aren't using a http schema, and we're passed a relative filename, we
@@ -231,12 +232,16 @@ class Diamond:
     if 'http' not in schemafile:
       schemafile = os.path.abspath(schemafile)
 
+    self.statusbar.set_statusbar('Loading schema from ' + schemafile)
+
     # now, let's try and read the schema.
     try:
       s_read = schema.Schema(schemafile)
       self.s = s_read
+      self.statusbar.set_statusbar('Loaded schema from ' + schemafile)
     except:
       dialogs.error_tb(self.main_window, "Unable to open schema file \"" + schemafile + "\"")
+      self.statusbar.clear_statusbar()
       return
 
     self.schemafile = schemafile
@@ -667,6 +672,7 @@ class Diamond:
 
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
+    self.treeview.connect("key_press_event", self.on_treeview_key_press)
     try:  # allow for possibility of no tooltips (like elsewhere)
       self.treeview.connect("query-tooltip", self.on_tooltip)
       self.treeview.set_property("has-tooltip", False)
@@ -1168,6 +1174,20 @@ class Diamond:
 
     return True
 
+  def on_treeview_key_press(self, treeview, event):
+    """
+    Called when treeview intercepts a key press. Collapse and expand rows.
+    """
+
+    if event.keyval == gtk.keysyms.Right:
+      self.treeview.expand_row(self.get_selected_row(), open_all = False)
+
+    if event.keyval == gtk.keysyms.Left:
+      self.treeview.collapse_row(self.get_selected_row())
+  
+    return
+
+
   def on_select_row(self, selection=None):
     """
     Called when a row is selected. Update the options frame.
@@ -1175,7 +1195,6 @@ class Diamond:
 
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
-      self.statusbar.clear_statusbar()
       return
     iter = self.treestore.get_iter(path)
     choice_or_tree = self.treestore.get_value(iter, 2)
@@ -1946,6 +1965,8 @@ class Diamond:
 
     self.update_node_comment()
 
+    self.gui.get_widget("optionsFrame").queue_resize()
+    
     return
 
   def node_desc_mouse_over(self, widget, event):
@@ -2028,17 +2049,16 @@ class Diamond:
     Update the RHS attributes widget.
     """
 
-    iter = self.node_attrs.get_model().get_iter_first()
-    while iter is not None:
-      next_iter = self.node_attrs.get_model().iter_next(iter)
-      self.node_attrs.get_model().remove(iter)
-      iter = next_iter
+    self.node_attrs.get_model().clear()
 
     if self.selected_node is None:
       self.node_attrs.get_column(2).set_property("visible", False)
       self.node_attrs.get_column(0).queue_resize()
       self.node_attrs.get_column(1).queue_resize()
+    elif len(self.selected_node.attrs.keys()) == 0:
+      self.gui.get_widget("attributeFrame").set_property("visible", False)
     else:
+      self.gui.get_widget("attributeFrame").set_property("visible", True)
       for key in self.selected_node.attrs.keys():
         iter = self.node_attrs.get_model().append()
         self.node_attrs.get_model().set_value(iter, 0, key)
@@ -2312,7 +2332,7 @@ class Diamond:
       self.node_data.set_tab_width(2)
       if self.node_data_is_python_code():
         self.node_data.set_show_line_numbers(True)
-        font_desc = pango.FontDescription("monospace 10")
+        font_desc = pango.FontDescription("monospace")
         if font_desc:
           self.node_data.modify_font(font_desc)
     except ImportError:
@@ -2585,9 +2605,6 @@ class Diamond:
       store_success = self.node_data_combo_store()
     else:
       store_success = self.node_data_entry_store()
-
-    if store_success:
-      self.node_data_revert()
 
     if self.scherror.errlist_is_open():
       if self.scherror.errlist_type == 0:
