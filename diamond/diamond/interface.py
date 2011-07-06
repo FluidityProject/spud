@@ -126,7 +126,9 @@ class Diamond:
                     "on_console": self.on_console,
                     "on_display_properties_toggled": self.on_display_properties_toggled,
                     "on_about": self.on_about,
-                    "on_copy_spud_path": self.on_copy_spud_path}
+                    "on_copy_spud_path": self.on_copy_spud_path,
+                    "on_copy": self.on_copy,
+                    "on_paste": self.on_paste}
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -640,6 +642,22 @@ class Diamond:
     clipboard = gtk.clipboard_get()
     clipboard.set_text(name)
     clipboard.store()
+
+  def on_copy(self, widget=None):
+    if self.selected_node != None:
+      ios = StringIO.StringIO()
+      self.selected_node.parent.write(ios)
+    
+      clipboard = gtk.clipboard_get()
+      clipboard.set_text(ios.getvalue())
+      clipboard.store()
+
+      ios.close()
+    return
+
+  def on_paste(self, widget=None):
+    return
+
 
   ## LHS ###
 
