@@ -1198,6 +1198,9 @@ class Diamond:
 
     if event.keyval == gtk.keysyms.Left:
       self.treeview.collapse_row(self.get_selected_row())
+
+    if event.keyval == gtk.keysyms.Delete:
+       self.collapse_tree(self.treestore.get_iter(self.get_selected_row()))
  
     return
 
