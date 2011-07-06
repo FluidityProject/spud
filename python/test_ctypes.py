@@ -30,13 +30,22 @@ print libspud.get_option_shape(list_path)
 print libspud.get_option_rank(list_path)
 print libspud.get_option(list_path)
 assert(libspud.get_option(list_path)==[7,8,9,10])
+libspud.set_option(list_path, [11,12,13,14])
+print libspud.get_option_shape(list_path)
+print libspud.get_option_rank(list_path)
+print libspud.get_option(list_path)
+assert(libspud.get_option(list_path)==[11,12,13,14])
 
 tensor_path = '/material_phase::Material1/tensor_field::DummyTensor/prescribed/value::WholeMesh/anisotropic_asymmetric/constant'
 print libspud.get_option_shape(tensor_path)
 print libspud.get_option_rank(tensor_path)
 print libspud.get_option(tensor_path)
 assert(libspud.get_option(tensor_path)==[[1.0,2.0],[3.0,4.0]])
-
+libspud.set_option(tensor_path, [[5.0,6.0],[7.0,8.0]])
+print libspud.get_option_shape(tensor_path)
+print libspud.get_option_rank(tensor_path)
+print libspud.get_option(tensor_path)
+assert(libspud.get_option(tensor_path)==[[5.0,6.0],[7.0,8.0]])
 
 try:
   libspud.add_option('/foo')
