@@ -818,11 +818,8 @@ class Diamond:
         self.set_treestore(iter, [])
         return
 
-    choice_or_tree = self.treestore.get_value(iter, 2)
-    active_tree = self.treestore.get_value(iter, 3)
-    if active_tree.active is False:
-      return
-    if choice_or_tree.active is False:
+    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    if active_tree.active is False or choice_or_tree.active is False:
       return
 
     l = self.s.valid_children(active_tree.schemaname)
@@ -937,8 +934,8 @@ class Diamond:
     Called when a row in the LHS treeview is collapsed.
     """
 
-    self.treeview.get_column(0).queue_resize()
-    self.treeview.get_column(1).queue_resize()
+    #self.treeview.get_column(0).queue_resize()
+    #self.treeview.get_column(1).queue_resize()
 
     return
 
@@ -1049,96 +1046,12 @@ class Diamond:
     col = pathinfo[1]
 
     iter = self.treestore.get_iter(path)
-    (name, combobox_liststore, choice_or_tree, active_tree) = self.treestore.get(iter, 0, 1, 2, 3)
-    parent_iter = self.treestore.iter_parent(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
-
     self.update_data_column(self.treestore, iter)
 
     if col is not self.imgcolumn:
       return
 
-    if choice_or_tree.cardinality == "":
-      return
-
-    if not self.options_tree_select_func():
-      self.options_tree_select_func_enabled = False
-      return
-
-    if choice_or_tree.cardinality == "?":
-      if choice_or_tree.active is True:
-        choice_or_tree.active = False
-        self.set_saved(False)
-        self.remove_children(iter)
-      else:
-        choice_or_tree.active = True
-        self.set_saved(False)
-        self.expand_treestore(iter)
-
-    elif choice_or_tree.cardinality == "*":
-      if choice_or_tree.active is True:
-        # If this is the only one, just make it inactive.
-        # Otherwise, just delete it.
-        count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
-        if count == 1:
-          choice_or_tree.active = False
-          self.set_saved(False)
-          self.remove_children(iter)
-        else:
-          confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-          if confirm == gtk.RESPONSE_YES:
-            parent_tree.delete_child_by_ref(choice_or_tree)
-            self.remove_children(iter)
-            self.treestore.remove(iter)
-            self.set_saved(False)
-      else:
-        # Make this active, and add a new inactive instance
-        choice_or_tree.active = True
-        new_tree = parent_tree.add_inactive_instance(choice_or_tree)
-        liststore = self.create_liststore(new_tree)
-        self.expand_treestore(iter)
-        iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-          new_tree.get_current_tree(), ""])
-        self.set_saved(False)
-
-    elif choice_or_tree.cardinality == "+":
-      count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
-      if count == 2: # one active, one inactive
-        if choice_or_tree.active is True:
-          # do nothing
-          return
-        elif choice_or_tree.active is False:
-          # Make this active, and add a new inactive instance
-          choice_or_tree.active = True
-          new_tree = parent_tree.add_inactive_instance(choice_or_tree)
-          liststore = self.create_liststore(new_tree)
-          self.expand_treestore(iter)
-          iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-            new_tree.get_current_tree(), ""])
-          self.set_saved(False)
-      else: # count > 2
-        if choice_or_tree.active is True:
-          # remove it
-          confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-          if confirm == gtk.RESPONSE_YES:
-            parent_tree.delete_child_by_ref(choice_or_tree)
-            self.treestore.remove(iter)
-            self.set_saved(False)
-        elif choice_or_tree.active is False:
-          # Make this active, and add a new inactive instance
-          choice_or_tree.active = True
-          new_tree = parent_tree.add_inactive_instance(choice_or_tree)
-          liststore = self.create_liststore(new_tree)
-          self.expand_treestore(iter)
-          iter = self.treestore.insert_after(parent=parent_iter, sibling=iter, row=[self.get_display_name(new_tree), liststore, new_tree,
-            new_tree.get_current_tree(), ""])
-          self.set_saved(False)
-
-    parent_tree.recompute_validity()
+    self.toggle_tree(iter)
 
     self.on_select_row(self.treeview.get_selection())
 
@@ -1146,6 +1059,115 @@ class Diamond:
     self.treeview.get_column(0).queue_resize()
     self.treeview.get_column(1).queue_resize()
 
+    return
+
+  def toggle_tree(self, iter):
+    """
+    Toggles the state of part of the tree.
+    """
+
+    choice_or_tree = self.treestore.get_value(iter, 2)
+
+    if choice_or_tree.active:
+      self.collapse_tree(iter)
+    else:
+      self.expand_tree(iter)
+
+    return
+  
+  def collapse_tree(self, iter):
+    """
+    Collapses part of the tree.
+    """
+
+    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    parent_iter = self.treestore.iter_parent(iter)
+
+    if parent_iter == None:
+      parent_tree = None
+    else:
+      parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    if not choice_or_tree.active:
+      return
+
+    if choice_or_tree.cardinality == "":
+      return
+
+    if choice_or_tree.cardinality == "?":
+      choice_or_tree.active = False
+      self.set_saved(False)
+      self.remove_children(iter)
+
+    elif choice_or_tree.cardinality == "*":
+      # If this is the only one, just make it inactive.
+      # Otherwise, just delete it.
+      count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
+      if count == 1:
+        choice_or_tree.active = False
+        self.set_saved(False)
+        self.remove_children(iter)
+      else:
+        confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
+        if confirm == gtk.RESPONSE_YES:
+          parent_tree.delete_child_by_ref(choice_or_tree)
+          self.remove_children(iter)
+          self.treestore.remove(iter)
+          self.set_saved(False)
+
+    elif choice_or_tree.cardinality == "+":
+      count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
+      if count == 2: # one active, one inactive
+        # do nothing
+        return
+      else: # count > 2
+        # remove it
+        confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
+        if confirm == gtk.RESPONSE_YES:
+          parent_tree.delete_child_by_ref(choice_or_tree)
+          self.remove_children(iter)
+          self.treestore.remove(iter)
+          self.set_saved(False)
+          
+    parent_tree.recompute_validity()
+    return
+
+  def expand_tree(self, iter):
+    """
+    Expands part of the tree.
+    """
+
+    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    parent_iter = self.treestore.iter_parent(iter)
+
+    if parent_iter == None:
+      parent_tree = None
+    else:
+      parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    if choice_or_tree.active:
+      return
+
+    if choice_or_tree.cardinality == "":
+      return
+
+    elif choice_or_tree.cardinality == "?":
+      choice_or_tree.active = True
+      self.set_saved(False)
+      self.expand_treestore(iter)
+
+    elif choice_or_tree.cardinality == "*" or choice_or_tree.cardinality == "+":
+      # Make this active, and add a new inactive instance
+      choice_or_tree.active = True
+      new_tree = parent_tree.add_inactive_instance(choice_or_tree)
+      liststore = self.create_liststore(new_tree)
+      self.expand_treestore(iter)
+      iter = self.treestore.insert_after(
+        parent=parent_iter, sibling=iter, 
+        row=[self.get_display_name(new_tree), liststore, new_tree, new_tree.get_current_tree(), ""])
+      self.set_saved(False)
+
+    parent_tree.recompute_validity()
     return
 
   def options_tree_select_func(self, info = None):
@@ -1176,7 +1198,7 @@ class Diamond:
 
     if event.keyval == gtk.keysyms.Left:
       self.treeview.collapse_row(self.get_selected_row())
-  
+ 
     return
 
 
@@ -1315,30 +1337,18 @@ class Diamond:
       iter = model.iter_next(iter)
    
 
-  def on_activate_row(self, treeview, iter, path):
+  def on_activate_row(self, treeview, path, view_column):
     """
     Called when you double click or press Enter on a row.
     """
 
-    path = self.get_selected_row(self.treeview.get_selection())
     iter = self.treestore.get_iter(path)
-    (name, combobox_liststore, choice_or_tree, active_tree) = self.treestore.get(iter, 0, 1, 2, 3)
-    parent_iter = self.treestore.iter_parent(iter)
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    
+    self.expand_tree(iter)
 
-    if choice_or_tree.cardinality == "?":
-      if choice_or_tree.active is False:
-        choice_or_tree.active = True
-        self.set_saved(False)
-        self.expand_treestore(iter)
-        self.on_select_row(self.treeview.get_selection())
-    if parent_tree is not None:
-      parent_tree.recompute_validity()
-
-    if path is None: return
+    if path is None: 
+      return
+    
     if treeview.row_expanded(path):
       treeview.collapse_row(path)
     else:
