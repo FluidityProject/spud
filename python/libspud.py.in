@@ -34,10 +34,6 @@ class SpudTypeError(Exception):
   def __init__(self, msg = "The specified option has a different type from that of the option argument provided."):
     self.message = msg
 
-class SpudTypeError(Exception):
-  def __init__(self, msg = "The specified option has a different type from that of the option argument provided."):
-    self.message = msg
-
 class SpudRankError(Exception):
   def __init__(self, msg = "The specified option has a different rank from that of the option argument provided."):
     self.message = msg
