@@ -1081,7 +1081,7 @@ class Diamond:
     Collapses part of the tree.
     """
 
-    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    choice_or_tree, = self.treestore.get(iter, 2)
     parent_iter = self.treestore.iter_parent(iter)
 
     if parent_iter == None:
@@ -1120,6 +1120,7 @@ class Diamond:
         self.delete_tree(iter)
   
     parent_tree.recompute_validity()
+    self.treeview.queue_draw()
     return
 
   def delete_tree(self, iter):
@@ -1215,7 +1216,6 @@ class Diamond:
        self.collapse_tree(self.treestore.get_iter(self.get_selected_row()))
  
     return
-
 
   def on_select_row(self, selection=None):
     """
