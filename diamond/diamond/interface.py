@@ -644,9 +644,14 @@ class Diamond:
     clipboard.store()
 
   def on_copy(self, widget=None):
-    if self.selected_node != None:
+    if isinstance(self.selected_node, MixedTree):
+      node = self.selected_node.parent
+    else:
+      node = self.selected_node    
+
+    if node != None and node.active:
       ios = StringIO.StringIO()
-      self.selected_node.parent.write(ios)
+      node.write(ios)
     
       clipboard = gtk.clipboard_get()
       clipboard.set_text(ios.getvalue())
@@ -656,6 +661,10 @@ class Diamond:
     return
 
   def on_paste(self, widget=None):
+    clipboard = gtk.clipboard_get()
+    ios = StringIO.StringIO(clipboard.wait_for_text())
+     
+    print ios  
     return
 
 
