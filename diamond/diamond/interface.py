@@ -1109,12 +1109,7 @@ class Diamond:
         self.set_saved(False)
         self.remove_children(iter)
       else:
-        confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-        if confirm == gtk.RESPONSE_YES:
-          parent_tree.delete_child_by_ref(choice_or_tree)
-          self.remove_children(iter)
-          self.treestore.remove(iter)
-          self.set_saved(False)
+        self.delete_tree(iter)
 
     elif choice_or_tree.cardinality == "+":
       count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
@@ -1122,15 +1117,31 @@ class Diamond:
         # do nothing
         return
       else: # count > 2
-        # remove it
-        confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-        if confirm == gtk.RESPONSE_YES:
-          parent_tree.delete_child_by_ref(choice_or_tree)
-          self.remove_children(iter)
-          self.treestore.remove(iter)
-          self.set_saved(False)
-          
+        self.delete_tree(iter)
+  
     parent_tree.recompute_validity()
+    return
+
+  def delete_tree(self, iter):
+    choice_or_tree, = self.treestore.get(iter, 2)
+    parent_iter = self.treestore.iter_parent(iter)
+    isSelected = self.treeview.get_selection().iter_is_selected(iter)
+    sibling = self.treestore.iter_next(iter)
+
+    if parent_iter == None:
+      parent_tree = None
+    else:
+      parent_tree = self.treestore.get_value(parent_iter, 3)
+
+    confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
+    if confirm == gtk.RESPONSE_YES:
+      parent_tree.delete_child_by_ref(choice_or_tree)
+      self.remove_children(iter)
+      self.treestore.remove(iter)
+      self.set_saved(False)
+      
+      if isSelected and sibling:
+        self.treeview.get_selection().select_iter(sibling)
     return
 
   def expand_tree(self, iter):
