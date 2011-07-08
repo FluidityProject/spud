@@ -103,6 +103,7 @@ class Diamond:
 
     self.statusbar = DiamondStatusBar(self.gui.get_widget("statusBar"))
     self.find      = DiamondFindDialog(self, gladefile)
+    self.popup = self.gui.get_widget("popupmenu")
 
     self.plugin_buttonbox = self.gui.get_widget("plugin_buttonbox")
     self.plugin_buttonbox.set_layout(gtk.BUTTONBOX_START)
@@ -741,6 +742,8 @@ class Diamond:
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
     self.treeview.connect("key_press_event", self.on_treeview_key_press)
+    self.treeview.connect("button_press_event", self.on_treeview_button_press)
+    self.treeview.connect("popup_menu", self.on_treeview_popup)
     try:  # allow for possibility of no tooltips (like elsewhere)
       self.treeview.connect("query-tooltip", self.on_tooltip)
       self.treeview.set_property("has-tooltip", False)
@@ -1299,6 +1302,25 @@ class Diamond:
     if event.keyval == gtk.keysyms.Delete:
        self.collapse_tree(self.treestore.get_iter(self.get_selected_row()))
  
+    return
+
+  def on_treeview_button_press(self, treeview, event):
+    if event.button == 3:
+      x = int(event.x)
+      y = int(event.y)
+      path = treeview.get_path_at_pos(x, y)[0]
+      if path is not None:
+        treeview.get_selection().select_path(path)
+        self.show_popup(None, event.button, event.time)
+        return True
+    return False
+  
+  def on_treeview_popup(self, treeview):
+    self.how_popup(None, None, None)
+    return
+
+  def show_popup(self, func, button, time):
+    self.popup.popup( None, None, func, button, time)  
     return
 
   def on_select_row(self, selection=None):
