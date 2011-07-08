@@ -2,7 +2,7 @@
 
 \usepackage{palatino}
 
-\title{Spud 1.0.24 Manual}
+\title{Spud 1.0.25 Manual}
 
 \usepackage{listings}
 \usepackage{hyperref,xspace}
@@ -692,7 +692,7 @@ subroutine load_options(filename)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cload_options(const char* key, const int* key_len)
+void cspud_load_options(const char* key, const int* key_len)
 \end{lstlisting}
 
 \begin{lstlisting}
@@ -709,7 +709,7 @@ subroutine write_options(filename)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cwrite_options(const char* filename, const int* filename_len)
+void cspud_write_options(const char* filename, const int* filename_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
