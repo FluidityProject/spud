@@ -664,17 +664,46 @@ class Diamond:
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
-    if isinstance(self.selected_node, MixedTree):
-      node = self.selected_node.parent
-    else:
-      node = self.selected_node    
+    if self.selected_iter is not None:    
+      node = self.treestore.get_value(self.selected_iter, 3)
 
-    if node != None and node.active:
+    if node != None:
+      if not node.active:
+        self.expand_tree(self.selected_iter)
+
       newnode = self.s.read(ios, node)
 
+      # Extract and display validation errors
+      lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
+      if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
+        saved = False
+        msg = ""
+        if len(lost_eles) > 0:
+          msg += "Warning: lost xml elements:\n"
+          for ele in lost_eles:
+            msg += ele + "\n"
+        if len(added_eles) > 0:
+          msg += "Warning: added xml elements:\n"
+          for ele in added_eles:
+            msg += ele + "\n"
+        if len(lost_attrs) > 0:
+          msg += "Warning: lost xml attributes:\n"
+          for ele in lost_attrs:
+            msg += ele + "\n"
+        if len(added_attrs) > 0:
+          msg += "Warning: added xml attributes:\n"
+          for ele in added_attrs:
+            msg += ele + "\n"
+      
+        dialogs.long_message(self.main_window, msg)
+ 
+      self.set_saved(False)     
+   
       self.treeview.freeze_child_notify()
-      self.set_treestore(self.selected_iter, [newnode], True, True)
+      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
       self.treeview.thaw_child_notify()
+      
+      self.treeview.get_selection().select_iter(iter)
 
     return
 
@@ -841,7 +870,8 @@ class Diamond:
 
     if replace:
       self.treestore.remove(replacediter)
-    
+      return child_iter
+   
     return
 
   def expand_choice_or_tree(self, choice_or_tree):
@@ -1275,7 +1305,7 @@ class Diamond:
     """
     Called when a row is selected. Update the options frame.
     """
-
+    
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
       return

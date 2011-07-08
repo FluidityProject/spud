@@ -156,13 +156,17 @@ class Schema(object):
       xpath = self.tree.xpath(eid)
       if len(xpath) == 0:
         debug.deprint("Warning: no element with XPath %s" % eid)
-        return []
+        return None
       node = xpath[0]
 
     node = self.to_tree(node)
     
     if eidtree is not None:
-      node.parent = eidtree.parent
+      if eidtree.parent is not None:
+        eidtree.parent.children.append(node) 
+        node.set_parent(eidtree.parent)
+      node.attrs = eidtree.attrs
+      node.cardinality = eidtree.cardinality
 
     return node
 
