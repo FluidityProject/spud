@@ -1,0 +1,24 @@
+# Bash completion for diamond
+
+_diamond()
+{
+    local cmd cur prev skinsdir IFS=$' \t\n' i j k=0
+
+    COMPREPLY=()
+    cmd=${COMP_WORDS[0]}
+    _get_comp_words_by_ref cur prev
+
+    case $prev in
+        -s)
+          _filedir '@(rng)'
+          return 0
+          ;;
+         *)
+          _filedir '@(*ml)'
+          return 0;
+          ;;
+    esac
+
+    return 0
+}
+complete -o filenames -F _diamond diamond
