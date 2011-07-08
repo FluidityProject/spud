@@ -674,6 +674,10 @@ class Diamond:
 
       newnode = self.s.read(ios, node)
 
+      if newnode is None:
+        self.statusbar.set_statusbar("Trying to paste invalid XML.")
+        return
+
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
       if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:

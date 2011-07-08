@@ -513,7 +513,10 @@ class Schema(object):
   # read takes a file handle, constructs a generic in-memory representation using the
   # the etree API, and then converts it to a tree of Tree and Choice elements.
   def read(self, xmlfile, root = None):
-    doc = etree.parse(xmlfile)
+    try:
+      doc = etree.parse(xmlfile)
+    except etree.XMLSyntaxError:
+      return None
 
     self.lost_eles = []
     self.added_eles = []
