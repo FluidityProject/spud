@@ -663,8 +663,19 @@ class Diamond:
   def on_paste(self, widget=None):
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
-     
-    print ios  
+    
+    if isinstance(self.selected_node, MixedTree):
+      node = self.selected_node.parent
+    else:
+      node = self.selected_node    
+
+    if node != None and node.active:
+      newnode = self.s.read(ios, node)
+
+      self.treeview.freeze_child_notify()
+      self.set_treestore(self.selected_iter, [newnode], True)
+      self.treeview.thaw_child_notify()
+
     return
 
 

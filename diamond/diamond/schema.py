@@ -483,7 +483,7 @@ class Schema(object):
 
   # read takes a file handle, constructs a generic in-memory representation using the
   # the etree API, and then converts it to a tree of Tree and Choice elements.
-  def read(self, xmlfile):
+  def read(self, xmlfile, datatree = None):
     doc = etree.parse(xmlfile)
 
     self.lost_eles = []
@@ -491,7 +491,8 @@ class Schema(object):
     self.lost_attrs  = []
     self.added_attrs = []
 
-    datatree = self.valid_children(":start")[0]
+    if datatree is None:
+      datatree = self.valid_children(":start")[0]
     xmlnode  = doc.getroot()
     self.xml_read_merge(datatree, xmlnode)
     self.xml_read_core(datatree, xmlnode, doc)
