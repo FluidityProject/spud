@@ -103,6 +103,7 @@ class Diamond:
 
     self.statusbar = DiamondStatusBar(self.gui.get_widget("statusBar"))
     self.find      = DiamondFindDialog(self, gladefile)
+    self.popup = self.gui.get_widget("popupmenu")
 
     self.plugin_buttonbox = self.gui.get_widget("plugin_buttonbox")
     self.plugin_buttonbox.set_layout(gtk.BUTTONBOX_START)
@@ -126,7 +127,9 @@ class Diamond:
                     "on_console": self.on_console,
                     "on_display_properties_toggled": self.on_display_properties_toggled,
                     "on_about": self.on_about,
-                    "on_copy_spud_path": self.on_copy_spud_path}
+                    "on_copy_spud_path": self.on_copy_spud_path,
+                    "on_copy": self.on_copy,
+                    "on_paste": self.on_paste}
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -641,6 +644,76 @@ class Diamond:
     clipboard.set_text(name)
     clipboard.store()
 
+  def on_copy(self, widget=None):
+    if isinstance(self.selected_node, MixedTree):
+      node = self.selected_node.parent
+    else:
+      node = self.selected_node    
+
+    if node != None and node.active:
+      ios = StringIO.StringIO()
+      node.write(ios)
+    
+      clipboard = gtk.clipboard_get()
+      clipboard.set_text(ios.getvalue())
+      clipboard.store()
+
+      ios.close()
+    return
+
+  def on_paste(self, widget=None):
+    clipboard = gtk.clipboard_get()
+    ios = StringIO.StringIO(clipboard.wait_for_text())
+    
+    if self.selected_iter is not None:    
+      node = self.treestore.get_value(self.selected_iter, 3)
+
+    if node != None:
+
+      newnode = self.s.read(ios, node)
+
+      if newnode is None:
+        self.statusbar.set_statusbar("Trying to paste invalid XML.")
+        return
+
+      if not node.active:
+        self.expand_tree(self.selected_iter)
+
+      # Extract and display validation errors
+      lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
+      if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
+        saved = False
+        msg = ""
+        if len(lost_eles) > 0:
+          msg += "Warning: lost xml elements:\n"
+          for ele in lost_eles:
+            msg += ele + "\n"
+        if len(added_eles) > 0:
+          msg += "Warning: added xml elements:\n"
+          for ele in added_eles:
+            msg += ele + "\n"
+        if len(lost_attrs) > 0:
+          msg += "Warning: lost xml attributes:\n"
+          for ele in lost_attrs:
+            msg += ele + "\n"
+        if len(added_attrs) > 0:
+          msg += "Warning: added xml attributes:\n"
+          for ele in added_attrs:
+            msg += ele + "\n"
+      
+        dialogs.long_message(self.main_window, msg)
+ 
+      self.set_saved(False)     
+   
+      self.treeview.freeze_child_notify()
+      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
+      self.treeview.thaw_child_notify()
+      
+      self.treeview.get_selection().select_iter(iter)
+
+    return
+
+
   ## LHS ###
 
   def init_datatree(self):
@@ -674,6 +747,8 @@ class Diamond:
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
     self.treeview.connect("key_press_event", self.on_treeview_key_press)
+    self.treeview.connect("button_press_event", self.on_treeview_button_press)
+    self.treeview.connect("popup_menu", self.on_treeview_popup)
     try:  # allow for possibility of no tooltips (like elsewhere)
       self.treeview.connect("query-tooltip", self.on_tooltip)
       self.treeview.set_property("has-tooltip", False)
@@ -756,12 +831,17 @@ class Diamond:
 
     return liststore
 
-  def set_treestore(self, iter=None, new_tree=[], recurse=False):
+  def set_treestore(self, iter=None, new_tree=[], recurse=False, replace=False):
     """
     Given a list of children of a node in a treestore, stuff them in the treestore.
     """
 
-    self.remove_children(iter)
+    if replace:
+      replacediter = iter
+      iter = self.treestore.iter_parent(replacediter)
+    else:
+      self.remove_children(iter)
+    
     for t in new_tree:
       if t.__class__ is tree.Tree:
         if self.choice_or_tree_is_hidden(t):
@@ -778,16 +858,28 @@ class Diamond:
 #              node_data = t[:4] + ".."
           
           data = str(node_data)
-        child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
+ 
+        if replace:
+          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(t), liststore, t, t, data])
+        else:
+          child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
+        
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if self.choice_or_tree_is_hidden(ts_choice):
           continue
-        child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+        if replace:
+          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+        else:
+          child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
+    if replace:
+      self.treestore.remove(replacediter)
+      return child_iter
+   
     return
 
   def expand_choice_or_tree(self, choice_or_tree):
@@ -1217,11 +1309,38 @@ class Diamond:
  
     return
 
+  def on_treeview_button_press(self, treeview, event):
+    if event.button == 3:
+      x = int(event.x)
+      y = int(event.y)
+      path = treeview.get_path_at_pos(x, y)[0]
+      if path is not None:
+        treeview.get_selection().select_path(path)
+        self.show_popup(None, event.button, event.time)
+        return True
+    return False
+
+  def popup_location(self, widget, user_data):
+    column = self.treeview.get_column(0)
+    path = self.treeview.get_selection().get_selected_rows()[0]
+    area = self.treeview.get_cell_area(path, column)
+    tx, ty = area.x, area.y
+    x, y = self.treeview.tree_to_widget_coords(tx, ty)
+    return (x, y, True)
+    
+  def on_treeview_popup(self, treeview):
+    self.show_popup(None, self.popup_location, gtk.get_current_event_time())
+    return
+
+  def show_popup(self, func, button, time):
+    self.popup.popup( None, None, func, button, time)  
+    return
+
   def on_select_row(self, selection=None):
     """
     Called when a row is selected. Update the options frame.
     """
-
+    
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
       return
