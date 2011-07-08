@@ -116,6 +116,7 @@
                         <property name="tooltip" translatable="yes">Copy</property>
                         <property name="label" translatable="yes">Copy</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_copy"/>
                         <accelerator key="C" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </widget>
                     </child>
@@ -126,6 +127,7 @@
                         <property name="tooltip" translatable="yes">Paste</property>
                         <property name="label" translatable="yes">Paste</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_paste"/>
                         <accelerator key="V" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </widget>
                     </child>
@@ -545,8 +547,12 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkStatusbar" id="statusBar">
+          <widget class="GtkHButtonBox" id="plugin_buttonbox">
             <property name="visible">True</property>
+            <property name="layout_style">start</property>
+            <child>
+              <placeholder/>
+            </child>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -555,12 +561,8 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkHButtonBox" id="plugin_buttonbox">
+          <widget class="GtkStatusbar" id="statusBar">
             <property name="visible">True</property>
-            <property name="layout_style">start</property>
-            <child>
-              <placeholder/>
-            </child>
           </widget>
           <packing>
             <property name="expand">False</property>

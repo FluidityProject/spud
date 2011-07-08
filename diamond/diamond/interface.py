@@ -677,7 +677,7 @@ class Diamond:
       if newnode is None:
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
-
+      
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
       if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
@@ -1318,9 +1318,17 @@ class Diamond:
         self.show_popup(None, event.button, event.time)
         return True
     return False
-  
+
+  def popup_location(self, widget, user_data):
+    column = self.treeview.get_column(0)
+    path = self.treeview.get_selection().get_selected_rows()[0]
+    area = self.treeview.get_cell_area(path, column)
+    tx, ty = area.x, area.y
+    x, y = self.treeview.tree_to_widget_coords(tx, ty)
+    return (x, y, True)
+    
   def on_treeview_popup(self, treeview):
-    self.how_popup(None, None, None)
+    self.show_popup(None, self.popup_location, gtk.get_current_event_time())
     return
 
   def show_popup(self, func, button, time):

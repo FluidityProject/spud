@@ -163,7 +163,8 @@ class Schema(object):
     
     if eidtree is not None:
       if eidtree.parent is not None:
-        eidtree.parent.children.append(node) 
+        eidtree.parent.children.append(node)
+        eidtree.parent.children.remove(eidtree) 
         node.set_parent(eidtree.parent)
       node.attrs = eidtree.attrs
       node.cardinality = eidtree.cardinality
@@ -515,7 +516,9 @@ class Schema(object):
   def read(self, xmlfile, root = None):
     try:
       doc = etree.parse(xmlfile)
-    except etree.XMLSyntaxError:
+    except etree.XMLSyntaxError as e:
+      debug.dprint("Invalid XML.")
+      debug.dprint(e)
       return None
 
     self.lost_eles = []
