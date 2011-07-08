@@ -143,6 +143,7 @@ class Schema(object):
 
   def valid_node(self, eid):
     if isinstance(eid, tree.Tree):
+      eidtree = eid
       eid = eid.schemaname
 
     if eid == ":start":
@@ -158,7 +159,12 @@ class Schema(object):
         return []
       node = xpath[0]
 
-    return self.to_tree(node)
+    node = self.to_tree(node)
+    
+    if eidtree is not None:
+      node.parent = eidtree.parent
+
+    return node
 
   def to_tree(self, element):
     tag = self.tag(element)
@@ -502,7 +508,7 @@ class Schema(object):
 
   # read takes a file handle, constructs a generic in-memory representation using the
   # the etree API, and then converts it to a tree of Tree and Choice elements.
-  def read(self, xmlfile, schemaname = None):
+  def read(self, xmlfile, root = None):
     doc = etree.parse(xmlfile)
 
     self.lost_eles = []
@@ -510,10 +516,10 @@ class Schema(object):
     self.lost_attrs  = []
     self.added_attrs = []
 
-    if schemaname is None:
+    if root is None:
       datatree = self.valid_children(":start")[0]
     else:
-      datatree = self.valid_node(schemaname)
+      datatree = self.valid_node(root)
 
     xmlnode  = doc.getroot()
     self.xml_read_merge(datatree, xmlnode)
