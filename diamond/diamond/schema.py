@@ -141,6 +141,25 @@ class Schema(object):
       
     return results
 
+  def valid_node(self, eid):
+    if isinstance(eid, tree.Tree):
+      eid = eid.schemaname
+
+    if eid == ":start":
+      try:
+        node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+      except:
+        debug.deprint("No valid start node found. Are you using a library Relax-NG file like spud_base.rng?", 0)
+        sys.exit(0)
+    else:
+      xpath = self.tree.xpath(eid)
+      if len(xpath) == 0:
+        debug.deprint("Warning: no element with XPath %s" % eid)
+        return []
+      node = xpath[0]
+
+    return self.to_tree(node)
+
   def to_tree(self, element):
     tag = self.tag(element)
     f = self.callbacks[tag]
@@ -483,7 +502,7 @@ class Schema(object):
 
   # read takes a file handle, constructs a generic in-memory representation using the
   # the etree API, and then converts it to a tree of Tree and Choice elements.
-  def read(self, xmlfile, datatree = None):
+  def read(self, xmlfile, schemaname = None):
     doc = etree.parse(xmlfile)
 
     self.lost_eles = []
@@ -491,8 +510,11 @@ class Schema(object):
     self.lost_attrs  = []
     self.added_attrs = []
 
-    if datatree is None:
+    if schemaname is None:
       datatree = self.valid_children(":start")[0]
+    else:
+      datatree = self.valid_node(schemaname)
+
     xmlnode  = doc.getroot()
     self.xml_read_merge(datatree, xmlnode)
     self.xml_read_core(datatree, xmlnode, doc)

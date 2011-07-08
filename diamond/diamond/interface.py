@@ -673,7 +673,7 @@ class Diamond:
       newnode = self.s.read(ios, node)
 
       self.treeview.freeze_child_notify()
-      self.set_treestore(self.selected_iter, [newnode], True)
+      self.set_treestore(self.selected_iter, [newnode], True, True)
       self.treeview.thaw_child_notify()
 
     return
@@ -794,12 +794,17 @@ class Diamond:
 
     return liststore
 
-  def set_treestore(self, iter=None, new_tree=[], recurse=False):
+  def set_treestore(self, iter=None, new_tree=[], recurse=False, replace=False):
     """
     Given a list of children of a node in a treestore, stuff them in the treestore.
     """
 
-    self.remove_children(iter)
+    if replace:
+      replacediter = iter
+      iter = self.treestore.iter_parent(replacediter)
+    else:
+      self.remove_children(iter)
+    
     for t in new_tree:
       if t.__class__ is tree.Tree:
         if self.choice_or_tree_is_hidden(t):
@@ -816,16 +821,27 @@ class Diamond:
 #              node_data = t[:4] + ".."
           
           data = str(node_data)
-        child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
+ 
+        if replace:
+          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(t), liststore, t, t, data])
+        else:
+          child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
+        
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if self.choice_or_tree_is_hidden(ts_choice):
           continue
-        child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+        if replace:
+          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+        else:
+          child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
+    if replace:
+      self.treestore.remove(replacediter)
+    
     return
 
   def expand_choice_or_tree(self, choice_or_tree):
