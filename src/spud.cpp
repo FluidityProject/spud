@@ -25,7 +25,7 @@
     USA
 */
 
-#include "spud.h"
+#include "spud"
 
 using namespace std;
 

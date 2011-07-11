@@ -412,15 +412,12 @@ namespace Spud{
     OptionManager::clear_options();
   }
 
-  inline void load_options(const std::string& filename){
-    OptionManager::load_options(filename);
-
-    return;
+  inline OptionError load_options(const std::string& filename){
+    return OptionManager::load_options(filename);
   }
-  inline void write_options(const std::string& filename){
-    OptionManager::write_options(filename);
 
-    return;
+  inline OptionError write_options(const std::string& filename){
+    return OptionManager::write_options(filename);
   }
 
   inline OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name){

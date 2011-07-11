@@ -25,8 +25,8 @@
     USA
 */
 
-#include "cspud.h"
 #include "spud.h"
+#include "spud"
 
 using namespace std;
 
@@ -40,18 +40,14 @@ extern "C" {
     return;
   }
 
-  void spud_load_options(const char* filename, const int filename_len)
+  int spud_load_options(const char* filename, const int filename_len)
   {
-    load_options(string(filename, filename_len));
-
-    return;
+    return load_options(string(filename, filename_len));
   }
 
-  void spud_write_options(const char* filename, const int filename_len)
+  int spud_write_options(const char* filename, const int filename_len)
   {
-    write_options(string(filename, filename_len));
-
-    return;
+    return write_options(string(filename, filename_len));
   }
 
   int spud_get_child_name(const char* key, const int key_len, const int index, char* child_name, const int child_name_len){
