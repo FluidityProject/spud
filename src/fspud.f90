@@ -44,6 +44,7 @@ module spud
     & SPUD_TYPE_ERROR              = 2, &
     & SPUD_RANK_ERROR              = 3, &
     & SPUD_SHAPE_ERROR             = 4, &
+    & SPUD_FILE_ERROR             = 5, &
     & SPUD_NEW_KEY_WARNING         = -1, &
     & SPUD_ATTR_SET_FAILED_WARNING = -2
 
@@ -52,7 +53,7 @@ module spud
     & load_options, &
     & write_options, &
     & get_child_name, &
-    & number_of_children, &
+    & get_number_of_children, &
     & option_count, &
     & have_option, &
     & option_type, &
@@ -100,19 +101,21 @@ module spud
      subroutine spud_clear_options() bind(c)
      end subroutine spud_clear_options
 
-     subroutine spud_load_options(key, key_len) bind(c)
+     function spud_load_options(key, key_len) bind(c)
        use iso_c_binding
        implicit none
        integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-     end subroutine spud_load_options
+       integer(c_int) :: spud_load_options
+     end function spud_load_options
 
-     subroutine spud_write_options(key, key_len) bind(c)
+     function spud_write_options(key, key_len) bind(c)
        use iso_c_binding
        implicit none
        integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-     end subroutine spud_write_options
+       integer(c_int) :: spud_write_options
+     end function spud_write_options
 
      function spud_get_child_name(key, key_len, index, child_name, child_name_len) bind(c)
        use iso_c_binding
@@ -125,13 +128,14 @@ module spud
        integer(c_int) :: spud_get_child_name
      end function spud_get_child_name
 
-     function spud_number_of_children(key, key_len) bind(c)
+     function spud_get_number_of_children(key, key_len, child_count) bind(c)
        use iso_c_binding
        implicit none
        integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: spud_number_of_children
-     end function spud_number_of_children
+       integer(c_int), intent(out) :: child_count
+       integer(c_int) :: spud_get_number_of_children
+     end function spud_get_number_of_children
 
      function spud_option_count(key, key_len) bind(c)
        use iso_c_binding
@@ -282,17 +286,33 @@ contains
     call spud_clear_options
   end subroutine clear_options
 
-  subroutine load_options(filename)
+  subroutine load_options(filename, stat)
     character(len = * ), intent(in) :: filename
+    integer, optional, intent(out) :: stat
 
-    call spud_load_options(string_array(filename), len_trim(filename))
+    integer :: lstat
+
+    lstat =  spud_load_options(string_array(filename), len_trim(filename))
+
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(filename, lstat, stat)
+      return
+    end if
 
   end subroutine load_options
 
-  subroutine write_options(filename)
+  subroutine write_options(filename, stat)
     character(len = *), intent(in) :: filename
+    integer, optional, intent(out) :: stat
 
-    call spud_write_options(string_array(filename), len_trim(filename))
+    integer :: lstat
+
+    lstat = spud_write_options(string_array(filename), len_trim(filename))
+
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(filename, lstat, stat)
+      return
+    end if
 
   end subroutine write_options
 
@@ -320,14 +340,20 @@ contains
 
   end subroutine get_child_name
 
-  function number_of_children(key)
+  subroutine get_number_of_children(key, child_count, stat)
     character(len = *), intent(in) :: key
+    integer, intent(out) :: child_count
+    integer, optional, intent(out) :: stat
 
-    integer :: number_of_children
+    integer :: lstat
 
-    number_of_children = spud_number_of_children(string_array(key), len_trim(key))
+    lstat = spud_get_number_of_children(string_array(key), len_trim(key), child_count)
+    if(lstat /= SPUD_NO_ERROR) then
+      call option_error(key, lstat, stat)
+      return
+    end if
 
-  end function number_of_children
+  end subroutine get_number_of_children
 
   function option_count(key)
     character(len = *), intent(in) :: key
@@ -1083,6 +1109,8 @@ contains
         write(0, *) "Option rank error. Key is: " // trim(key)
       case(SPUD_SHAPE_ERROR)
         write(0, *) "Option shape error. Key is: " // trim(key)
+      case(SPUD_FILE_ERROR)
+        write(0, *) "Option file error. Filename is: " // trim(key)        
       case(SPUD_NEW_KEY_WARNING)
         write(0, *) "Option warning. Key is not in the options tree: " // trim(key)
       case(SPUD_ATTR_SET_FAILED_WARNING)

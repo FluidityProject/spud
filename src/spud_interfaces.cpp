@@ -67,8 +67,8 @@ extern "C" {
     return SPUD_NO_ERROR;
   }
 
-  int spud_number_of_children(const char* key, const int key_len){
-    return number_of_children(string(key, key_len));
+  int spud_get_number_of_children(const char* key, const int key_len, int* child_count){
+    return get_number_of_children(string(key, key_len), *child_count);
   }
 
   int spud_option_count(const char* key, const int key_len){

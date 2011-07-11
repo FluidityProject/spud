@@ -53,12 +53,12 @@ namespace Spud{
     
       static void clear_options();
 
-      static void load_options(const std::string& filename);
-      static void write_options(const std::string& filename);
+      static OptionError load_options(const std::string& filename);
+      static OptionError write_options(const std::string& filename);
 
       static OptionError get_child_name(const std::string& key, const unsigned& index, std::string& child_name);
 
-      static int number_of_children(const std::string& key);
+      static OptionError get_number_of_children(const std::string& key, int& child_count);
 
       static int option_count(const std::string& key);
 
@@ -149,12 +149,12 @@ namespace Spud{
             * the supplied XML file, and adds children to this element
             * corresponding to the data in the XML file.
             */
-          void load_options(const std::string& filename);
+          OptionError load_options(const std::string& filename);
           /**
             * Write out this element and all of its children to an XML file
             * with the supplied filename.
             */
-          void write_options(const std::string& filename) const;
+          OptionError write_options(const std::string& filename) const;
 
           /**
             * Get the name of this element.
@@ -427,8 +427,8 @@ namespace Spud{
     return OptionManager::get_child_name(key, index, child_name);
   }
 
-  inline int number_of_children(const std::string& key){
-    return OptionManager::number_of_children(key);
+  inline OptionError get_number_of_children(const std::string& key, int& child_count){
+    return OptionManager::get_number_of_children(key, child_count);
   }
 
   inline int option_count(const std::string& key){
