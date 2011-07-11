@@ -97,153 +97,154 @@ module spud
 
   ! C interfaces
   interface
-     subroutine cspud_clear_options() bind(c)
-     end subroutine cspud_clear_options
+     subroutine spud_clear_options() bind(c)
+     end subroutine spud_clear_options
 
-     subroutine cspud_load_options(key, key_len) bind(c)
+     subroutine spud_load_options(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-     end subroutine cspud_load_options
+     end subroutine spud_load_options
 
-     subroutine cspud_write_options(key, key_len) bind(c)
+     subroutine spud_write_options(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-     end subroutine cspud_write_options
+     end subroutine spud_write_options
 
-     function cspud_get_child_name(key, key_len, index, child_name, child_name_len) bind(c)
+     function spud_get_child_name(key, key_len, index, child_name, child_name_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
-       integer(c_int), intent(in) :: child_name_len
+       integer(c_int), intent(in), value :: key_len
+       integer(c_int), intent(in), value :: child_name_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int), intent(in) :: index
+       integer(c_int), intent(in), value :: index
        character(len=1,kind=c_char), dimension(child_name_len), intent(out) :: child_name
-       integer(c_int) :: cspud_get_child_name
-     end function cspud_get_child_name
+       integer(c_int) :: spud_get_child_name
+     end function spud_get_child_name
 
-     function cspud_number_of_children(key, key_len) bind(c)
+     function spud_number_of_children(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: cspud_number_of_children
-     end function cspud_number_of_children
+       integer(c_int) :: spud_number_of_children
+     end function spud_number_of_children
 
-     function cspud_option_count(key, key_len) bind(c)
+     function spud_option_count(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: cspud_option_count
-     end function cspud_option_count
+       integer(c_int) :: spud_option_count
+     end function spud_option_count
 
-     function cspud_have_option(key, key_len) bind(c)
+     function spud_have_option(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: cspud_have_option
-     end function cspud_have_option
+       integer(c_int) :: spud_have_option
+     end function spud_have_option
 
-     function cspud_get_option_type(key, key_len, option_type) bind(c)
+     function spud_get_option_type(key, key_len, option_type) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        integer(c_int), intent(out) :: option_type
-       integer(c_int) :: cspud_get_option_type
-     end function cspud_get_option_type
+       integer(c_int) :: spud_get_option_type
+     end function spud_get_option_type
 
-     function cspud_get_option_rank(key, key_len, option_rank) bind(c)
+     function spud_get_option_rank(key, key_len, option_rank) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        integer(c_int), intent(out) :: option_rank
-       integer(c_int) :: cspud_get_option_rank
-     end function cspud_get_option_rank
+       integer(c_int) :: spud_get_option_rank
+     end function spud_get_option_rank
 
-     function cspud_get_option_shape(key, key_len, shape) bind(c)
+     function spud_get_option_shape(key, key_len, shape) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        integer(c_int), dimension(2), intent(out) :: shape
-       integer(c_int) :: cspud_get_option_shape
-     end function cspud_get_option_shape
+       integer(c_int) :: spud_get_option_shape
+     end function spud_get_option_shape
 
-     function cspud_add_option(key, key_len) bind(c)
+     function spud_add_option(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: cspud_add_option
-     end function cspud_add_option
+       integer(c_int) :: spud_add_option
+     end function spud_add_option
 
-     function cspud_set_option_attribute(key, key_len, val, val_len) bind(c)
+     function spud_set_option_attribute(key, key_len, val, val_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
-       integer(c_int), intent(in) :: val_len
+       integer(c_int), intent(in), value :: key_len
+       integer(c_int), intent(in), value :: val_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        character(len=1,kind=c_char), dimension(val_len), intent(in) :: val
-       integer(c_int) :: cspud_set_option_attribute
-     end function cspud_set_option_attribute
+       integer(c_int) :: spud_set_option_attribute
+     end function spud_set_option_attribute
 
-     function cspud_move_option(key1, key1_len, key2, key2_len) bind(c)
+     function spud_move_option(key1, key1_len, key2, key2_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key1_len
-       integer(c_int), intent(in) :: key2_len
+       integer(c_int), intent(in), value :: key1_len
+       integer(c_int), intent(in), value :: key2_len
        character(len = 1,kind=c_char), dimension(key1_len), intent(in) :: key1
        character(len = 1,kind=c_char), dimension(key2_len), intent(in) :: key2
-       integer(c_int) :: cspud_move_option
-     end function cspud_move_option
+       integer(c_int) :: spud_move_option
+     end function spud_move_option
 
-     function cspud_copy_option(key1, key1_len, key2, key2_len) bind(c)
+     function spud_copy_option(key1, key1_len, key2, key2_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key1_len
-       integer(c_int), intent(in) :: key2_len
+       integer(c_int), intent(in), value :: key1_len
+       integer(c_int), intent(in), value :: key2_len
        character(len = 1,kind=c_char), dimension(key1_len), intent(in) :: key1
        character(len = 1,kind=c_char), dimension(key2_len), intent(in) :: key2
-       integer(c_int) :: cspud_copy_option
-     end function cspud_copy_option
+       integer(c_int) :: spud_copy_option
+     end function spud_copy_option
 
-     function cspud_delete_option(key, key_len) bind(c)
+     function spud_delete_option(key, key_len) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
-       integer(c_int) :: cspud_delete_option
-     end function cspud_delete_option
+       integer(c_int) :: spud_delete_option
+     end function spud_delete_option
 
-     subroutine cspud_print_options() bind(c)
-     end subroutine cspud_print_options
+     subroutine spud_print_options() bind(c)
+     end subroutine spud_print_options
 
-     function cspud_get_option(key, key_len, val) bind(c)
+     function spud_get_option(key, key_len, val) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        ! Here intent(in) refers to the c_ptr, not the target!
        type(c_ptr), value, intent(in) :: val
-       integer(c_int) :: cspud_get_option
-     end function cspud_get_option
+       integer(c_int) :: spud_get_option
+     end function spud_get_option
 
-     function cspud_set_option(key, key_len, val, type, rank, shape) bind(c)
+     function spud_set_option(key, key_len, val, type, rank, shape) bind(c)
        use iso_c_binding
        implicit none
-       integer(c_int), intent(in) :: key_len
+       integer(c_int), intent(in), value :: key_len
        character(len=1,kind=c_char), dimension(key_len), intent(in) :: key
        type(c_ptr), value, intent(in) :: val
-       integer(c_int), intent(in) :: type, rank, shape(*)
-       integer(c_int) :: cspud_set_option
-     end function cspud_set_option
+       integer(c_int), intent(in), value :: type, rank
+       integer(c_int), intent(in), dimension(2) :: shape
+       integer(c_int) :: spud_set_option
+     end function spud_set_option
 
   end interface
 
@@ -278,20 +279,20 @@ contains
   end function array_string
 
   subroutine clear_options()
-    call cspud_clear_options
+    call spud_clear_options
   end subroutine clear_options
 
   subroutine load_options(filename)
     character(len = * ), intent(in) :: filename
 
-    call cspud_load_options(string_array(filename), len_trim(filename))
+    call spud_load_options(string_array(filename), len_trim(filename))
 
   end subroutine load_options
 
   subroutine write_options(filename)
     character(len = *), intent(in) :: filename
 
-    call cspud_write_options(string_array(filename), len_trim(filename))
+    call spud_write_options(string_array(filename), len_trim(filename))
 
   end subroutine write_options
 
@@ -309,7 +310,7 @@ contains
     end if
 
     lchild_name = ""
-    lstat = cspud_get_child_name(string_array(key), len_trim(key), index, lchild_name, len(lchild_name))
+    lstat = spud_get_child_name(string_array(key), len_trim(key), index, lchild_name, len(lchild_name))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -324,7 +325,7 @@ contains
 
     integer :: number_of_children
 
-    number_of_children = cspud_number_of_children(string_array(key), len_trim(key))
+    number_of_children = spud_number_of_children(string_array(key), len_trim(key))
 
   end function number_of_children
 
@@ -333,7 +334,7 @@ contains
 
     integer :: option_count
 
-    option_count = cspud_option_count(string_array(key), len_trim(key))
+    option_count = spud_option_count(string_array(key), len_trim(key))
 
   end function option_count
 
@@ -342,7 +343,7 @@ contains
 
     logical :: have_option
 
-    have_option = (cspud_have_option(string_array(key), len_trim(key)) /= 0)
+    have_option = (spud_have_option(string_array(key), len_trim(key)) /= 0)
 
   end function have_option
 
@@ -358,7 +359,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_get_option_type(string_array(key), len_trim(key), option_type)
+    lstat = spud_get_option_type(string_array(key), len_trim(key), option_type)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -378,7 +379,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_get_option_rank(string_array(key), len_trim(key), option_rank)
+    lstat = spud_get_option_rank(string_array(key), len_trim(key), option_rank)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -398,7 +399,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_get_option_shape(string_array(key), len_trim(key), option_shape(1:2))  ! Slicing required by GCC 4.2
+    lstat = spud_get_option_shape(string_array(key), len_trim(key), option_shape(1:2))  ! Slicing required by GCC 4.2
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -433,7 +434,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(key, len_trim(key), c_loc(lval))
+      lstat = spud_get_option(key, len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -464,7 +465,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -496,7 +497,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -529,7 +530,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -562,7 +563,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -595,7 +596,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -626,7 +627,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -657,7 +658,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -688,7 +689,7 @@ contains
         call option_error(key, lstat, stat)
         return
       end if
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -726,7 +727,7 @@ contains
         return
       end if
       lval = ""
-      lstat = cspud_get_option(string_array(key), len_trim(key), c_loc(lval))
+      lstat = spud_get_option(string_array(key), len_trim(key), c_loc(lval))
       if(lstat /= SPUD_NO_ERROR) then
         call option_error(key, lstat, stat)
         return
@@ -746,7 +747,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_add_option(string_array(key), len_trim(key))
+    lstat = spud_add_option(string_array(key), len_trim(key))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -765,7 +766,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(val), SPUD_REAL, 0, (/-1, -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(val), SPUD_REAL, 0, (/-1, -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -788,7 +789,7 @@ contains
 
     lval=val
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 1, (/size(val), -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 1, (/size(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -810,7 +811,7 @@ contains
 
     val_handle = transpose(val)
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_REAL, 2, shape(val_handle))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_REAL, 2, shape(val_handle))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -833,7 +834,7 @@ contains
     end if
 
     lval = val
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 0, (/-1, -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 0, (/-1, -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -856,7 +857,7 @@ contains
     end if
     
     lval=val
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 1, (/size(val), -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_REAL, 1, (/size(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -880,7 +881,7 @@ contains
 
     val_handle = transpose(val)
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_REAL, 2, shape(val_handle))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_REAL, 2, shape(val_handle))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -899,7 +900,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(val), SPUD_INTEGER, 0, (/-1, -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(val), SPUD_INTEGER, 0, (/-1, -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -921,7 +922,7 @@ contains
 
     lval=val
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_INTEGER, 1, (/size(val), -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_INTEGER, 1, (/size(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -943,7 +944,7 @@ contains
 
     val_handle = transpose(val)
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_INTEGER, 2, shape(val_handle))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(val_handle), SPUD_INTEGER, 2, shape(val_handle))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -965,7 +966,7 @@ contains
 
     lval=string_array(val)
 
-    lstat = cspud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_CHARACTER, 1, (/len_trim(val), -1/))
+    lstat = spud_set_option(string_array(key), len_trim(key), c_loc(lval), SPUD_CHARACTER, 1, (/len_trim(val), -1/))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -987,7 +988,7 @@ contains
 
     lval=string_array(val)
 
-    lstat = cspud_set_option_attribute(string_array(key), len_trim(key), lval, len_trim(val))
+    lstat = spud_set_option_attribute(string_array(key), len_trim(key), lval, len_trim(val))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -1006,7 +1007,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_move_option(string_array(key1), len_trim(key1), string_array(key2), len_trim(key2))
+    lstat = spud_move_option(string_array(key1), len_trim(key1), string_array(key2), len_trim(key2))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key1, lstat, stat)
       return
@@ -1025,7 +1026,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_copy_option(string_array(key1), len_trim(key1), string_array(key2), len_trim(key2))
+    lstat = spud_copy_option(string_array(key1), len_trim(key1), string_array(key2), len_trim(key2))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key1, lstat, stat)
       return
@@ -1043,7 +1044,7 @@ contains
       stat = SPUD_NO_ERROR
     end if
 
-    lstat = cspud_delete_option(string_array(key), len_trim(key))
+    lstat = spud_delete_option(string_array(key), len_trim(key))
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
@@ -1053,7 +1054,7 @@ contains
 
   subroutine print_options()
 
-    call cspud_print_options()
+    call spud_print_options()
 
   end subroutine print_options
 
