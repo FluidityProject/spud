@@ -1,3 +1,9 @@
+spud (1.0.25) natty; urgency=low
+
+  * Include Fraser's first week of work on Diamond
+
+ -- Patrick Farrell <patrick.farrell06@imperial.ac.uk>  Mon, 11 Jul 2011 11:49:45 +0100
+
 spud (1.0.24) natty; urgency=low
 
   * Update the manual to reflect the move to Launchpad.
