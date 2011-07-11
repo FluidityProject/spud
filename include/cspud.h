@@ -29,27 +29,7 @@
 #ifndef CSPUD_H
 #define CSPUD_H
 
-#include "spud_config.h"
 #include "spud_enums.h"
-
-#define cspud_clear_options F77_FUNC(cspud_clear_options, CSPUD_CLEAR_OPTIONS)
-#define cspud_load_options F77_FUNC(cspud_load_options, CSPUD_LOAD_OPTIONS)
-#define cspud_write_options F77_FUNC(cspud_write_options, CSPUD_WRITE_OPTIONS)
-#define cspud_get_child_name F77_FUNC(cspud_get_child_name, CSPUD_GET_CHILD_NAME)
-#define cspud_number_of_children F77_FUNC(cspud_number_of_children, CSPUD_GET_NUMBER_OF_CHILDREN)
-#define cspud_option_count F77_FUNC(cspud_option_count, CSPUD_OPTION_COUNT)
-#define cspud_have_option F77_FUNC(cspud_have_option, CSPUD_HAVE_OPTION)
-#define cspud_get_option_type F77_FUNC(cspud_get_option_type, CSPUD_GET_OPTION_TYPE)
-#define cspud_get_option_rank F77_FUNC(cspud_get_option_rank, CSPUD_GET_OPTION_RANK)
-#define cspud_get_option_shape F77_FUNC(cspud_get_option_shape, CSPUD_GET_OPTION_SHAPE)
-#define cspud_get_option F77_FUNC(cspud_get_option, CSPUD_GET_OPTION)
-#define cspud_add_option F77_FUNC(cspud_add_option, CSPUD_ADD_OPTION)
-#define cspud_set_option F77_FUNC(cspud_set_option, CSPUD_SET_OPTION)
-#define cspud_set_option_attribute F77_FUNC(cspud_set_option_attribute, CSPUD_SET_OPTION_ATTRIBUTE)
-#define cspud_move_option F77_FUNC(cspud_move_option, CSPUD_MOVE_OPTION)
-#define cspud_copy_option F77_FUNC(cspud_copy_option, CSPUD_COPY_OPTION)
-#define cspud_delete_option F77_FUNC(cspud_delete_option, CSPUD_DELETE_OPTION)
-#define cspud_print_options F77_FUNC(cspud_print_options, CSPUD_PRINT_OPTIONS)
 
 #ifdef __cplusplus
 extern "C" {
