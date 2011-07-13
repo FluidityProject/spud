@@ -644,7 +644,21 @@ class Diamond:
     clipboard.set_text(name)
     clipboard.store()
 
+  def _get_focus_widget(self, parent):
+    """Gets the widget that is a child of parent with the focus."""
+    focus = parent.get_focus_child()
+    if focus is None or (focus.flags() & gtk.HAS_FOCUS):
+      return focus
+    else:
+      return self._get_focus_widget(focus)
+
   def on_copy(self, widget=None):
+    
+    widget = self._get_focus_widget(self.main_window)
+    if widget is not self.treeview and gobject.signal_lookup("copy-clipboard", widget):
+      widget.emit("copy-clipboard")
+      return
+
     if isinstance(self.selected_node, MixedTree):
       node = self.selected_node.parent
     else:
@@ -662,6 +676,12 @@ class Diamond:
     return
 
   def on_paste(self, widget=None):
+
+    widget = self._get_focus_widget(self.main_window)
+    if widget is not self.treeview and gobject.signal_lookup("paste-clipboard", widget):
+      widget.emit("paste-clipboard")
+      return
+
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
