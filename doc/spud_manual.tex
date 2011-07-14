@@ -2,7 +2,7 @@
 
 \usepackage{palatino}
 
-\title{Spud 1.0.25 Manual}
+\title{Spud 1.1.0 Manual}
 
 \usepackage{listings}
 \usepackage{hyperref,xspace}
@@ -19,7 +19,7 @@
     pagecolor   = DarkBlue,
     urlcolor    = DarkBlue,
     colorlinks  = true,
-    pdftitle    = {Spud 1.0.24 Manual},
+    pdftitle    = {Spud 1.1.0 Manual},
 }
 
 \lstloadlanguages{Fortran,C++,C}
@@ -146,8 +146,8 @@ software parsers.  Hence the completed schema, including the base language,
 is translated from compact to XML syntax using the software package Trang
 before use by Spud based tools like Diamond.
 
-
 \section{Base language named patterns}\label{sec:named_patterns}
+
 The RELAX NG language allows different schemas to be imported into one
 another, which enables Spud to define a base language for schema developers.
 The Spud base language thus provides core schema objects (known in RELAX NG
@@ -602,7 +602,7 @@ will halt with an error message.
 \subsection{C}
 
 Since C does not itself have any namespacing facility, all exposed symbols
-have the prefix \lstinline[language=C]+cspud_+. Error codes are returned via
+have the prefix \lstinline[language=C]+spud_+. Error codes are returned via
 function return values.
 
 \subsection{C++}
@@ -646,6 +646,8 @@ Error values are greater than zero, warnings are negative and
   from that of the option argument provided.\\
   \lstinline+SPUD_SHAPE_ERROR+ & The specified option has a different shape
   from that of the option argument provided.\\
+  \lstinline+SPUD_FILE_ERROR+ & The specified options file cannot be read or
+  written to as the routine requires.\\
   \lstinline+SPUD_NEW_KEY_WARNING+ & The option being inserted is not
   already in the dictionary.\\
   \lstinline+SPUD_ATTR_SET_FAILED_WARNING+ & The option being set as an
@@ -675,7 +677,7 @@ end subroutine clear_options
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cspud_clear_options()
+void spud_clear_options()
 \end{lstlisting}
 
 \begin{lstlisting}
@@ -687,36 +689,42 @@ Clears the entire options tree.
 \subsection{load\_options}
 
 \begin{lstlisting}[language=fortran]
-subroutine load_options(filename)
+function load_options(filename, stat)
   character(len=*), intent(in) :: filename
+  integer, optional, intent(out) :: stat
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cspud_load_options(const char* key, const int* key_len)
+int spud_load_options(const char* key, const int key_len)
 \end{lstlisting}
 
 \begin{lstlisting}
-void Spud::load_options(const std::string& filename)
+OptionError Spud::load_options(const std::string& filename)
 \end{lstlisting}
 
 Reads the XML file \lstinline+filename+ into the options tree.
 
+Returns error code \lstinline+SPUD_FILE_ERROR+ if the file does not exist or cannot be read.
+
 \subsection{write\_options}
 
 \begin{lstlisting}[language=fortran]
-subroutine write_options(filename)
+subroutine write_options(filename, stat)
   character(len=*), intent(in) :: filename
+  integer, optional, intent(out) :: stat
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cspud_write_options(const char* filename, const int* filename_len)
+int spud_write_options(const char* filename, const int filename_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
-void write_options(const std::string& filename)
+OptionError write_options(const std::string& filename)
 \end{lstlisting}
 
 Writes the options tree out to the XML file \lstinline+filename+.
+
+Returns error code \lstinline+SPUD_FILE_ERROR+ if the file does not exist or cannot be written.
 
 \subsection{get\_child\_name}
 
@@ -728,9 +736,9 @@ subroutine get_child_name(key, index, child_name)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_get_child_name(const char* key, const int* key_len,
-  const int* index,
-  char* child_name, const int* child_name_len)
+int spud_get_child_name(const char* key, const int key_len,
+  const int index,
+  char* child_name, const int child_name_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -745,26 +753,28 @@ is mostly useful for debugging input files.
 Returns error code \lstinline+SPUD_KEY_ERROR+ if the supplied key does not
 exist in the options tree.
 
-\subsection{number\_of\_children}
+\subsection{get\_number\_of\_children}
 
 \begin{lstlisting}[language=Fortran]
-function number_of_children(key)
+function number_of_children(key, child_count)
   integer :: number_of_children
   character(len=*), intent(in) :: key
+  integer, intent(out) :: child_count
+  integer, optional, intent(out) :: stat
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_number_of_children(const char* key, const int* key_len)
+int spud_get_number_of_children(const char* key, const int key_len, int* child_count)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
-int Spud::number_of_children(const std::string& key)
+int Spud::get_number_of_children(const std::string& key, int& child_count)
 \end{lstlisting}
 
-Returns the number of children under \lstinline+key+. This is mainly of use
+On return, \lstinline+child_count+  the number of children under \lstinline+key+. This is mainly of use
 for debugging input files.
 
-Returns 0 if the specified key does not exist in the options tree.
+Returns the error code \lstinline+SPUD_KEY_ERROR+ if the specified key does not exist in the options tree.
 
 \subsection{option\_count}
 
@@ -775,7 +785,7 @@ function option_count(key)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_option_count(const char* key, const int* key_len)
+int spud_option_count(const char* key, const int key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -822,7 +832,7 @@ function have_option(key)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_have_option(const char* key, const int* key_len)
+int spud_have_option(const char* key, const int key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -843,7 +853,7 @@ function option_type(key, stat) result (type)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_get_option_type(const char* key, const int* key_len, int* type)
+int spud_get_option_type(const char* key, const int key_len, int* type)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -867,7 +877,7 @@ function option_rank(key, stat) result (rank)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_get_option_rank(const char* key, const int* key_len, int* rank)
+int spud_get_option_rank(const char* key, const int key_len, int* rank)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -891,7 +901,7 @@ function option_shape(key, stat) result (lshape)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_get_option_shape(const char* key, const int* key_len, int* shape)
+int spud_get_option_shape(const char* key, const int key_len, int* shape)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -918,7 +928,7 @@ subroutine get_option(key, val, stat, default)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C,emph=option_type,emphstyle=\textit]
-int cspud_get_option(const char* key, const int* key_len, void* val)
+int spud_get_option(const char* key, const int key_len, void* val)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++,emph=option_type,emphstyle=\textit]
@@ -979,7 +989,7 @@ subroutine add_option(key, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_add_option(const char* key, const int* key_len)
+int spud_add_option(const char* key, const int key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -1000,8 +1010,8 @@ subroutine set_option(key, val, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C,emph=option_type,emphstyle=\textit]
-int cspud_set_option(const char* key, const int* key_len, const void* val,
-const int* type, const int* rank, const int* shape)
+int spud_set_option(const char* key, const int key_len, const void* val,
+const int type, const int rank, const int* shape)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++,emph=option_type,emphstyle=\textit]
@@ -1033,8 +1043,8 @@ subroutine set_option_attribute(key, val, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int int cspud_set_option_attribute(const char* key, const int* key_len,
-const char* val, const int* val_len)
+int int spud_set_option_attribute(const char* key, const int key_len,
+const char* val, const int val_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -1069,7 +1079,7 @@ subroutine delete_option(key, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_delete_option(const char* key, const int* key_len)
+int spud_delete_option(const char* key, const int key_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -1091,7 +1101,7 @@ subroutine move_option(key1, key2, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_move_option(const char* key1, const int* key1_len, const char* key2, const int* key2_len)
+int spud_move_option(const char* key1, const int key1_len, const char* key2, const int key2_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -1110,7 +1120,7 @@ subroutine copy_option(key1, key2, stat)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-int cspud_copy_option(const char* key1, const int* key1_len, const char* key2, const int* key2_len)
+int spud_copy_option(const char* key1, const int key1_len, const char* key2, const int key2_len)
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
@@ -1126,7 +1136,7 @@ subroutine print_options()
 \end{lstlisting}
 
 \begin{lstlisting}[language=C]
-void cspud_print_options()
+void spud_print_options()
 \end{lstlisting}
 
 \begin{lstlisting}[language=C++]
