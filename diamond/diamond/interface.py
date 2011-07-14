@@ -1415,39 +1415,9 @@ class Diamond:
 
     return
 
-
   def on_store(self):
     self.set_saved(False)
     self.treeview.queue_draw()
-
-  def paint_validity(self):
-    """
-    Walk up the parental line, repainting the colour for their validity
-    appropriately. This is called when a validity-changing event occurs.
-    Repaint the whole tree if there is no selection.
-    """
-
-    def paint_iter_validity(iter):
-      while iter is not None:
-        active_tree = self.treestore.get_value(iter, 3)
-        if active_tree.valid:
-          self.cellcombo.set_property("foreground", "black")
-        else:
-          self.cellcombo.set_property("foreground", "blue")
-        iter = self.treestore.iter_next(iter)
-
-      return
-
-    selection = self.treeview.get_selection()
-    path = self.get_selected_row(selection)
-    if path is None:
-      paint_iter_validity(self.treestore.get_iter_first())
-    else:
-      paint_iter_validity(self.treestore.get_iter(path))
-
-    self.treeview.queue_draw()
-
-    return
 
   def get_display_name(self, active_tree):
     """
