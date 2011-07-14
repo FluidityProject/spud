@@ -333,7 +333,7 @@ class DataWidget(gtk.VBox):
     else:
       value_check = self.node.validity_check(self.node.datatype, new_data)
       if value_check is None:
-        dialogs.error(self, "Invalid value entered")
+        dialogs.error(None, "Invalid value entered")
         return False
       elif value_check != self.node.data:
         self.node.set_data(value_check)
@@ -380,7 +380,7 @@ class DataWidget(gtk.VBox):
     if not changed:
       return True
     elif (self.node.data is None and False in self.interacted) or "" in entry_values:
-      dialogs.error(self.main_window, "Invalid value entered")
+      dialogs.error(None, "Invalid value entered")
       return False
 
     new_data = ""

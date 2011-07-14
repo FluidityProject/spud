@@ -19,6 +19,7 @@ import gobject
 import gtk
 
 import datatype
+import dialogs
 
 class AttributeWidget(gtk.Frame):
   def __init__(self):
@@ -322,7 +323,7 @@ class AttributeWidget(gtk.Frame):
     valid_chars = "_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ"
     for char in value:
       if char not in valid_chars:
-        dialogs.error(self, "Invalid value entered")
+        dialogs.error(None, "Invalid value entered")
         return False
 
     return True
