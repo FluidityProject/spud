@@ -146,6 +146,21 @@ class Tree:
 
     return (True, data)
 
+  def validity_check(self, datatype, data):
+    """
+    Check to see if the supplied data with supplied type can be stored in a
+    tree.Tree.
+    """
+
+    (invalid, new_data) = self.valid_data(datatype, data)
+    if not invalid and isinstance(new_data, str) and not new_data == "":
+      if new_data != data and self.validity_check(new_data, datatype) is None:
+        return None
+      else:
+        return new_data
+    else:
+      return None
+
   def copy(self):
     new_copy = Tree()
     for attr in ["attrs", "name", "schemaname", "doc", "cardinality", "datatype", "parent", "active", "valid"]:
@@ -387,3 +402,55 @@ class Tree:
 
   def choices(self):
     return [self]
+
+  def is_comment(self):
+    """
+    Test whether the given node is a comment node.
+    """
+
+    if not self.name == "comment":
+      return False
+
+    if not self.attrs == {}:
+      return False
+
+    if not self.children == []:
+      return False
+
+    if not self.datatype is str:
+      return False
+
+    if not self.cardinality == "?":
+      return False
+
+    return True
+
+  def get_comment(self):
+    """
+    Return the first comment found as a child of the supplied node, or None if
+    none found.
+    """
+
+    for child in self.children:
+      if child.is_comment():
+        return child
+
+    return None
+
+  def is_tensor(self, geometry_dim_tree):
+    return False
+
+  def is_python_code(self):
+    """
+    Perform a series of tests on the current Tree, to determine if
+    it is intended to be used to store python code data.
+    """
+
+    try:
+       lang = self.selected_node.get_attr("language")
+       if lang == "python":
+         return True
+    except:
+      pass
+
+    return False

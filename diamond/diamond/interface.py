@@ -20,7 +20,6 @@ import os.path
 import re
 import sys
 import tempfile
-import webbrowser
 import cStringIO as StringIO
 
 import pango
@@ -28,17 +27,25 @@ import gobject
 import gtk
 import gtk.glade
 
-import debug
-import dialogs
 import choice
 import config
+import datatype
+import debug
+import dialogs
+import mixedtree
 import plist
+import plugins
 import schema
 import scherror
 import tree
-import plugins
+
 import StringIO
 import TextBufferMarkup
+
+import attributewidget
+import commentwidget
+import descriptionwidget
+import datawidget
 
 from lxml import etree
 
@@ -60,14 +67,13 @@ Important fields:
   logofile: the GUI logo file
   main_window: GUI toplevel window
   node_attrs: RHS attributes entry widget
-  node_comment: RHS comment entry widget
-  node_comment_interacted: used to determine if the comment widget has been interacted with without the comment being stored
+  description: RHS description widget
+  data = RHS data widget
+  comment: RHS comment entry widget
   node_data: RHS data entry widget
   node_data_buttons_hbox: container for "Revert Data" and "Store Data" buttons
   node_data_interacted: used to determine if a node data widget has been interacted with without data being stored
   node_data_frame: frame containing data entry widgets
-  node_desc: RHS description widget
-  node_desc_link_bounds: a list of tuples corresponding to the start and end points of links in the current tree.Tree / MixedTree documentation
   options_tree_select_func_enabled: boolean, true if the options tree select function is enabled (used to overcome a nasty clash with the treeview clicked signal) - re-enabled on next options_tree_select_func call
   selected_node: a tree.Tree or MixedTree containing data to be displayed on the RHS
   selected_iter: last iter set by on_select_row
@@ -83,7 +89,6 @@ Important fields:
 
 Important routines:
   cellcombo_edited: called when a choice is selected on the left-hand pane
-  init_options_frame: initialise the right-hand side
   init_treemodel: set up the treemodel and treeview
   on_treeview_clicked: when a row is clicked, process the consequences (e.g. activate inactive instance)
   set_treestore: stuff the treestore with a given tree.Tree
@@ -105,6 +110,8 @@ class Diamond:
     self.find      = DiamondFindDialog(self, gladefile)
     self.popup = self.gui.get_widget("popupmenu")
 
+    self.add_custom_widgets()
+    
     self.plugin_buttonbox = self.gui.get_widget("plugin_buttonbox")
     self.plugin_buttonbox.set_layout(gtk.BUTTONBOX_START)
     self.plugin_buttonbox.show()
@@ -147,7 +154,7 @@ class Diamond:
     self.suffix = suffix
 
     self.selected_node = None
-    self.init_options_frame()
+    self.update_options_frame()
 
     self.file_path = os.getcwd()
     self.schemafile_path = os.getcwd()
@@ -418,7 +425,7 @@ class Diamond:
     one.
     """
 
-    self.node_data_store()
+    self.data.store()
 
     if self.filename is None:
       return self.on_save_as(widget)
@@ -525,32 +532,6 @@ class Diamond:
     self.options_frame.set_property("visible", not self.options_frame.get_property("visible"))
     return
 
-  def set_cell_node(self, iter):
-      node = self.get_painted_tree(iter)
-
-      if isinstance(node, MixedTree):
-        node = node.child
-
-      if node.data is not None:
-        self.data_renderer.set_property("foreground", "black")
-        self.treestore.set_value(iter, 4, node.data)
-      elif isinstance(node, tree.Tree) and not node.not_editable():
-        self.data_renderer.set_property("foreground", "gray")
-
-        datatype = ""
-
-        if isinstance(node.datatype, plist.List):
-          datatype = "(" + node.datatype.datatype.__name__ + ")"
-        elif isinstance(node.datatype, tuple):
-          datatype = str(node.datatype)
-        else:
-          datatype = node.datatype.__name__
-
-        self.treestore.set_value(iter, 4, datatype)
-
-  def expand_fill_data(self, model, path, iter, user_data):
-      return self.set_cell_node(iter)
-
   def on_go_to_node(self, widget=None):
    """
    Go to a node, identified by an XPath
@@ -567,7 +548,6 @@ class Diamond:
     """
 
     self.treeview.expand_all()
-    self.treestore.foreach(self.expand_fill_data, None)
 
     return
 
@@ -749,11 +729,6 @@ class Diamond:
     self.treeview.connect("key_press_event", self.on_treeview_key_press)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
-    try:  # allow for possibility of no tooltips (like elsewhere)
-      self.treeview.connect("query-tooltip", self.on_tooltip)
-      self.treeview.set_property("has-tooltip", False)
-    except:
-      pass
 
     self.treeview.set_property("rules-hint", True)
 
@@ -782,17 +757,6 @@ class Diamond:
     imgcolumn.set_property("sizing", gtk.TREE_VIEW_COLUMN_FIXED)
     imgcolumn.set_cell_data_func(cellPicture, self.set_cellpicture_cardinality)
     optionsTree.append_column(imgcolumn)
-
-    # mtw07 - add column for quick preview of data.
-    self.data_renderer = gtk.CellRendererText()
-    self.data_renderer.set_property("editable", True)
-    self.data_renderer.connect("edited", self.on_cell_edit)
-    self.data_renderer.connect("editing-started", self.on_cell_edit_start)
-
-#    self.data_col = data_col = gtk.TreeViewColumn("Data", self.data_renderer, text=4)
-#    data_col.set_property("expand", True)
-#    data_col.set_property("sizing", gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-#    optionsTree.append_column(data_col)
 
     # display name, gtk.ListStore containing the display names of possible choices, pointer to node in self.tree -- a choice or a tree, pointer to currently active tree and its data.
     self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, str)
@@ -956,10 +920,7 @@ class Diamond:
     foreground colour.
     """
 
-    liststore = self.treestore.get_value(iter, 1)
-    choice_or_tree = self.treestore.get_value(iter, 2)
-    active_tree = self.treestore.get_value(iter, 3)
-    data = self.treestore.get_value(iter, 4)
+    liststore, choice_or_tree, active_tree = self.treestore.get(iter, 1, 2, 3)
 
     # set the model for the cellcombo, where it gets the possible choices for the name
     cellCombo.set_property("model", liststore)
@@ -1032,93 +993,6 @@ class Diamond:
 
     return
 
-  def on_tooltip(self, widget, x, y, keyboard_mode, tooltip):
-    y-=25 # It's hardcoded. Gtk doesn't offer a way to get at the column height without a lot more code.
-    (tx, ty) = self.treeview.convert_bin_window_to_tree_coords(x, y)
-    pathinfo = self.treeview.get_path_at_pos(x, y)
-
-    if pathinfo is None:
-      return False
-
-    path = pathinfo[0]
-    column = pathinfo[1]
-
-    if path is None:
-      return
-
-    ctitle = column.get_title()
-
-    iter = self.treestore.get_iter(path)
-
-    # Get the tree or choice pointed to by the iterator.
-    tree = self.treestore.get_value(iter, 2)
-
-    if tree.__class__ is choice.Choice:
-      tree = tree.get_current_tree()
-
-    if ctitle == "Node":
-      if tree.doc is None:
-        text = "(No documentation)"
-      else:
-        text = self.render_whitespace(tree.doc)
-    elif ctitle == "Data":
-      comment_tree = self.get_comment(tree)
-
-      if comment_tree is None:
-        text = "(No comment)"
-      else:
-        text = comment_tree.data
-    else:
-      return False
-
-    tooltip.set_text(text)    
-    return True
-
-  def on_cell_edit(self, cellr, path, new_text):
-    iter = self.treestore.get_iter(path)
-    node = self.selected_node
-
-    if new_text == "":
-      return
-
-    # mtw07 - Check whether the data is valid or not. If so, update the treeview
-    # and internal model. GTK automatically clears the text field if we don't
-    # add the new data to the treestore.
-    (invalid, data) = node.valid_data(node.datatype, new_text)
-
-    if invalid:
-      try:
-        name = node.datatype.__name__
-        dialogs.error(self.main_window, "Invalid data type. A %s is required." % name)
-      except:
-        pass
-      return
-
-    self.treestore.set_value(iter, 4, new_text)
-    node.data = new_text
-
-    # Update the node data box.
-    self.node_data.get_buffer().set_text(new_text)
-
-    # Update the validation errors list.
-    if self.scherror.errlist_is_open():
-      if self.scherror.errlist_type == 0:
-         self.scherror.on_validate_schematron()
-      else:
-         self.scherror.on_validate()
-
-    return
-
-  def on_cell_edit_start(self, cellrenderer, editable, path):
-    iter = self.treestore.get_iter(path)
-    node = self.selected_node
-
-    # If the cell has (<type>) in it, clear it for the user to enter data.
-    if node.datatype is not None and node.data is None:
-      editable.set_text("")
-
-    return True
-
   def on_treeview_clicked(self, treeview, event):
     """
     This routine is called every time the mouse is clicked on the treeview on the
@@ -1138,12 +1012,10 @@ class Diamond:
     path = pathinfo[0]
     col = pathinfo[1]
 
-    iter = self.treestore.get_iter(path)
-    self.update_data_column(self.treestore, iter)
-
     if col is not self.imgcolumn:
       return
 
+    iter = self.treestore.get_iter(path)
     self.toggle_tree(iter)
 
     self.on_select_row(self.treeview.get_selection())
@@ -1285,10 +1157,13 @@ class Diamond:
       self.options_tree_select_func_enabled = True
       return False
 
-    if not self.node_data_store():
+    if not self.data.store():
       return False
 
-    if isinstance(self.selected_node, MixedTree) and not self.geometry_dim_tree is None and self.selected_node.parent is self.geometry_dim_tree.parent and not self.selected_node.data is None:
+    if isinstance(self.selected_node, mixedtree.MixedTree) \
+       and self.geometry_dim_tree is not None \
+       and self.selected_node.parent is self.geometry_dim_tree.parent \
+       and self.selected_node.data is not None:
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True
@@ -1345,9 +1220,8 @@ class Diamond:
     if path is None:
       return
     self.selected_iter = iter = self.treestore.get_iter(path)
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
 
-    active_tree = self.treestore.get_value(iter, 3)
     debug.dprint(active_tree)
 
     self.selected_node = self.get_painted_tree(iter)
@@ -1355,12 +1229,8 @@ class Diamond:
 
     node = self.selected_node
 
-    if isinstance(node, MixedTree):
+    if isinstance(node, mixedtree.MixedTree):
       node = node.child
-
-    # TODO: Handle tuple datatypes. Is it possible in a Gtk treeview column?
-    if not isinstance(node.datatype, tuple):
-      self.data_renderer.set_property("editable", not (node.not_editable()))
 
     name = self.get_spudpath(active_tree)
     self.statusbar.set_statusbar(name)
@@ -1459,18 +1329,6 @@ class Diamond:
     else:
       return paths[0]
 
-  def update_data_column(self, model, itParent):
-    """
-    Update the data column in the treeview. Used when a user expands a row.
-    """
-
-    iter = model.iter_children(itParent)
-
-    while iter is not None:
-      self.set_cell_node(iter)
-      iter = model.iter_next(iter)
-   
-
   def on_activate_row(self, treeview, path, view_column):
     """
     Called when you double click or press Enter on a row.
@@ -1487,10 +1345,6 @@ class Diamond:
       treeview.collapse_row(path)
     else:
       treeview.expand_row(path, False)
-
-      # Update the data column for the newly expanded row.
-      (model, itParent) = self.treeview.get_selection().get_selected()
-      self.update_data_column(model, itParent)
 
     return
 
@@ -1541,6 +1395,11 @@ class Diamond:
     self.update_options_frame()
 
     return
+
+
+  def on_store(self):
+    self.set_saved(False)
+    self.treeview.queue_draw()
 
   def paint_validity(self):
     """
@@ -1661,7 +1520,7 @@ class Diamond:
     if child is None:
       painted_tree = active_tree
     else:
-      painted_tree = MixedTree(active_tree, child)
+      painted_tree = mixedtree.MixedTree(active_tree, child)
 
     if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
@@ -1671,10 +1530,10 @@ class Diamond:
         data_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, datatype = "fixed")
         data_tree.data = painted_tree.data
         painted_tree = MixedTree(painted_tree, data_tree)
-      elif isinstance(self.geometry_dim_tree, MixedTree) and active_tree is self.geometry_dim_tree.parent:
+      elif isinstance(self.geometry_dim_tree, mixedtree.MixedTree) and active_tree is self.geometry_dim_tree.parent:
         data_tree = tree.Tree(painted_tree.child.name, painted_tree.child.schemaname, datatype = "fixed")
         data_tree.data = painted_tree.data
-        painted_tree = MixedTree(painted_tree, data_tree)
+        painted_tree = mixedtree.MixedTree(painted_tree, data_tree)
 
     return painted_tree
 
@@ -1705,28 +1564,25 @@ class Diamond:
     Find the iter into the treestore corresponding to the geometry dimension, and
     perform checks to test that the geometry dimension node is valid.
     """
-
+    
+    self.geometry_dim_tree = self.data.geometry_dim_tree = None
     # The tree must exist
     if self.tree is None:
-      self.geometry_dim_tree = None
       return
 
     # A geometry dimension element must exist
     iter = self.get_treestore_iter_from_xmlpath("/" + self.tree.name + self.data_paths["dim"])
     if iter is None:
-      self.geometry_dim_tree = None
       return
 
     painted_tree = self.get_painted_tree(iter, False)
-    if isinstance(painted_tree, MixedTree):
+    if isinstance(painted_tree, mixedtree.MixedTree):
        # If the geometry dimension element has a hidden data element, it must
        # have datatype tuple or fixed
        if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
-         self.geometry_dim_tree = None
          return
     elif not painted_tree.datatype == "fixed":
       # Otherwise, only fixed datatype is permitted
-      self.geometry_dim_tree = None
       return
 
     # All parents of the geometry dimension element must have cardinality ""
@@ -1734,7 +1590,6 @@ class Diamond:
     parent = painted_tree.parent
     while not parent is None:
       if not parent.cardinality == "":
-        self.geometry_dim_tree = None
         return
       parent = parent.parent
 
@@ -1744,18 +1599,16 @@ class Diamond:
     elif painted_tree.datatype == "fixed":
       possible_dims = [painted_tree.data]
     else:
-      self.geometry_dim_tree = None
       return
     for opt in possible_dims:
       try:
         test = int(opt)
         assert test > 0
       except:
-        self.geometry_dim_tree = None
         return
       
     # A valid geometry dimension element has been located
-    self.geometry_dim_tree = painted_tree
+    self.geometry_dim_tree = self.data.geometry_dim_tree = painted_tree
     
     return
 
@@ -1778,49 +1631,7 @@ class Diamond:
     Tests whether the supplied choice or tree should be hidden from the LHS.
     """
 
-    return self.choice_or_tree_is_comment(choice_or_tree) or choice_or_tree.name in ["integer_value", "real_value", "string_value", "logical_value"]
-
-  def choice_or_tree_is_comment(self, choice_or_tree):
-    """
-    Test whether the given node is a comment node.
-    """
-
-    if not isinstance(choice_or_tree, tree.Tree):
-      return False
-
-    if not choice_or_tree.name == "comment":
-      return False
-
-    if not choice_or_tree.attrs == {}:
-      return False
-
-    if not choice_or_tree.children == []:
-      return False
-
-    if not choice_or_tree.datatype is str:
-      return False
-
-    if not choice_or_tree.cardinality == "?":
-      return False
-
-    return True
-
-  def get_comment(self, choice_or_tree):
-    """
-    Return the first comment found as a child of the supplied node, or None if
-    none found.
-    """
-
-    if choice_or_tree is None or isinstance(choice_or_tree, choice.Choice):
-      return None
-
-    for child in choice_or_tree.children:
-      if self.choice_or_tree_is_comment(child):
-        return child
-
-    return None
-
-    return
+    return choice_or_tree.is_comment() or choice_or_tree.name in ["integer_value", "real_value", "string_value", "logical_value"]
 
   def choice_or_tree_matches(self, text, choice_or_tree, recurse, search_active_subtrees = False):
     """
@@ -1851,7 +1662,7 @@ class Diamond:
           text_re = re.compile(text)
         else:
           text_re = re.compile(text, re.IGNORECASE)
-        comment = self.get_comment(choice_or_tree)
+        comment = choice_or_tree.get_comment()
         if not comment is None and not comment.data is None and not text_re.search(comment.data) is None:
           return True
         elif recurse:
@@ -1890,1278 +1701,58 @@ class Diamond:
     return
 
   ### RHS ###
-  
-  def render_whitespace(self, desc):
-    ''' Render the line wrapping in desc as follows:
+
+  def add_custom_widgets(self):
+    """
+    Adds custom python widgets that aren't easily handeled by glade.
+    """
     
-    * Newlines followed by 0-1 spaces are ignored.
-    * Blank lines start new paragraphs.
-    * Newlines followed by more than 1 space are honoured.
-    '''
+    optionsFrame = self.gui.get_widget("optionsFrame")
 
-    prev_line_literal=False
-    prev_line_new_para=False
-    newdesc=""
-
-    for line in desc.split("\n"):
-
-        if (line[:1]==" "):
-            # Literal line with leading blanks.
-            newdesc=newdesc+"\n"+line
-            prev_line_literal=True
-            prev_line_new_para=False
-            continue
-
-        if (line.strip()==""):
-            # New paragraph.
-
-            # Collapse multiple new paragraphs into one, except when
-            # following a literal line.
-            if (prev_line_new_para and not prev_line_literal):
-                continue
-
-            newdesc=newdesc+"\n"
-            prev_line_new_para=True                
-            continue
-
-        if prev_line_literal:
-            newdesc=newdesc+"\n"
-            prev_line_literal=False
-            prev_line_new_para=False
-            
-        if prev_line_new_para:
-            newdesc=newdesc+"   "
-            prev_line_new_para=False
-        
-        # Default case
-        newdesc=newdesc+line+" "
+    vpane1 = gtk.VPaned()
+    vpane2 = gtk.VPaned()
+    vbox = gtk.VBox()
     
-    return newdesc
+    vpane1.pack2(vpane2, True, False)
+    vpane2.pack1(vbox, True, False)
+    optionsFrame.add(vpane1)
 
-  def link_bounds(self, text):
-    """
-    Return a list of tuples corresponding to the start and end points of links in
-    the supplied string.
-    """
+    self.description = descriptionwidget.DescriptionWidget()
+    vpane1.pack1(self.description, True, False)
+    
 
-    bounds = []
+    self.attributes = attributewidget.AttributeWidget()
+    self.attributes.on_store = self.on_store
+    self.attributes.update_name = self.update_painted_name
+    vbox.pack_start(self.attributes, True, True)
 
-    text_split = text.lower().split("http://")
-    if len(text_split) > 1:
-      lbound = -7
-      for i in range(len(text_split))[1:]:
-        lbound += len(text_split[i - 1]) + 7
-        ubound = lbound + len(text_split[i].split(" ")[0].split("\n")[0]) + 7
-        while text[ubound - 1:ubound] in [".", ",", ":", ";", "\"", "'", ")", "]", "}"]:
-          ubound -= 1
-        bounds.append((lbound, ubound))
+    self.data = datawidget.DataWidget()
+    self.data.on_store = self.on_store
+    vbox.pack_end(self.data, True, True)
 
-    return bounds
+    self.comment = commentwidget.CommentWidget()
+    self.comment.on_store = self.on_store
+    vpane2.pack2(self.comment, True, False)
 
-  def type_name(self, datatype):
-    """
-    Return a human readable version of datatype.
-    """
-
-    def familiar_type(type_as_printable):
-      """
-      Convert some type names to more familiar equivalents.
-      """
-
-      if type_as_printable == "decim":
-        return "float"
-      elif type_as_printable == "int":
-        return "integer"
-      elif type_as_printable == "str":
-        return "string"
-      else:
-        return type_as_printable
-
-    datatype_string = str(datatype)
-
-    if datatype_string[:7] == "<type '" and datatype_string[len(datatype_string) - 2:] == "'>":
-      value_type_split = datatype_string.split("'")
-      return familiar_type(value_type_split[1])
-
-    value_type_split1 = datatype_string.split(".")
-    value_type_split2 = value_type_split1[len(value_type_split1) - 1].split(" ")
-    if len(value_type_split2) == 1:
-      return familiar_type(value_type_split2[0][0:len(value_type_split2[0]) - 6])
-    else:
-      return familiar_type(value_type_split2[0])
-
-  def printable_type(self, datatype, bracket = True):
-    """
-    Create a string to be displayed in place of empty data / attributes.
-    """
-
-    if isinstance(datatype, plist.List):
-      if (isinstance(datatype.cardinality, int) and datatype.cardinality == 1) or datatype.cardinality == "":
-        type_as_printable = self.type_name(datatype.datatype).lower()
-      else:
-        type_as_printable = self.type_name(datatype).lower() + " of "
-        list_type_as_printable = self.type_name(datatype.datatype).lower()
-        if isinstance(datatype.cardinality, int):
-          type_as_printable += str(datatype.cardinality) + " " + list_type_as_printable + "s"
-        else:
-          type_as_printable += list_type_as_printable + "s"
-    else:
-      type_as_printable = self.type_name(datatype).lower()
-
-    if bracket:
-      type_as_printable = "(" + type_as_printable + ")"
-
-    return type_as_printable
-
-  def init_options_frame(self):
-    """
-    Initialise the RHS.
-    """
-
-    # mtw07 - TODO: set the visibility of the options frame, depending on the value in the schema file.
-    self.options_frame = self.gui.get_widget("optionsFrame")
-
-    # Display the right hand side by default.
-    self.options_frame.set_property("visible", True)
-
-    self.node_desc = self.gui.get_widget("nodeDescription")
-    self.node_desc.set_buffer(TextBufferMarkup.PangoBuffer())
-    self.node_desc.connect("button-release-event", self.node_desc_mouse_button_release)
-    self.node_desc.connect("motion-notify-event", self.node_desc_mouse_over)
-
-    self.node_attrs = self.gui.get_widget("nodeAttributes")
-    attrs_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
-    self.node_attrs.set_model(attrs_model)
-    self.node_attrs.connect("motion-notify-event", self.node_attrs_mouse_over)
-    key_renderer = gtk.CellRendererText()
-    key_renderer.set_property("editable", False)
-    attrs_col1 = gtk.TreeViewColumn("Name", key_renderer, text = 0)
-    attrs_col1.set_cell_data_func(key_renderer, self.node_attrs_key_data_func)
-    attrs_col1.set_property("min-width", 75)
-    attrs_val_entry_renderer = gtk.CellRendererText()
-    attrs_val_entry_renderer.connect("edited", self.node_attrs_edited)
-    attrs_val_entry_renderer.connect("editing-started", self.node_attrs_entry_edit_start)
-    attrs_val_combo_renderer = gtk.CellRendererCombo()
-    attrs_val_combo_renderer.set_property("text-column", 0)
-    attrs_val_combo_renderer.connect("edited", self.node_attrs_selected)
-    attrs_val_combo_renderer.connect("editing-started", self.node_attrs_combo_edit_start)
-    attrs_col2 = gtk.TreeViewColumn("Value", attrs_val_entry_renderer, text = 1)
-    attrs_col2.pack_start(attrs_val_combo_renderer)
-    attrs_col2.set_attributes(attrs_val_combo_renderer, text = 1)
-    attrs_col2.set_cell_data_func(attrs_val_entry_renderer, self.node_attrs_entry_data_func)
-    attrs_col2.set_cell_data_func(attrs_val_combo_renderer, self.node_attrs_combo_data_func)
-    attrs_col2.set_property("expand", True)
-    attrs_col2.set_property("min-width", 75)
-    attrs_icon_renderer = gtk.CellRendererPixbuf()
-    attrs_col3 = gtk.TreeViewColumn("", attrs_icon_renderer)
-    attrs_col3.set_cell_data_func(attrs_icon_renderer, self.node_attrs_icon_data_func)
-    self.node_attrs.append_column(attrs_col1)
-    self.node_attrs.append_column(attrs_col2)
-    self.node_attrs.append_column(attrs_col3)
-
-    self.node_data_frame = self.gui.get_widget("dataFrame")
-
-    self.node_data_buttons_hbox = self.gui.get_widget("dataButtonsHBox")
-
-    data_revert_button = self.gui.get_widget("dataRevertButton")
-    data_revert_button.connect("clicked", self.node_data_revert)
-
-    data_store_button = self.gui.get_widget("dataStoreButton")
-    data_store_button.connect("clicked", self.node_data_store)
-
-    self.node_comment = self.gui.get_widget("nodeComment")
-    self.node_comment.get_buffer().create_tag("comment_buffer_tag")
-    self.node_comment.connect("focus-in-event", self.node_comment_focus_in)
-    self.node_comment.connect("expose-event", self.node_comment_expose)
-
-    return
-
+    optionsFrame.show_all()
+    return 
+ 
   def update_options_frame(self):
     """
     Update the RHS.
     """
+    
+    self.description.update(self.selected_node)
 
-    if self.selected_node is None:
-      self.set_node_desc("<span foreground=\"grey\">No node selected</span>")
-    elif self.selected_node.doc is None:
-      self.set_node_desc("<span foreground=\"red\">No documentation</span>")
-    else:
-      self.set_node_desc(self.selected_node.doc)
+    self.attributes.update(self.selected_node)
 
-    self.update_node_attrs()
+    self.data.update(self.selected_node)
 
-    if self.selected_node is None or not self.selected_node.active:
-      self.set_node_data_entry()
-    elif self.node_data_is_tensor() and not self.geometry_dim_tree.data is None:
-      self.set_node_data_tensor()
-    elif isinstance(self.selected_node.datatype, tuple):
-      self.set_node_data_combo()
-    else:
-      self.set_node_data_entry()
-
-    self.update_node_comment()
+    self.comment.update(self.selected_node)
 
     self.gui.get_widget("optionsFrame").queue_resize()
     
     return
-
-  def node_desc_mouse_over(self, widget, event):
-    """
-    Called when the mouse moves over the node description widget. Sets the cursor
-    to a hand if the mouse hovers over a link.
-
-    Based on code from HyperTextDemo class in hypertext.py from PyGTK 2.12 demos
-    """
-
-    if self.selected_node is None or self.selected_node.doc is None:
-      return
-
-    buffer_pos = self.node_desc.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT, int(event.x), int(event.y))
-    char_offset = self.node_desc.get_iter_at_location(buffer_pos[0], buffer_pos[1]).get_offset()
-
-    for bounds in self.node_desc_link_bounds:
-      if char_offset >= bounds[0] and char_offset <= bounds[1]:
-        self.node_desc.get_window(gtk.TEXT_WINDOW_TEXT).set_cursor(gtk.gdk.Cursor(gtk.gdk.HAND2))
-        return
-
-    self.node_desc.get_window(gtk.TEXT_WINDOW_TEXT).set_cursor(gtk.gdk.Cursor(gtk.gdk.XTERM))
-
-    return
-
-  def node_desc_mouse_button_release(self, widget, event):
-    """
-    Called when a mouse button is released over the node description widget.
-    Launches a browser if the mouse release was over a link, the left mouse button
-    was released and no text was selected.
-
-    Based on code from HyperTextDemo class in hypertext.py from PyGTK 2.12 demos
-    """
-
-    if self.selected_node is None or self.selected_node.doc is None or not event.button == 1:
-      return
-
-    selection_bounds = self.node_desc.get_buffer().get_selection_bounds()
-    if not len(selection_bounds) == 0:
-      return
-
-    buffer_pos = self.node_desc.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT, int(event.x), int(event.y))
-    char_offset = self.node_desc.get_iter_at_location(buffer_pos[0], buffer_pos[1]).get_offset()
-
-    for bounds in self.node_desc_link_bounds:
-      if char_offset >= bounds[0] and char_offset <= bounds[1]:
-        webbrowser.open(self.selected_node.doc[bounds[0]:bounds[1]])
-        return
-
-    return
-
-  def set_node_desc(self, desc):
-    """
-    Set the node description.
-    """
-
-    self.node_desc_link_bounds = self.link_bounds(desc)
-
-    desc = self.render_whitespace(desc)
-
-    if not len(self.node_desc_link_bounds) == 0:
-      new_desc = ""
-      for i in range(len(self.node_desc_link_bounds)):
-        if i == 0:
-          new_desc += desc[:self.node_desc_link_bounds[i][0]]
-        else:
-          new_desc += desc[self.node_desc_link_bounds[i - 1][1]:self.node_desc_link_bounds[i][0]]
-        new_desc += "<span foreground=\"blue\" underline=\"single\">" + desc[self.node_desc_link_bounds[i][0]:self.node_desc_link_bounds[i][1]] + "</span>"
-      new_desc += desc[self.node_desc_link_bounds[len(self.node_desc_link_bounds) - 1][1]:]
-      if self.node_desc_link_bounds[len(self.node_desc_link_bounds) - 1][1] == len(desc):
-        new_desc += " "
-      desc = new_desc
-
-    self.node_desc.get_buffer().set_text(desc)
-
-    return
-
-  def update_node_attrs(self):
-    """
-    Update the RHS attributes widget.
-    """
-
-    self.node_attrs.get_model().clear()
-
-    if self.selected_node is None:
-      self.node_attrs.get_column(2).set_property("visible", False)
-      self.node_attrs.get_column(0).queue_resize()
-      self.node_attrs.get_column(1).queue_resize()
-    elif len(self.selected_node.attrs.keys()) == 0:
-      self.gui.get_widget("attributeFrame").set_property("visible", False)
-    else:
-      self.gui.get_widget("attributeFrame").set_property("visible", True)
-      for key in self.selected_node.attrs.keys():
-        iter = self.node_attrs.get_model().append()
-        self.node_attrs.get_model().set_value(iter, 0, key)
-        cell_model = gtk.ListStore(gobject.TYPE_STRING)
-        self.node_attrs.get_model().set_value(iter, 2, cell_model)
-        if isinstance(self.selected_node.attrs[key][0], tuple):
-          if self.selected_node.attrs[key][1] is None:
-            if isinstance(self.selected_node.attrs[key][0][0], tuple):
-              self.node_attrs.get_model().set_value(iter, 1, "Select " + self.printable_type(self.selected_node.attrs[key][0][1]) + "...")
-            else:
-              self.node_attrs.get_model().set_value(iter, 1, "Select...")
-          else:
-            self.node_attrs.get_model().set_value(iter, 1, self.selected_node.attrs[key][1])
-          if isinstance(self.selected_node.attrs[key][0][0], tuple):
-            opts = self.selected_node.attrs[key][0][0]
-          else:
-            opts = self.selected_node.attrs[key][0]
-          for opt in opts:
-            cell_iter = cell_model.append()
-            cell_model.set_value(cell_iter, 0, opt)
-          self.node_attrs.get_column(2).set_property("visible", True)
-        elif self.selected_node.attrs[key][0] is None:
-          self.node_attrs.get_model().set_value(iter, 1, "No data")
-        elif self.selected_node.attrs[key][1] is None:
-          self.node_attrs.get_model().set_value(iter, 1, self.printable_type(self.selected_node.attrs[key][0]))
-        else:
-          self.node_attrs.get_model().set_value(iter, 1, self.selected_node.attrs[key][1])
-      self.node_attrs.get_column(0).queue_resize()
-      self.node_attrs.get_column(1).queue_resize()
-      self.node_attrs.get_column(2).queue_resize()
-
-    return
-
-  def node_attrs_mouse_over(self, widget, event):
-    """
-    Called when the mouse moves over the node attributes widget. Sets the
-    appropriate attribute widget tooltip.
-    """
-
-    path_info = self.node_attrs.get_path_at_pos(int(event.x), int(event.y))
-    if path_info is None:
-      try:
-        self.node_attrs.set_tooltip_text("")
-        self.node_attrs.set_property("has-tooltip", False)
-      except:
-        pass
-      return
-
-    path = path_info[0]
-    col = path_info[1]
-    if col is not self.node_attrs.get_column(1):
-      try:
-        self.node_attrs.set_tooltip_text("")
-        self.node_attrs.set_property("has-tooltip", False)
-      except:
-        pass
-      return
-
-    iter = self.node_attrs.get_model().get_iter(path)
-    iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    return
-
-  def node_attrs_key_data_func(self, col, cell_renderer, model, iter):
-    """
-    Attribute name data function. Sets the cell renderer text colours.
-    """
-
-    iter_key = model.get_value(iter, 0)
-
-    if not self.selected_node.active or self.selected_node.attrs[iter_key][0] is None or self.selected_node.attrs[iter_key][0] == "fixed":
-      cell_renderer.set_property("foreground", "grey")
-    elif self.selected_node.attrs[iter_key][1] is None:
-      cell_renderer.set_property("foreground", "blue")
-    else:
-      cell_renderer.set_property("foreground", "black")
-
-    return
-
-  def node_attrs_entry_data_func(self, col, cell_renderer, model, iter):
-    """
-    Attribute text data function. Hides the renderer if a combo box is required,
-    and sets colours and editability otherwise.
-    """
-
-    iter_key = model.get_value(iter, 0)
-
-    if not self.selected_node.active or self.selected_node.attrs[iter_key][0] is None or self.selected_node.attrs[iter_key][0] == "fixed":
-      cell_renderer.set_property("editable", False)
-      cell_renderer.set_property("foreground", "grey")
-      cell_renderer.set_property("visible", True)
-    elif not isinstance(self.selected_node.attrs[iter_key][0], tuple):
-      cell_renderer.set_property("editable", True)
-      cell_renderer.set_property("visible", True)
-      if self.selected_node.attrs[iter_key][1] is None:
-        cell_renderer.set_property("foreground", "blue")
-      else:
-        cell_renderer.set_property("foreground", "black")
-    else:
-      cell_renderer.set_property("editable", False)
-      cell_renderer.set_property("visible", False)
-
-    return
-
-  def node_attrs_combo_data_func(self, col, cell_renderer, model, iter):
-    """
-    Attribute combo box data function. Hides the renderer if a combo box is not
-    required, and sets the combo box options otherwise. Adds an entry if required.
-    """
-
-    iter_key = model.get_value(iter, 0)
-
-    if self.selected_node.active and isinstance(self.selected_node.attrs[iter_key][0], tuple):
-      cell_renderer.set_property("editable", True)
-      cell_renderer.set_property("visible", True)
-      if isinstance(self.selected_node.attrs[iter_key][0][0], tuple):
-        cell_renderer.set_property("has-entry", True)
-      else:
-        cell_renderer.set_property("has-entry", False)
-      if self.selected_node.attrs[iter_key][1] is None:
-        cell_renderer.set_property("foreground", "blue")
-      else:
-        cell_renderer.set_property("foreground", "black")
-    else:
-      cell_renderer.set_property("visible", False)
-      cell_renderer.set_property("editable", False)
-    cell_renderer.set_property("model", model.get_value(iter, 2))
-
-    return
-
-  def node_attrs_icon_data_func(self, col, cell_renderer, model, iter):
-    """
-    Attribute icon data function. Used to add downward pointing arrows for combo
-    attributes, for consistency with the LHS.
-    """
-
-    iter_key = model.get_value(iter, 0)
-
-    if self.selected_node.active and isinstance(self.selected_node.attrs[iter_key][0], tuple):
-      cell_renderer.set_property("stock-id", gtk.STOCK_GO_DOWN)
-    else:
-      cell_renderer.set_property("stock-id", None)
-
-    return
-
-  def node_attrs_entry_edit_start(self, cell_renderer, editable, path):
-    """
-    Called when editing is started on an attribute text cell. Used to delete the
-    printable_type placeholder.
-    """
-
-    iter = self.node_attrs.get_model().get_iter(path)
-    iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    if self.selected_node.attrs[iter_key][1] is None:
-      editable.set_text("")
-
-    return
-
-  def node_attrs_combo_edit_start(self, cell_renderer, editable, path):
-    """
-    Called when editing is started on an attribute combo cell. Used to delete the
-    select placeholder for mixed entry / combo attributes.
-    """
-
-    iter = self.node_attrs.get_model().get_iter(path)
-    iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    if isinstance(self.selected_node.attrs[iter_key][0][0], tuple) and self.selected_node.attrs[iter_key][1] is None:
-      editable.child.set_text("")
-
-    return
-
-  def node_attrs_edited(self, cell_renderer, path, new_text):
-    """
-    Called when editing is finished on an attribute text cell. Updates data in the
-    treestore.
-    """
-
-    iter = self.node_attrs.get_model().get_iter(path)
-    iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    if self.selected_node.get_attr(iter_key) is None and new_text == "":
-      return
-
-    value_check = self.validity_check(new_text, self.selected_node.attrs[iter_key][0])
-
-    if not value_check is None and not value_check == self.selected_node.attrs[iter_key][1]:
-      if iter_key == "name" and not self.name_check(value_check):
-        return
-
-      self.node_attrs.get_model().set_value(iter, 1, value_check)
-      self.selected_node.set_attr(iter_key, value_check)
-      self.paint_validity()
-      if iter_key == "name":
-        self.update_painted_name()
-        self.on_select_row()
-      self.set_saved(False)
-
-    return
-
-  def node_attrs_selected(self, cell_renderer, path, new_text):
-    """
-    Called when an attribute combo box element is selected, or combo box entry
-    element entry is edited. Updates data in the treestore.
-    """
-
-    iter = self.node_attrs.get_model().get_iter(path)
-    iter_key = self.node_attrs.get_model().get_value(iter, 0)
-
-    if new_text is None:
-      return
-
-    if isinstance(self.selected_node.attrs[iter_key][0][0], tuple) and not new_text in self.selected_node.attrs[iter_key][0][0]:
-      if self.selected_node.get_attr(iter_key) is None and new_text == "":
-        return
-        
-      new_text = self.validity_check(new_text, self.selected_node.attrs[iter_key][0][1])
-      if iter_key == "name" and not self.name_check(new_text):
-        return False
-    if not new_text == self.selected_node.attrs[iter_key][1]:
-      self.node_attrs.get_model().set_value(iter, 1, new_text)
-      self.selected_node.set_attr(iter_key, new_text)
-      self.paint_validity()
-      if iter_key == "name":
-        self.update_painted_name()
-      self.set_saved(False)
-
-    return
-
-  def set_node_data_empty(self):
-    """
-    Empty the node data frame.
-    """
-
-    if len(self.node_data_frame.get_children()) > 1:
-      if isinstance(self.node_data, gtk.TextView):
-        self.node_data.handler_block_by_func(self.node_data_entry_focus_in)
-      elif isinstance(self.node_data, gtk.ComboBox):
-        self.node_data.handler_block_by_func(self.node_data_combo_focus_child)
-      self.node_data_frame.remove(self.node_data_frame.child)
-
-    self.node_data_interacted = False
-
-    return
-
-  def set_node_data_entry(self):
-    """
-    Create a text view for data entry in the node data frame.
-    """
-
-    self.set_node_data_empty()
-
-    data_scrolled_window = gtk.ScrolledWindow()
-    self.node_data_frame.add(data_scrolled_window)
-    data_scrolled_window.show()
-
-    try:
-      import gtksourceview2
-      buf = gtksourceview2.Buffer()
-      lang_manager = gtksourceview2.LanguageManager()
-      buf.set_highlight_matching_brackets(True)
-      if self.node_data_is_python_code():
-        python = lang_manager.get_language("python")
-        buf.set_language(python)
-        buf.set_highlight_syntax(True)
-      self.node_data = gtksourceview2.View(buffer=buf)
-      self.node_data.set_auto_indent(True)
-      #self.node_data.set_highlight_current_line(True)
-      self.node_data.set_insert_spaces_instead_of_tabs(True)
-      self.node_data.set_tab_width(2)
-      if self.node_data_is_python_code():
-        self.node_data.set_show_line_numbers(True)
-        font_desc = pango.FontDescription("monospace")
-        if font_desc:
-          self.node_data.modify_font(font_desc)
-    except ImportError:
-      self.node_data = gtk.TextView()
-
-    data_scrolled_window.add(self.node_data)
-    self.node_data.show()
-
-    data_scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-
-    self.node_data.set_pixels_above_lines(2)
-    self.node_data.set_pixels_below_lines(2)
-    self.node_data.set_wrap_mode(gtk.WRAP_WORD)
-
-    self.node_data.connect("focus-in-event", self.node_data_entry_focus_in)
-
-    data_frame_packing = self.node_data_frame.get_property("parent").query_child_packing(self.node_data_frame)
-    self.node_data_frame.get_property("parent").set_child_packing(self.node_data_frame, True, data_frame_packing[1], data_frame_packing[2], data_frame_packing[3])
-
-    self.node_data.get_buffer().create_tag("node_data_buffer_tag")
-    text_tag = self.node_data.get_buffer().get_tag_table().lookup("node_data_buffer_tag")
-    if self.selected_node is None:
-      self.node_data.set_cursor_visible(False)
-      self.node_data.set_editable(False)
-      self.node_data_buttons_hbox.hide()
-      self.node_data.get_buffer().set_text("")
-      text_tag.set_property("foreground", "grey")
-    elif not self.selected_node.active:
-      self.node_data.set_cursor_visible(False)
-      self.node_data.set_editable(False)
-      self.node_data_buttons_hbox.hide()
-      self.node_data.get_buffer().set_text("Inactive node")
-      text_tag.set_property("foreground", "grey")
-    elif self.selected_node.datatype is None:
-      self.node_data.set_cursor_visible(False)
-      self.node_data.set_editable(False)
-      self.node_data_buttons_hbox.hide()
-      self.node_data.get_buffer().set_text("No data")
-      text_tag.set_property("foreground", "grey")
-    elif self.node_data_is_tensor():
-      self.node_data.set_cursor_visible(False)
-      self.node_data.set_editable(False)
-      self.node_data_buttons_hbox.hide()
-      self.node_data.get_buffer().set_text("Dimension not set")
-      text_tag.set_property("foreground", "grey")
-    elif self.selected_node.data is None:
-      self.node_data.set_cursor_visible(True)
-      self.node_data.set_editable(True)
-      self.node_data_buttons_hbox.show()
-      self.node_data.get_buffer().set_text(self.printable_type(self.selected_node.datatype))
-      text_tag.set_property("foreground", "blue")
-    else:
-      self.node_data.get_buffer().set_text(self.selected_node.data)
-      if self.selected_node.datatype == "fixed":
-        self.node_data.set_cursor_visible(False)
-        self.node_data.set_editable(False)
-        self.node_data_buttons_hbox.hide()
-        text_tag.set_property("foreground", "grey")
-      else:
-        self.node_data.set_cursor_visible(True)
-        self.node_data.set_editable(True)
-        self.node_data_buttons_hbox.show()
-        #text_tag.set_property("foreground", "black")
-    buffer_bounds = self.node_data.get_buffer().get_bounds()
-    self.node_data.get_buffer().apply_tag(text_tag, buffer_bounds[0], buffer_bounds[1])
-
-    return
-
-  def set_node_data_tensor(self):
-    """
-    Create a table container packed with appropriate widgets for tensor data entry
-    in the node data frame.
-    """
-
-    self.set_node_data_empty()
-
-    data_scrolled_window = gtk.ScrolledWindow()
-    self.node_data_frame.add(data_scrolled_window)
-    data_scrolled_window.show()
-
-    data_scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-
-    dim1, dim2 = self.node_data_tensor_shape()
-    self.node_data = gtk.Table(dim1, dim2)
-    data_scrolled_window.add_with_viewport(self.node_data)
-    self.node_data.show()
-
-    data_scrolled_window.child.set_property("shadow-type", gtk.SHADOW_NONE)
-
-    data_frame_packing = self.node_data_frame.get_property("parent").query_child_packing(self.node_data_frame)
-    self.node_data_frame.get_property("parent").set_child_packing(self.node_data_frame, True, data_frame_packing[1], data_frame_packing[2], data_frame_packing[3])
-
-    self.node_data_buttons_hbox.show()
-
-    is_symmetric = self.node_data_is_symmetric_tensor()
-    for i in range(dim1):
-      for j in range(dim2):
-        entry = gtk.Entry()
-        self.node_data.attach(entry, dim2 - j - 1, dim2 - j, dim1 - i - 1, dim1 - i)
-        if not is_symmetric or i >= j:
-          entry.show()
-
-          entry.connect("focus-in-event", self.node_data_tensor_element_focus_in, dim2 - j - 1, dim1 - i - 1)
-
-          if self.selected_node.data is None:
-            entry.set_text(self.printable_type(self.selected_node.datatype.datatype))
-            entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
-          else:
-            entry.set_text(self.selected_node.data.split(" ")[(dim2 - j - 1) + (dim1 - i - 1) * dim2])
-
-    self.node_data_interacted = [False for i in range(dim1 * dim2)]
-
-    return
-
-  def set_node_data_combo(self):
-    """
-    Create a combo box for node data selection in the node data frame. Add an
-    entry if required.
-    """
-
-    self.set_node_data_empty()
-
-    if isinstance(self.selected_node.datatype[0], tuple):
-      self.node_data = gtk.combo_box_entry_new_text()
-    else:
-      self.node_data = gtk.combo_box_new_text()
-    self.node_data_frame.add(self.node_data)
-    self.node_data.show()
-
-    self.node_data.connect("set-focus-child", self.node_data_combo_focus_child)
-    self.node_data.connect("scroll-event", self.node_data_combo_scroll)
-
-    data_frame_packing = self.node_data_frame.get_property("parent").query_child_packing(self.node_data_frame)
-    self.node_data_frame.get_property("parent").set_child_packing(self.node_data_frame, False, data_frame_packing[1], data_frame_packing[2], data_frame_packing[3])
-
-    if isinstance(self.selected_node.datatype[0], tuple):
-      self.node_data_buttons_hbox.show()
-    else:
-      self.node_data_buttons_hbox.hide()
-
-    if self.selected_node.data is None:
-      if isinstance(self.selected_node.datatype[0], tuple):
-        self.node_data.child.set_text("Select " + self.printable_type(self.selected_node.datatype[1]) + "...")
-      else:
-        self.node_data.append_text("Select...")
-        self.node_data.set_active(0)
-      self.node_data.child.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
-      self.node_data.child.modify_text(gtk.STATE_PRELIGHT, gtk.gdk.color_parse("blue"))
-
-    if isinstance(self.selected_node.datatype[0], tuple):
-      options = self.selected_node.datatype[0]
-    else:
-      options = self.selected_node.datatype
-    for i in range(len(options)):
-      opt = options[i]
-      self.node_data.append_text(opt)
-      if self.selected_node.data == opt:
-        self.node_data.set_active(i)
-
-    if isinstance(self.selected_node.datatype[0], tuple) and not self.selected_node.data is None and not self.selected_node.data in self.selected_node.datatype[0]:
-      self.node_data.child.set_text(self.selected_node.data)
-
-    self.node_data.connect("changed", self.node_data_combo_changed)
-
-    return
-
-  def node_data_entry_focus_in(self, widget, event):
-    """
-    Called when a text view data entry widget gains focus. Used to delete the
-    printable_type placeholder.
-    """
-
-    if not self.selected_node is None and not self.selected_node.datatype is None and not self.node_data_is_tensor() and self.selected_node.data is None and not self.node_data_interacted:
-      self.node_data.get_buffer().set_text("")
-
-    self.node_data_interacted = True
-
-    return
-
-  def node_data_tensor_element_focus_in(self, widget, event, row, col):
-    """
-    Called when a tensor data entry widget gains focus. Used to delete the
-    printable_type placeholder.
-    """
-
-    dim1, dim2 = self.node_data_tensor_shape()
-    if not self.node_data_interacted[col + row * dim2]:
-      self.node_data_interacted[col + row * dim2] = True
-      if self.node_data_is_symmetric_tensor():
-        self.node_data_interacted[row + col * dim1] = True
-      if self.selected_node.data is None:
-        widget.set_text("")
-        widget.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
-
-    return
-
-  def node_data_combo_focus_child(self, container, widget):
-    """
-    Called when a data selection widget gains focus. Used to delete the select
-    placeholder.
-    """
-
-    if not self.node_data_interacted:
-      self.node_data_interacted = True
-      if self.selected_node.data is None:
-        self.node_data_interacted = True
-        if isinstance(self.selected_node.datatype[0], tuple):
-          self.node_data.handler_block_by_func(self.node_data_combo_changed)
-          self.node_data.child.set_text("")
-          self.node_data.handler_unblock_by_func(self.node_data_combo_changed)
-        else:
-          self.node_data.set_active(1)
-          self.node_data.remove_text(0)
-        self.node_data.child.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
-        self.node_data.child.modify_text(gtk.STATE_PRELIGHT, gtk.gdk.color_parse("black"))
-
-    return
-
-  def node_data_combo_changed(self, combo_box):
-    """
-    Called when a data combo box element is selected. Updates data in the
-    treestore.
-    """
-
-    if not isinstance(self.selected_node.datatype[0], tuple) or not self.node_data.child.get_property("has-focus"):
-      self.selected_node.set_data(self.node_data.get_active_text())
-      self.paint_validity()
-      self.set_saved(False)
-      self.node_data_interacted = False
-      iter = self.get_treeview_iter(self.treeview.get_selection())
-      self.treestore.set_value(iter, 4, self.node_data.get_active_text())
-
-    return
-
-  def node_data_combo_scroll(self, widget, event):
-    """
-    Called when the data combo box is scrolled with the mouse wheel. Removes the
-    select placeholder and updates data in the treestore.
-    """
-
-    self.node_data_combo_focus_child(self.node_data_frame, self.node_data)
-    if not isinstance(self.selected_node.datatype[0], tuple) or not self.selected_node.data is None:
-      self.node_data_combo_changed(self.node_data)
-
-    return
-
-  def node_data_revert(self, button = None):
-    """
-    "Revert Data" button click signal handler. Reverts data in the node data frame.
-    """
-
-    if self.node_data_is_tensor() and not self.geometry_dim_tree.data is None:
-      self.set_node_data_tensor()
-    elif not self.selected_node is None and isinstance(self.selected_node.datatype, tuple):
-      self.set_node_data_combo()
-    else:
-      self.set_node_data_entry()
-
-    return
-
-  def node_data_store(self, button = None):
-    """
-    "Store Data" button click signal handler. Stores data from the node data frame
-    in the treestore.
-    """
-
-    if self.node_data_is_tensor() and not self.geometry_dim_tree.data is None:
-      store_success = self.node_data_tensor_store()
-    elif not self.selected_node is None and isinstance(self.selected_node.datatype, tuple):
-      store_success = self.node_data_combo_store()
-    else:
-      store_success = self.node_data_entry_store()
-
-    if self.scherror.errlist_is_open():
-      if self.scherror.errlist_type == 0:
-         self.scherror.on_validate_schematron()
-      else:
-         self.scherror.on_validate()
-
-    return store_success
-
-  def node_data_entry_store(self):
-    """
-    Attempt to store data read from a textview packed in the node data frame.
-    """
-
-    if self.selected_node is None or self.selected_node.datatype in ["fixed", None] or self.node_data_is_tensor():
-      return True
-
-    data_buffer_bounds = self.node_data.get_buffer().get_bounds()
-    new_data = self.node_data.get_buffer().get_text(data_buffer_bounds[0], data_buffer_bounds[1])
-
-    if new_data == "":
-      return True
-
-    if self.selected_node.data is None and not self.node_data_interacted:
-      return True
-    else:
-      value_check = self.validity_check(new_data, self.selected_node.datatype)
-      if value_check is None:
-        return False
-      elif not value_check == self.selected_node.data:
-        self.selected_node.set_data(value_check)
-        if isinstance(self.selected_node, MixedTree) and "shape" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["shape"][0] is int and isinstance(self.selected_node.datatype, plist.List) and self.selected_node.datatype.cardinality == "+":
-          self.selected_node.child.set_attr("shape", str(len(value_check.split(" "))))
-        self.paint_validity()
-        
-        iter = self.selected_iter
-        self.treestore.set_value(iter, 4, new_data)
-        self.set_saved(False)
-        self.node_data_interacted = False
-
-    return True
-
-  def node_data_combo_store(self):
-    """
-    Attempt to store data read from a combo box entry packed in the node data
-    frame.
-    """
-
-    if not isinstance(self.selected_node.datatype[0], tuple):
-      return True
-
-    new_data = self.node_data.child.get_text()
-
-    if self.selected_node.data is None and not self.node_data_interacted:
-      return True
-    elif not new_data in self.selected_node.datatype[0]:
-      new_data = self.validity_check(new_data, self.selected_node.datatype[1])
-      if new_data is None:
-        return False
-
-    if not new_data == self.selected_node.data:
-      self.selected_node.set_data(new_data)
-      self.paint_validity()
-      self.set_saved(False)
-      self.node_data_interacted = False
-
-    return True
-
-  def node_data_tensor_store(self):
-    """
-    Attempt to store data read from tensor data entry widgets packed in the node
-    data frame.
-    """
-
-    dim1, dim2 = self.node_data_tensor_shape()
-    is_symmetric = self.node_data_is_symmetric_tensor()
-
-    if not True in self.node_data_interacted:
-      return True
-
-    entry_values = []
-    for i in range(dim1):
-      for j in range(dim2):
-        if is_symmetric and i > j:
-          entry_values.append(self.node_data.get_children()[i + j * dim1].get_text())
-        else:
-          entry_values.append(self.node_data.get_children()[j + i * dim2].get_text())
-
-    changed = False
-    for i in range(dim1):
-      for j in range(dim2):
-        if self.node_data_interacted[j + i * dim2] and not entry_values[j + i * dim2] == "" and (self.selected_node.data is None or not self.selected_node.data.split(" ")[j + i * dim2] == entry_values[j + i * dim2]):
-          changed = True
-    if not changed:
-      return True
-    elif (self.selected_node.data is None and False in self.node_data_interacted) or "" in entry_values:
-      dialogs.error(self.main_window, "Invalid value entered")
-      return False
-
-    new_data = ""
-    for i in range(dim1):
-      for j in range(dim2):
-        new_data += " " + entry_values[j + i * dim2]
-
-    value_check = self.validity_check(new_data, self.selected_node.datatype)
-    if value_check is None:
-      return False
-    elif not value_check == self.selected_node.data:
-      self.selected_node.set_data(value_check)
-
-      dim1, dim2 = self.node_data_tensor_shape()
-      if int(self.selected_node.child.attrs["rank"][1]) == 1:
-        self.selected_node.child.set_attr("shape", str(dim1))
-      else:
-        self.selected_node.child.set_attr("shape", str(dim1) + " " + str(dim2))
-
-      self.paint_validity()
-      self.set_saved(False)
-      self.node_data_interacted = [False for i in range(dim1 * dim2)]
-
-    return True
-
-  def update_node_comment(self):
-    """
-    Update the comment widget.
-    """
-
-    if self.selected_node is None or not self.selected_node.active:
-      self.node_comment.get_buffer().set_text("")
-      self.node_comment.set_cursor_visible(False)
-      self.node_comment.set_editable(False)
-      try:
-        self.node_comment.set_tooltip_text("")
-        self.node_comment.set_property("has-tooltip", False)
-      except:
-        pass
-
-      return
-
-    comment_tree = self.get_comment(self.selected_node)
-    text_tag = self.node_comment.get_buffer().get_tag_table().lookup("comment_buffer_tag")
-    if comment_tree is None:
-      self.node_comment.get_buffer().set_text("No comment")
-      self.node_comment.set_cursor_visible(False)
-      self.node_comment.set_editable(False)
-      text_tag.set_property("foreground", "grey")
-      try:
-        self.node_comment.set_tooltip_text("")
-        self.node_comment.set_property("has-tooltip", False)
-      except:
-        pass
-    else:
-      if comment_tree.data is None:
-        self.node_comment.get_buffer().set_text("(string)")
-      else:
-        self.node_comment.get_buffer().set_text(comment_tree.data)
-      if self.selected_node.active:
-        self.node_comment.set_cursor_visible(True)
-        self.node_comment.set_editable(True)
-        text_tag.set_property("foreground", "black")
-      else:
-        self.node_comment.set_cursor_visible(False)
-        self.node_comment.set_editable(False)
-        text_tag.set_property("foreground", "grey")
-
-    buffer_bounds = self.node_comment.get_buffer().get_bounds()
-    self.node_comment.get_buffer().apply_tag(text_tag, buffer_bounds[0], buffer_bounds[1])
-
-    self.node_comment_interacted = False
-
-    return
-
-  def node_comment_focus_in(self, widget, event):
-    """
-    Called when the comment widget gains focus. Removes the printable_type
-    placeholder.
-    """
-
-    comment_tree = self.get_comment(self.selected_node)
-    if not comment_tree is None and not self.node_comment_interacted:
-      self.node_comment_interacted = True
-      if comment_tree.data is None:
-        self.node_comment.get_buffer().set_text("")
-
-    return
-
-  def node_comment_expose(self, widget, event):
-    """
-    Called when the comment widget is repainted. Stores the comment if required.
-    """
-
-    self.node_comment_store()
-
-    return
-
-  def node_comment_store(self):
-    """
-    Store data in the node comment.
-    """
-
-    comment_tree = self.get_comment(self.selected_node)
-    if comment_tree is None or not self.node_comment_interacted:
-      return
-
-    data_buffer_bounds = self.node_comment.get_buffer().get_bounds()
-    new_comment = self.node_comment.get_buffer().get_text(data_buffer_bounds[0], data_buffer_bounds[1])
-
-    if not new_comment == comment_tree.data:
-      if new_comment == "":
-        comment_tree.data = None
-        comment_tree.active = False
-      else:
-        comment_tree.set_data(new_comment)
-        comment_tree.active = True
-        self.set_saved(False)
-
-    return
-
-  def validity_check(self, val, val_type):
-    """
-    Check to see if the supplied data with supplied type can be stored in a
-    tree.Tree.
-    """
-
-    (invalid, data) = self.selected_node.valid_data(val_type, val)
-    if not invalid and isinstance(data, str) and not data == "":
-      if not data == val and self.validity_check(data, val_type) is None:
-        return None
-      else:
-        return data
-    else:
-      dialogs.error(self.main_window, "Invalid value entered")
-      return None
-
-  def name_check(self, val):
-    """
-    Check to see if the supplied data is a valid tree name.
-    """
-
-    valid_chars = "_:[]1234567890qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ"
-    for char in val:
-      if not char in valid_chars:
-        dialogs.error(self.main_window, "Invalid value entered")
-        return False
-
-    return True
-
-  def node_data_is_python_code(self):
-    """
-    Perform a series of tests on the current tree.Tree / MixedTree, to determine if
-    it is intended to be used to store python code data.
-    """
-
-    try:
-       lang = self.selected_node.get_attr("language")
-       if lang == "python":
-         return True
-    except:
-      pass
-    
-    if not isinstance(self.selected_node, MixedTree):
-      return False
-      
-    if not self.selected_node.datatype is str:
-      return False
-  
-    if "type" in self.selected_node.child.attrs.keys():
-      return self.selected_node.child.attrs["type"][1] == "python"
-    else:
-      return False
-
-  def node_data_is_tensor(self):
-    """
-    Perform a series of tests on the current tree.Tree / MixedTree, to determine if
-    it is intended to be used to store tensor or vector data.
-    """
-
-    # Check that a geometry is defined
-    if self.geometry_dim_tree is None:
-      return False
-
-    # Check that this element has calculable and positive dimensions
-    if isinstance(self.geometry_dim_tree.datatype, tuple):
-      possible_dims = self.geometry_dim_tree.datatype
-    else:
-      possible_dims = [self.geometry_dim_tree.data]
-    for opt in possible_dims:
-      try:
-        dim1, dim2 = self.node_data_tensor_shape(int(opt))
-        assert dim1 > 0
-        assert dim2 > 0
-      except:
-        return False
-
-    # All tensor elements must be of MixedTree type
-    if not isinstance(self.selected_node, MixedTree):
-      return False
-
-    # The element must have dim1, rank and shape attributes
-    if not "dim1" in self.selected_node.child.attrs.keys() or not "rank" in self.selected_node.child.attrs.keys() or not "shape" in self.selected_node.child.attrs.keys():
-      return False
-    # The dim1 and rank attributes must be of fixed type
-    if not self.selected_node.child.attrs["dim1"][0] == "fixed" or not self.selected_node.child.attrs["rank"][0] == "fixed":
-      return False
-
-    if "dim2" in self.selected_node.child.attrs.keys():
-      # If a dim2 attribute is specified, it must be of fixed type and the rank must be 2
-      # Also, the shape attribute must be a list of integers with cardinality equal to the rank
-      if not self.selected_node.child.attrs["dim2"][0] == "fixed" or not self.selected_node.child.attrs["rank"][1] == "2" or not isinstance(self.selected_node.child.attrs["shape"][0], plist.List) or not self.selected_node.child.attrs["shape"][0].datatype is int or not str(self.selected_node.child.attrs["shape"][0].cardinality) == self.selected_node.child.attrs["rank"][1]:
-        return False
-    # Otherwise, the rank must be one and the shape an integer
-    elif not self.selected_node.child.attrs["rank"][1] == "1" or not self.selected_node.child.attrs["shape"][0] is int: 
-      return False
-
-    # The data for the element must be a list of one or more
-    if not isinstance(self.selected_node.datatype, plist.List) or not self.selected_node.datatype.cardinality == "+":
-      return False
-
-    # If the shape has been set, check that it has a valid value
-    if not self.selected_node.child.attrs["shape"][1] == None:
-      if self.geometry_dim_tree.data is None:
-        return False
-
-      dim1, dim2 = self.node_data_tensor_shape()
-      if "dim2" in self.selected_node.child.attrs.keys():
-        if not self.selected_node.child.attrs["shape"][1] == str(dim1) + " " + str(dim2):
-          return False
-      elif not self.selected_node.child.attrs["shape"][1] == str(dim1):
-        return False
-
-    return True
-
-  def node_data_tensor_shape(self, geometry_dim = None):
-    """
-    Read the tensor shape for tensor or vector data in the current MixedTree.
-    """
-
-    if geometry_dim == None:
-      geometry_dim = int(self.geometry_dim_tree.data)
-
-    dim1 = 1
-    dim2 = 1
-    if "dim1" in self.selected_node.child.attrs.keys():
-      dim1 = int(eval(self.selected_node.child.attrs["dim1"][1], {"dim":geometry_dim}))
-      if "dim2" in self.selected_node.child.attrs.keys():
-        dim2 = int(eval(self.selected_node.child.attrs["dim2"][1], {"dim":geometry_dim}))
-
-    return (dim1, dim2)
-
-  def node_data_is_symmetric_tensor(self):
-    """
-    Read if the tensor data in the current MixedTree is symmetric.
-    """
-
-    dim1, dim2 = self.node_data_tensor_shape()
-    if not dim1 == dim2:
-      return False
-
-    if "symmetric" in self.selected_node.child.attrs.keys() and self.selected_node.child.attrs["symmetric"][1] == "true":
-      return True
-    else:
-      return False
-
-class MixedTree:
-  def __init__(self, parent, child):
-    """
-    The .doc and .attrs comes from parent, and the .data comes from child. This
-    is used to hide integer_value etc. from the left hand side, but for its data
-    entry to show up on the right.
-    """
-
-    self.parent = parent
-    self.child = child
-
-    self.name = parent.name
-    self.schemaname = parent.schemaname
-    self.attrs = self.parent.attrs
-    self.children = parent.children
-    self.datatype = child.datatype
-    self.data = child.data
-    self.doc = parent.doc
-    self.active = parent.active
-
-    return
-
-  def set_attr(self, attr, val):
-    self.parent.set_attr(attr, val)
-
-    return
-
-  def get_attr(self, attr):
-    return self.parent.get_attr(attr)
-
-  def set_data(self, data):
-    self.child.set_data(data)
-    self.datatype = self.child.datatype
-    self.data = self.child.data
-
-    return
-
-  def valid_data(self, datatype, data):
-    return self.parent.valid_data(datatype, data)
-
-  def matches(self, text, case_sensitive = False):
-    old_parent_data = self.parent.data
-    self.parent.data = None
-    parent_matches = self.parent.matches(text, case_sensitive)
-    self.parent.data = old_parent_data
-
-    if parent_matches:
-      return True
-
-    if case_sensitive:
-      text_re = re.compile(text)
-    else:
-      text_re = re.compile(text, re.IGNORECASE)
-
-    if not self.child.data is None and not text_re.search(self.child.data) is None:
-      return True
-    else:
-      return False
 
 class DiamondFindDialog:
   def __init__(self, parent, gladefile):

@@ -126,3 +126,10 @@ class Choice:
 
   def choices(self):
     return self.l
+
+  def is_comment(self):
+    return False
+
+  def get_comment(self):
+    return None
+
