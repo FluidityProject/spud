@@ -503,5 +503,13 @@
         <signal name="activate" handler="on_paste"/>
       </widget>
     </child>
+    <child>
+      <widget class="GtkMenuItem" id="menuitemSlice">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Slice</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_slice"/>
+      </widget>
+    </child>
   </widget>
 </glade-interface>

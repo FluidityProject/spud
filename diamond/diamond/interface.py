@@ -46,6 +46,7 @@ import attributewidget
 import commentwidget
 import descriptionwidget
 import datawidget
+import sliceview
 
 from lxml import etree
 
@@ -136,7 +137,8 @@ class Diamond:
                     "on_about": self.on_about,
                     "on_copy_spud_path": self.on_copy_spud_path,
                     "on_copy": self.on_copy,
-                    "on_paste": self.on_paste}
+                    "on_paste": self.on_paste,
+                    "on_slice": self.on_slice}
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -712,6 +714,10 @@ class Diamond:
 
     return
 
+  def on_slice(self, widget = None):
+    sliceview = sliceview.Slice()
+    sliceview.show()
+    return
 
   ## LHS ###
 
@@ -1207,9 +1213,9 @@ class Diamond:
     if event.button == 3:
       x = int(event.x)
       y = int(event.y)
-      path = treeview.get_path_at_pos(x, y)[0]
+      path = treeview.get_path_at_pos(x, y)
       if path is not None:
-        treeview.get_selection().select_path(path)
+        treeview.get_selection().select_path(path[0])
         self.show_popup(None, event.button, event.time)
         return True
     return False
