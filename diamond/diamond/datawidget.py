@@ -56,7 +56,7 @@ class DataWidget(gtk.VBox):
 
     self.node = node
 
-    if not self.is_node_editable(node):
+    if not self.is_node_editable():
       self.set_data_fixed()
     elif node.is_tensor(self.geometry_dim_tree):
       self.set_data_tensor()
@@ -82,7 +82,7 @@ class DataWidget(gtk.VBox):
     in the treestore.
     """
 
-    if not self.is_node_editable(self.node):
+    if not self.is_node_editable():
       return True
     elif self.node.is_tensor(self.geometry_dim_tree):
       return self.data_tensor_store()
@@ -98,12 +98,12 @@ class DataWidget(gtk.VBox):
 #      else:
 #         self.scherror.on_validate()
 
-  def is_node_editable(self, node):
-    return node is not None \
-       and node.active \
-       and node.datatype is not None \
-       and node.datatype != "fixed" \
-       and (not node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree is not None)
+  def is_node_editable(self):
+    return self.node is not None \
+       and self.node.active \
+       and self.node.datatype is not None \
+       and self.node.datatype != "fixed" \
+       and (not self.node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree.data is not None)
        # not A or B == A implies B
        # A B T
        # 0 0 1
@@ -158,6 +158,11 @@ class DataWidget(gtk.VBox):
     """
 
     if self.frame.child is not None:
+      if isinstance(self.data, gtk.TextView):
+        self.data.handler_block_by_func(self.entry_focus_in)
+      elif isinstance(self.data, gtk.ComboBox):
+        self.data.handler_block_by_func(self.combo_focus_child)
+
       self.frame.remove(self.frame.child)
 
     self.interacted = False
@@ -189,10 +194,8 @@ class DataWidget(gtk.VBox):
       self.data.get_buffer().set_text("No data")
     elif self.node.is_tensor(self.geometry_dim_tree):
       self.data.get_buffer().set_text("Dimension not set")
-    elif self.node.datatype == "fixed":
+    else: # self.node.datatype == "fixed":
       self.data.get_buffer().set_text(self.node.data)
-    else:
-      self.data.get_buffer().set_text("BUG")
  
     buffer_bounds = self.data.get_buffer().get_bounds()
     self.data.get_buffer().apply_tag(text_tag, buffer_bounds[0], buffer_bounds[1])
@@ -242,24 +245,26 @@ class DataWidget(gtk.VBox):
     scrolledWindow.child.set_property("shadow-type", gtk.SHADOW_NONE)
 
     self.set_child_packing(self.frame, True, True, 0, gtk.PACK_START)
-    self.buttons.show()
 
-    is_symmetric = self.node.is_symmetric_tensor()
+    is_symmetric = self.node.is_symmetric_tensor(self.geometry_dim_tree)
     for i in range(dim1):
       for j in range(dim2):
-        entry = gtk.Entry()
-        self.node_data.attach(entry, dim2 - j - 1, dim2 - j, dim1 - i - 1, dim1 - i)
+        iindex = dim1 - i - 1
+        jindex = dim2 - j - 1
+
         if not is_symmetric or i >= j:
-          entry.show()
-          entry.connect("focus-in-event", self.tensor_element_focus_in, dim2 - j - 1, dim1 - i - 1)
+          entry = gtk.Entry()
+          entry.connect("focus-in-event", self.tensor_element_focus_in, jindex, iindex)
+          self.data.attach(entry, jindex, jindex + 1, iindex, iindex + 1)
 
           if self.node.data is None:
             entry.set_text(datatype.print_type(self.node.datatype.datatype))
             entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
           else:
-            entry.set_text(self.node.data.split(" ")[(dim2 - j - 1) + (dim1 - i - 1) * dim2])
+            entry.set_text(self.node.data.split(" ")[jindex + iindex * dim2])
 
     self.interacted = [False for i in range(dim1 * dim2)]
+    self.show_all()
 
     return
 
@@ -356,7 +361,7 @@ class DataWidget(gtk.VBox):
     """
 
     dim1, dim2 = self.node.tensor_shape(self.geometry_dim_tree)
-    is_symmetric = self.node.is_symmetric_tensor()
+    is_symmetric = self.node.is_symmetric_tensor(self.geometry_dim_tree)
 
     if True not in self.interacted:
       return True
@@ -395,13 +400,13 @@ class DataWidget(gtk.VBox):
       self.node.set_data(value_check)
 
       dim1, dim2 = self.node.tensor_shape(self.geometry_dim_tree)
-      if int(self.selected_node.child.attrs["rank"][1]) == 1:
+      if int(self.node.child.attrs["rank"][1]) == 1:
         self.node.child.set_attr("shape", str(dim1))
       else:
         self.node.child.set_attr("shape", str(dim1) + " " + str(dim2))
 
       self.on_store()
-      self.node_data_interacted = [False for i in range(dim1 * dim2)]
+      self.interacted = [False for i in range(dim1 * dim2)]
 
     return True
 
@@ -455,7 +460,7 @@ class DataWidget(gtk.VBox):
     dim1, dim2 = self.node.tensor_shape(self.geometry_dim_tree)
     if not self.interacted[col + row * dim2]:
       self.interacted[col + row * dim2] = True
-      if self.node.is_symmetric_tensor():
+      if self.node.is_symmetric_tensor(self.geometry_dim_tree):
         self.interacted[row + col * dim1] = True
       if self.node.data is None:
         widget.set_text("")

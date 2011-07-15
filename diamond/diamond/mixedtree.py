@@ -111,7 +111,7 @@ class MixedTree:
     # The element must have dim1, rank and shape attributes
     if "dim1" not in self.child.attrs.keys() \
        or "rank" not in self.child.attrs.keys() \
-       or "shape" not in self.selected_node.child.attrs.keys():
+       or "shape" not in self.child.attrs.keys():
       return False
 
     # The dim1 and rank attributes must be of fixed type
@@ -125,7 +125,7 @@ class MixedTree:
          or self.child.attrs["rank"][1] != "2" \
          or not isinstance(self.child.attrs["shape"][0], plist.List) \
          or self.child.attrs["shape"][0].datatype is not int \
-         or str(self.selected_node.child.attrs["shape"][0].cardinality) != self.selected_node.child.attrs["rank"][1]:
+         or str(self.child.attrs["shape"][0].cardinality) != self.child.attrs["rank"][1]:
         return False
 
     # Otherwise, the rank must be one and the shape an integer
@@ -133,7 +133,7 @@ class MixedTree:
       return False
 
     # The data for the element must be a list of one or more
-    if isinstance(self.datatype, plist.List) or self.datatype.cardinality != "+":
+    if not isinstance(self.datatype, plist.List) or self.datatype.cardinality != "+":
       return False
 
     # If the shape has been set, check that it has a valid value
@@ -141,7 +141,7 @@ class MixedTree:
       if geometry_dim_tree.data is None:
         return False
 
-      dim1, = self.tensor_shape()
+      dim1, dim2 = self.tensor_shape()
       if "dim2" in self.child.attrs.keys():
         if self.child.attrs["shape"][1] != str(dim1) + " " + str(dim2):
           return False
@@ -167,12 +167,12 @@ class MixedTree:
 
     return (dim1, dim2)
 
-  def is_symmetric_tensor(self):
+  def is_symmetric_tensor(self, geometry):
     """
     Read if the tensor data in the current MixedTree is symmetric.
     """
 
-    dim1, dim2 = self.tensor_shape()
+    dim1, dim2 = self.tensor_shape(geometry)
 
     return dim1 == dim2 and "symmetric" in self.child.attrs.keys() and self.child.attrs["symmetric"][1] == "true"
 
