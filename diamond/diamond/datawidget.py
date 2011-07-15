@@ -34,23 +34,16 @@ class DataWidget(gtk.VBox):
     frame.set_label_widget(label)
     frame.set_shadow_type(gtk.SHADOW_NONE)
 
-    hbox = self.buttons = gtk.HBox()
- 
-    revertButton = gtk.Button()
-    revertButton.set_label("Revert data")
-    revertButton.connect("clicked", self.revert)
-
-    storeButton = gtk.Button()
-    storeButton.set_label("Store data")
-    storeButton.connect("clicked", self.store)
-   
-    hbox.pack_end(revertButton)
-    hbox.pack_start(storeButton)
-
     self.pack_start(frame)
-    self.pack_end(hbox, expand = False)
-
+    self.buttons = None
     return
+
+  def set_buttons(self, buttons):
+    self.buttons = buttons
+    buttons.connect("revert", self.revert)
+    buttons.connect("store", self.store)
+    self.pack_end(buttons, expand = False)
+    buttons.show_all()
 
   def update(self, node):
 

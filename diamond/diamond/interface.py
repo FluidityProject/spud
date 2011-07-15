@@ -45,6 +45,7 @@ import TextBufferMarkup
 import attributewidget
 import commentwidget
 import descriptionwidget
+import databuttonswidget
 import datawidget
 import sliceview
 
@@ -715,8 +716,8 @@ class Diamond:
     return
 
   def on_slice(self, widget = None):
-    sliceview = sliceview.Slice()
-    sliceview.show()
+    window = sliceview.Slice(self.main_window)
+    window.update(self.selected_node, self.tree)
     return
 
   ## LHS ###
@@ -1722,6 +1723,7 @@ class Diamond:
     vbox.pack_start(self.attributes, True, True)
 
     self.data = datawidget.DataWidget()
+    self.data.set_buttons(databuttonswidget.DataButtonsWidget())
     self.data.on_store = self.on_store
     vbox.pack_end(self.data, True, True)
 
