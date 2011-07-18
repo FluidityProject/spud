@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Diamond.  If not, see <http://www.gnu.org/licenses/>.
 
+import gobject
 import gtk
 import pango
 
@@ -23,6 +24,9 @@ import datatype
 import mixedtree
 
 class DataWidget(gtk.VBox):
+
+  __gsignals__ = { "on-store"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+
   def __init__(self):
     gtk.VBox.__init__(self)
     
@@ -42,7 +46,6 @@ class DataWidget(gtk.VBox):
     self.buttons = buttons
     buttons.connect("revert", self.revert)
     buttons.connect("store", self.store)
-    self.pack_end(buttons, expand = False)
     buttons.show_all()
 
   def update(self, node):
@@ -342,7 +345,7 @@ class DataWidget(gtk.VBox):
            and self.node.datatype.cardinality == "+":
           self.node.child.set_attr("shape", str(len(value_check.split(" "))))
 
-        self.on_store()
+        self.emit("on-store")
         self.interacted = False
 
     return True
@@ -398,7 +401,7 @@ class DataWidget(gtk.VBox):
       else:
         self.node.child.set_attr("shape", str(dim1) + " " + str(dim2))
 
-      self.on_store()
+      self.emit("on-store")
       self.interacted = [False for i in range(dim1 * dim2)]
 
     return True
@@ -422,7 +425,7 @@ class DataWidget(gtk.VBox):
 
     if not new_data == self.node.data:
       self.node.set_data(new_data)
-      self.on_store()
+      self.emit("on-store")
       self.interacted = False
 
     return True
@@ -506,3 +509,4 @@ class DataWidget(gtk.VBox):
 
     return
 
+gobject.type_register(DataWidget)

@@ -470,3 +470,5 @@ class Tree:
 
     return displayname
 
+  def get_children(self):
+    return self.children

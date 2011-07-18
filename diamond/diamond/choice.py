@@ -141,3 +141,6 @@ class Choice:
     """
 
     return self.get_current_tree().get_display_name()
+
+  def get_children(self):
+    return self.get_current_tree().get_children()
