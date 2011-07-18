@@ -685,8 +685,10 @@ class Diamond:
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
-    if self.selected_iter is not None:    
-      node = self.treestore.get_value(self.selected_iter, 3)
+    if isinstance(self.selected_node, MixedTree):
+      node = self.selected_node.parent
+    else:
+      node = self.selected_node
 
     if node != None:
 
