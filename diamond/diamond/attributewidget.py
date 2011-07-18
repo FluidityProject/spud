@@ -22,6 +22,10 @@ import datatype
 import dialogs
 
 class AttributeWidget(gtk.Frame):
+
+  __gsignals__ = { "on-store" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
+                   "update-name"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+
   def __init__(self):
     gtk.Frame.__init__(self)
 
@@ -280,9 +284,9 @@ class AttributeWidget(gtk.Frame):
       self.treeview.get_model().set_value(iter, 1, value_check)
       self.node.set_attr(iter_key, value_check)
       if iter_key == "name":
-        self.update_name()
+        self.emit("update-name")
 
-      self.on_store()
+      self.emit("on-store")
 
     return
 
@@ -309,9 +313,9 @@ class AttributeWidget(gtk.Frame):
       self.treeview.get_model().set_value(iter, 1, new_text)
       self.node.set_attr(iter_key, new_text)
       if iter_key == "name":
-        self.update_name()
+        self.emit("update-name")
 
-      self.on_store()
+      self.emit("on-store")
 
     return
 
@@ -328,3 +332,4 @@ class AttributeWidget(gtk.Frame):
 
     return True
 
+gobject.type_register(AttributeWidget)

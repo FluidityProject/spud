@@ -716,7 +716,10 @@ class Diamond:
     return
 
   def on_slice(self, widget = None):
-    window = sliceview.Slice(self.main_window)
+    window = sliceview.SliceView(self.main_window)
+    window.geometry_dim_tree = self.geometry_dim_tree
+    window.connect("on-store", self.on_store)
+    window.connect("update-name", self.update_painted_name)
     window.update(self.selected_node, self.tree)
     return
 
@@ -1422,10 +1425,6 @@ class Diamond:
 
     return
 
-  def on_store(self):
-    self.set_saved(False)
-    self.treeview.queue_draw()
-
   def get_treeview_iter(self, selection):
     """
     Get a treeview iterator object, given a selection.
@@ -1437,7 +1436,17 @@ class Diamond:
 
     return self.treestore.get_iter(path)
 
-  def update_painted_name(self):
+  def on_store(self, widget = None):
+    self.set_saved(False)
+    self.treeview.queue_draw()
+
+    if isinstance(widget, sliceview.SliceView):
+      # reset the main view
+      # we only do this for slice view because otherwise textboxes your
+      # working on will jump to the top everytime you hit store
+      self.update_options_frame()
+
+  def update_painted_name(self, widget = None):
     """
     This updates the treestore (and the liststore for the gtk.CellRendererCombo)
     with a new name, when the name="xxx" attribute is changed.
@@ -1700,17 +1709,20 @@ class Diamond:
     
 
     self.attributes = attributewidget.AttributeWidget()
-    self.attributes.on_store = self.on_store
-    self.attributes.update_name = self.update_painted_name
+    self.attributes.connect("on-store", self.on_store)
+    self.attributes.connect("update-name", self.update_painted_name)
     vbox.pack_start(self.attributes, True, True)
 
+    databuttons = databuttonswidget.DataButtonsWidget()
+    vbox.pack_end(databuttons, False)
+    
     self.data = datawidget.DataWidget()
-    self.data.set_buttons(databuttonswidget.DataButtonsWidget())
-    self.data.on_store = self.on_store
+    self.data.set_buttons(databuttons)
+    self.data.connect("on-store", self.on_store)
     vbox.pack_end(self.data, True, True)
 
     self.comment = commentwidget.CommentWidget()
-    self.comment.on_store = self.on_store
+    self.comment.connect("on-store", self.on_store)
     vpane2.pack2(self.comment, True, False)
 
     optionsFrame.show_all()

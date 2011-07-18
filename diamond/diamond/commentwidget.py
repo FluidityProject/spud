@@ -15,9 +15,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Diamond.  If not, see <http://www.gnu.org/licenses/>.
 
+import gobject
 import gtk
 
 class CommentWidget(gtk.Frame):
+
+  __gsignals__ = { "on-store"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+
   def __init__(self):
     gtk.Frame.__init__(self)
     
@@ -113,7 +117,7 @@ class CommentWidget(gtk.Frame):
       else:
         comment_tree.set_data(new_comment)
         comment_tree.active = True
-        self.on_store()
+        self.emit("on-store")
     return
 
   def focus_in(self, widget, event):
@@ -137,5 +141,6 @@ class CommentWidget(gtk.Frame):
 
     self.store()
 
-
     return
+
+gobject.type_register(CommentWidget)
