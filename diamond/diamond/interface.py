@@ -816,7 +816,7 @@ class Diamond:
     # Ignoring the numerous l's involved in getting the choices,
     # l is now a list of possible names.
     for t in l:
-      name = self.get_display_name(t)
+      name = t.get_display_name()
       liststore.append([name, t])
 
     return liststore
@@ -850,9 +850,9 @@ class Diamond:
           data = str(node_data)
  
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(t), liststore, t, t, data])
+          child_iter = self.treestore.insert_before(iter, replacediter, [t.get_display_name(), liststore, t, t, data])
         else:
-          child_iter = self.treestore.append(iter, [self.get_display_name(t), liststore, t, t, data])
+          child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t, data])
         
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
@@ -861,9 +861,9 @@ class Diamond:
         if self.choice_or_tree_is_hidden(ts_choice):
           continue
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+          child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice, ""])
         else:
-          child_iter = self.treestore.append(iter, [self.get_display_name(ts_choice), liststore, t, ts_choice, ""])
+          child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice, ""])
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
     if replace:
@@ -1167,7 +1167,7 @@ class Diamond:
       self.expand_treestore(iter)
       iter = self.treestore.insert_after(
         parent=parent_iter, sibling=iter, 
-        row=[self.get_display_name(new_tree), liststore, new_tree, new_tree.get_current_tree(), ""])
+        row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree(), ""])
       self.set_saved(False)
 
     parent_tree.recompute_validity()
@@ -1426,24 +1426,6 @@ class Diamond:
     self.set_saved(False)
     self.treeview.queue_draw()
 
-  def get_display_name(self, active_tree):
-    """
-    This is a fluidity hack, allowing the name displayed in the treeview on the
-    left to be different to the element name. If it has an attribute name="xxx",
-    element_tag (xxx) is displayed.
-    """
-
-    if active_tree.__class__ is tree.Tree:
-      displayname = active_tree.name
-      if "name" in active_tree.attrs.keys():
-        attrname = active_tree.attrs["name"][1]
-        if attrname is not None:
-          displayname = displayname + " (" + attrname + ")"
-    elif active_tree.__class__ is choice.Choice:
-      displayname = self.get_display_name(active_tree.get_current_tree())
-
-    return displayname
-
   def get_treeview_iter(self, selection):
     """
     Get a treeview iterator object, given a selection.
@@ -1467,7 +1449,7 @@ class Diamond:
 
     liststore = self.treestore.get_value(iter, 1)
     active_tree = self.treestore.get_value(iter, 3)
-    new_name = self.get_display_name(active_tree)
+    new_name = active_tree.get_display_name()
     self.treestore.set_value(iter, 0, new_name)
 
     # find the liststore iter corresponding to the painted choice

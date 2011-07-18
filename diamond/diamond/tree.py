@@ -454,3 +454,19 @@ class Tree:
       pass
 
     return False
+
+  def get_display_name(self):
+    """
+    This is a fluidity hack, allowing the name displayed in the treeview on the
+    left to be different to the element name. If it has an attribute name="xxx",
+    element_tag (xxx) is displayed.
+    """
+
+    displayname = self.name
+    if "name" in self.attrs:
+      attrname = self.attrs["name"][1]
+      if attrname is not None:
+        displayname = displayname + " (" + attrname + ")"
+
+    return displayname
+

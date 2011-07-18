@@ -133,3 +133,11 @@ class Choice:
   def get_comment(self):
     return None
 
+  def get_display_name(self):
+    """
+    This is a fluidity hack, allowing the name displayed in the treeview on the
+    left to be different to the element name. If it has an attribute name="xxx",
+    element_tag (xxx) is displayed.
+    """
+
+    return self.get_current_tree().get_display_name()
