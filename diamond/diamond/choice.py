@@ -144,3 +144,25 @@ class Choice:
 
   def get_children(self):
     return self.get_current_tree().get_children()
+
+  def get_mixed_data(self):
+    integers = [child for child in self.get_children() if child.name == "integer_value"]
+    reals    = [child for child in self.get_children() if child.name == "real_value"]
+    logicals = [child for child in self.get_children() if child.name == "logical_value"]
+    strings  = [child for child in self.get_children() if child.name == "string_value"]
+
+    child = None
+    if len(integers) > 0:
+      child = integers[0]
+    if len(reals) > 0:
+      child = reals[0]
+    if len(logicals) > 0:
+      child = logicals[0]
+    if len(strings) > 0:
+      child = strings[0]
+
+    if child is None:
+      return self
+    else:
+      return mixedtree.MixedTree(self, child)
+

@@ -21,6 +21,7 @@ import gtk
 import attributewidget
 import databuttonswidget
 import datawidget
+import mixedtree
 
 class SliceView(gtk.Window):
   
@@ -54,6 +55,7 @@ class SliceView(gtk.Window):
     self.show_all()
 
   def update(self, node, tree):
+    print node.schemaname
     for n in self.get_nodes(node, tree):
       self.vbox.pack_start(self.control(n))
 
@@ -63,8 +65,8 @@ class SliceView(gtk.Window):
    nodes = []
 
    for child in tree.get_children():
-     if child.schemaname == node.schemaname:
-       nodes.append(child)
+     if child.schemaname == node.schemaname and child.active:
+       nodes.append(child.get_mixed_data())
      
      nodes += self.get_nodes(node, child)
    

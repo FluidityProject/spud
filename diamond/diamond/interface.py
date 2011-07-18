@@ -1489,25 +1489,7 @@ class Diamond:
     else:
       active_tree = self.treestore.get_value(iter_or_tree, 3)
 
-    integers = [child for child in active_tree.children if child.name == "integer_value"]
-    reals    = [child for child in active_tree.children if child.name == "real_value"]
-    logicals = [child for child in active_tree.children if child.name == "logical_value"]
-    strings  = [child for child in active_tree.children if child.name == "string_value"]
-
-    child = None
-    if len(integers) > 0:
-      child = integers[0]
-    if len(reals) > 0:
-      child = reals[0]
-    if len(logicals) > 0:
-      child = logicals[0]
-    if len(strings) > 0:
-      child = strings[0]
-
-    if child is None:
-      painted_tree = active_tree
-    else:
-      painted_tree = mixedtree.MixedTree(active_tree, child)
+    painted_tree = active_tree.get_mixed_data()
 
     if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
