@@ -252,11 +252,14 @@ class Tree:
   
     for child in self.children:
       if child.active is True:
-        sub_tree.append(child.write_core(sub_tree))
+        child.write_core(sub_tree)
         
     if self.data is not None:
       sub_tree.text = unicode(self.data)
       
+    if parent is not None:
+      parent.append(sub_tree)
+
     return sub_tree
 
   def pickle(self):

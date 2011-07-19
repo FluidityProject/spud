@@ -686,16 +686,13 @@ class Diamond:
     else:
       node = self.selected_node
 
-    if node != None:
+    if node != None and node.active:
 
       newnode = self.s.read(ios, node)
 
       if newnode is None:
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
-
-      if not node.active:
-        self.expand_tree(self.selected_iter)
 
       if node.parent is not None:
         newnode.set_parent(node.parent)
