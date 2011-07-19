@@ -92,32 +92,38 @@ class AttributeWidget(gtk.Frame):
       self.set_property("visible", True)
 
       for key in node.attrs.keys():
-        iter = self.treeview.get_model().append()
-        self.treeview.get_model().set_value(iter, 0, key)
+        model = self.treeview.get_model()
         cell_model = gtk.ListStore(gobject.TYPE_STRING)
-        self.treeview.get_model().set_value(iter, 2, cell_model)
+
+        iter = model.append()
+        model.set_value(iter, 0, key)
+        model.set_value(iter, 2, cell_model)
+
         if isinstance(node.attrs[key][0], tuple):
           if node.attrs[key][1] is None:
             if isinstance(node.attrs[key][0][0], tuple):
-              self.treeview.get_model().set_value(iter, 1, "Select " + datatype.print_type(node.attrs[key][0][1]) + "...")
+              model.set_value(iter, 1, "Select " + datatype.print_type(node.attrs[key][0][1]) + "...")
             else:
-              self.treeview.get_model().set_value(iter, 1, "Select...")
+              model.set_value(iter, 1, "Select...")
           else:
-            self.treeview.get_model().set_value(iter, 1, node.attrs[key][1])
+            model.set_value(iter, 1, node.attrs[key][1])
+
           if isinstance(node.attrs[key][0][0], tuple):
             opts = node.attrs[key][0][0]
           else:
             opts = node.attrs[key][0]
+
           for opt in opts:
             cell_iter = cell_model.append()
             cell_model.set_value(cell_iter, 0, opt)
+
           self.treeview.get_column(2).set_property("visible", True)
         elif node.attrs[key][0] is None:
-          self.treeview.get_model().set_value(iter, 1, "No data")
+          model.set_value(iter, 1, "No data")
         elif node.attrs[key][1] is None:
-          self.treeview.get_model().set_value(iter, 1, datatype.print_type(node.attrs[key][0]))
+          model.set_value(iter, 1, datatype.print_type(node.attrs[key][0]))
         else:
-          self.treeview.get_model().set_value(iter, 1, node.attrs[key][1])
+          model.set_value(iter, 1, node.attrs[key][1])
 
       self.treeview.queue_resize()
 
