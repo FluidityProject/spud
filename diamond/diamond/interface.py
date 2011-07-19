@@ -258,9 +258,6 @@ class Diamond:
     return
 
   def close_file(self):
-    if self.filename is None:
-      return
-  
     self.remove_children(None)
     self.init_datatree()
 
@@ -356,15 +353,30 @@ class Diamond:
 
     return
 
+  def save_continue(self):
+
+    if not self.saved:
+      prompt_response = dialogs.prompt(self.main_window, 
+        "Unsaved data. Do you want to save the current document before continuing?", gtk.MESSAGE_WARNING, True)
+ 
+      if prompt_response == gtk.RESPONSE_YES:
+        if self.filename is None:
+          return self.on_save_as()
+        else:
+          return self.on_save()
+      elif prompt_response == gtk.RESPONSE_CANCEL:
+        return False
+
+    return True
+
   def on_new(self, widget=None):
     """
     Called when new is clicked. Clear the treestore and reset the datatree.
     """
 
-    if not self.saved:
-      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you wish to continue?", gtk.MESSAGE_WARNING)
-      if not prompt_response == gtk.RESPONSE_YES:
-        return
+    if not self.save_continue():
+      return
+
     self.open_file(filename = None)
     self.filename = None
 
@@ -375,10 +387,8 @@ class Diamond:
     Called when open is clicked. Open a user supplied file.
     """
 
-    if not self.saved:
-      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you want to save the current document before continuing?", gtk.MESSAGE_WARNING)
-      if not prompt_response == gtk.RESPONSE_YES:
-        return
+    if not self.save_continue():
+      return
 
     filter_names_and_patterns = {}
     if self.suffix is None:
@@ -401,10 +411,8 @@ class Diamond:
     Called when open schema is clicked. Clear the treestore and reset the schema.
     """
 
-    if not self.saved:
-      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you wish to continue?", gtk.MESSAGE_WARNING)
-      if not prompt_response == gtk.RESPONSE_YES:
-        return
+    if not self.save_continue():
+      return
 
     filename = dialogs.get_filename(title = "Open RELAX NG schema", action = gtk.FILE_CHOOSER_ACTION_OPEN, filter_names_and_patterns = {"RNG files":"*.rng"}, folder_uri = self.schemafile_path)
     if not filename is None:
@@ -493,19 +501,10 @@ class Diamond:
     changed.
     """
 
-    if self.saved:
-      self.destroy()
-    else:
-      prompt_response = dialogs.prompt(self.main_window, "Unsaved data. Do you wish to save?", gtk.MESSAGE_WARNING, True)
-      if prompt_response == gtk.RESPONSE_YES:
-        if self.filename is None:
-          retval = self.on_save_as()
-        else:
-          retval = self.on_save()
-        if retval is True:
-          self.destroy()
-      elif prompt_response == gtk.RESPONSE_NO:
-        self.destroy()
+    if not self.save_continue():
+      return
+
+    self.destroy()
 
     return
 
