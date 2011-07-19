@@ -162,12 +162,9 @@ class Schema(object):
     node = self.to_tree(node)
     
     if eidtree is not None:
-      if eidtree.parent is not None:
-        eidtree.parent.children.append(node)
-        eidtree.parent.children.remove(eidtree) 
-        node.set_parent(eidtree.parent)
       node.attrs = eidtree.attrs
       node.cardinality = eidtree.cardinality
+      node.parent = eidtree.parent
 
     return node
 

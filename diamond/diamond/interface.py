@@ -653,11 +653,11 @@ class Diamond:
       return self._get_focus_widget(focus)
 
   def on_copy(self, widget=None):
-    
-    widget = self._get_focus_widget(self.main_window)
-    if widget is not self.treeview and gobject.signal_lookup("copy-clipboard", widget):
-      widget.emit("copy-clipboard")
-      return
+    if not isinstance(widget, gtk.MenuItem):
+      widget = self._get_focus_widget(self.main_window)
+      if widget is not self.treeview and gobject.signal_lookup("copy-clipboard", widget):
+        widget.emit("copy-clipboard")
+        return
 
     if isinstance(self.selected_node, MixedTree):
       node = self.selected_node.parent
@@ -676,11 +676,11 @@ class Diamond:
     return
 
   def on_paste(self, widget=None):
-
-    widget = self._get_focus_widget(self.main_window)
-    if widget is not self.treeview and gobject.signal_lookup("paste-clipboard", widget):
-      widget.emit("paste-clipboard")
-      return
+    if not isinstance(widget, gtk.MenuItem):
+      widget = self._get_focus_widget(self.main_window)
+      if widget is not self.treeview and gobject.signal_lookup("paste-clipboard", widget):
+        widget.emit("paste-clipboard")
+        return
 
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
@@ -700,6 +700,11 @@ class Diamond:
 
       if not node.active:
         self.expand_tree(self.selected_iter)
+
+      if node.parent is not None:
+        newnode.set_parent(node.parent)
+        node.parent.children.insert(node.parent.children.index(node), newnode)
+        #node.parent.children.remove(node)
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
@@ -861,7 +866,7 @@ class Diamond:
     if replace:
       replacediter = iter
       iter = self.treestore.iter_parent(replacediter)
-    else:
+    else: 
       self.remove_children(iter)
     
     for t in new_tree:

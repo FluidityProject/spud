@@ -110,18 +110,7 @@ class Choice:
       choice.parent = parent
 
   def write_core(self, parent):
-    l = self.l
-    for i in range(len(l)):
-      if self.index == i:
-        l[i].write_core(parent)
-#      else:
-#        root=etree.Element(parent.tag)
-#        l[i].write_core(root)
-#        comment_buffer = StringIO.StringIO(etree.tostring(root))
-#        comment_text = ("DIAMOND MAGIC COMMENT (neglected choice subtree %s):\n" % l[i].schemaname)
-#        comment_text = comment_text + base64.b64encode(bz2.compress(comment_buffer.getvalue()))
-#        parent.append(etree.Comment(unicode(comment_text)))
-
+    self.l[self.index].write_core(parent)
     return parent
 
   def choices(self):
