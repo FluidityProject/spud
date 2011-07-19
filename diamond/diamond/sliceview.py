@@ -55,7 +55,6 @@ class SliceView(gtk.Window):
     self.show_all()
 
   def update(self, node, tree):
-    print node.schemaname
     for n in self.get_nodes(node, tree):
       self.vbox.pack_start(self.control(n))
 

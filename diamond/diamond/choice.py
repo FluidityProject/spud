@@ -143,7 +143,7 @@ class Choice:
     return self.get_current_tree().get_display_name()
 
   def get_children(self):
-    return self.get_current_tree().get_children()
+    return [self.get_current_tree()]
 
   def get_mixed_data(self):
     integers = [child for child in self.get_children() if child.name == "integer_value"]

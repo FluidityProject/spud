@@ -1444,7 +1444,7 @@ class Diamond:
       # reset the main view
       # we only do this for slice view because otherwise textboxes your
       # working on will jump to the top everytime you hit store
-      self.update_options_frame()
+      self.on_select_row()
 
   def update_painted_name(self, widget = None):
     """
@@ -1688,7 +1688,6 @@ class Diamond:
 
     self.description = descriptionwidget.DescriptionWidget()
     vpane1.pack1(self.description, True, False)
-    
 
     self.attributes = attributewidget.AttributeWidget()
     self.attributes.connect("on-store", self.on_store)

@@ -493,7 +493,7 @@ class DataWidget(gtk.VBox):
 
     if not isinstance(self.node.datatype[0], tuple) or not self.data.child.get_property("has-focus"):
       self.node.set_data(self.data.get_active_text())
-      self.on_store()      
+      self.emit("on-store")      
       self.interacted = False
     return
 
