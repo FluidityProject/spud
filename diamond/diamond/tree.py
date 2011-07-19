@@ -235,7 +235,7 @@ class Tree:
     else:
       file = filename
 
-    xmlTree=etree.tostring(self.write_core(), pretty_print = True, xml_declaration = True, encoding="utf-8")
+    xmlTree=etree.tostring(self.write_core(None), pretty_print = True, xml_declaration = True, encoding="utf-8")
     
     file.write(xmlTree)
 
@@ -252,7 +252,7 @@ class Tree:
   
     for child in self.children:
       if child.active is True:
-        sub_tree.append(child.write_core(parent))
+        sub_tree.append(child.write_core(sub_tree))
         
     if self.data is not None:
       sub_tree.text = unicode(self.data)

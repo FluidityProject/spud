@@ -392,14 +392,11 @@ class Schema(object):
       # bloody simplified RNG
       if len(children) == 2:
         empty = [x for x in children if self.tag(x) == "empty"]
-        nonempty = [x for x in children if self.tag(x) != "empty"]
-        if len(empty) > 0:
+        if empty:
+          nonempty = [x for x in children if self.tag(x) != "empty"]
           tag = self.tag(nonempty[0])
-          if tag == "oneOrMore":
-            return self.cb_oneormore(element, facts)
-          else:
-            f = self.callbacks[tag]
-            return f(element, facts)
+          f = self.callbacks[tag]
+          return f(element, facts)
 
       for child in children:
         newfacts = {}

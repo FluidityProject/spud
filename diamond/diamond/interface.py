@@ -704,7 +704,7 @@ class Diamond:
       if node.parent is not None:
         newnode.set_parent(node.parent)
         node.parent.children.insert(node.parent.children.index(node), newnode)
-        #node.parent.children.remove(node)
+        node.parent.children.remove(node)
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
