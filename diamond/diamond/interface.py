@@ -159,7 +159,7 @@ class Diamond:
 
     self.main_window.show()
 
-    if not schemafile is None:
+    if schemafile is not None:
       self.open_file(schemafile = schemafile, filename = input_filename)
 
     # Hide specific menu items
@@ -205,9 +205,9 @@ class Diamond:
     """
 
     self.saved = saved
-    if not filename == "":
+    if filename != "":
       self.filename = filename
-      if not filename is None:
+      if filename is not None:
         self.file_path = os.path.dirname(filename) + os.path.sep
     self.update_title()
 
@@ -326,11 +326,11 @@ class Diamond:
     self.find.on_find_close_button()
     if schemafile is None:
       self.close_schema()
-    elif not schemafile == "":
+    elif schemafile != "":
       self.load_schema(schemafile)
     if filename is None:
       self.close_file()
-    elif not filename == "":
+    elif filename != "":
       self.load_file(filename)
       
     self.treeview.freeze_child_notify()
@@ -398,7 +398,7 @@ class Diamond:
 
     filename = dialogs.get_filename(title = "Open XML file", action = gtk.FILE_CHOOSER_ACTION_OPEN, filter_names_and_patterns = filter_names_and_patterns, folder_uri = self.file_path)
 
-    if not filename is None:
+    if filename is not None:
       self.open_file(filename = filename)
 
     return
@@ -412,7 +412,7 @@ class Diamond:
       return
 
     filename = dialogs.get_filename(title = "Open RELAX NG schema", action = gtk.FILE_CHOOSER_ACTION_OPEN, filter_names_and_patterns = {"RNG files":"*.rng"}, folder_uri = self.schemafile_path)
-    if not filename is None:
+    if filename is not None:
       self.open_file(schemafile = filename)
 
     return
@@ -466,7 +466,7 @@ class Diamond:
 
     filename = dialogs.get_filename(title = "Save XML file", action = gtk.FILE_CHOOSER_ACTION_SAVE, filter_names_and_patterns = filter_names_and_patterns, folder_uri = self.file_path)
 
-    if not filename is None:
+    if filename is not None:
       # Check that the selected file has a file extension. If not, add a .xml extension.
       if len(filename.split(".")) <= 1:
         filename += ".xml"
@@ -1311,7 +1311,7 @@ class Diamond:
     if not self.node_data_store():
       return False
 
-    if isinstance(self.selected_node, MixedTree) and not self.geometry_dim_tree is None and self.selected_node.parent is self.geometry_dim_tree.parent and not self.selected_node.data is None:
+    if isinstance(self.selected_node, MixedTree) and self.geometry_dim_tree is not None and self.selected_node.parent is self.geometry_dim_tree.parent and self.selected_node.data is not None:
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True
@@ -1689,7 +1689,7 @@ class Diamond:
     if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
       painted_tree.active = False
-    elif lock_geometry_dim and not self.geometry_dim_tree is None and not self.geometry_dim_tree.data is None:
+    elif lock_geometry_dim and self.geometry_dim_tree is not None and self.geometry_dim_tree.data is not None:
       if active_tree is self.geometry_dim_tree:
         data_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, datatype = "fixed")
         data_tree.data = painted_tree.data
@@ -1713,7 +1713,7 @@ class Diamond:
     if iter is None:
       return None
     for name in names[1:len(names) - 1]:
-      while not self.treestore.get_value(iter, 0) == name:
+      while self.treestore.get_value(iter, 0) != name:
         iter = self.treestore.iter_next(iter)
         if iter is None:
           return None
@@ -1744,10 +1744,10 @@ class Diamond:
     if isinstance(painted_tree, MixedTree):
        # If the geometry dimension element has a hidden data element, it must
        # have datatype tuple or fixed
-       if not isinstance(painted_tree.datatype, tuple) and not painted_tree.datatype == "fixed":
+       if not isinstance(painted_tree.datatype, tuple) and painted_tree.datatype != "fixed":
          self.geometry_dim_tree = None
          return
-    elif not painted_tree.datatype == "fixed":
+    elif painted_tree.datatype != "fixed":
       # Otherwise, only fixed datatype is permitted
       self.geometry_dim_tree = None
       return
@@ -1755,8 +1755,8 @@ class Diamond:
     # All parents of the geometry dimension element must have cardinality ""
     # (i.e. not ?, * or +).
     parent = painted_tree.parent
-    while not parent is None:
-      if not parent.cardinality == "":
+    while parent is not None:
+      if parent.cardinality != "":
         self.geometry_dim_tree = None
         return
       parent = parent.parent
@@ -1787,7 +1787,7 @@ class Diamond:
     Test whether the node at the given iter in the LHS treestore is active.
     """
 
-    while not iter is None:
+    while iter is not None:
       choice_or_tree = self.treestore.get_value(iter, 2)
       active_tree = self.treestore.get_value(iter, 3)
       if not choice_or_tree.active or not active_tree.active:
@@ -1875,7 +1875,7 @@ class Diamond:
         else:
           text_re = re.compile(text, re.IGNORECASE)
         comment = self.get_comment(choice_or_tree)
-        if not comment is None and not comment.data is None and not text_re.search(comment.data) is None:
+        if comment is not None and comment.data is not None and text_re.search(comment.data) is not None:
           return True
         elif recurse:
           for opt in choice_or_tree.children:
@@ -2115,7 +2115,7 @@ class Diamond:
 
     if self.selected_node is None or not self.selected_node.active:
       self.set_node_data_entry()
-    elif self.node_data_is_tensor() and not self.geometry_dim_tree.data is None:
+    elif self.node_data_is_tensor() and self.geometry_dim_tree.data is not None:
       self.set_node_data_tensor()
     elif isinstance(self.selected_node.datatype, tuple):
       self.set_node_data_combo()
@@ -2160,11 +2160,11 @@ class Diamond:
     Based on code from HyperTextDemo class in hypertext.py from PyGTK 2.12 demos
     """
 
-    if self.selected_node is None or self.selected_node.doc is None or not event.button == 1:
+    if self.selected_node is None or self.selected_node.doc is None or event.button != 1:
       return
 
     selection_bounds = self.node_desc.get_buffer().get_selection_bounds()
-    if not len(selection_bounds) == 0:
+    if selection_bounds:
       return
 
     buffer_pos = self.node_desc.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT, int(event.x), int(event.y))
@@ -2186,7 +2186,7 @@ class Diamond:
 
     desc = self.render_whitespace(desc)
 
-    if not len(self.node_desc_link_bounds) == 0:
+    if self.node_desc_link_bounds:
       new_desc = ""
       for i in range(len(self.node_desc_link_bounds)):
         if i == 0:
@@ -3027,7 +3027,7 @@ class Diamond:
     if not isinstance(self.selected_node, MixedTree):
       return False
       
-    if not self.selected_node.datatype is str:
+    if self.selected_node.datatype is not str:
       return False
   
     if "type" in self.selected_node.child.attrs.keys():
