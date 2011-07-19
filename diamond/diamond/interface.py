@@ -269,9 +269,6 @@ class Diamond:
     # if we have a relative path, make it absolute
     filename = os.path.abspath(filename)
   
-    if filename == self.filename:
-      return
-  
     try:
       os.stat(filename)
     except OSError:
