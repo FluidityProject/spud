@@ -632,6 +632,7 @@ class Diamond:
 
 
   def on_copy_spud_path(self, widget=None):
+    print "here"
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
       debug.deprint("No selection.")
@@ -1472,7 +1473,10 @@ class Diamond:
         selection = self.treeview.get_selection()
 
     (model, paths) = selection.get_selected_rows()
-    return paths[0]
+    if paths:
+      return paths[0]
+    else:
+      return None
 
   def update_data_column(self, model, itParent):
     """
