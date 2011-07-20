@@ -775,6 +775,7 @@ class Diamond:
       pass
 
     self.treeview.set_property("rules-hint", True)
+    self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
 
     model = gtk.ListStore(str, str, gobject.TYPE_PYOBJECT)
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
@@ -1165,12 +1166,6 @@ class Diamond:
 
     self.toggle_tree(iter)
 
-    self.on_select_row(self.treeview.get_selection())
-
-    self.treeview.queue_draw()
-    self.treeview.get_column(0).queue_resize()
-    self.treeview.get_column(1).queue_resize()
-
     return
 
   def toggle_tree(self, iter):
@@ -1184,6 +1179,8 @@ class Diamond:
       self.collapse_tree(iter)
     else:
       self.expand_tree(iter)
+
+    self.on_select_row()
 
     return
   
@@ -1325,6 +1322,7 @@ class Diamond:
 
     if event.keyval == gtk.keysyms.Delete:
        self.collapse_tree(self.treestore.get_iter(self.get_selected_row()))
+       self.on_select_row()
  
     return
 
@@ -1359,11 +1357,12 @@ class Diamond:
     """
     Called when a row is selected. Update the options frame.
     """
-    
-    path = self.get_selected_row(self.treeview.get_selection())
+
+    path = self.get_selected_row(selection)
     if path is None:
-      return
+      return  
     self.selected_iter = iter = self.treestore.get_iter(path)
+
     choice_or_tree = self.treestore.get_value(iter, 2)
 
     active_tree = self.treestore.get_value(iter, 3)
@@ -1470,13 +1469,10 @@ class Diamond:
     """
 
     if (selection == None):
-        selection = self.gui.get_widget("optionsTree").get_selection()
+        selection = self.treeview.get_selection()
 
     (model, paths) = selection.get_selected_rows()
-    if ((len(paths) != 1) or (paths[0] == None)):
-      return None
-    else:
-      return paths[0]
+    return paths[0]
 
   def update_data_column(self, model, itParent):
     """
@@ -1498,6 +1494,7 @@ class Diamond:
     iter = self.treestore.get_iter(path)
     
     self.expand_tree(iter)
+    self.on_select_row()
 
     if path is None: 
       return
