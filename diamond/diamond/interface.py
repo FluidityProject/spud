@@ -632,7 +632,6 @@ class Diamond:
 
 
   def on_copy_spud_path(self, widget=None):
-    print "here"
     path = self.get_selected_row(self.treeview.get_selection())
     if path is None:
       debug.deprint("No selection.")

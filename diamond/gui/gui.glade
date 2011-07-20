@@ -107,6 +107,7 @@
                         <property name="tooltip" translatable="yes">Copy spud path</property>
                         <property name="label" translatable="yes">Copy spud path</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_copy_spud_path"/>
                       </widget>
                     </child>
                     <child>
