@@ -803,22 +803,15 @@ class Diamond:
 
     return
 
-  def create_liststore(self, l):
+  def create_liststore(self, choice_or_tree):
     """
     Given a list of possible choices, create the liststore for the
     gtk.CellRendererCombo that contains the names of possible choices.
     """
 
     liststore = gtk.ListStore(str, gobject.TYPE_PYOBJECT)
-    if l.__class__ is choice.Choice:
-      l = l.l # I'm really sorry about this, blame dham
 
-    if not isinstance(l, list):
-      l = [l]
-
-    # Ignoring the numerous l's involved in getting the choices,
-    # l is now a list of possible names.
-    for t in l:
+    for t in choice_or_tree.get_choices()
       name = t.get_display_name()
       liststore.append([name, t])
 
@@ -837,7 +830,7 @@ class Diamond:
     
     for t in new_tree:
       if t.__class__ is tree.Tree:
-        if self.choice_or_tree_is_hidden(t):
+        if t.is_hidden():
           continue
 
         liststore = self.create_liststore(t)
@@ -861,7 +854,7 @@ class Diamond:
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
-        if self.choice_or_tree_is_hidden(ts_choice):
+        if ts_choice.is_hidden():
           continue
         if replace:
           child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice, ""])
@@ -977,9 +970,9 @@ class Diamond:
     """
 
     choice_or_tree = self.treestore.get_value(iter, 2)
-    if choice_or_tree.__class__ is tree.Tree:
+    if isinstance(choice_or_tree, tree.Tree):
       cell.set_property("stock-id", None)
-    elif choice_or_tree.__class__ is choice.Choice:
+    elif isinstance(choice_or_tree, choice.Choice):
       cell.set_property("stock-id", gtk.STOCK_GO_DOWN)
 
     return
@@ -1595,13 +1588,6 @@ class Diamond:
 
     return True
 
-  def choice_or_tree_is_hidden(self, choice_or_tree):
-    """
-    Tests whether the supplied choice or tree should be hidden from the LHS.
-    """
-
-    return choice_or_tree.is_comment() or choice_or_tree.name in ["integer_value", "real_value", "string_value", "logical_value"]
-
   def choice_or_tree_matches(self, text, choice_or_tree, recurse, search_active_subtrees = False):
     """
     See if the supplied node matches a given piece of text. If recurse is True,
@@ -1610,7 +1596,7 @@ class Diamond:
     choice match.
     """
 
-    if self.choice_or_tree_is_hidden(choice_or_tree):
+    if choice_or_tree.is_hidden():
       return False
     elif isinstance(choice_or_tree, choice.Choice):
       if self.choice_or_tree_matches(text, choice_or_tree.get_current_tree(), False):

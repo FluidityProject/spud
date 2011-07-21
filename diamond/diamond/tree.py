@@ -473,6 +473,9 @@ class Tree:
 
   def get_children(self):
     return self.children
+  
+  def get_choices(self):
+    return [self]
 
   def get_mixed_data(self):
     integers = [child for child in self.children if child.name == "integer_value"]
@@ -494,3 +497,5 @@ class Tree:
       return self
     else:
       return mixedtree.MixedTree(self, child)
+
+

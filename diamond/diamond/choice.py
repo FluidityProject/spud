@@ -145,6 +145,15 @@ class Choice:
   def get_children(self):
     return [self.get_current_tree()]
 
+  def get_choices(self):
+    return self.l
+
+  def is_hidden(self):
+    """
+    Tests whether the supplied choice should be hidden in view.
+    """
+    return False
+
   def get_mixed_data(self):
     integers = [child for child in self.get_children() if child.name == "integer_value"]
     reals    = [child for child in self.get_children() if child.name == "real_value"]
