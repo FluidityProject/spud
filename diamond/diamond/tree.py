@@ -477,6 +477,12 @@ class Tree:
   def get_choices(self):
     return [self]
 
+  def is_hidden(self):
+    """
+    Tests whether the supplied tree should be hidden in view.
+    """
+    return self.is_comment() or self.name in ["integer_value", "real_value", "string_value", "logical_value"]
+
   def get_mixed_data(self):
     integers = [child for child in self.children if child.name == "integer_value"]
     reals    = [child for child in self.children if child.name == "real_value"]

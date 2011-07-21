@@ -531,7 +531,8 @@ class Diamond:
     return
 
   def on_display_properties_toggled(self, widget=None):
-    self.options_frame.set_property("visible", not self.options_frame.get_property("visible"))
+    optionsFrame = self.gui.get_widget("optionsFrame")
+    optionsFrame.set_property("visible", not optionsFrame.get_property("visible"))
     return
 
   def on_go_to_node(self, widget=None):
@@ -811,7 +812,7 @@ class Diamond:
 
     liststore = gtk.ListStore(str, gobject.TYPE_PYOBJECT)
 
-    for t in choice_or_tree.get_choices()
+    for t in choice_or_tree.get_choices():
       name = t.get_display_name()
       liststore.append([name, t])
 
