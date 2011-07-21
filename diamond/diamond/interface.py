@@ -608,8 +608,6 @@ class Diamond:
       pass
 
     about.set_logo(logo)
-    about.connect("destroy", dialogs.close_dialog)
-    about.connect("response", dialogs.close_dialog)
     about.show()
 
     return
