@@ -755,7 +755,6 @@ class Diamond:
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
     self.treeview.connect("key_press_event", self.on_treeview_key_press)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
-    self.treeview.connect("button_press_event", self.on_treeview_clicked)
     self.treeview.connect("row-activated", self.on_activate_row)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
 
@@ -772,6 +771,7 @@ class Diamond:
     cellCombo.set_property("text-column", 0)
     cellCombo.set_property("editable", True)
     cellCombo.set_property("has-entry", False)
+    cellCombo.connect("edited", self.cellcombo_edited)
 
     # Node column
     column = gtk.TreeViewColumn("Node", cellCombo, text=0)
@@ -792,13 +792,13 @@ class Diamond:
     imgcolumn.set_cell_data_func(cellPicture, self.set_cellpicture_cardinality)
     optionsTree.append_column(imgcolumn)
 
-    # display name, gtk.ListStore containing the display names of possible choices, pointer to node in self.tree -- a choice or a tree, pointer to currently active tree and its data.
-    self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, str)
+    # 0: display name, 
+    # 1: gtk.ListStore containing the display names of possible choices
+    # 2: pointer to node in self.tree -- a choice or a tree
+    # 3: pointer to currently active tree
+
+    self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
     self.treeview.set_model(self.treestore)
-#    self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
-
-    cellCombo.connect("edited", self.cellcombo_edited)
-
     self.treeview.set_enable_search(False)
 
     return
@@ -835,20 +835,10 @@ class Diamond:
 
         liststore = self.create_liststore(t)
 
-        # Convert node data, if it exists, to a string
-        data = ""
-        node_data = t.data
-        if node_data is not None:
-#          if t.__class__ is str:
-#            if len(t) > 4: # Trim the string if it's long
-#              node_data = t[:4] + ".."
-          
-          data = str(node_data)
- 
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [t.get_display_name(), liststore, t, t, data])
+          child_iter = self.treestore.insert_before(iter, replacediter, [t.get_display_name(), liststore, t, t])
         else:
-          child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t, data])
+          child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t])
         
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
@@ -857,9 +847,9 @@ class Diamond:
         if ts_choice.is_hidden():
           continue
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice, ""])
+          child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice])
         else:
-          child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice, ""])
+          child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice])
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
     if replace:
@@ -1005,33 +995,6 @@ class Diamond:
 
     return
 
-  def on_treeview_clicked(self, treeview, event):
-    """
-    This routine is called every time the mouse is clicked on the treeview on the
-    left-hand side. It processes the "buttons" gtk.STOCK_ADD and gtk.STOCK_REMOVE
-    in the right-hand column, activating, adding and removing tree nodes as
-    necessary.
-    """
-
-    if event.button != 1:
-      return
-
-    pathinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
-
-    if pathinfo is None:
-      return
-
-    path = pathinfo[0]
-    col = pathinfo[1]
-
-    if col is not self.imgcolumn:
-      return
-
-    iter = self.treestore.get_iter(path)
-    self.toggle_tree(iter)
-
-    return
-
   def toggle_tree(self, iter):
     """
     Toggles the state of part of the tree.
@@ -1149,7 +1112,7 @@ class Diamond:
       self.expand_treestore(iter)
       iter = self.treestore.insert_after(
         parent=parent_iter, sibling=iter, 
-        row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree(), ""])
+        row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
       self.set_saved(False)
 
     parent_tree.recompute_validity()
