@@ -717,8 +717,6 @@ class Diamond:
   def on_slice(self, widget = None):
     window = sliceview.SliceView(self.main_window)
     window.geometry_dim_tree = self.geometry_dim_tree
-    #window.connect("on-store", self.on_store)
-    #window.connect("update-name", self.update_painted_name)
     window.update(self.selected_node, self.tree)
     return
 
@@ -1438,44 +1436,6 @@ class Diamond:
 
     self.treeview.queue_resize()
 
-
-  def on_store(self, widget = None):
-    self.set_saved(False)
-    self.treeview.queue_draw()
-
-    if isinstance(widget, sliceview.SliceView):
-      # reset the main view
-      # we only do this for slice view because otherwise textboxes your
-      # working on will jump to the top everytime you hit store
-      self.on_select_row()
-
-  def update_painted_name(self, widget = None):
-    """
-    This updates the treestore (and the liststore for the gtk.CellRendererCombo)
-    with a new name, when the name="xxx" attribute is changed.
-    """
-
-    iter = self.get_treeview_iter(self.treeview.get_selection())
-    if iter is None:
-      return
-
-    liststore = self.treestore.get_value(iter, 1)
-    active_tree = self.treestore.get_value(iter, 3)
-    new_name = active_tree.get_display_name()
-    self.treestore.set_value(iter, 0, new_name)
-
-    # find the liststore iter corresponding to the painted choice
-    list_iter = liststore.get_iter_first()
-    while list_iter is not None:
-      liststore_tree = liststore.get_value(list_iter, 1)
-      if liststore_tree is active_tree:
-        liststore.set_value(list_iter, 0, new_name)
-      list_iter = liststore.iter_next(list_iter)
-
-    self.treeview.get_column(0).queue_resize()
-
-    return
-
   def get_painted_tree(self, iter_or_tree, lock_geometry_dim = True):
     """
     Check if the given tree, or the active tree at the given iter in the treestore,
@@ -1688,8 +1648,6 @@ class Diamond:
     vpane1.pack1(self.description, True, False)
 
     self.attributes = attributewidget.AttributeWidget()
-    #self.attributes.connect("on-store", self.on_store)
-    #self.attributes.connect("update-name", self.update_painted_name)
     vbox.pack_start(self.attributes, True, True)
 
     databuttons = databuttonswidget.DataButtonsWidget()
@@ -1697,11 +1655,9 @@ class Diamond:
     
     self.data = datawidget.DataWidget()
     self.data.set_buttons(databuttons)
-    #self.data.connect("on-store", self.on_store)
     vbox.pack_end(self.data, True, True)
 
     self.comment = commentwidget.CommentWidget()
-    #self.comment.connect("on-store", self.on_store)
     vpane2.pack2(self.comment, True, False)
 
     optionsFrame.show_all()
