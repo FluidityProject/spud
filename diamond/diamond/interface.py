@@ -1177,7 +1177,7 @@ class Diamond:
 
     elif event.button == 3:
       if pathinfo is not None:
-        treeview.get_selection().select_path(path[0])
+        treeview.get_selection().select_path(pathinfo[0])
         self.show_popup(None, event.button, event.time)
         return True
 

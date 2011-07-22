@@ -37,7 +37,7 @@ class Tree:
     # name: the element name in the options XML
     # e.g. "fluidity_options"
     self.name = name
-
+    
     # schemaname: the label given to it in the Xvif parsing of the schema
     # this is necessary to walk the tree to see what possible valid
     # children this node could have
@@ -468,7 +468,7 @@ class Tree:
     if name is None:
       return self.name
     else:
-      return self.name + "(" + name + ")"
+      return self.name + " (" + name + ")"
 
   def get_name(self):
     if "name" in self.attrs:
