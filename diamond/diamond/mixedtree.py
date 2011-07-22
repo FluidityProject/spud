@@ -197,3 +197,5 @@ class MixedTree:
     
     return False
 
+  def get_name_path(self, leaf = True):
+    return self.parent.get_name_path(leaf)

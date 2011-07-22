@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 #    This file is part of Diamond.
 #
@@ -462,14 +462,20 @@ class Tree:
     left to be different to the element name. If it has an attribute name="xxx",
     element_tag (xxx) is displayed.
     """
+    
+    name = self.get_name()
 
-    displayname = self.name
+    if name is None:
+      return self.name
+    else:
+      return self.name + "(" + name + ")"
+
+  def get_name(self):
     if "name" in self.attrs:
-      attrname = self.attrs["name"][1]
-      if attrname is not None:
-        displayname = displayname + " (" + attrname + ")"
+      name = self.attrs["name"][1]
+      return name
 
-    return displayname
+    return None
 
   def get_children(self):
     return self.children
@@ -482,6 +488,22 @@ class Tree:
     Tests whether the supplied tree should be hidden in view.
     """
     return self.is_comment() or self.name in ["integer_value", "real_value", "string_value", "logical_value"]
+
+  def get_name_path(self, leaf = True):
+    name = self.get_display_name() if leaf else self.get_name()
+
+    if self.parent is None:
+      return name                            
+    else:
+
+      pname = self.parent.get_name_path(False)
+
+      if name is None:
+        return pname
+      elif pname is None:
+        return name
+      else:
+        return pname + "/" + name
 
   def get_mixed_data(self):
     integers = [child for child in self.children if child.name == "integer_value"]

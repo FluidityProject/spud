@@ -74,7 +74,7 @@ class SliceView(gtk.Window):
   def control(self, node):
     hbox = gtk.HBox()
 
-    label = gtk.Label(node.name)
+    label = gtk.Label(node.get_name_path())
 
     data = datawidget.DataWidget()
     data.geometry_dim_tree = self.geometry_dim_tree

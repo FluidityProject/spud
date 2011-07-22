@@ -1239,7 +1239,7 @@ class Diamond:
     if path is None:
       return  
     self.selected_iter = iter = self.treestore.get_iter(path)
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
 
     debug.dprint(active_tree)
 

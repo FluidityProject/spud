@@ -142,6 +142,9 @@ class Choice:
 
     return self.get_current_tree().get_display_name()
 
+  def get_name(self):
+    return self.get_current_tree().get_name()
+
   def get_children(self):
     return [self.get_current_tree()]
 
@@ -154,24 +157,21 @@ class Choice:
     """
     return False
 
-  def get_mixed_data(self):
-    integers = [child for child in self.get_children() if child.name == "integer_value"]
-    reals    = [child for child in self.get_children() if child.name == "real_value"]
-    logicals = [child for child in self.get_children() if child.name == "logical_value"]
-    strings  = [child for child in self.get_children() if child.name == "string_value"]
+  def get_name_path(self, leaf = True):
+    name = self.get_display_name() if leaf else self.get_name()
 
-    child = None
-    if len(integers) > 0:
-      child = integers[0]
-    if len(reals) > 0:
-      child = reals[0]
-    if len(logicals) > 0:
-      child = logicals[0]
-    if len(strings) > 0:
-      child = strings[0]
-
-    if child is None:
-      return self
+    if self.parent is None:
+      return name
     else:
-      return mixedtree.MixedTree(self, child)
 
+      pname = self.parent.get_name_path(False)
+
+      if name is None:
+        return pname
+      elif pname is None:
+        return name
+      else:
+        return pname + "/" + name
+
+  def get_mixed_data(self):
+    return self
