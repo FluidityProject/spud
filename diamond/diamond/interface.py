@@ -717,8 +717,8 @@ class Diamond:
   def on_slice(self, widget = None):
     window = sliceview.SliceView(self.main_window)
     window.geometry_dim_tree = self.geometry_dim_tree
-    window.connect("on-store", self.on_store)
-    window.connect("update-name", self.update_painted_name)
+    #window.connect("on-store", self.on_store)
+    #window.connect("update-name", self.update_painted_name)
     window.update(self.selected_node, self.tree)
     return
 
@@ -831,6 +831,8 @@ class Diamond:
     for t in new_tree:
       if t.__class__ is tree.Tree:
         if t.is_hidden():
+          t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+          t.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
           continue
 
         liststore = self.create_liststore(t)
@@ -839,17 +841,27 @@ class Diamond:
           child_iter = self.treestore.insert_before(iter, replacediter, [t.get_display_name(), liststore, t, t])
         else:
           child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t])
-        
+
+        t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
+        t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+ 
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
       elif t.__class__ is choice.Choice:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if ts_choice.is_hidden():
+          ts_choice.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+          ts_choice.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
           continue
+
         if replace:
           child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice])
         else:
           child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice])
+
+        ts_choice.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
+        ts_choice.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 
     if replace:
@@ -1113,6 +1125,8 @@ class Diamond:
       iter = self.treestore.insert_after(
         parent=parent_iter, sibling=iter, 
         row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
+      new_tree.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+      new_tree.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
       self.set_saved(False)
 
     parent_tree.recompute_validity()
@@ -1202,9 +1216,14 @@ class Diamond:
     Called when a row is selected. Update the options frame.
     """
 
-    path = self.get_selected_row(selection)
+    if isinstance(selection, str) or isinstance(selection, tuple):
+      path = selection
+    else:
+      path = self.get_selected_row(selection)
+
     if path is None:
       return  
+
     self.selected_iter = iter = self.treestore.get_iter(path)
     choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
 
@@ -1393,6 +1412,32 @@ class Diamond:
       return self.get_treestore_iter_from_xmlpath(self.current_xpath)
 
     return self.treestore.get_iter(path)
+
+  def on_set_data(self, node, data, path):
+    self.set_saved(False)
+    self.treeview.queue_draw()
+    self.on_select_row(path)
+
+  def on_set_attr(self, node, attr, value, path):
+    if attr != "name":
+      return
+
+    iter = self.treestore.get_iter(path)
+    liststore = self.treestore.get_value(iter, 1)
+    active_tree = self.treestore.get_value(iter, 3)
+    new_name = active_tree.get_display_name()
+    self.treestore.set_value(iter, 0, new_name)
+
+    # find the liststore iter corresponding to the painted choice
+    list_iter = liststore.get_iter_first()
+    while list_iter is not None:
+      liststore_tree = liststore.get_value(list_iter, 1)
+      if liststore_tree is active_tree:
+        liststore.set_value(list_iter, 0, new_name)
+      list_iter = liststore.iter_next(list_iter)
+
+    self.treeview.queue_resize()
+
 
   def on_store(self, widget = None):
     self.set_saved(False)
@@ -1643,8 +1688,8 @@ class Diamond:
     vpane1.pack1(self.description, True, False)
 
     self.attributes = attributewidget.AttributeWidget()
-    self.attributes.connect("on-store", self.on_store)
-    self.attributes.connect("update-name", self.update_painted_name)
+    #self.attributes.connect("on-store", self.on_store)
+    #self.attributes.connect("update-name", self.update_painted_name)
     vbox.pack_start(self.attributes, True, True)
 
     databuttons = databuttonswidget.DataButtonsWidget()
@@ -1652,11 +1697,11 @@ class Diamond:
     
     self.data = datawidget.DataWidget()
     self.data.set_buttons(databuttons)
-    self.data.connect("on-store", self.on_store)
+    #self.data.connect("on-store", self.on_store)
     vbox.pack_end(self.data, True, True)
 
     self.comment = commentwidget.CommentWidget()
-    self.comment.connect("on-store", self.on_store)
+    #self.comment.connect("on-store", self.on_store)
     vpane2.pack2(self.comment, True, False)
 
     optionsFrame.show_all()

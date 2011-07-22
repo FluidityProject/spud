@@ -25,15 +25,23 @@ import zlib
 from lxml import etree
 import sys
 
+import gobject
+
 import debug
 import choice
 import mixedtree
 
-class Tree:
+class Tree(gobject.GObject):
   """This class maps pretty much 1-to-1 with an xml tree.
      It is used to represent the options in-core."""
 
+  __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
+                   "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
+
+
   def __init__(self, name="", schemaname="", attrs={}, children=None, cardinality='', datatype=None, doc=None):
+    gobject.GObject.__init__(self)
+
     # name: the element name in the options XML
     # e.g. "fluidity_options"
     self.name = name
@@ -100,6 +108,7 @@ class Tree:
       raise Exception, "invalid data: (%s, %s)" % (datatype, val)
     self.attrs[attr] = (datatype, newdata)
     self.recompute_validity()
+    self.emit("on-set-attr", attr, val)
 
   def get_attr(self, attr):
     """Get an attribute."""
@@ -112,6 +121,7 @@ class Tree:
       raise Exception, "invalid data: (%s, %s)" % (str(self.datatype), data)
     self.data = data
     self.recompute_validity()
+    self.emit("on-set-data", data)
 
   def valid_data(self, datatype, data):
     if datatype is None:
@@ -164,11 +174,11 @@ class Tree:
 
   def copy(self):
     new_copy = Tree()
-    for attr in ["attrs", "name", "schemaname", "doc", "cardinality", "datatype", "parent", "active", "valid"]:
+    for attr in ["attrs", "name", "schemaname", "doc", "cardinality", "datatype", "data", "active", "valid"]:
       setattr(new_copy, attr, copy.copy(getattr(self, attr)))
 
-    new_copy.data = self.data
-    new_copy.children = copy.copy([])
+    new_copy.parent = self.parent
+    new_copy.children = []
 
     return new_copy
 
@@ -526,4 +536,5 @@ class Tree:
     else:
       return mixedtree.MixedTree(self, child)
 
+gobject.type_register(Tree)
 

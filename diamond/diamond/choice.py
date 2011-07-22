@@ -21,10 +21,19 @@ import copy
 import StringIO
 from lxml import etree
 
+
+import gobject
+
 import tree
 
-class Choice:
+class Choice(gobject.GObject):
+
+  __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
+                   "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
+
   def __init__(self, l, cardinality=''):
+    gobject.GObject.__init__(self)
+
     self.l = l
     if l == []:
       raise Exception
@@ -33,12 +42,21 @@ class Choice:
     for choice in l:
       assert choice.__class__ is tree.Tree
       name = name + choice.name + ":"
+      choice.connect("on-set-data", self._on_set_data)
+      choice.connect("on-set-attr", self._on_set_attr)
+
     name = name[:-1]
     self.name = name
     self.schemaname = name
     self.cardinality = cardinality
     self.parent = None
     self.set_default_active()
+
+  def _on_set_data(self, data):
+    self.emit("on-set-data", data)
+
+  def _on_set_attr(self, attr, value):
+    self.emit("on-set-attr", attr, value)
 
   def set_default_active(self):
     self.active = True
@@ -175,3 +193,5 @@ class Choice:
 
   def get_mixed_data(self):
     return self
+
+gobject.type_register(Choice)
