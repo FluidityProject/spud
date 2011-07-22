@@ -33,7 +33,7 @@ class CommentWidget(gtk.Frame):
     textView.set_wrap_mode(gtk.WRAP_WORD)
     textView.set_cursor_visible(False)
     textView.connect("focus-in-event", self.focus_in)
-    textView.connect("expose-event", self.expose)
+    textView.connect("focus-out-event", self.focus_out)
     textView.get_buffer().create_tag("tag")
     
     scrolledWindow.add(textView)
@@ -52,6 +52,9 @@ class CommentWidget(gtk.Frame):
     """
     Update the widget with the given node
     """
+
+    #before updateing store the old
+    self.store()
 
     if node is None or not node.active:
       self.textView.get_buffer().set_text("")
@@ -134,13 +137,10 @@ class CommentWidget(gtk.Frame):
 
     return
 
-  def expose(self, widget, event):
+  def focus_out(self, widget, event):
+    """"
+    Called when the comment widget loses focus. Stores the comment.
     """
-    Called when the comment widget is repainted. Stores the comment if required.
-    """
-
     self.store()
-
-    return
-
+  
 gobject.type_register(CommentWidget)

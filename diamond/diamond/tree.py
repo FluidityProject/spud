@@ -37,10 +37,10 @@ class Tree(gobject.GObject):
 
   __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
                    "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
-
-
+  
   def __init__(self, name="", schemaname="", attrs={}, children=None, cardinality='', datatype=None, doc=None):
     gobject.GObject.__init__(self)
+    self.signals = {}
 
     # name: the element name in the options XML
     # e.g. "fluidity_options"
@@ -356,7 +356,7 @@ class Tree(gobject.GObject):
     for i in range(len(self.children)):
       if isinstance(self.children[i], Tree):
         self.children[i].print_recursively(indent + ">>")
-      elif isinstance(self.children[i], Choice):
+      elif isinstance(self.children[i], choice.Choice):
         ref = self.children[i].get_current_tree()
         ref.print_recursively(indent + ">>")
       if i < len(self.children) - 1:

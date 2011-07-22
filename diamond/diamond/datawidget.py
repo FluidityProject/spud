@@ -281,7 +281,6 @@ class DataWidget(gtk.VBox):
     self.data.show()
 
     self.data.connect("set-focus-child", self.combo_focus_child)
-    self.data.connect("scroll-event", self.combo_scroll)
 
     self.set_child_packing(self.frame, False, False, 0, gtk.PACK_START)
 
@@ -478,8 +477,8 @@ class DataWidget(gtk.VBox):
           self.data.child.set_text("")
           self.data.handler_unblock_by_func(self.combo_changed)
         else:
-          self.data.set_active(1)
           self.data.remove_text(0)
+
         self.data.child.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
         self.data.child.modify_text(gtk.STATE_PRELIGHT, gtk.gdk.color_parse("black"))
 
@@ -492,21 +491,13 @@ class DataWidget(gtk.VBox):
     """
 
     if not isinstance(self.node.datatype[0], tuple) or not self.data.child.get_property("has-focus"):
-      self.node.set_data(self.data.get_active_text())
+      text = self.data.get_active_text()
+      if text is None:
+        return
+
+      self.node.set_data(text)
       self.emit("on-store")      
       self.interacted = False
-    return
-
-  def combo_scroll(self, widget, event):
-    """
-    Called when the data combo box is scrolled with the mouse wheel. Removes the
-    select placeholder and updates data in the treestore.
-    """
-
-    self.combo_focus_child(self.frame, self.data)
-    if not isinstance(self.node.datatype[0], tuple) or not self.node.data is None:
-      self.combo_changed(self.data)
-
     return
 
 gobject.type_register(DataWidget)
