@@ -1420,7 +1420,6 @@ class Diamond:
     self.on_select_row(path)
 
   def on_set_attr(self, node, attr, value, path):
-    print "data", node.name
     if attr != "name":
       return
 
