@@ -753,13 +753,18 @@ class Diamond:
     """
 
     self.treeview = optionsTree = self.gui.get_widget("optionsTree")
-    self.treeview.connect("row-collapsed", self.on_treeview_row_collapsed)
     self.treeview.connect("key_press_event", self.on_treeview_key_press)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
+    self.treeview.connect("button_press_event", self.on_treeview_clicked)
+    self.treeview.connect("row-activated", self.on_activate_row)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
 
     self.treeview.set_property("rules-hint", True)
+
     self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
+    self.treeview.get_selection().connect("changed", self.on_select_row)
+    self.treeview.get_selection().set_select_function(self.options_tree_select_func)
+    self.options_tree_select_func_enabled = True
 
     model = gtk.ListStore(str, str, gobject.TYPE_PYOBJECT)
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
@@ -792,11 +797,6 @@ class Diamond:
     self.treeview.set_model(self.treestore)
 #    self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
 
-    optionsTree.get_selection().connect("changed", self.on_select_row)
-    self.treeview.get_selection().set_select_function(self.options_tree_select_func)
-    self.options_tree_select_func_enabled = True
-    optionsTree.connect("button_press_event", self.on_treeview_clicked)
-    optionsTree.connect("row-activated", self.on_activate_row)
     cellCombo.connect("edited", self.cellcombo_edited)
 
     self.treeview.set_enable_search(False)
@@ -1005,16 +1005,6 @@ class Diamond:
 
     return
 
-  def on_treeview_row_collapsed(self, treeview, iter, path):
-    """
-    Called when a row in the LHS treeview is collapsed.
-    """
-
-    #self.treeview.get_column(0).queue_resize()
-    #self.treeview.get_column(1).queue_resize()
-
-    return
-
   def on_treeview_clicked(self, treeview, event):
     """
     This routine is called every time the mouse is clicked on the treeview on the
@@ -1204,15 +1194,29 @@ class Diamond:
     return
 
   def on_treeview_button_press(self, treeview, event):
-    if event.button == 3:
-      x = int(event.x)
-      y = int(event.y)
-      path = treeview.get_path_at_pos(x, y)
-      if path is not None:
+    """
+    This routine is called every time the mouse is clicked on the treeview on the
+    left-hand side. It processes the "buttons" gtk.STOCK_ADD and gtk.STOCK_REMOVE
+    in the right-hand column, activating, adding and removing tree nodes as
+    necessary.
+    """
+    pathinfo = treeview.get_path_at_pos(int(event.x), int(event.y))
+
+    if event.button == 1:
+
+      if pathinfo is not None:
+        path = pathinfo[0]
+        col = pathinfo[1]
+
+        if col is self.imgcolumn:
+          iter = self.treestore.get_iter(path)
+          self.toggle_tree(iter)
+
+    elif event.button == 3:
+      if pathinfo is not None:
         treeview.get_selection().select_path(path[0])
         self.show_popup(None, event.button, event.time)
         return True
-    return False
 
   def popup_location(self, widget, user_data):
     column = self.treeview.get_column(0)
