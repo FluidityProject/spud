@@ -487,7 +487,6 @@
   </widget>
   <widget class="GtkMenu" id="popupmenu">
     <property name="visible">True</property>
-    <property name="ubuntu_local">True</property>
     <child>
       <widget class="GtkMenuItem" id="menuitemCopy">
         <property name="visible">True</property>

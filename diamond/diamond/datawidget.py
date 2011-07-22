@@ -154,10 +154,10 @@ class DataWidget(gtk.VBox):
     """
 
     if self.frame.child is not None:
-      if isinstance(self.data, gtk.TextView):
-        self.data.handler_block_by_func(self.entry_focus_in)
-      elif isinstance(self.data, gtk.ComboBox):
-        self.data.handler_block_by_func(self.combo_focus_child)
+    #  if isinstance(self.data, gtk.TextView):
+    #    self.data.handler_block_by_func(self.entry_focus_in)
+    #  elif isinstance(self.data, gtk.ComboBox):
+    #    self.data.handler_block_by_func(self.combo_focus_child)
 
       self.frame.remove(self.frame.child)
 
@@ -468,19 +468,18 @@ class DataWidget(gtk.VBox):
     Called when a data selection widget gains focus. Used to delete the select
     placeholder.
     """
-
     if not self.interacted:
       self.interacted = True
       if self.node.data is None:
+        self.data.handler_block_by_func(self.combo_changed)
         if isinstance(self.node.datatype[0], tuple):
-          self.data.handler_block_by_func(self.combo_changed)
           self.data.child.set_text("")
-          self.data.handler_unblock_by_func(self.combo_changed)
         else:
           self.data.remove_text(0)
 
         self.data.child.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
         self.data.child.modify_text(gtk.STATE_PRELIGHT, gtk.gdk.color_parse("black"))
+        self.data.handler_unblock_by_func(self.combo_changed)
 
     return
 
@@ -490,7 +489,7 @@ class DataWidget(gtk.VBox):
     treestore.
     """
 
-    if not isinstance(self.node.datatype[0], tuple) or not self.data.child.get_property("has-focus"):
+    if not isinstance(self.node.datatype[0], tuple):
       text = self.data.get_active_text()
       if text is None:
         return
