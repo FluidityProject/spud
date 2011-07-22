@@ -33,7 +33,6 @@ class Choice(gobject.GObject):
 
   def __init__(self, l, cardinality=''):
     gobject.GObject.__init__(self)
-    self.signals = {}
 
     self.l = l
     if l == []:

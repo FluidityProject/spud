@@ -348,6 +348,7 @@ class Diamond:
       
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
+    self.signals = {}
     self.set_treestore(None, [self.tree], True)
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
@@ -734,6 +735,7 @@ class Diamond:
       l = self.s.valid_children(":start")
 
       self.tree = l[0]
+      self.signals = {}
       self.set_treestore(None, l)
 
     root_iter = self.treestore.get_iter_first()
@@ -827,14 +829,15 @@ class Diamond:
       self.remove_children(iter)
   
     for t in new_tree:
-      if t is not None and "on-set-attr" in t.signals:
-        t.disconnect(t.signals["on-set-attr"])
-        t.disconnect(t.signals["on-set-data"])
+      if t is not None and t in self.signals:
+        t.disconnect(self.signals[t][0])
+        t.disconnect(self.signals[t][1])
 
       if isinstance(t, tree.Tree):
         if t.is_hidden():
-          t.signals["on-set-attr"] = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
-          t.signals["on-set-data"] = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
+          attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+          dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
+          self.signals[t] = (attrid, dataid)
           continue
 
         liststore = self.create_liststore(t)
@@ -844,8 +847,9 @@ class Diamond:
         else:
           child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t])
 
-        t.signals["on-set-attr"] = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
-        t.signals["on-set-data"] = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+        attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
+        dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+        self.signals[t] = (attrid, dataid)
  
         if recurse and t.active: self.set_treestore(child_iter, t.children, recurse)
 
@@ -853,8 +857,9 @@ class Diamond:
         liststore = self.create_liststore(t)
         ts_choice = t.get_current_tree()
         if ts_choice.is_hidden():
-          t.signals["on-set-attr"] = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
-          t.signals["on-set-data"] = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
+          attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+          dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
+          self.signals[t] = (attrid, dataid)
           continue
 
         if replace:
@@ -862,8 +867,9 @@ class Diamond:
         else:
           child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice])
 
-        t.signals["on-set-attr"] = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
-        t.signals["on-set-data"] = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+        attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
+        dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
+        self.signals[t] = (attrid, dataid)
 
         if recurse and t.active: self.set_treestore(child_iter, ts_choice.children, recurse)
 

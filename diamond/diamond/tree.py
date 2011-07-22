@@ -40,7 +40,6 @@ class Tree(gobject.GObject):
   
   def __init__(self, name="", schemaname="", attrs={}, children=None, cardinality='', datatype=None, doc=None):
     gobject.GObject.__init__(self)
-    self.signals = {}
 
     # name: the element name in the options XML
     # e.g. "fluidity_options"
