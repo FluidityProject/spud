@@ -31,7 +31,7 @@ class SliceView(gtk.Window):
   def __init__(self, parent):
     gtk.Window.__init__(self)
     
-    self.set_default_size(400, 300)
+    self.set_default_size(800, 600)
     self.set_title("Slice View")
     self.set_modal(True)
     self.set_transient_for(parent)
@@ -55,8 +55,20 @@ class SliceView(gtk.Window):
     self.show_all()
 
   def update(self, node, tree):
-    for n in self.get_nodes(node, tree):
+    nodes = self.get_nodes(node, tree)
+    if not nodes:
+      self.destroy()
+
+    for n in nodes:
       self.vbox.pack_start(self.control(n))
+
+    maxwidth = 0
+    for child in self.vbox.get_children():
+      width, height = child.label.get_size_request()
+      maxwidth = max(maxwidth, width)
+    
+    for child in self.vbox.get_children():
+      child.label.set_size_request(maxwidth, -1)
 
     self.check_resize()
 
@@ -64,7 +76,7 @@ class SliceView(gtk.Window):
    nodes = []
 
    for child in tree.get_children():
-     if child.schemaname == node.schemaname and child.active:
+     if child.name == node.name and child.active:
        nodes.append(child.get_mixed_data())
      
      nodes += self.get_nodes(node, child)
@@ -75,6 +87,7 @@ class SliceView(gtk.Window):
     hbox = gtk.HBox()
 
     label = gtk.Label(node.get_name_path())
+    hbox.label = label
 
     data = datawidget.DataWidget()
     data.geometry_dim_tree = self.geometry_dim_tree

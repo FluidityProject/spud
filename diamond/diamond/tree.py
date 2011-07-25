@@ -181,9 +181,6 @@ class Tree(gobject.GObject):
 
     return new_copy
 
-  def not_editable(self):
-    return not self.active or self.datatype is None or self.datatype == "fixed"
-
   def recompute_validity(self):
 
     new_valid = True
