@@ -308,9 +308,9 @@ class DataWidget(gtk.VBox):
       if self.node.data == opt:
         self.data.set_active(i)
 
-    if isinstance(self.node.datatype[0], tuple) \
-       and self.node.data is not None \
-       and self.node.data not in self.node.datatype[0]:
+    if (isinstance(self.node.datatype[0], tuple)
+       and self.node.data is not None
+       and self.node.data not in self.node.datatype[0]):
       self.data.child.set_text(self.node.data)
 
     self.data.connect("changed", self.combo_changed)
@@ -336,11 +336,11 @@ class DataWidget(gtk.VBox):
         return False
       elif value_check != self.node.data:
         self.node.set_data(value_check)
-        if isinstance(self.node, mixedtree.MixedTree) \
-           and "shape" in self.node.child.attrs.keys() \
-           and self.node.child.attrs["shape"][0] is int \
-           and isinstance(self.node.datatype, plist.List) \
-           and self.node.datatype.cardinality == "+":
+        if (isinstance(self.node, mixedtree.MixedTree)
+           and "shape" in self.node.child.attrs.keys()
+           and self.node.child.attrs["shape"][0] is int
+           and isinstance(self.node.datatype, plist.List)
+           and self.node.datatype.cardinality == "+"):
           self.node.child.set_attr("shape", str(len(value_check.split(" "))))
 
         self.emit("on-store")
@@ -371,10 +371,10 @@ class DataWidget(gtk.VBox):
     changed = False
     for i in range(dim1):
       for j in range(dim2):
-        if self.interacted[j + i * dim2] \
-           and entry_values[j + i * dim2] != "" \
-           and (self.node.data is None \
-                or self.node.data.split(" ")[j + i * dim2] != entry_values[j + i * dim2]):
+        if (self.interacted[j + i * dim2]
+           and entry_values[j + i * dim2] != ""
+           and (self.node.data is None
+                or self.node.data.split(" ")[j + i * dim2] != entry_values[j + i * dim2])):
           changed = True
     if not changed:
       return True
@@ -434,11 +434,11 @@ class DataWidget(gtk.VBox):
     printable_type placeholder.
     """
 
-    if self.node is not None \
-       and self.node.datatype is not None \
-       and not self.node.is_tensor(self.geometry_dim_tree) \
-       and self.node.data is None \
-       and not self.interacted:
+    if (self.node is not None
+       and self.node.datatype is not None
+       and not self.node.is_tensor(self.geometry_dim_tree)
+       and self.node.data is None
+       and not self.interacted):
       self.data.get_buffer().set_text("")
 
     self.interacted = True

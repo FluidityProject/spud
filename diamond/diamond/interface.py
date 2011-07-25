@@ -1418,7 +1418,7 @@ class Diamond:
   def on_set_data(self, node, data, path):
     self.set_saved(False)
     self.treeview.queue_draw()
-    self.on_select_row(path)
+    #self.on_select_row(path)
 
   def on_set_attr(self, node, attr, value, path):
     if attr != "name":
