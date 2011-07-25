@@ -1134,6 +1134,9 @@ class Diamond:
       iter = self.treestore.insert_after(
         parent=parent_iter, sibling=iter, 
         row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
+      attrid = new_tree.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
+      dataid = new_tree.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
+      self.signals[new_tree] = (attrid, dataid)
       self.set_saved(False)
 
     parent_tree.recompute_validity()
