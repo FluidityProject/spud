@@ -719,7 +719,11 @@ class Diamond:
     window = sliceview.SliceView(self.main_window)
     window.geometry_dim_tree = self.geometry_dim_tree
     window.update(self.selected_node, self.tree)
+    window.connect("destroy", self._slice_destroy)
     return
+
+  def _slice_destroy(self, widget):
+    self.on_select_row()
 
   ## LHS ###
 
