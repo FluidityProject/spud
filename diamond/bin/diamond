@@ -123,38 +123,40 @@ def main():
     elif opt[0] == "-t":
       input_schematron_file = opt[1]
 
-  # if the user has specified a file to work on, use the suffix as a key
 
-  if input_filename is not None and input_schemafile is None:
-    suffix = input_filename.split(".")[-1]
-    try:
-      input_schemafile = config.schemata[suffix][1]
-    except:
-      debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
-      debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
-      debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
-      debug.deprint("The file should have two lines in it:", 0)
-      debug.deprint("A Verbal Description Of The Language Purpose", 0)
-      debug.deprint("/path/to/the/schema/file.rng", 0)
-      sys.exit(1)
+  #is not given or an alias so look up actual path
+  if input_schemafile is None or input_schemafile.isalpha():
 
-  # if there is only one schema, use that
-
-  if input_schemafile is None:
-    if len(config.schemata) == 1:
+    # if the user has specified a file to work on, use the suffix as a key
+    if input_filename is not None:
+      suffix = input_filename.split(".")[-1]
+      try:
+        schemata = config.schemata[suffix]
+      except:
+        debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
+        debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+        debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
+        debug.deprint("The file should have two lines in it:", 0)
+        debug.deprint("A Verbal Description Of The Language Purpose", 0)
+        debug.deprint("/path/to/the/schema/file.rng", 0)
+        sys.exit(1)
+      
+    # if there is only one schema, use that
+    elif len(config.schemata) == 1:
       suffix = config.schemata.keys()[0]
-      input_schemafile = config.schemata[suffix][1]
+      schemata = config.schemata[suffix]
+    
+    # otherwise ask the user to choose
+    else:
+      choices = [key + ": " + config.schemata[key][0] for key in config.schemata]
+      choice = dialogs.radio_dialog("Choose a schema", "Choose a schema to use:", choices, logofile)
+      suffix = choice.split(":")[0]
+      schemata = config.schemata[suffix]
 
-  # otherwise ask the user to choose
-
-  if input_schemafile is None:
-    choices = [key + ": " + config.schemata[key][0] for key in config.schemata]
-    choice = dialogs.radio_dialog("Choose a schema", "Choose a schema to use:", choices, logofile)
-    suffix = choice.split(":")[0]
-    input_schemafile = config.schemata[suffix][1]
+    input_schemafile = schemata[1][input_schemafile]   
+  #endif
 
   # ensure that the specified schema actually exists!
-
   try:
     if 'http' not in input_schemafile:
       os.stat(input_schemafile)

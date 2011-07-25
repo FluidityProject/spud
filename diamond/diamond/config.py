@@ -29,7 +29,7 @@ if sys.platform != "win32" and sys.platform != "win64":
 
 # Here we hard-code a default for flml
 # so that users don't have to tweak this to run it.
-schemata = {'flml': ('Fluidity markup language', 'http://amcg.ese.ic.ac.uk/svn/fluidity/tags/4.0-release/schemas/fluidity_options.rng')}
+schemata = {'flml': ('Fluidity markup language', { None: 'http://amcg.ese.ic.ac.uk/svn/fluidity/tags/4.0-release/schemas/fluidity_options.rng'})}
 
 for dir in dirs:
   try:
@@ -44,17 +44,27 @@ for dir in dirs:
       except:
         debug.deprint("Failure to examine entry " + file + " in folder " + dir + ".")
         continue
-      newSchemata = [x.strip() for x in handle]
-      if len(newSchemata) < 2:
+      lines = [x.strip() for x in handle]
+      if len(lines) < 2:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)
         continue
       # Expand environment variables in the schema path
-      newSchemata[1] = os.path.expandvars(newSchemata[1])
-      if not os.path.exists(newSchemata[1]) and 'http' not in newSchemata[1]:
-        debug.deprint("Warning: not a valid path: %s" % newSchemata[1], 0)
-        debug.deprint("schema type not registered")
-        continue
-      schemata[file] = tuple(newSchemata)
+      alias = {}
+      for i in range(1, len(lines)):
+        keyvalue = [x.strip() for x in lines[i].split("=")]
+        key, value = (None, keyvalue[0]) if len(keyvalue) == 1 else keyvalue
+
+        value = os.path.expandvars(value)
+        if not os.path.exists(value) and 'http' not in value:
+          debug.deprint("Warning: not a valid path: %s" % value, 0)
+          debug.deprint("schema type not registered")
+          continue
+
+        alias[key] = value
+        if key == "default":
+          alias[None] = value
+
+      schemata[file] = (lines[0], alias)
       debug.dprint("Registered schema type: " + file)
   except OSError:
     pass
