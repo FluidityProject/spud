@@ -95,11 +95,11 @@ class DataWidget(gtk.VBox):
 #         self.scherror.on_validate()
 
   def is_node_editable(self):
-    return self.node is not None \
-       and self.node.active \
-       and self.node.datatype is not None \
-       and self.node.datatype != "fixed" \
-       and (not self.node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree.data is not None)
+    return (self.node is not None
+       and self.node.active
+       and self.node.datatype is not None
+       and self.node.datatype != "fixed"
+       and (not self.node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree.data is not None))
        # not A or B == A implies B
        # A B T
        # 0 0 1
@@ -154,10 +154,10 @@ class DataWidget(gtk.VBox):
     """
 
     if self.frame.child is not None:
-    #  if isinstance(self.data, gtk.TextView):
-    #    self.data.handler_block_by_func(self.entry_focus_in)
-    #  elif isinstance(self.data, gtk.ComboBox):
-    #    self.data.handler_block_by_func(self.combo_focus_child)
+      if isinstance(self.data, gtk.TextView):
+        self.data.handler_block_by_func(self.entry_focus_in)
+      elif isinstance(self.data, gtk.ComboBox):
+        self.data.handler_block_by_func(self.combo_focus_child)
 
       self.frame.remove(self.frame.child)
 
