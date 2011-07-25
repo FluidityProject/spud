@@ -303,8 +303,7 @@ class DataWidget(gtk.VBox):
     else:
       options = self.node.datatype
 
-    for i in range(len(options)):
-      opt = options[i]
+    for (i, opt) in enumerate(options):
       self.data.append_text(opt)
       if self.node.data == opt:
         self.data.set_active(i)

@@ -1239,11 +1239,6 @@ class Diamond:
     self.selected_node = self.get_painted_tree(iter)
     self.update_options_frame()
 
-    node = self.selected_node
-
-    if isinstance(node, mixedtree.MixedTree):
-      node = node.child
-
     name = self.get_spudpath(active_tree)
     self.statusbar.set_statusbar(name)
     self.current_spudpath = name
