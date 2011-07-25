@@ -52,10 +52,10 @@ class Choice(gobject.GObject):
     self.parent = None
     self.set_default_active()
 
-  def _on_set_data(self, data):
+  def _on_set_data(self, node, data):
     self.emit("on-set-data", data)
 
-  def _on_set_attr(self, attr, value):
+  def _on_set_attr(self, node, attr, value):
     self.emit("on-set-attr", attr, value)
 
   def set_default_active(self):
