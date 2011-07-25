@@ -194,4 +194,7 @@ class Choice(gobject.GObject):
   def get_mixed_data(self):
     return self
 
+  def is_sliceable(self):
+    return self.get_current_tree().is_sliceable()
+
 gobject.type_register(Choice)

@@ -77,7 +77,7 @@ class SliceView(gtk.Window):
 
    for child in tree.get_children():
      if child.active:
-       if child.name == node.name:
+       if child.name == node.name and child.is_sliceable():
          nodes.append(child.get_mixed_data())
        nodes += self.get_nodes(node, child)
    

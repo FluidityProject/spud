@@ -532,5 +532,12 @@ class Tree(gobject.GObject):
     else:
       return mixedtree.MixedTree(self, child)
 
+  def is_sliceable(self):
+    mixed = self.get_mixed_data()
+    if isinstance(mixed, mixedtree.MixedTree):
+      return True
+    
+    return (self.datatype is not None and self.datatype != "fixed") or self.attrs
+   
 gobject.type_register(Tree)
 
