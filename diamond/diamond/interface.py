@@ -716,6 +716,10 @@ class Diamond:
     return
 
   def on_slice(self, widget = None):
+    if not self.selected_node.is_sliceable():
+      self.statusbar.set_statusbar("Cannot slice on this element.")
+      return
+
     window = sliceview.SliceView(self.main_window)
     window.geometry_dim_tree = self.geometry_dim_tree
     window.update(self.selected_node, self.tree)

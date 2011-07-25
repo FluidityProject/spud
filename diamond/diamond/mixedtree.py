@@ -199,3 +199,6 @@ class MixedTree:
 
   def get_name_path(self, leaf = True):
     return self.parent.get_name_path(leaf)
+
+  def is_sliceable(self):
+    return True
