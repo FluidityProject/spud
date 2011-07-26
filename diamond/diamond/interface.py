@@ -742,13 +742,15 @@ class Diamond:
     with the same type as the selected node.
     """
 
-    if self.selected_node == self.tree:
-      return #Group on the entire tree... ie don't group
+    if self.selected_node == self.tree or not self.selected_iter:
+      self.statusbar.set_statusbar("Cannot group on this element.")
+      return #Group on the entire tree... ie don't group or nothing selected
 
     self.gui.get_widget("menuitemUngroup").show()
     self.gui.get_widget("popupmenuitemUngroup").show()
 
     self.groupmode = True
+    self.group_node = node = self.treestore.get_value(self.selected_iter, 0)
     
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -757,26 +759,18 @@ class Diamond:
       nodes = []
 
       for child in tree.get_children():
-        #if child.active:
-          if child.name == node.name:
-            nodes.append(child)
-          nodes += get_nodes(node, child)
+        if child.name == node.name:
+          nodes.append(child)
+        nodes += get_nodes(node, child)
 
       return nodes
-
-    selected_node = self.treestore.get_value(self.selected_iter, 0)
-
-    nodes = get_nodes(selected_node, self.tree)
-
-    self.set_treestore(None, nodes, True)
+    
+    self.set_treestore(None, get_nodes(node, self.tree), True)
 
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
 
-    self.treeview.get_selection().unselect_all()
-
-    self.selected_node = None
-    self.update_options_frame()
+    self.treeview.get_selection().select_path(self.get_treestore_path_from_node(self.group_node))
 
     return
 
@@ -789,6 +783,7 @@ class Diamond:
     self.gui.get_widget("popupmenuitemUngroup").hide()
 
     self.groupmode = False
+    node = self.treestore.get_value(self.selected_iter, 0)
 
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -798,12 +793,14 @@ class Diamond:
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
 
-    self.treeview.get_selection().unselect_all()
+    node = node if node is not None else self.group_node
+    path = self.get_treestore_path_from_node(node)
+    self.treeview.expand_to_path(path)
+    self.treeview.get_selection().select_path(path)
+    self.treeview.scroll_to_cell(path)
+ 
+    return
 
-    self.selected_node = None
-    self.update_options_frame()
-
-    return 0
   ## LHS ###
 
   def init_datatree(self):
@@ -1544,7 +1541,25 @@ class Diamond:
         return None
 
     return iter
+
+  def get_treestore_path_from_node(self, node):
+    """
+    Look for the path for the given node.
+    """
     
+    def search(treestore, iter, node):
+      while iter:
+        if treestore.get_value(iter, 0) is node:
+          return iter
+        else:
+          child = search(treestore, treestore.iter_children(iter), node)
+          if child: return child
+
+          iter = treestore.iter_next(iter)      
+      return iter
+
+    return self.treestore.get_path(search(self.treestore, self.treestore.get_iter_first(), node))
+ 
   def set_geometry_dim_tree(self):
     """
     Find the iter into the treestore corresponding to the geometry dimension, and
