@@ -750,7 +750,7 @@ class Diamond:
     self.gui.get_widget("popupmenuitemUngroup").show()
 
     self.groupmode = True
-    self.group_node = node = self.treestore.get_value(self.selected_iter, 0)
+    node = self.treestore.get_value(self.selected_iter, 0)
     
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -758,10 +758,16 @@ class Diamond:
     def get_nodes(node, tree):
       nodes = []
 
-      for child in tree.get_children():
+      if isinstance(tree, choice.Choice):
+        child = tree.get_current_tree()
         if child.name == node.name:
-          nodes.append(child)
+          nodes.append(tree)
         nodes += get_nodes(node, child)
+      else:
+        for child in tree.get_children():
+          if child.name == node.name:
+            nodes.append(child)
+          nodes += get_nodes(node, child)
 
       return nodes
     
@@ -770,7 +776,8 @@ class Diamond:
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
 
-    self.treeview.get_selection().select_path(self.get_treestore_path_from_node(self.group_node))
+    path = self.get_treestore_path_from_node(node)
+    self.treeview.get_selection().select_path(path)
 
     return
 
@@ -793,11 +800,10 @@ class Diamond:
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
 
-    node = node if node is not None else self.group_node
     path = self.get_treestore_path_from_node(node)
     self.treeview.expand_to_path(path)
-    self.treeview.get_selection().select_path(path)
     self.treeview.scroll_to_cell(path)
+    self.treeview.get_selection().select_path(path)
  
     return
 
@@ -1547,18 +1553,19 @@ class Diamond:
     Look for the path for the given node.
     """
     
-    def search(treestore, iter, node):
+    def search(iter, node, indent=""):
       while iter:
-        if treestore.get_value(iter, 0) is node:
+        if self.treestore.get_value(iter, 0) is node:
           return iter
         else:
-          child = search(treestore, treestore.iter_children(iter), node)
+          child = search(self.treestore.iter_children(iter), node, indent + "  ")
           if child: return child
 
-          iter = treestore.iter_next(iter)      
+          iter = self.treestore.iter_next(iter)      
       return iter
 
-    return self.treestore.get_path(search(self.treestore, self.treestore.get_iter_first(), node))
+    iter = search(self.treestore.get_iter_first(), node)
+    return self.treestore.get_path(iter) if iter else None
  
   def set_geometry_dim_tree(self):
     """
