@@ -196,5 +196,11 @@ class Choice(gobject.GObject):
 
   def is_sliceable(self):
     return self.get_current_tree().is_sliceable()
+ 
+  def __str__(self):
+    """
+    Returns the display name of the selected tree.
+    """
+    return self.get_display_name()
 
 gobject.type_register(Choice)

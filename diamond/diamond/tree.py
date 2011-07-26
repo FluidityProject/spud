@@ -301,7 +301,7 @@ class Tree(gobject.GObject):
   def unpickle(self, pick):
     return pickle.loads(bz2.decompress(base64.b64decode(pick)))
 
-  def __str__(self):
+  def print_str(self):
     s = "name: %s at %s\n" % (self.name, hex(id(self)))
     s = s + "schemaname: %s\n" % self.schemaname
     s = s + "attrs: %s\n" % self.attrs
@@ -538,6 +538,9 @@ class Tree(gobject.GObject):
       return True
     
     return (self.datatype is not None and self.datatype != "fixed") or self.attrs
+
+  def __str__(self):
+    return self.get_display_name()
    
 gobject.type_register(Tree)
 
