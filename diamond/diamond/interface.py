@@ -160,6 +160,7 @@ class Diamond:
     self.suffix = suffix
 
     self.selected_node = None
+    self.selected_iter = None
     self.update_options_frame()
 
     self.file_path = os.getcwd()
@@ -787,7 +788,7 @@ class Diamond:
     self.gui.get_widget("menuitemUngroup").hide()
     self.gui.get_widget("popupmenuitemUngroup").hide()
 
-    self.groupmode = True
+    self.groupmode = False
 
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -1037,6 +1038,7 @@ class Diamond:
       cellCombo.set_property("text", choice_or_tree.get_name_path())
     else:
       cellCombo.set_property("text", str(choice_or_tree))
+
 
     cellCombo.set_property("model", liststore)
 
