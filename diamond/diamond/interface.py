@@ -747,7 +747,6 @@ class Diamond:
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
 
-    self.treestore.clear()
 
     def get_nodes(node, tree):
       nodes = []
@@ -785,7 +784,6 @@ class Diamond:
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
 
-    self.treestore.clear()
     self.set_treestore(None, [self.tree], True)
 
     self.treeview.set_model(self.treestore)
@@ -1035,9 +1033,9 @@ class Diamond:
     cellCombo.set_property("model", liststore)
 
     # set the properties: colour, etc.
-    if choice_or_tree.__class__ is tree.Tree:
+    if isinstance(choice_or_tree, tree.Tree):
       cellCombo.set_property("editable", False)
-    elif choice_or_tree.__class__ is choice.Choice:
+    elif isinstance(choice_or_tree, choice.Choice):
       cellCombo.set_property("editable", True)
 
     if self.treestore_iter_is_active(iter):
