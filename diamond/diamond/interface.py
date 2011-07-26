@@ -139,7 +139,10 @@ class Diamond:
                     "on_copy_spud_path": self.on_copy_spud_path,
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
-                    "on_slice": self.on_slice}
+                    "on_slice": self.on_slice,
+                    "on_group": self.on_group,
+                    "on_ungroup": self.on_ungroup}
+
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -729,6 +732,74 @@ class Diamond:
   def _slice_destroy(self, widget):
     self.on_select_row()
 
+  def on_group(self, widget = None):
+    """
+    Clears the treeview and then fills it with nodes 
+    with the same type as the selected node.
+    """
+
+    groupItem = self.gui.get_widget("menuitemGroup")
+    ungroupItem = self.gui.get_widget("menuitemUngroup")
+
+    groupItem.hide()
+    ungroupItem.show()
+
+    self.treeview.freeze_child_notify()
+    self.treeview.set_model(None)
+
+    self.treestore.clear()
+
+    def get_nodes(node, tree):
+      nodes = []
+
+      for child in tree.get_children():
+        if child.active:
+          if child.name == node.name:
+            nodes.append(child)
+          nodes += get_nodes(node, child)
+
+      return nodes
+
+    nodes = get_nodes(self.selected_node, self.tree)
+
+    self.set_treestore(None, nodes, True)
+
+    self.treeview.set_model(self.treestore)
+    self.treeview.thaw_child_notify()
+
+    self.treeview.get_selection().unselect_all()
+
+    self.selected_node = None
+    self.update_options_frame()
+
+    return
+
+  def on_ungroup(self, widget = None):
+    """
+    Restores the treeview to normal.
+    """
+
+    groupItem = self.gui.get_widget("menuitemGroup")
+    ungroupItem = self.gui.get_widget("menuitemUngroup")
+
+    groupItem.show()
+    ungroupItem.hide()
+
+    self.treeview.freeze_child_notify()
+    self.treeview.set_model(None)
+
+    self.treestore.clear()
+    self.set_treestore(None, [self.tree], True)
+
+    self.treeview.set_model(self.treestore)
+    self.treeview.thaw_child_notify()
+
+    self.treeview.get_selection().unselect_all()
+
+    self.selected_node = None
+    self.update_options_frame()
+
+    return 0
   ## LHS ###
 
   def init_datatree(self):

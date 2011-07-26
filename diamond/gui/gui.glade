@@ -511,5 +511,19 @@
         <signal name="activate" handler="on_slice"/>
       </widget>
     </child>
+    <child>
+      <widget class="GtkMenuItem" id="menuitemGroup">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Group</property>
+        <signal name="activate" handler="on_group"/>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="menuitemUngroup">
+        <property name="visible">False</property>
+        <property name="label" translatable="yes">Ungroup</property>
+        <signal name="activate" handler="on_ungroup"/>
+      </widget>
+    </child>
   </widget>
 </glade-interface>
