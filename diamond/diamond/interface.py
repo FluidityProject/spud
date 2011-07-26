@@ -750,7 +750,7 @@ class Diamond:
     self.gui.get_widget("popupmenuitemUngroup").show()
 
     self.groupmode = True
-    node = self.treestore.get_value(self.selected_iter, 0)
+    node, tree = self.treestore.get(self.selected_iter, 0, 1)
     
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -771,7 +771,7 @@ class Diamond:
 
       return nodes
     
-    self.set_treestore(None, get_nodes(node, self.tree), True)
+    self.set_treestore(None, get_nodes(tree, self.tree), True)
 
     self.treeview.set_model(self.treestore)
     self.treeview.thaw_child_notify()
@@ -1037,7 +1037,7 @@ class Diamond:
 
     choice_or_tree, active_tree, liststore = self.treestore.get(iter, 0, 1, 2)
 
-    if self.groupmode:
+    if self.groupmode and self.treestore.iter_parent(iter) is None:
       cellCombo.set_property("text", choice_or_tree.get_name_path())
     else:
       cellCombo.set_property("text", str(choice_or_tree))
