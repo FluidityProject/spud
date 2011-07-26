@@ -752,14 +752,16 @@ class Diamond:
       nodes = []
 
       for child in tree.get_children():
-        if child.active:
+        #if child.active:
           if child.name == node.name:
             nodes.append(child)
           nodes += get_nodes(node, child)
 
       return nodes
 
-    nodes = get_nodes(self.selected_node, self.tree)
+    selected_node = self.treestore.get_value(self.selected_iter, 2)
+
+    nodes = get_nodes(selected_node, self.tree)
 
     self.set_treestore(None, nodes, True)
 
@@ -1053,7 +1055,7 @@ class Diamond:
     This hook function sets up the other gtk.CellRendererPixbuf, the one that gives
     the clue to the user whether this is a choice or not.
     """
-
+    
     choice_or_tree = self.treestore.get_value(iter, 2)
     if isinstance(choice_or_tree, tree.Tree):
       cell.set_property("stock-id", None)
@@ -1112,12 +1114,7 @@ class Diamond:
     """
 
     choice_or_tree, = self.treestore.get(iter, 2)
-    parent_iter = self.treestore.iter_parent(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    parent_tree = choice_or_tree.parent
 
     if not choice_or_tree.active:
       return
@@ -1155,14 +1152,9 @@ class Diamond:
 
   def delete_tree(self, iter):
     choice_or_tree, = self.treestore.get(iter, 2)
-    parent_iter = self.treestore.iter_parent(iter)
+    parent_tree = choice_or_tree.parent
     isSelected = self.treeview.get_selection().iter_is_selected(iter)
     sibling = self.treestore.iter_next(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
 
     confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
     if confirm == gtk.RESPONSE_YES:
@@ -1181,12 +1173,7 @@ class Diamond:
     """
 
     choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
-    parent_iter = self.treestore.iter_parent(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    parent_tree = choice_or_tree.parent
 
     if choice_or_tree.active:
       return
@@ -1206,8 +1193,7 @@ class Diamond:
       liststore = self.create_liststore(new_tree)
       self.expand_treestore(iter)
       iter = self.treestore.insert_after(
-        parent=parent_iter, sibling=iter, 
-        row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
+        None, iter, [new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
       attrid = new_tree.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
       dataid = new_tree.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
       self.signals[new_tree] = (attrid, dataid)
