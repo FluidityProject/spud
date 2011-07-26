@@ -738,11 +738,11 @@ class Diamond:
     with the same type as the selected node.
     """
 
-    groupItem = self.gui.get_widget("menuitemGroup")
-    ungroupItem = self.gui.get_widget("menuitemUngroup")
+    if self.selected_node == self.tree:
+      return #Group on the entire tree... ie don't group
 
-    groupItem.hide()
-    ungroupItem.show()
+    self.gui.get_widget("menuitemUngroup").show()
+    self.gui.get_widget("popupmenuitemUngroup").show()
 
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
@@ -779,11 +779,8 @@ class Diamond:
     Restores the treeview to normal.
     """
 
-    groupItem = self.gui.get_widget("menuitemGroup")
-    ungroupItem = self.gui.get_widget("menuitemUngroup")
-
-    groupItem.show()
-    ungroupItem.hide()
+    self.gui.get_widget("menuitemUngroup").hide()
+    self.gui.get_widget("popupmenuitemUngroup").hide()
 
     self.treeview.freeze_child_notify()
     self.treeview.set_model(None)
