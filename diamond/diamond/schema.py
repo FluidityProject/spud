@@ -558,7 +558,7 @@ class Schema(object):
         xmlname = xmlnode.get("name")
         have_found = False
 
-        possibles = [tree_choice for tree_choice in datatree.choices() if tree_choice.name == xmlnode.tag]
+        possibles = [tree_choice for tree_choice in datatree.get_choices() if tree_choice.name == xmlnode.tag]
         # first loop over the fixed-value names
         for tree_choice in possibles:
           if "name" not in tree_choice.attrs:
@@ -692,7 +692,7 @@ class Schema(object):
 
     for schemachild in priority_queue:
       if schemachild.cardinality in ['', '?']:
-        for curtree in schemachild.choices():
+        for curtree in schemachild.get_choices():
           name = curtree.name
 
           have_fixed_name = False
@@ -719,7 +719,7 @@ class Schema(object):
               xmls[schemachild.schemaname] = copy.deepcopy([])
       elif schemachild.cardinality in ['*', '+']:
         xmls[schemachild.schemaname] = copy.deepcopy([])
-        for curtree in schemachild.choices():
+        for curtree in schemachild.get_choices():
           name = curtree.name
 
           have_fixed_name = False
@@ -797,7 +797,7 @@ class Schema(object):
         bins[schemachild.schemaname].append(child)
 
       # search for neglected choices
-      if schemachild.__class__ is choice.Choice and schemachild.cardinality in ['', '?']:
+      if isinstance(schemachild, choice.Choice) and schemachild.cardinality in ['', '?']:
         for child in bins[schemachild.schemaname]:
 
           # Does the child have a valid XML node attached?
@@ -805,7 +805,7 @@ class Schema(object):
           if child.xmlnode is None: continue
 
           current_choice = child.get_current_tree()
-          for tree_choice in child.l:
+          for tree_choice in child.get_choices():
             if tree_choice is current_choice: continue
 
     return bins

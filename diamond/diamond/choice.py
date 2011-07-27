@@ -31,21 +31,21 @@ class Choice(gobject.GObject):
   __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
                    "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
 
-  def __init__(self, l, cardinality=''):
+  def __init__(self, choices, cardinality=''):
     gobject.GObject.__init__(self)
 
-    self.l = l
-    if l == []:
+    self.choices = choices
+    if choices == []:
       raise Exception
     self.index = 0
     name = ""
-    for choice in l:
+    for choice in choices:
       assert choice.__class__ is tree.Tree
-      name = name + choice.name + ":"
       choice.connect("on-set-data", self._on_set_data)
       choice.connect("on-set-attr", self._on_set_attr)
 
-    name = name[:-1]
+    name = ":".join(choice.name for choice in choices)
+
     self.name = name
     self.schemaname = name
     self.cardinality = cardinality
@@ -67,21 +67,21 @@ class Choice(gobject.GObject):
     self.index = i
 
   def find_tree(self, name):
-    for t in self.l:
+    for t in self.choices:
       if t.name == name:
         return t
 
     debug.deprint("self.name == %s" % self.name, 0)
-    for choice in self.l:
+    for choice in self.choices:
       debug.deprint("choice.name == %s" % choice.name, 0)
     raise Exception, "No such choice name: %s" % name
 
   def set_active_choice_by_name(self, name):
     matched = False
-    for t in self.l:
+    for t in self.choices:
       if t.name == name.strip():
         matched = True
-        self.index = self.l.index(t)
+        self.index = self.choices.index(t)
 
     if not matched:
       raise Exception, "no such name %s found" % name
@@ -89,11 +89,11 @@ class Choice(gobject.GObject):
     self.recompute_validity()
 
   def set_active_choice_by_ref(self, ref):
-    self.index = self.l.index(ref)
+    self.index = self.choices.index(ref)
     self.recompute_validity()
 
   def get_current_tree(self):
-    return self.l[self.index]
+    return self.choices[self.index]
 
   def add_children(self, schema):
     return self.get_current_tree().add_children(schema)
@@ -106,7 +106,7 @@ class Choice(gobject.GObject):
 
   def copy(self):
     new_choices = []
-    for choice in self.l:
+    for choice in self.choices:
       new_choices.append(choice.copy())
 
     new_choice = Choice(new_choices)
@@ -114,25 +114,22 @@ class Choice(gobject.GObject):
       setattr(new_choice, attr, copy.copy(getattr(self, attr)))
 
     new_choice.set_parent(self.parent)
-    for choice in new_choice.l:
+    for choice in new_choice.choices:
       choice.children = copy.copy([])
 
     return new_choice
 
   def get_possible_names(self):
-    return [x.name for x in self.l]
+    return [x.name for x in self.choices]
 
   def set_parent(self, parent):
     self.parent = parent
-    for choice in self.l:
+    for choice in self.choices:
       choice.parent = parent
 
   def write_core(self, parent):
-    self.l[self.index].write_core(parent)
+    self.choices[self.index].write_core(parent)
     return parent
-
-  def choices(self):
-    return self.l
 
   def is_comment(self):
     return False
@@ -156,7 +153,7 @@ class Choice(gobject.GObject):
     return [self.get_current_tree()]
 
   def get_choices(self):
-    return self.l
+    return self.choices
 
   def is_hidden(self):
     """
