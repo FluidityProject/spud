@@ -162,20 +162,7 @@ class Choice(gobject.GObject):
     return False
 
   def get_name_path(self, leaf = True):
-    name = self.get_display_name() if leaf else self.get_name()
-
-    if self.parent is None:
-      return name
-    else:
-
-      pname = self.parent.get_name_path(False)
-
-      if name is None:
-        return pname
-      elif pname is None:
-        return name
-      else:
-        return pname + "/" + name
+    return self.get_current_tree().get_name_path(leaf)
 
   def get_mixed_data(self):
     return self
@@ -189,4 +176,7 @@ class Choice(gobject.GObject):
     """
     return self.get_display_name()
 
+  def __repr__(self):
+    return self.get_name_path() + "[" + self.name + "]"
+ 
 gobject.type_register(Choice)

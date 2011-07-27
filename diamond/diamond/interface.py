@@ -674,7 +674,6 @@ class Diamond:
     
     if self.selected_iter is not None:    
       node = self.treestore.get_value(self.selected_iter, 0)
-      oldtree = self.treestore.get_value(self.selected_iter, 1)
 
     if node != None:
   
@@ -682,30 +681,23 @@ class Diamond:
       if expand:
         self.expand_tree(self.selected_iter)
 
-      newtree = self.s.read(ios, oldtree)
+      newnode = self.s.read(ios, node)
 
-      if newtree is None:
+      if newnode is None:
         if expand:
           self.collapse_tree(self.selected_iter, False)
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
 
-      if oldtree.parent is not None:
-        newtree.set_parent(oldtree.parent)
-        if isinstance(node, tree.Tree):
-          children = node.parent.get_children()
-          children.insert(children.index(oldtree), newtree)
-          children.remove(oldtree)
+      if node.parent is not None:
+        newnode.set_parent(node.parent)
+        children = node.parent.get_children()
+        children.insert(children.index(node), newnode)
+        children.remove(node)
  
-      if isinstance(node, choice.Choice):
-        choices = node.get_choices()
-        choices.insert(choices.index(oldtree), newtree)
-        choices.remove(oldtree)
-        self.set_treestore(self.selected_iter, [node], True, True)
-      else:
-        self.set_treestore(self.selected_iter, [newtree], True, True)
+      self.set_treestore(self.selected_iter, [newnode], True, True)
 
-      newtree.recompute_validity()
+      newnode.recompute_validity()
       self.treeview.queue_draw()
 
       # Extract and display validation errors

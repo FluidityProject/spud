@@ -533,6 +533,9 @@ class Tree(gobject.GObject):
 
   def __str__(self):
     return self.get_display_name()
-   
+  
+  def __repr__(self):
+    return self.get_name_path()
+ 
 gobject.type_register(Tree)
 
