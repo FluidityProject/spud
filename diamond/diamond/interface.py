@@ -673,20 +673,40 @@ class Diamond:
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
     if self.selected_iter is not None:    
-      node = self.treestore.get_value(self.selected_iter, 1)
+      node = self.treestore.get_value(self.selected_iter, 0)
+      oldtree = self.treestore.get_value(self.selected_iter, 1)
 
-    if node != None and node.active:
+    if node != None:
+  
+      expand = not node.active
+      if expand:
+        self.expand_tree(self.selected_iter)
 
-      newnode = self.s.read(ios, node)
+      newtree = self.s.read(ios, oldtree)
 
-      if newnode is None:
+      if newtree is None:
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
+        if expand:
+          self.collapse_tree(self.selected_iter)
         return
 
-      if node.parent is not None:
-        newnode.set_parent(node.parent)
-        node.parent.children.insert(node.parent.children.index(node), newnode)
-        node.parent.children.remove(node)
+      if oldtree.parent is not None:
+        newtree.set_parent(oldtree.parent)
+        if isinstance(node, tree.Tree):
+          children = node.parent.get_children()
+          children.insert(children.index(oldtree), newtree)
+          children.remove(oldtree)
+ 
+      if isinstance(node, choice.Choice):
+        choices = node.get_choices()
+        choices.insert(choices.index(oldtree), newtree)
+        choices.remove(oldtree)
+        self.set_treestore(self.selected_iter, [node], True, True)
+      else:
+        self.set_treestore(self.selected_iter, [newtree], True, True)
+
+      newtree.recompute_validity()
+      self.treeview.queue_draw()
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
@@ -713,12 +733,6 @@ class Diamond:
         dialogs.long_message(self.main_window, msg)
  
       self.set_saved(False)     
-   
-      self.treeview.freeze_child_notify()
-      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
-      self.treeview.thaw_child_notify()
-      
-      self.treeview.get_selection().select_iter(iter)
 
     return
 
