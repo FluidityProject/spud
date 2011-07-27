@@ -685,9 +685,9 @@ class Diamond:
       newtree = self.s.read(ios, oldtree)
 
       if newtree is None:
-        self.statusbar.set_statusbar("Trying to paste invalid XML.")
         if expand:
-          self.collapse_tree(self.selected_iter)
+          self.collapse_tree(self.selected_iter, False)
+        self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
 
       if oldtree.parent is not None:
@@ -1136,7 +1136,7 @@ class Diamond:
 
     return
   
-  def collapse_tree(self, iter):
+  def collapse_tree(self, iter, confirm = True):
     """
     Collapses part of the tree.
     """
@@ -1164,7 +1164,7 @@ class Diamond:
         self.set_saved(False)
         self.remove_children(iter)
       else:
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
 
     elif choice_or_tree.cardinality == "+":
       count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
@@ -1172,20 +1172,23 @@ class Diamond:
         # do nothing
         return
       else: # count > 2
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
   
     parent_tree.recompute_validity()
     self.treeview.queue_draw()
     return
 
-  def delete_tree(self, iter):
+  def delete_tree(self, iter, confirm):
     choice_or_tree, = self.treestore.get(iter, 0)
     parent_tree = choice_or_tree.parent
     isSelected = self.treeview.get_selection().iter_is_selected(iter)
     sibling = self.treestore.iter_next(iter)
 
-    confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-    if confirm == gtk.RESPONSE_YES:
+    if confirm:
+      response = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
+
+    # not A or B == A implies B
+    if not confirm or response == gtk.RESPONSE_YES:
       parent_tree.delete_child_by_ref(choice_or_tree)
       self.remove_children(iter)
       self.treestore.remove(iter)
