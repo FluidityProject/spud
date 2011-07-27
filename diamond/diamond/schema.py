@@ -160,7 +160,7 @@ class Schema(object):
       node = xpath[0]
 
     node = self.to_tree(node)
-    
+  
     if eidtree is not None:
       node.attrs = eidtree.attrs
       node.cardinality = eidtree.cardinality
