@@ -635,7 +635,7 @@ class Diamond:
     else:
       return self._get_focus_widget(focus)
 
-  def _handle_clipboard(self, widget, signal)
+  def _handle_clipboard(self, widget, signal):
     if isinstance(widget, gtk.MenuItem):
       return False
     else:
