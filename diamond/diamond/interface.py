@@ -283,9 +283,6 @@ class Diamond:
     # if we have a relative path, make it absolute
     filename = os.path.abspath(filename)
   
-    if filename == self.filename:
-      return
-  
     try:
       os.stat(filename)
     except OSError:
@@ -638,12 +635,19 @@ class Diamond:
     else:
       return self._get_focus_widget(focus)
 
-  def on_copy(self, widget=None):
-    if not isinstance(widget, gtk.MenuItem):
+  def _handle_clipboard(self, widget, signal):
+    if isinstance(widget, gtk.MenuItem):
+      return False
+    else:
       widget = self._get_focus_widget(self.main_window)
-      if widget is not self.treeview and gobject.signal_lookup("copy-clipboard", widget):
-        widget.emit("copy-clipboard")
-        return
+      if widget is not self.treeview and gobject.signal_lookup(signal + "-clipboard", widget):
+        widget.emit(signal + "-clipboard")
+        return True
+      return False
+
+  def on_copy(self, widget=None):
+    if self._handle_clipboard(widget, "copy"):
+      return
 
     if isinstance(self.selected_node, mixedtree.MixedTree):
       node = self.selected_node.parent
@@ -662,28 +666,39 @@ class Diamond:
     return
 
   def on_paste(self, widget=None):
-    if not isinstance(widget, gtk.MenuItem):
-      widget = self._get_focus_widget(self.main_window)
-      if widget is not self.treeview and gobject.signal_lookup("paste-clipboard", widget):
-        widget.emit("paste-clipboard")
-        return
+    if self._handle_clipboard(widget, "paste"):
+      return
 
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
     if self.selected_iter is not None:    
-      node = self.treestore.get_value(self.selected_iter, 1)
+      node = self.treestore.get_value(self.selected_iter, 0)
 
     if node != None:
+  
+      expand = not node.active
+      if expand:
+        self.expand_tree(self.selected_iter)
 
       newnode = self.s.read(ios, node)
 
       if newnode is None:
+        if expand:
+          self.collapse_tree(self.selected_iter, False)
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
 
-      if not node.active:
-        self.expand_tree(self.selected_iter)
+      if node.parent is not None:
+        newnode.set_parent(node.parent)
+        children = node.parent.get_children()
+        children.insert(children.index(node), newnode)
+        children.remove(node)
+ 
+      self.set_treestore(self.selected_iter, [newnode], True, True)
+
+      newnode.recompute_validity()
+      self.treeview.queue_draw()
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
@@ -710,12 +725,6 @@ class Diamond:
         dialogs.long_message(self.main_window, msg)
  
       self.set_saved(False)     
-   
-      self.treeview.freeze_child_notify()
-      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
-      self.treeview.thaw_child_notify()
-      
-      self.treeview.get_selection().select_iter(iter)
 
     return
 
@@ -909,7 +918,7 @@ class Diamond:
     if replace:
       replacediter = iter
       iter = self.treestore.iter_parent(replacediter)
-    else:
+    else: 
       self.remove_children(iter)
   
     for t in new_tree:
@@ -1121,7 +1130,7 @@ class Diamond:
 
     return
   
-  def collapse_tree(self, iter):
+  def collapse_tree(self, iter, confirm = True):
     """
     Collapses part of the tree.
     """
@@ -1149,7 +1158,7 @@ class Diamond:
         self.set_saved(False)
         self.remove_children(iter)
       else:
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
 
     elif choice_or_tree.cardinality == "+":
       count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
@@ -1157,20 +1166,23 @@ class Diamond:
         # do nothing
         return
       else: # count > 2
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
   
     parent_tree.recompute_validity()
     self.treeview.queue_draw()
     return
 
-  def delete_tree(self, iter):
+  def delete_tree(self, iter, confirm):
     choice_or_tree, = self.treestore.get(iter, 0)
     parent_tree = choice_or_tree.parent
     isSelected = self.treeview.get_selection().iter_is_selected(iter)
     sibling = self.treestore.iter_next(iter)
 
-    confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-    if confirm == gtk.RESPONSE_YES:
+    if confirm:
+      response = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
+
+    # not A or B == A implies B
+    if not confirm or response == gtk.RESPONSE_YES:
       parent_tree.delete_child_by_ref(choice_or_tree)
       self.remove_children(iter)
       self.treestore.remove(iter)
