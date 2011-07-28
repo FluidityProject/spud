@@ -22,6 +22,7 @@ import pango
 import dialogs
 import datatype
 import mixedtree
+import plist
 
 class DataWidget(gtk.VBox):
 

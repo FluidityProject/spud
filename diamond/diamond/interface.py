@@ -621,7 +621,7 @@ class Diamond:
       debug.deprint("No selection.")
       return
     iter = self.treestore.get_iter(path)
-    active_tree = self.treestore.get_value(iter, 3)
+    active_tree = self.treestore.get_value(iter, 1)
     name = self.get_spudpath(active_tree)
     clipboard = gtk.clipboard_get()
     clipboard.set_text(name)
@@ -1549,8 +1549,8 @@ class Diamond:
     iter = self.treestore.get_iter_first()
     if iter is None:
       return None
-    for name in names[1:len(names) - 1]:
-      while self.treestore.get_value(iter, 0) != name:
+    for name in names[1:-1]:
+      while str(self.treestore.get_value(iter, 0)) != name:
         iter = self.treestore.iter_next(iter)
         if iter is None:
           return None

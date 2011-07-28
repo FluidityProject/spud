@@ -315,7 +315,7 @@ class AttributeWidget(gtk.Frame):
       new_text = self.node.validity_check(self.node.attrs[iter_key][0][1], new_text)
       if iter_key == "name" and not self._name_check(new_text):
         return False
-    if new_text != self.selected_node.attrs[iter_key][1]:
+    if new_text != self.node.attrs[iter_key][1]:
       self.treeview.get_model().set_value(iter, 1, new_text)
       self.node.set_attr(iter_key, new_text)
       if iter_key == "name":
