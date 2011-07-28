@@ -851,21 +851,23 @@ class Diamond:
     self.treeview.get_selection().set_select_function(self.options_tree_select_func)
     self.options_tree_select_func_enabled = True
 
+    # Node column
+    column = gtk.TreeViewColumn("Node")
+    column.set_property("expand", True)
+    column.set_resizable(True)
+
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
     cellCombo.set_property("text-column", 0)
     cellCombo.set_property("editable", True)
     cellCombo.set_property("has-entry", False)
     cellCombo.connect("changed", self.cellcombo_changed)
-
-    # Node column
-    column = gtk.TreeViewColumn("Node", cellCombo)
-    column.set_property("expand", True)
-    column.set_resizable(True)
+    column.pack_start(cellCombo)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
     self.choicecell = choiceCell = gtk.CellRendererPixbuf()
     column.pack_end(choiceCell, expand=False)
     column.set_cell_data_func(choiceCell, self.set_cellpicture_choice)
+
     optionsTree.append_column(column)
 
     self.imgcell = cellPicture = gtk.CellRendererPixbuf()
