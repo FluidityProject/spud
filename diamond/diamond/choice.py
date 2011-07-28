@@ -31,7 +31,7 @@ class Choice(gobject.GObject):
   __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
                    "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
 
-  def __init__(self, choices, cardinality=''):
+  def __init__(self, choices, schemaname="", cardinality=''):
     gobject.GObject.__init__(self)
 
     self.choices = choices
@@ -47,7 +47,7 @@ class Choice(gobject.GObject):
     name = ":".join(choice.name for choice in choices)
 
     self.name = name
-    self.schemaname = name
+    self.schemaname = schemaname
     self.cardinality = cardinality
     self.parent = None
     self.set_default_active()

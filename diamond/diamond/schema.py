@@ -142,10 +142,10 @@ class Schema(object):
     return results
 
   def valid_node(self, eid):
-    if isinstance(eid, tree.Tree):
+    if isinstance(eid, tree.Tree) or isinstance(eid, choice.Choice):
       eidtree = eid
       eid = eid.schemaname
-
+    
     if eid == ":start":
       try:
         node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
@@ -162,7 +162,6 @@ class Schema(object):
     node = self.to_tree(node)
   
     if eidtree is not None:
-      node.attrs = eidtree.attrs
       node.cardinality = eidtree.cardinality
       node.parent = eidtree.parent
 
@@ -173,7 +172,7 @@ class Schema(object):
     f = self.callbacks[tag]
     facts = {}
     x = f(element, facts)
-    return x
+    return x    
 
   #############################################
   # Beginning of schema processing functions. #
@@ -386,6 +385,8 @@ class Schema(object):
       if "schemaname" in facts:
         return
 
+      facts['schemaname'] = self.tree.getpath(element)
+
       r = []
       children = self.choice_children(self.element_children(element))
       
@@ -527,7 +528,7 @@ class Schema(object):
 
     xmlnode  = doc.getroot()
     self.xml_read_merge(datatree, xmlnode)
-    self.xml_read_core(datatree, xmlnode, doc)
+    self.xml_read_core(datatree.get_current_tree(), xmlnode, doc)
 
     if len(self.lost_eles) != 0:
       debug.deprint("WARNING: Lost XML elements:\n" + str(self.lost_eles))
