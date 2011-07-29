@@ -624,7 +624,7 @@ class Diamond:
       debug.deprint("No selection.")
       return
     iter = self.treestore.get_iter(path)
-    active_tree = self.treestore.get_value(iter, 3)
+    active_tree = self.treestore.get_value(iter, 1)
     name = self.get_spudpath(active_tree)
     clipboard = gtk.clipboard_get()
     clipboard.set_text(name)
@@ -851,21 +851,23 @@ class Diamond:
     self.treeview.get_selection().set_select_function(self.options_tree_select_func)
     self.options_tree_select_func_enabled = True
 
+    # Node column
+    column = gtk.TreeViewColumn("Node")
+    column.set_property("expand", True)
+    column.set_resizable(True)
+
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
     cellCombo.set_property("text-column", 0)
     cellCombo.set_property("editable", True)
     cellCombo.set_property("has-entry", False)
     cellCombo.connect("changed", self.cellcombo_changed)
-
-    # Node column
-    column = gtk.TreeViewColumn("Node", cellCombo)
-    column.set_property("expand", True)
-    column.set_resizable(True)
+    column.pack_start(cellCombo)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
     self.choicecell = choiceCell = gtk.CellRendererPixbuf()
     column.pack_end(choiceCell, expand=False)
     column.set_cell_data_func(choiceCell, self.set_cellpicture_choice)
+
     optionsTree.append_column(column)
 
     self.imgcell = cellPicture = gtk.CellRendererPixbuf()
@@ -1537,8 +1539,8 @@ class Diamond:
     iter = self.treestore.get_iter_first()
     if iter is None:
       return None
-    for name in names[1:len(names) - 1]:
-      while self.treestore.get_value(iter, 0) != name:
+    for name in names[1:-1]:
+      while str(self.treestore.get_value(iter, 0)) != name:
         iter = self.treestore.iter_next(iter)
         if iter is None:
           return None
