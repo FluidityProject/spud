@@ -24,7 +24,6 @@ assert libspud.get_option_shape('/problem_type')[1] == -1
 assert libspud.get_option('/problem_type') == "multimaterial"
 assert libspud.get_option('/geometry/dimension') == 2
 libspud.set_option('/geometry/dimension', 3)
-print libspud.get_option('/geometry/dimension')
 assert libspud.get_option('/geometry/dimension') == 3
 
 list_path = '/material_phase::Material1/scalar_field::MaterialVolumeFraction/prognostic/boundary_conditions::LetNoOneLeave/surface_ids'

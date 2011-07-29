@@ -3,48 +3,73 @@
 #include "spud.h"
 #include <stdio.h>
 
-
 #define MAXLENGTH   2048
-
 
 static PyObject *SpudError;
 static PyObject *SpudTypeError;
 static PyObject *SpudKeyError;
 static PyObject *SpudFileError;
 static PyObject *SpudNewKeyWarning;
+static PyObject *SpudAttrSetFailedWarning;
+static PyObject *SpudShapeError;
+static PyObject *SpudRankError;
 
 void* manager;
 
-static PyObject*
+static PyObject *
 error_checking(int outcome, char *functionname)
 {
     char errormessage [MAXLENGTH];
+
     if (outcome == SPUD_KEY_ERROR){
-        snprintf(errormessage, MAXLENGTH, "Error: key error in %s", functionname);
+        snprintf(errormessage, MAXLENGTH, "Error: The specified option is not present \
+                        in the dictionary in %s", functionname);
         PyErr_SetString(SpudKeyError, errormessage);
         return NULL;
     }
     if (outcome == SPUD_TYPE_ERROR){
-        snprintf(errormessage, MAXLENGTH, "Error: Type error in %s", functionname);
+        snprintf(errormessage, MAXLENGTH, "Error: The specified option has a different \
+                        type from that of the option argument provided in %s", functionname);
         PyErr_SetString(SpudTypeError, errormessage);
         return NULL;
     }
     if (outcome == SPUD_NEW_KEY_WARNING){
-        snprintf(errormessage, MAXLENGTH, "Warning: New key warning in %s", functionname);
+        snprintf(errormessage, MAXLENGTH, "Warning: The option being inserted is not ]  \
+                        already in the dictionary %s", functionname);
         PyErr_SetString(SpudNewKeyWarning, errormessage);
         return NULL;
     }
     if (outcome == SPUD_FILE_ERROR){
-        snprintf(errormessage, MAXLENGTH, "Error: File does not exist in %s", functionname);
+        snprintf(errormessage, MAXLENGTH, "Error: The specified options file cannot be  \
+                        read or written to as the routine requires in %s", functionname);
         PyErr_SetString(SpudFileError, errormessage);
         return NULL;
     }
+    if (outcome == SPUD_RANK_ERROR){
+        snprintf(errormessage, MAXLENGTH, "Error: The specified option has a different rank from \
+                      that of the option argument provided %s", functionname);
+        PyErr_SetString(SpudRankError, errormessage);
+        return NULL;
+    }
+    if (outcome == SPUD_SHAPE_ERROR){
+        snprintf(errormessage, MAXLENGTH, "Error: The specified option has a different shape from \
+                      that of the option argument provided in %s", functionname);
+        PyErr_SetString(SpudShapeError, errormessage);
+        return NULL;
+    }
+    if (outcome == SPUD_ATTR_SET_FAILED_WARNING){
+        snprintf(errormessage, MAXLENGTH, "Warning: The option being set as an attribute can not be \
+                      set as an attribute in %s", functionname);
+        PyErr_SetString(SpudAttrSetFailedWarning, errormessage);
+        return NULL;
+    }
+    if (outcome == SPUD_NO_ERROR){
+        Py_RETURN_NONE;
+    }
 
-    Py_RETURN_NONE;
+    PyErr_SetString(SpudError,"Error: error checking failed.");
+    return NULL;
 }
-
-
-
 
 static PyObject *
 libspud_load_options(PyObject *self, PyObject *args)
@@ -183,18 +208,18 @@ libspud_get_option_type(PyObject *self, PyObject *args)
         return NULL;
     }
     if (type == SPUD_DOUBLE){
-        Py_XINCREF(&PyFloat_Type);
+        Py_INCREF(&PyFloat_Type);
         return (PyObject*) &PyFloat_Type;
     }
     else if (type == SPUD_INT){
-        Py_XINCREF(&PyInt_Type);
+        Py_INCREF(&PyInt_Type);
         return (PyObject*) &PyInt_Type;
     }
     else if (type == SPUD_NONE){
         Py_RETURN_NONE;
     }
     else if (type == SPUD_STRING){
-        Py_XINCREF(&PyString_Type);
+        Py_INCREF(&PyString_Type);
         return (PyObject*) &PyString_Type;
     }
 
@@ -297,7 +322,7 @@ spud_get_option_aux_scalar_or_string(const char *key, int key_len, int type, int
 {   // this function is for getting option when the option is of type a scalar or string
     int outcomeGetOption;
 
-    if (type == SPUD_DOUBLE ){
+    if (type == SPUD_DOUBLE){
         float val;
         outcomeGetOption = spud_get_option(key, key_len, &val);
         if (error_checking(outcomeGetOption, "get option aux scalar or string") == NULL){
@@ -305,7 +330,7 @@ spud_get_option_aux_scalar_or_string(const char *key, int key_len, int type, int
         }
         return Py_BuildValue("f", val);
     }
-    else if (type == SPUD_INT ){
+    else if (type == SPUD_INT){
         int val;
         outcomeGetOption = spud_get_option(key, key_len, &val);
         if (error_checking(outcomeGetOption, "get option aux scalar or string") == NULL){
@@ -394,16 +419,16 @@ libspud_get_option(PyObject *self, PyObject *args)
     if (error_checking(outcomeGetOptionShape, "get option") == NULL){
         return NULL;
     }
-    if (rank == 1 && type == 1){ //a list of ints
+    if (rank == 1 && type == SPUD_INT){ //a list of ints
         return spud_get_option_aux_list_ints(key, key_len, type, rank, shape);
     }
-    else if (rank == 1 && type == 0){ //a list of doubles
+    else if (rank == 1 && type == SPUD_DOUBLE){ //a list of doubles
         return spud_get_option_aux_list_doubles(key, key_len, type, rank, shape);
     }
-    else if (rank == 2 && type == 0){ //a tensor of doubles
+    else if (rank == 2 && type == SPUD_DOUBLE){ //a tensor of doubles
         return spud_get_option_aux_tensor_doubles(key, key_len, type, rank, shape);
     }
-    else if (rank == 0 || type == 3){ // scalar or string
+    else if (rank == 0 || type == SPUD_STRING){ // scalar or string
         return spud_get_option_aux_scalar_or_string(key, key_len, type, rank, shape);
     }
     else if (rank == -1){
@@ -465,6 +490,7 @@ libspud_set_option_attribute(PyObject *self, PyObject *args)
     outcomeSetOption = spud_set_option_attribute(key, key_len, val, val_len);
     return error_checking(outcomeSetOption, "set option attribute");
 }
+
 static PyObject*
 libspud_delete_option(PyObject *self, PyObject *args)
 {
@@ -480,8 +506,6 @@ libspud_delete_option(PyObject *self, PyObject *args)
     outcomeDeleteOption = spud_delete_option(key, key_len);
     return error_checking(outcomeDeleteOption, "delete option");
 }
-
-
 
 static PyObject*
 set_option_aux_tensor_doubles(PyObject *pylist, const char *key, int key_len, int type, int rank, int *shape)
@@ -510,6 +534,29 @@ set_option_aux_tensor_doubles(PyObject *pylist, const char *key, int key_len, in
     outcomeSetOption = spud_set_option(key, key_len, val, type, rank, shape);
     return error_checking(outcomeSetOption, "set option aux tensor doubles");
 }
+
+static PyObject*
+set_option_aux_scalar(PyObject *pyscalar, const char *key, int key_len, int type, int rank, int *shape)
+{   // this function is for setting option when the second argument is of type scalar
+    //printf("set option aux scalar is entered\n");
+
+    int outcomeSetOption = SPUD_NO_ERROR;
+
+    if (type == SPUD_DOUBLE){ //scalar is double
+        double val;
+        PyArg_Parse(pyscalar, "f", &val);
+        outcomeSetOption = spud_set_option(key, key_len, &val, type, rank, shape);
+    }
+    else if (type == SPUD_INT){
+        int val;
+        PyArg_Parse(pyscalar, "i", &val);
+        outcomeSetOption = spud_set_option(key, key_len, &val, type, rank, shape);
+    }
+
+
+    return error_checking(outcomeSetOption, "set option aux scalar");
+}
+
 
 static PyObject*
 libspud_set_option(PyObject *self, PyObject *args)
@@ -541,16 +588,19 @@ libspud_set_option(PyObject *self, PyObject *args)
     if (error_checking(outcomeGetShape, "set option") == NULL){
         return NULL;
     }
-    if (PyList_Check(secondArg)){
-        if (rank == 1 && type == 1){ // list of ints
+    if (PyList_Check(secondArg)){ // if second argument is a pylist
+        if (rank == 1 && type == SPUD_INT){ // list of ints
             set_option_aux_list_ints(secondArg, key, key_len, type, rank, shape);
         }
-        else if (rank == 2 && type == 0){ //tensor of doubles
+        else if (rank == 2 && type == SPUD_DOUBLE){ //tensor of doubles
             set_option_aux_tensor_doubles(secondArg, key, key_len, type, rank, shape);
         }
     }
-    else if (PyString_Check(secondArg)){
+    else if (PyString_Check(secondArg)){ // if second argument is a pystring
         set_option_aux_string(secondArg, key, key_len, type, rank, shape);
+    }
+    else if (rank == 0){ // if second argument is a scalar
+        set_option_aux_scalar(secondArg, key, key_len, type, rank, shape);
     }
 
     Py_RETURN_NONE;
@@ -619,23 +669,33 @@ initlibspud(void)
     SpudNewKeyWarning = PyErr_NewException("SpudNewKey.warning", NULL, NULL);
     SpudKeyError = PyErr_NewException("SpudKey.error", NULL, NULL);
     SpudTypeError = PyErr_NewException("SpudType.error", NULL, NULL);
-    SpudFileError = PyErr_NewException("SpudFile.error", NULL, NULL);
+    SpudFileError = PyErr_NewException("SpudFile.warning", NULL, NULL);
+    SpudAttrSetFailedWarning = PyErr_NewException("SpudAttrSetFailed.warning", NULL, NULL);
+    SpudShapeError = PyErr_NewException("SpudShape.error", NULL, NULL);
+    SpudRankError = PyErr_NewException("SpudRank.error", NULL, NULL);
 
     Py_INCREF(SpudError);
     Py_INCREF(SpudNewKeyWarning);
     Py_INCREF(SpudKeyError);
     Py_INCREF(SpudTypeError);
     Py_INCREF(SpudFileError);
+    Py_INCREF(SpudRankError);
+    Py_INCREF(SpudShapeError);
+    Py_INCREF(SpudAttrSetFailedWarning);
 
     PyModule_AddObject(m, "SpudError", SpudError);
     PyModule_AddObject(m, "SpudNewKeyWarning", SpudNewKeyWarning);
     PyModule_AddObject(m, "SpudKeyError", SpudKeyError);
     PyModule_AddObject(m, "SpudTypeError", SpudTypeError);
     PyModule_AddObject(m, "SpudFileError", SpudFileError);
+    PyModule_AddObject(m, "SpudAttrSetFailedWarning", SpudAttrSetFailedWarning);
+    PyModule_AddObject(m, "SpudShapeError", SpudShapeError);
+    PyModule_AddObject(m, "SpudRankError", SpudRankError);
 
 #if PY_MINOR_VERSION > 6
     manager = PyCapsule_Import("fluidity_api._spud_manager", 0);
     if (manager != NULL) spud_set_manager(manager);
 #endif
 }
+
 
