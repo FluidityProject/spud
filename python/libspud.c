@@ -340,7 +340,11 @@ spud_get_option_aux_scalar_or_string(const char *key, int key_len, int type, int
     }
     else if (type == SPUD_STRING) {
         int size = shape[0];
-        char val [size];
+        char val[size+1];
+        int i;
+        for (i = 0; i < size+1; i++)
+          val[i] = '\0';
+          
         outcomeGetOption = spud_get_option(key, key_len, val);
         if (error_checking(outcomeGetOption, "get option aux scalar or string") == NULL){
             return NULL;
@@ -354,12 +358,51 @@ spud_get_option_aux_scalar_or_string(const char *key, int key_len, int type, int
 
 static PyObject*
 spud_get_option_aux_tensor_doubles(const char *key, int key_len, int type, int rank, int *shape)
-{   // this function is for getting option when the option is of type a tensor
+{   // this function is for getting option when the option is of type a tensor o doubles
     int outcomeGetOption;
     int rowsize = shape[0];
     int colsize = shape[1];
     int size = rowsize*colsize;
     double val [size];
+    int m;
+    int n;
+    int counter;
+
+    outcomeGetOption = spud_get_option(key, key_len, val);
+    if (error_checking(outcomeGetOption, "get option aux tensor") == NULL){
+        return NULL;
+    }
+    PyObject* pylist = PyList_New(rowsize);
+    if (pylist == NULL){
+        printf("New list error");
+        return NULL;
+    }
+    counter = 0;
+    for (m = 0; m < rowsize; m++){
+        PyObject* pysublist = PyList_New(colsize);
+        if (pysublist == NULL){
+            printf("New sublist error");
+            return NULL;
+        }
+        for (n = 0; n < colsize; n++){
+            PyObject* element = Py_BuildValue("f", val[counter]);
+            PyList_SetItem(pysublist, n, element);
+            counter++;
+        }
+        PyList_SetItem(pylist, m, pysublist);
+    }
+
+    return pylist;
+}
+
+static PyObject*
+spud_get_option_aux_tensor_ints(const char *key, int key_len, int type, int rank, int *shape)
+{   // this function is for getting option when the option is of type a tensor of ints
+    int outcomeGetOption;
+    int rowsize = shape[0];
+    int colsize = shape[1];
+    int size = rowsize*colsize;
+    int val [size];
     int m;
     int n;
     int counter;
@@ -419,21 +462,35 @@ libspud_get_option(PyObject *self, PyObject *args)
     if (error_checking(outcomeGetOptionShape, "get option") == NULL){
         return NULL;
     }
-    if (rank == 1 && type == SPUD_INT){ //a list of ints
-        return spud_get_option_aux_list_ints(key, key_len, type, rank, shape);
+    
+    if (rank == -1){ // type error
+        char errormessage [MAXLENGTH];
+        snprintf(errormessage, MAXLENGTH, "Error: The specified option has a different \
+                        type from that of the option argument provided in %s", "get option");
+        PyErr_SetString(SpudTypeError, errormessage);
+        return NULL;
     }
-    else if (rank == 1 && type == SPUD_DOUBLE){ //a list of doubles
-        return spud_get_option_aux_list_doubles(key, key_len, type, rank, shape);
-    }
-    else if (rank == 2 && type == SPUD_DOUBLE){ //a tensor of doubles
-        return spud_get_option_aux_tensor_doubles(key, key_len, type, rank, shape);
-    }
-    else if (rank == 0 || type == SPUD_STRING){ // scalar or string
+    else if (rank == 0){ // scalar
         return spud_get_option_aux_scalar_or_string(key, key_len, type, rank, shape);
     }
-    else if (rank == -1){
-        PyErr_SetString(SpudTypeError,"Error: Type error in get option.");
-        return NULL;
+    else if (rank == 1){ // list or string
+        if (type == SPUD_INT){  //a list of ints
+            return spud_get_option_aux_list_ints(key, key_len, type, rank, shape);
+        }
+        else if (type == SPUD_DOUBLE){  //a list of doubles
+            return spud_get_option_aux_list_doubles(key, key_len, type, rank, shape);
+        }
+        else if (type == SPUD_STRING){  //string
+            return spud_get_option_aux_scalar_or_string(key, key_len, type, rank, shape);
+        }
+    }
+    else if (rank == 2){ // tensor
+        if (type == SPUD_DOUBLE){  //a tensor of doubles
+            return spud_get_option_aux_tensor_doubles(key, key_len, type, rank, shape);
+        }
+        else if (type == SPUD_INT){  //a tensor of ints
+            return spud_get_option_aux_tensor_ints(key, key_len, type, rank, shape);
+        } 
     }
 
     PyErr_SetString(SpudError,"Error: Get option failed.");
@@ -444,7 +501,8 @@ set_option_aux_list_ints(PyObject *pylist, const char *key, int key_len, int typ
 {   // this function is for setting option when the second argument is of type a list of ints
     int j;
     int psize = PyList_Size(pylist);
-    int val [psize];
+    shape[0] = psize;
+    int *val = malloc(psize*sizeof(int)) ;
     int outcomeSetOption;
     int element;
 
@@ -452,6 +510,29 @@ set_option_aux_list_ints(PyObject *pylist, const char *key, int key_len, int typ
         element = -1;
         PyObject* pelement = PyList_GetItem(pylist, j);
         PyArg_Parse(pelement, "i", &element);
+        val[j] = element;
+    }
+    outcomeSetOption = spud_set_option(key, key_len, val, type, rank, shape);
+    if (error_checking(outcomeSetOption, "set option aux list ints") == NULL){
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+static PyObject*
+set_option_aux_list_doubles(PyObject *pylist, const char *key, int key_len, int type, int rank, int *shape)
+{   // this function is for setting option when the second argument is of type a list of doubles
+    int j;
+    int psize = PyList_Size(pylist);
+    shape[0] = psize;
+    double val [psize];
+    int outcomeSetOption;
+    double element;
+
+    for (j = 0; j < psize; j++){
+        element = -1.0;
+        PyObject* pelement = PyList_GetItem(pylist, j);
+        PyArg_Parse(pelement, "f", &element);
         val[j] = element;
     }
     outcomeSetOption = spud_set_option(key, key_len, val, type, rank, shape);
@@ -501,7 +582,6 @@ libspud_delete_option(PyObject *self, PyObject *args)
 
     firstArg = PyTuple_GetItem(args, 0);
     PyArg_Parse(firstArg, "s", &key);
-    printf("%s\n",key);
     key_len = strlen(key);
     outcomeDeleteOption = spud_delete_option(key, key_len);
     return error_checking(outcomeDeleteOption, "delete option");
@@ -514,14 +594,21 @@ set_option_aux_tensor_doubles(PyObject *pylist, const char *key, int key_len, in
     int j;
     int counter = 0;
     int pylistsize = PyList_Size(pylist);
-    double val [pylistsize];
+    shape[0] = pylistsize;
+    
     int outcomeSetOption;
     int pysublistsize;
+    PyObject* pysublist = PyList_GetItem(pylist, 0);
+    pysublistsize = PyList_Size(pysublist);
+    int size = pylistsize*pysublistsize;
+    
     double element;
-
+    double val [size];
+    
     for (i = 0; i < pylistsize; i++){
         PyObject* pysublist = PyList_GetItem(pylist, i);
         pysublistsize = PyList_Size(pysublist);
+        shape[1] = pysublistsize;
         for (j = 0; j < pysublistsize; j++){
             element = -1.0;
             PyObject* pysublistElement = PyList_GetItem(pysublist, j);
@@ -536,10 +623,42 @@ set_option_aux_tensor_doubles(PyObject *pylist, const char *key, int key_len, in
 }
 
 static PyObject*
+set_option_aux_tensor_ints(PyObject *pylist, const char *key, int key_len, int type, int rank, int *shape)
+{   // this function is for setting option when the second argument is of type a tensor of ints
+    int i;
+    int j;
+    int counter = 0;
+    int pylistsize = PyList_Size(pylist);
+    shape[0] = pylistsize;
+    int pysublistsize;
+    PyObject* pysublist = PyList_GetItem(pylist, 0);
+    pysublistsize = PyList_Size(pysublist);
+    int size = pylistsize*pysublistsize;
+    int val [size];
+    int outcomeSetOption;
+
+    int element;
+
+    for (i = 0; i < pylistsize; i++){
+        PyObject* pysublist = PyList_GetItem(pylist, i);
+        pysublistsize = PyList_Size(pysublist);
+        shape[1] = pysublistsize;
+        for (j = 0; j < pysublistsize; j++){
+            element = 1;
+            PyObject* pysublistElement = PyList_GetItem(pysublist, j);
+            PyArg_Parse(pysublistElement, "i", &element);
+            val[counter] = element;
+            counter ++;
+        }
+    }
+
+    outcomeSetOption = spud_set_option(key, key_len, val, type, rank, shape);
+    return error_checking(outcomeSetOption, "set option aux tensor doubles");
+}
+
+static PyObject*
 set_option_aux_scalar(PyObject *pyscalar, const char *key, int key_len, int type, int rank, int *shape)
 {   // this function is for setting option when the second argument is of type scalar
-    //printf("set option aux scalar is entered\n");
-
     int outcomeSetOption = SPUD_NO_ERROR;
 
     if (type == SPUD_DOUBLE){ //scalar is double
@@ -552,7 +671,6 @@ set_option_aux_scalar(PyObject *pyscalar, const char *key, int key_len, int type
         PyArg_Parse(pyscalar, "i", &val);
         outcomeSetOption = spud_set_option(key, key_len, &val, type, rank, shape);
     }
-
 
     return error_checking(outcomeSetOption, "set option aux scalar");
 }
@@ -588,19 +706,28 @@ libspud_set_option(PyObject *self, PyObject *args)
     if (error_checking(outcomeGetShape, "set option") == NULL){
         return NULL;
     }
-    if (PyList_Check(secondArg)){ // if second argument is a pylist
-        if (rank == 1 && type == SPUD_INT){ // list of ints
-            set_option_aux_list_ints(secondArg, key, key_len, type, rank, shape);
+    
+    if (rank == 0){ // scalar
+        set_option_aux_scalar(secondArg, key, key_len, type, rank, shape);
+    }
+    else if (rank == 1){ // list or string
+        if (PyString_Check(secondArg)){ // pystring
+            set_option_aux_string(secondArg, key, key_len, type, rank, shape);
         }
-        else if (rank == 2 && type == SPUD_DOUBLE){ //tensor of doubles
+        else if (type == SPUD_INT) { // list of ints
+            set_option_aux_list_ints(secondArg, key, key_len, type, rank, shape);
+        }    
+        else if (type == SPUD_DOUBLE){ // list of doubles
+            set_option_aux_list_doubles(secondArg, key, key_len, type, rank, shape);
+        } 
+    }
+    else if (rank == 2){ // tensor
+        if (type == SPUD_DOUBLE) { // tensor of doubles
             set_option_aux_tensor_doubles(secondArg, key, key_len, type, rank, shape);
         }
-    }
-    else if (PyString_Check(secondArg)){ // if second argument is a pystring
-        set_option_aux_string(secondArg, key, key_len, type, rank, shape);
-    }
-    else if (rank == 0){ // if second argument is a scalar
-        set_option_aux_scalar(secondArg, key, key_len, type, rank, shape);
+        else if (type == SPUD_INT) { // tensor of ints
+            set_option_aux_tensor_ints(secondArg, key, key_len, type, rank, shape);
+        }
     }
 
     Py_RETURN_NONE;
@@ -691,11 +818,13 @@ initlibspud(void)
     PyModule_AddObject(m, "SpudAttrSetFailedWarning", SpudAttrSetFailedWarning);
     PyModule_AddObject(m, "SpudShapeError", SpudShapeError);
     PyModule_AddObject(m, "SpudRankError", SpudRankError);
-
+    
+/*
 #if PY_MINOR_VERSION > 6
     manager = PyCapsule_Import("fluidity_api._spud_manager", 0);
     if (manager != NULL) spud_set_manager(manager);
 #endif
+*/
 }
 
 

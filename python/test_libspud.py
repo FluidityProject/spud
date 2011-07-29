@@ -1,5 +1,4 @@
 import libspud
-#print libspud.__file__
 
 libspud.load_options('test.flml')
 
@@ -24,6 +23,8 @@ assert libspud.get_option_shape('/problem_type')[1] == -1
 assert libspud.get_option('/problem_type') == "multimaterial"
 assert libspud.get_option('/geometry/dimension') == 2
 libspud.set_option('/geometry/dimension', 3)
+
+
 assert libspud.get_option('/geometry/dimension') == 3
 
 list_path = '/material_phase::Material1/scalar_field::MaterialVolumeFraction/prognostic/boundary_conditions::LetNoOneLeave/surface_ids'
@@ -32,6 +33,7 @@ assert libspud.get_option_rank(list_path) == 1
 assert libspud.get_option(list_path) == [7, 8, 9, 10]
 
 libspud.set_option(list_path, [11, 12, 13, 14, 15])
+
 assert libspud.get_option_shape(list_path) == (5, -1)
 assert libspud.get_option_rank(list_path) == 1
 assert libspud.get_option(list_path)==[11, 12, 13, 14, 15]
@@ -44,6 +46,7 @@ assert libspud.get_option(tensor_path)==[[1.0,2.0],[3.0,4.0]]
 libspud.set_option(tensor_path, [[5.0,6.0,2.0],[7.0,8.0,1.0]])
 #assert libspud.get_option_shape(tensor_path) == (3,3)
 assert libspud.get_option_rank(tensor_path) == 2
+
 assert(libspud.get_option(tensor_path)==[[5.0, 6.0, 2.0],[7.0, 8.0, 1.0]])
 
 try:
@@ -81,3 +84,4 @@ except libspud.SpudTypeError, e:
   pass
 
 libspud.write_options('test_out.flml')
+
