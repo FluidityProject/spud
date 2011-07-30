@@ -1240,10 +1240,10 @@ class Diamond:
     if not self.data.store():
       return False
 
-    if isinstance(self.selected_node, mixedtree.MixedTree) \
-       and self.geometry_dim_tree is not None \
-       and self.selected_node.parent is self.geometry_dim_tree.parent \
-       and self.selected_node.data is not None:
+    if (isinstance(self.selected_node, mixedtree.MixedTree)
+       and self.geometry_dim_tree is not None
+       and self.selected_node.parent is self.geometry_dim_tree.parent
+       and self.selected_node.data is not None):
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True

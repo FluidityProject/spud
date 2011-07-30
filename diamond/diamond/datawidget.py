@@ -262,6 +262,7 @@ class DataWidget(gtk.VBox):
 
     self.interacted = [False for i in range(dim1 * dim2)]
     self.show_all()
+    self.buttons.show()
 
     return
 
