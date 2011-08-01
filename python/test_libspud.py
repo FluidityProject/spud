@@ -33,7 +33,6 @@ assert libspud.get_option_rank(list_path) == 1
 assert libspud.get_option(list_path) == [7, 8, 9, 10]
 
 libspud.set_option(list_path, [11, 12, 13, 14, 15])
-
 assert libspud.get_option_shape(list_path) == (5, -1)
 assert libspud.get_option_rank(list_path) == 1
 assert libspud.get_option(list_path)==[11, 12, 13, 14, 15]
@@ -85,3 +84,4 @@ except libspud.SpudTypeError, e:
 
 libspud.write_options('test_out.flml')
 
+print "All tests passed!"
