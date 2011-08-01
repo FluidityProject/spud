@@ -502,7 +502,7 @@ set_option_aux_list_ints(PyObject *pylist, const char *key, int key_len, int typ
     int j;
     int psize = PyList_Size(pylist);
     shape[0] = psize;
-    int *val = malloc(psize*sizeof(int)) ;
+    int val[psize] ;
     int outcomeSetOption;
     int element;
 
