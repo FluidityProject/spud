@@ -163,8 +163,8 @@ class Tree(gobject.GObject):
     """
 
     (invalid, new_data) = self.valid_data(datatype, data)
-    if not invalid and isinstance(new_data, str) and not new_data == "":
-      if new_data != data and self.validity_check(new_data, datatype) is None:
+    if not invalid and isinstance(new_data, str) and new_data != "":
+      if new_data != data and self.validity_check(datatype, new_data) is None:
         return None
       else:
         return new_data

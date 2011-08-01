@@ -55,10 +55,10 @@ class MixedTree:
     return
 
   def valid_data(self, datatype, data):
-    return self.parent.valid_data(datatype, data)
+    return self.child.valid_data(datatype, data)
 
   def validity_check(self, datatype, data):
-    return self.parent.validity_check(datatype, data)
+    return self.child.validity_check(datatype, data)
 
   def matches(self, text, case_sensitive = False):
     old_parent_data = self.parent.data

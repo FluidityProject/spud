@@ -1046,9 +1046,9 @@ class Diamond:
     foreground colour.
     """
 
-    choice_or_tree, active_tree, liststore = self.treestore.get(iter, 0, 1, 2)
+    choice_or_tree, active_tree, liststore = treemodel.get(iter, 0, 1, 2)
 
-    if self.groupmode and self.treestore.iter_parent(iter) is None:
+    if self.groupmode and treemodel.iter_parent(iter) is None:
       cellCombo.set_property("text", choice_or_tree.get_name_path())
     else:
       cellCombo.set_property("text", str(choice_or_tree))
@@ -1062,7 +1062,7 @@ class Diamond:
     elif isinstance(choice_or_tree, choice.Choice):
       cellCombo.set_property("editable", True)
 
-    if self.treestore_iter_is_active(iter):
+    if self.iter_is_active(treemodel, iter):
       if active_tree.valid is True:
         cellCombo.set_property("foreground", "black")
       else:
@@ -1072,13 +1072,13 @@ class Diamond:
 
     return
 
-  def set_cellpicture_choice(self, column, cell, model, iter):
+  def set_cellpicture_choice(self, column, cell, treemodel, iter):
     """
     This hook function sets up the other gtk.CellRendererPixbuf, the one that gives
     the clue to the user whether this is a choice or not.
     """
     
-    choice_or_tree = self.treestore.get_value(iter, 0)
+    choice_or_tree = treemodel.get_value(iter, 0)
     if isinstance(choice_or_tree, tree.Tree):
       cell.set_property("stock-id", None)
     elif isinstance(choice_or_tree, choice.Choice):
@@ -1086,14 +1086,14 @@ class Diamond:
 
     return
 
-  def set_cellpicture_cardinality(self, column, cell, model, iter):
+  def set_cellpicture_cardinality(self, column, cell, treemodel, iter):
     """
     This hook function sets up the gtk.CellRendererPixbuf on the extreme right-hand
     side for each row; this paints a plus or minus or nothing depending on whether
     something can be added or removed or has to be there.
     """
 
-    choice_or_tree = self.treestore.get_value(iter, 0)
+    choice_or_tree = treemodel.get_value(iter, 0)
     if choice_or_tree.cardinality == "":
       cell.set_property("stock-id", None)
     elif choice_or_tree.cardinality == "?" or choice_or_tree.cardinality == "*":
@@ -1240,10 +1240,10 @@ class Diamond:
     if not self.data.store():
       return False
 
-    if isinstance(self.selected_node, mixedtree.MixedTree) \
-       and self.geometry_dim_tree is not None \
-       and self.selected_node.parent is self.geometry_dim_tree.parent \
-       and self.selected_node.data is not None:
+    if (isinstance(self.selected_node, mixedtree.MixedTree)
+       and self.geometry_dim_tree is not None
+       and self.selected_node.parent is self.geometry_dim_tree.parent
+       and self.selected_node.data is not None):
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True
@@ -1525,7 +1525,7 @@ class Diamond:
 
     painted_tree = active_tree.get_mixed_data()
 
-    if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
+    if not isinstance(iter_or_tree, tree.Tree) and not self.iter_is_active(self.treestore, iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
       painted_tree.active = False
     elif lock_geometry_dim and self.geometry_dim_tree is not None and self.geometry_dim_tree.data is not None:
@@ -1636,17 +1636,17 @@ class Diamond:
     
     return
 
-  def treestore_iter_is_active(self, iter):
+  def iter_is_active(self, treemodel, iter):
     """
     Test whether the node at the given iter in the LHS treestore is active.
     """
 
     while iter is not None:
-      choice_or_tree = self.treestore.get_value(iter, 0)
-      active_tree = self.treestore.get_value(iter, 1)
+      choice_or_tree = treemodel.get_value(iter, 0)
+      active_tree = treemodel.get_value(iter, 1)
       if not choice_or_tree.active or not active_tree.active:
         return False
-      iter = self.treestore.iter_parent(iter)
+      iter = treemodel.iter_parent(iter)
 
     return True
 
