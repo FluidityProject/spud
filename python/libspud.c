@@ -818,13 +818,14 @@ initlibspud(void)
     PyModule_AddObject(m, "SpudAttrSetFailedWarning", SpudAttrSetFailedWarning);
     PyModule_AddObject(m, "SpudShapeError", SpudShapeError);
     PyModule_AddObject(m, "SpudRankError", SpudRankError);
-    
-/*
+
+
 #if PY_MINOR_VERSION > 6
     manager = PyCapsule_Import("fluidity_api._spud_manager", 0);
     if (manager != NULL) spud_set_manager(manager);
+    else PyErr_Clear();
 #endif
-*/
+
 }
 
 
