@@ -494,13 +494,11 @@ class Schema(object):
   def append(self, r, x):
     if x is None:
       return
-
+    
     if isinstance(x, list):
-      for y in x:
-        r.append(y)
-      return
-
-    r.append(x)
+      r.extend(x)
+    else:
+      r.append(x)
 
   ##########################################
   # Beginning of XML processing functions. #
