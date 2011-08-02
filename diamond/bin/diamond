@@ -20,6 +20,7 @@ import os
 import os.path
 import sys
 import traceback
+import string
 
 import gtk
 import gtk.gdk
@@ -55,6 +56,16 @@ def Help():
                "  see the Spud manual for further details.", 0)
 
   return
+
+
+def is_valid_alias(alias):
+  valid_chars = string.ascii_letters + string.digits + "-_"
+
+  for c in alias:
+    if c not in valid_chars:
+      return False
+
+  return True
 
 def main():
 
@@ -125,7 +136,7 @@ def main():
 
 
   #is not given or an alias so look up actual path
-  if input_schemafile is None or input_schemafile.isalpha():
+  if input_schemafile is None or is_valid_alias(input_schemafile):
 
     # if the user has specified a file to work on, use the suffix as a key
     if input_filename is not None:
@@ -148,12 +159,17 @@ def main():
     
     # otherwise ask the user to choose
     else:
-      choices = [key + ": " + config.schemata[key][0] for key in config.schemata]
+      choices = [key + ": " + value[0] for key, value in config.schemata.iteritems()]
       choice = dialogs.radio_dialog("Choose a schema", "Choose a schema to use:", choices, logofile)
       suffix = choice.split(":")[0]
       schemata = config.schemata[suffix]
 
-    input_schemafile = schemata[1][input_schemafile]   
+    try:
+      input_schemafile = schemata[1][input_schemafile]   
+    except KeyError:
+      debug.deprint("""Could not find alias "%s"!""" % input_schemafile, 0)
+      sys.exit(1)
+
   #endif
 
   # ensure that the specified schema actually exists!
