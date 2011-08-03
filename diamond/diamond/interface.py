@@ -628,7 +628,9 @@ class Diamond:
     clipboard.store()
 
   def _get_focus_widget(self, parent):
-    """Gets the widget that is a child of parent with the focus."""
+    """
+    Gets the widget that is a child of parent with the focus.
+    """
     focus = parent.get_focus_child()
     if focus is None or (focus.flags() & gtk.HAS_FOCUS):
       return focus
@@ -636,13 +638,21 @@ class Diamond:
       return self._get_focus_widget(focus)
 
   def _handle_clipboard(self, widget, signal):
-    if isinstance(widget, gtk.MenuItem):
+    """
+    This finds the currently focused widget.
+    If no widget is focused or the focused widget doesn't support 
+    the given clipboard operation use the treeview (False), otherwise
+    signal the widget to handel the clipboard operation (True).
+    """
+    widget = self._get_focus_widget(self.main_window)
+
+    if widget is None or widget is self.treeview:
       return False
+
+    if gobject.signal_lookup(signal + "-clipboard", widget):
+      widget.emit(signal + "-clipboard")
+      return True
     else:
-      widget = self._get_focus_widget(self.main_window)
-      if widget is not self.treeview and gobject.signal_lookup(signal + "-clipboard", widget):
-        widget.emit(signal + "-clipboard")
-        return True
       return False
 
   def on_copy(self, widget=None):
@@ -695,10 +705,9 @@ class Diamond:
         children.insert(children.index(node), newnode)
         children.remove(node)
  
-      self.set_treestore(self.selected_iter, [newnode], True, True)
-
+      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
       newnode.recompute_validity()
-      self.treeview.queue_draw()
+      self.treeview.get_selection().select_iter(iter)
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
@@ -970,7 +979,7 @@ class Diamond:
       self.treestore.remove(replacediter)
       return child_iter
    
-    return
+    return iter
 
   def expand_choice_or_tree(self, choice_or_tree):
     """
