@@ -72,7 +72,7 @@ unittest: libspud.la
 doc: 
 	@cd doc; $(MAKE) spud_manual.pdf
 
-install: install-libspud install-spudtools install-diamond
+install: install-libspud install-spudtools install-diamond install-pyspud
 
 install-libspud: libspud.la
 	@INSTALL@ -d $(DESTDIR)@prefix@/lib
@@ -92,6 +92,9 @@ install-spudtools:
 
 install-diamond:
 	cd diamond;	python setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
+
+install-pyspud:
+	cd python; python setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
 
 clean:
 	@cd doc; $(MAKE) clean
