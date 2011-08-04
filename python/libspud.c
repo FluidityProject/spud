@@ -821,7 +821,7 @@ initlibspud(void)
 
 
 #if PY_MINOR_VERSION > 6
-    manager = PyCapsule_Import("spud_manager._spud_manager", 0)
+    manager = PyCapsule_Import("spud_manager._spud_manager", 0);
     if (manager != NULL) spud_set_manager(manager);
     else PyErr_Clear();
 #endif
