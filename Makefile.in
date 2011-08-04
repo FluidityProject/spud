@@ -57,7 +57,7 @@ default: libspud.la build-diamond
 libspud.la: $(OBJS)
 	./libtool --mode=link --tag=FC $(FC) $(FCFLAGS) -o $(LIB) $(OBJS) $(LIBS) -rpath @prefix@/lib 
 	if test -f .libs/libspud.a; then cp .libs/libspud.a .; fi
-	(if test -f .libs/libspud.so; then cp .libs/libspud.so .; fi) || true
+	(if test -f .libs/libspud.so; then cp .libs/libspud.so ./libspud.so.0; ln -s libspud.so.0 libspud.so; fi) || true
 
 build-diamond:
 	cd diamond; python setup.py build; cd ..
@@ -78,7 +78,8 @@ install-libspud: libspud.la
 	@INSTALL@ -d $(DESTDIR)@prefix@/lib
 	@INSTALL@ -d $(DESTDIR)@prefix@/include
 	@INSTALL@ libspud.a $(DESTDIR)@prefix@/lib
-	(if test -f libspud.so; then @INSTALL@ libspud.so $(DESTDIR)@prefix@/lib; fi) || true
+	(if test -f libspud.so.0; then @INSTALL@ libspud.so.0 $(DESTDIR)@prefix@/lib; fi) || true
+	(if test -f libspud.so; then cd $(DESTDIR)@prefix@/lib/; ln -s libspud.so.0 libspud.so; cd -; fi) || true
 	@INSTALL@ $(MODS) $(DESTDIR)@prefix@/include
 	@INSTALL@ $(HEADERS) $(DESTDIR)@prefix@/include
 
