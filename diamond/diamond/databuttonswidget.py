@@ -33,8 +33,8 @@ class DataButtonsWidget(gtk.HBox):
     storeButton.set_label("Store data")
     storeButton.connect("clicked", self._store)
 
-    self.pack_end(revertButton)
-    self.pack_start(storeButton)
+    self.pack_start(revertButton)
+    self.pack_end(storeButton)
 
     return
 

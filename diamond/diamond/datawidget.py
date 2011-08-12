@@ -22,6 +22,7 @@ import pango
 import dialogs
 import datatype
 import mixedtree
+import plist
 
 class DataWidget(gtk.VBox):
 
@@ -95,11 +96,11 @@ class DataWidget(gtk.VBox):
 #         self.scherror.on_validate()
 
   def is_node_editable(self):
-    return self.node is not None \
-       and self.node.active \
-       and self.node.datatype is not None \
-       and self.node.datatype != "fixed" \
-       and (not self.node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree.data is not None)
+    return (self.node is not None
+       and self.node.active
+       and self.node.datatype is not None
+       and self.node.datatype != "fixed"
+       and (not self.node.is_tensor(self.geometry_dim_tree) or self.geometry_dim_tree.data is not None))
        # not A or B == A implies B
        # A B T
        # 0 0 1
@@ -154,10 +155,10 @@ class DataWidget(gtk.VBox):
     """
 
     if self.frame.child is not None:
-    #  if isinstance(self.data, gtk.TextView):
-    #    self.data.handler_block_by_func(self.entry_focus_in)
-    #  elif isinstance(self.data, gtk.ComboBox):
-    #    self.data.handler_block_by_func(self.combo_focus_child)
+      if isinstance(self.data, gtk.TextView):
+        self.data.handler_block_by_func(self.entry_focus_in)
+      elif isinstance(self.data, gtk.ComboBox):
+        self.data.handler_block_by_func(self.combo_focus_child)
 
       self.frame.remove(self.frame.child)
 
@@ -242,16 +243,21 @@ class DataWidget(gtk.VBox):
 
     self.set_child_packing(self.frame, True, True, 0, gtk.PACK_START)
 
+    self.show_all()
+    self.buttons.show()
+
     is_symmetric = self.node.is_symmetric_tensor(self.geometry_dim_tree)
     for i in range(dim1):
       for j in range(dim2):
         iindex = dim1 - i - 1
         jindex = dim2 - j - 1
 
+        entry = gtk.Entry()
+        self.data.attach(entry, jindex, jindex + 1, iindex, iindex + 1)
+
         if not is_symmetric or i >= j:
-          entry = gtk.Entry()
+          entry.show()
           entry.connect("focus-in-event", self.tensor_element_focus_in, jindex, iindex)
-          self.data.attach(entry, jindex, jindex + 1, iindex, iindex + 1)
 
           if self.node.data is None:
             entry.set_text(datatype.print_type(self.node.datatype.datatype))
@@ -260,7 +266,6 @@ class DataWidget(gtk.VBox):
             entry.set_text(self.node.data.split(" ")[jindex + iindex * dim2])
 
     self.interacted = [False for i in range(dim1 * dim2)]
-    self.show_all()
 
     return
 

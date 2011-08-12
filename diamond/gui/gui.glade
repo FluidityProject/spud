@@ -132,6 +132,20 @@
                         <accelerator key="V" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </widget>
                     </child>
+                    <child>
+                      <widget class="GtkMenuItem" id="menuitemGroup">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Group</property>
+                        <signal name="activate" handler="on_group"/>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkMenuItem" id="menuitemUngroup">
+                        <property name="visible">False</property>
+                        <property name="label" translatable="yes">Ungroup</property>
+                        <signal name="activate" handler="on_ungroup"/>
+                      </widget>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -488,7 +502,7 @@
   <widget class="GtkMenu" id="popupmenu">
     <property name="visible">True</property>
     <child>
-      <widget class="GtkMenuItem" id="menuitemCopy">
+      <widget class="GtkMenuItem" id="popupmenuitemCopy">
         <property name="visible">True</property>
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
@@ -496,7 +510,7 @@
       </widget>
     </child>
     <child>
-      <widget class="GtkMenuItem" id="menuitemPaste">
+      <widget class="GtkMenuItem" id="popupmenuitemPaste">
         <property name="visible">True</property>
         <property name="label" translatable="yes">Paste</property>
         <property name="use_underline">True</property>
@@ -504,11 +518,25 @@
       </widget>
     </child>
     <child>
-      <widget class="GtkMenuItem" id="menuitemSlice">
+      <widget class="GtkMenuItem" id="popupmenuitemSlice">
         <property name="visible">True</property>
         <property name="label" translatable="yes">Slice</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_slice"/>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="popupmenuitemGroup">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Group</property>
+        <signal name="activate" handler="on_group"/>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="popupmenuitemUngroup">
+        <property name="visible">False</property>
+        <property name="label" translatable="yes">Ungroup</property>
+        <signal name="activate" handler="on_ungroup"/>
       </widget>
     </child>
   </widget>

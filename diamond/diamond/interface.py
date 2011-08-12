@@ -90,7 +90,7 @@ Important fields:
   treeview: the LHS tree widget
 
 Important routines:
-  cellcombo_edited: called when a choice is selected on the left-hand pane
+  cellcombo_changed: called when a choice is selected on the left-hand pane
   init_treemodel: set up the treemodel and treeview
   on_treeview_clicked: when a row is clicked, process the consequences (e.g. activate inactive instance)
   set_treestore: stuff the treestore with a given tree.Tree
@@ -139,7 +139,10 @@ class Diamond:
                     "on_copy_spud_path": self.on_copy_spud_path,
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
-                    "on_slice": self.on_slice}
+                    "on_slice": self.on_slice,
+                    "on_group": self.on_group,
+                    "on_ungroup": self.on_ungroup}
+
     self.gui.signal_autoconnect(signals)
 
     self.main_window = self.gui.get_widget("mainWindow")
@@ -157,6 +160,7 @@ class Diamond:
     self.suffix = suffix
 
     self.selected_node = None
+    self.selected_iter = None
     self.update_options_frame()
 
     self.file_path = os.getcwd()
@@ -278,9 +282,6 @@ class Diamond:
   def load_file(self, filename):
     # if we have a relative path, make it absolute
     filename = os.path.abspath(filename)
-  
-    if filename == self.filename:
-      return
   
     try:
       os.stat(filename)
@@ -620,26 +621,43 @@ class Diamond:
       debug.deprint("No selection.")
       return
     iter = self.treestore.get_iter(path)
-    active_tree = self.treestore.get_value(iter, 3)
+    active_tree = self.treestore.get_value(iter, 1)
     name = self.get_spudpath(active_tree)
     clipboard = gtk.clipboard_get()
     clipboard.set_text(name)
     clipboard.store()
 
   def _get_focus_widget(self, parent):
-    """Gets the widget that is a child of parent with the focus."""
+    """
+    Gets the widget that is a child of parent with the focus.
+    """
     focus = parent.get_focus_child()
     if focus is None or (focus.flags() & gtk.HAS_FOCUS):
       return focus
     else:
       return self._get_focus_widget(focus)
 
+  def _handle_clipboard(self, widget, signal):
+    """
+    This finds the currently focused widget.
+    If no widget is focused or the focused widget doesn't support 
+    the given clipboard operation use the treeview (False), otherwise
+    signal the widget to handel the clipboard operation (True).
+    """
+    widget = self._get_focus_widget(self.main_window)
+
+    if widget is None or widget is self.treeview:
+      return False
+
+    if gobject.signal_lookup(signal + "-clipboard", widget):
+      widget.emit(signal + "-clipboard")
+      return True
+    else:
+      return False
+
   def on_copy(self, widget=None):
-    if not isinstance(widget, gtk.MenuItem):
-      widget = self._get_focus_widget(self.main_window)
-      if widget is not self.treeview and gobject.signal_lookup("copy-clipboard", widget):
-        widget.emit("copy-clipboard")
-        return
+    if self._handle_clipboard(widget, "copy"):
+      return
 
     if isinstance(self.selected_node, mixedtree.MixedTree):
       node = self.selected_node.parent
@@ -658,28 +676,38 @@ class Diamond:
     return
 
   def on_paste(self, widget=None):
-    if not isinstance(widget, gtk.MenuItem):
-      widget = self._get_focus_widget(self.main_window)
-      if widget is not self.treeview and gobject.signal_lookup("paste-clipboard", widget):
-        widget.emit("paste-clipboard")
-        return
+    if self._handle_clipboard(widget, "paste"):
+      return
 
     clipboard = gtk.clipboard_get()
     ios = StringIO.StringIO(clipboard.wait_for_text())
     
     if self.selected_iter is not None:    
-      node = self.treestore.get_value(self.selected_iter, 3)
+      node = self.treestore.get_value(self.selected_iter, 0)
 
     if node != None:
+  
+      expand = not node.active
+      if expand:
+        self.expand_tree(self.selected_iter)
 
       newnode = self.s.read(ios, node)
 
       if newnode is None:
+        if expand:
+          self.collapse_tree(self.selected_iter, False)
         self.statusbar.set_statusbar("Trying to paste invalid XML.")
         return
 
-      if not node.active:
-        self.expand_tree(self.selected_iter)
+      if node.parent is not None:
+        newnode.set_parent(node.parent)
+        children = node.parent.get_children()
+        children.insert(children.index(node), newnode)
+        children.remove(node)
+ 
+      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
+      newnode.recompute_validity()
+      self.treeview.get_selection().select_iter(iter)
 
       # Extract and display validation errors
       lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
@@ -706,19 +734,95 @@ class Diamond:
         dialogs.long_message(self.main_window, msg)
  
       self.set_saved(False)     
-   
-      self.treeview.freeze_child_notify()
-      iter = self.set_treestore(self.selected_iter, [newnode], True, True)
-      self.treeview.thaw_child_notify()
-      
-      self.treeview.get_selection().select_iter(iter)
 
     return
 
   def on_slice(self, widget = None):
+    if not self.selected_node.is_sliceable():
+      self.statusbar.set_statusbar("Cannot slice on this element.")
+      return
+
     window = sliceview.SliceView(self.main_window)
     window.geometry_dim_tree = self.geometry_dim_tree
     window.update(self.selected_node, self.tree)
+    window.connect("destroy", self._slice_destroy)
+    return
+
+  def _slice_destroy(self, widget):
+    self.on_select_row()
+
+
+  groupmode = False
+
+  def on_group(self, widget = None):
+    """
+    Clears the treeview and then fills it with nodes 
+    with the same type as the selected node.
+    """
+
+    if self.selected_node == self.tree or not self.selected_iter:
+      self.statusbar.set_statusbar("Cannot group on this element.")
+      return #Group on the entire tree... ie don't group or nothing selected
+
+    self.gui.get_widget("menuitemUngroup").show()
+    self.gui.get_widget("popupmenuitemUngroup").show()
+
+    self.groupmode = True
+    node, tree = self.treestore.get(self.selected_iter, 0, 1)
+    
+    self.treeview.freeze_child_notify()
+    self.treeview.set_model(None)
+
+    def get_nodes(node, tree):
+      nodes = []
+
+      if isinstance(tree, choice.Choice):
+        child = tree.get_current_tree()
+        if child.name == node.name:
+          nodes.append(tree)
+        nodes += get_nodes(node, child)
+      else:
+        for child in tree.get_children():
+          if child.name == node.name:
+            nodes.append(child)
+          nodes += get_nodes(node, child)
+
+      return nodes
+    
+    self.set_treestore(None, get_nodes(tree, self.tree), True)
+
+    self.treeview.set_model(self.treestore)
+    self.treeview.thaw_child_notify()
+
+    path = self.get_treestore_path_from_node(node)
+    self.treeview.get_selection().select_path(path)
+
+    return
+
+  def on_ungroup(self, widget = None):
+    """
+    Restores the treeview to normal.
+    """
+
+    self.gui.get_widget("menuitemUngroup").hide()
+    self.gui.get_widget("popupmenuitemUngroup").hide()
+
+    self.groupmode = False
+    node = self.treestore.get_value(self.selected_iter, 0)
+
+    self.treeview.freeze_child_notify()
+    self.treeview.set_model(None)
+
+    self.set_treestore(None, [self.tree], True)
+
+    self.treeview.set_model(self.treestore)
+    self.treeview.thaw_child_notify()
+
+    path = self.get_treestore_path_from_node(node)
+    self.treeview.expand_to_path(path)
+    self.treeview.scroll_to_cell(path)
+    self.treeview.get_selection().select_path(path)
+ 
     return
 
   ## LHS ###
@@ -765,23 +869,23 @@ class Diamond:
     self.treeview.get_selection().set_select_function(self.options_tree_select_func)
     self.options_tree_select_func_enabled = True
 
-    model = gtk.ListStore(str, str, gobject.TYPE_PYOBJECT)
+    # Node column
+    column = gtk.TreeViewColumn("Node")
+    column.set_property("expand", True)
+    column.set_resizable(True)
+
     self.cellcombo = cellCombo = gtk.CellRendererCombo()
-    cellCombo.set_property("model", model)
     cellCombo.set_property("text-column", 0)
     cellCombo.set_property("editable", True)
     cellCombo.set_property("has-entry", False)
-    cellCombo.connect("edited", self.cellcombo_edited)
-
-    # Node column
-    column = gtk.TreeViewColumn("Node", cellCombo, text=0)
-    column.set_property("expand", True)
-    column.set_resizable(True)
+    cellCombo.connect("changed", self.cellcombo_changed)
+    column.pack_start(cellCombo)
     column.set_cell_data_func(cellCombo, self.set_combobox_liststore)
 
     self.choicecell = choiceCell = gtk.CellRendererPixbuf()
     column.pack_end(choiceCell, expand=False)
     column.set_cell_data_func(choiceCell, self.set_cellpicture_choice)
+
     optionsTree.append_column(column)
 
     self.imgcell = cellPicture = gtk.CellRendererPixbuf()
@@ -792,12 +896,11 @@ class Diamond:
     imgcolumn.set_cell_data_func(cellPicture, self.set_cellpicture_cardinality)
     optionsTree.append_column(imgcolumn)
 
-    # 0: display name, 
-    # 1: gtk.ListStore containing the display names of possible choices
-    # 2: pointer to node in self.tree -- a choice or a tree
-    # 3: pointer to currently active tree
+    # 0: pointer to node in self.tree -- a choice or a tree
+    # 1: pointer to currently active tree
+    # 2: gtk.ListStore containing the display names of possible choices
 
-    self.treestore = gtk.TreeStore(str, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
+    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
     self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
 
@@ -812,8 +915,7 @@ class Diamond:
     liststore = gtk.ListStore(str, gobject.TYPE_PYOBJECT)
 
     for t in choice_or_tree.get_choices():
-      name = t.get_display_name()
-      liststore.append([name, t])
+      liststore.append([str(t), t])
 
     return liststore
   
@@ -825,7 +927,7 @@ class Diamond:
     if replace:
       replacediter = iter
       iter = self.treestore.iter_parent(replacediter)
-    else:
+    else: 
       self.remove_children(iter)
   
     for t in new_tree:
@@ -843,9 +945,9 @@ class Diamond:
         liststore = self.create_liststore(t)
 
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [t.get_display_name(), liststore, t, t])
+          child_iter = self.treestore.insert_before(iter, replacediter, [t, t, liststore])
         else:
-          child_iter = self.treestore.append(iter, [t.get_display_name(), liststore, t, t])
+          child_iter = self.treestore.append(iter, [t, t, liststore])
 
         attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
         dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
@@ -863,9 +965,9 @@ class Diamond:
           continue
 
         if replace:
-          child_iter = self.treestore.insert_before(iter, replacediter, [ts_choice.get_display_name(), liststore, t, ts_choice])
+          child_iter = self.treestore.insert_before(iter, replacediter, [t, ts_choice, liststore])
         else:
-          child_iter = self.treestore.append(iter, [ts_choice.get_display_name(), liststore, t, ts_choice])
+          child_iter = self.treestore.append(iter, [t, ts_choice, liststore])
 
         attrid = t.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(child_iter))
         dataid = t.connect("on-set-data", self.on_set_data, self.treestore.get_path(child_iter))
@@ -877,7 +979,7 @@ class Diamond:
       self.treestore.remove(replacediter)
       return child_iter
    
-    return
+    return iter
 
   def expand_choice_or_tree(self, choice_or_tree):
     """
@@ -908,7 +1010,7 @@ class Diamond:
         self.set_treestore(iter, [])
         return
 
-    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    choice_or_tree, active_tree = self.treestore.get(iter, 0, 1)
     if active_tree.active is False or choice_or_tree.active is False:
       return
 
@@ -919,7 +1021,7 @@ class Diamond:
     child_iter = self.treestore.iter_children(iter)
     while child_iter is not None:
       # fix for recursive schemata!
-      child_active_tree = self.treestore.get_value(child_iter, 3)
+      child_active_tree = self.treestore.get_value(child_iter, 1)
       if child_active_tree.schemaname == active_tree.schemaname:
         debug.deprint("Warning: recursive schema elements not supported: %s" % active_tree.name)
         child_iter = self.treestore.iter_next(child_iter)
@@ -953,18 +1055,23 @@ class Diamond:
     foreground colour.
     """
 
-    liststore, choice_or_tree, active_tree = self.treestore.get(iter, 1, 2, 3)
+    choice_or_tree, active_tree, liststore = treemodel.get(iter, 0, 1, 2)
 
-    # set the model for the cellcombo, where it gets the possible choices for the name
+    if self.groupmode and treemodel.iter_parent(iter) is None:
+      cellCombo.set_property("text", choice_or_tree.get_name_path())
+    else:
+      cellCombo.set_property("text", str(choice_or_tree))
+
+
     cellCombo.set_property("model", liststore)
 
     # set the properties: colour, etc.
-    if choice_or_tree.__class__ is tree.Tree:
+    if isinstance(choice_or_tree, tree.Tree):
       cellCombo.set_property("editable", False)
-    elif choice_or_tree.__class__ is choice.Choice:
+    elif isinstance(choice_or_tree, choice.Choice):
       cellCombo.set_property("editable", True)
 
-    if self.treestore_iter_is_active(iter):
+    if self.iter_is_active(treemodel, iter):
       if active_tree.valid is True:
         cellCombo.set_property("foreground", "black")
       else:
@@ -974,13 +1081,13 @@ class Diamond:
 
     return
 
-  def set_cellpicture_choice(self, column, cell, model, iter):
+  def set_cellpicture_choice(self, column, cell, treemodel, iter):
     """
     This hook function sets up the other gtk.CellRendererPixbuf, the one that gives
     the clue to the user whether this is a choice or not.
     """
-
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    
+    choice_or_tree = treemodel.get_value(iter, 0)
     if isinstance(choice_or_tree, tree.Tree):
       cell.set_property("stock-id", None)
     elif isinstance(choice_or_tree, choice.Choice):
@@ -988,14 +1095,14 @@ class Diamond:
 
     return
 
-  def set_cellpicture_cardinality(self, column, cell, model, iter):
+  def set_cellpicture_cardinality(self, column, cell, treemodel, iter):
     """
     This hook function sets up the gtk.CellRendererPixbuf on the extreme right-hand
     side for each row; this paints a plus or minus or nothing depending on whether
     something can be added or removed or has to be there.
     """
 
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    choice_or_tree = treemodel.get_value(iter, 0)
     if choice_or_tree.cardinality == "":
       cell.set_property("stock-id", None)
     elif choice_or_tree.cardinality == "?" or choice_or_tree.cardinality == "*":
@@ -1021,7 +1128,7 @@ class Diamond:
     Toggles the state of part of the tree.
     """
 
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    choice_or_tree = self.treestore.get_value(iter, 0)
 
     if choice_or_tree.active:
       self.collapse_tree(iter)
@@ -1032,18 +1139,13 @@ class Diamond:
 
     return
   
-  def collapse_tree(self, iter):
+  def collapse_tree(self, iter, confirm = True):
     """
     Collapses part of the tree.
     """
 
-    choice_or_tree, = self.treestore.get(iter, 2)
-    parent_iter = self.treestore.iter_parent(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    choice_or_tree, = self.treestore.get(iter, 0)
+    parent_tree = choice_or_tree.parent
 
     if not choice_or_tree.active:
       return
@@ -1065,7 +1167,7 @@ class Diamond:
         self.set_saved(False)
         self.remove_children(iter)
       else:
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
 
     elif choice_or_tree.cardinality == "+":
       count = parent_tree.count_children_by_schemaname(choice_or_tree.schemaname)
@@ -1073,25 +1175,23 @@ class Diamond:
         # do nothing
         return
       else: # count > 2
-        self.delete_tree(iter)
+        self.delete_tree(iter, confirm)
   
     parent_tree.recompute_validity()
     self.treeview.queue_draw()
     return
 
-  def delete_tree(self, iter):
-    choice_or_tree, = self.treestore.get(iter, 2)
-    parent_iter = self.treestore.iter_parent(iter)
+  def delete_tree(self, iter, confirm):
+    choice_or_tree, = self.treestore.get(iter, 0)
+    parent_tree = choice_or_tree.parent
     isSelected = self.treeview.get_selection().iter_is_selected(iter)
     sibling = self.treestore.iter_next(iter)
 
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    if confirm:
+      response = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
 
-    confirm = dialogs.prompt(self.main_window, "Are you sure you want to delete this node?")
-    if confirm == gtk.RESPONSE_YES:
+    # not A or B == A implies B
+    if not confirm or response == gtk.RESPONSE_YES:
       parent_tree.delete_child_by_ref(choice_or_tree)
       self.remove_children(iter)
       self.treestore.remove(iter)
@@ -1106,13 +1206,8 @@ class Diamond:
     Expands part of the tree.
     """
 
-    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
-    parent_iter = self.treestore.iter_parent(iter)
-
-    if parent_iter == None:
-      parent_tree = None
-    else:
-      parent_tree = self.treestore.get_value(parent_iter, 3)
+    choice_or_tree, active_tree = self.treestore.get(iter, 0, 1)
+    parent_tree = choice_or_tree.parent
 
     if choice_or_tree.active:
       return
@@ -1132,8 +1227,7 @@ class Diamond:
       liststore = self.create_liststore(new_tree)
       self.expand_treestore(iter)
       iter = self.treestore.insert_after(
-        parent=parent_iter, sibling=iter, 
-        row=[new_tree.get_display_name(), liststore, new_tree, new_tree.get_current_tree()])
+        None, iter, [new_tree, new_tree.get_current_tree(), liststore])
       attrid = new_tree.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
       dataid = new_tree.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
       self.signals[new_tree] = (attrid, dataid)
@@ -1155,10 +1249,10 @@ class Diamond:
     if not self.data.store():
       return False
 
-    if isinstance(self.selected_node, mixedtree.MixedTree) \
-       and self.geometry_dim_tree is not None \
-       and self.selected_node.parent is self.geometry_dim_tree.parent \
-       and self.selected_node.data is not None:
+    if (isinstance(self.selected_node, mixedtree.MixedTree)
+       and self.geometry_dim_tree is not None
+       and self.selected_node.parent is self.geometry_dim_tree.parent
+       and self.selected_node.data is not None):
       self.geometry_dim_tree.set_data(self.selected_node.data)
 
     return True
@@ -1235,7 +1329,7 @@ class Diamond:
       return  
 
     self.selected_iter = iter = self.treestore.get_iter(path)
-    choice_or_tree, active_tree = self.treestore.get(iter, 2, 3)
+    choice_or_tree, active_tree = self.treestore.get(iter, 0, 1)
 
     debug.dprint(active_tree)
 
@@ -1359,26 +1453,18 @@ class Diamond:
 
     return
 
-  def cellcombo_edited(self, cellrenderertext, path, new_text):
+  def cellcombo_changed(self, combo, tree_path, combo_iter):
     """
     This is called when a cellcombo on the left-hand treeview is edited,
     i.e. the user chooses between more than one possible choice.
     """
 
-    iter = self.treestore.get_iter(path)
-    self.treestore.set(iter, 0, new_text)
-    choice = self.treestore.get_value(iter, 2)
+    tree_iter = self.treestore.get_iter(tree_path)
+    choice = self.treestore.get_value(tree_iter, 0)
 
     # get the ref to the new active choice
-    liststore = self.treestore.get_value(iter, 1)
-    list_iter = liststore.get_iter_first()
-    ref = None
-    while list_iter is not None:
-      list_text = liststore.get_value(list_iter, 0)
-      if list_text == new_text:
-        ref = liststore.get_value(list_iter, 1)
-        break
-      list_iter = liststore.iter_next(list_iter)
+    liststore = self.treestore.get_value(tree_iter, 2)
+    ref = liststore.get_value(combo_iter, 1)
 
     # record the choice in the datatree
     choice.set_active_choice_by_ref(ref)
@@ -1386,7 +1472,7 @@ class Diamond:
 
     name = self.get_spudpath(new_active_tree)
     self.statusbar.set_statusbar(name)
-    self.treestore.set(iter, 3, new_active_tree)
+    self.treestore.set(tree_iter, 1, new_active_tree)
     self.current_spudpath = name
     xpath = self.get_xpath(new_active_tree)
     self.current_xpath = xpath
@@ -1397,12 +1483,12 @@ class Diamond:
       if plugin.matches(xpath):
         self.add_plugin_button(plugin)
 
-    self.remove_children(iter)
-    self.expand_treestore(iter)
-    self.treeview.expand_row(path, False)
+    self.remove_children(tree_iter)
+    self.expand_treestore(tree_iter)
+    self.treeview.expand_row(tree_path, False)
 
     self.set_saved(False)
-    self.selected_node = self.get_painted_tree(iter)
+    self.selected_node = self.get_painted_tree(tree_iter)
     self.update_options_frame()
 
     return
@@ -1427,20 +1513,7 @@ class Diamond:
     if attr != "name":
       return
 
-    iter = self.treestore.get_iter(path)
-    liststore = self.treestore.get_value(iter, 1)
-    active_tree = self.treestore.get_value(iter, 3)
-    new_name = active_tree.get_display_name()
-    self.treestore.set_value(iter, 0, new_name)
-
-    # find the liststore iter corresponding to the painted choice
-    list_iter = liststore.get_iter_first()
-    while list_iter is not None:
-      liststore_tree = liststore.get_value(list_iter, 1)
-      if liststore_tree is active_tree:
-        liststore.set_value(list_iter, 0, new_name)
-      list_iter = liststore.iter_next(list_iter)
-
+    self.treeview.queue_draw()
     self.treeview.queue_resize()
 
   def get_painted_tree(self, iter_or_tree, lock_geometry_dim = True):
@@ -1457,11 +1530,11 @@ class Diamond:
     if isinstance(iter_or_tree, tree.Tree):
       active_tree = iter_or_tree
     else:
-      active_tree = self.treestore.get_value(iter_or_tree, 3)
+      active_tree = self.treestore.get_value(iter_or_tree, 1)
 
     painted_tree = active_tree.get_mixed_data()
 
-    if not isinstance(iter_or_tree, tree.Tree) and not self.treestore_iter_is_active(iter_or_tree):
+    if not isinstance(iter_or_tree, tree.Tree) and not self.iter_is_active(self.treestore, iter_or_tree):
       painted_tree = tree.Tree(painted_tree.name, painted_tree.schemaname, painted_tree.attrs, doc = painted_tree.doc)
       painted_tree.active = False
     elif lock_geometry_dim and self.geometry_dim_tree is not None and self.geometry_dim_tree.data is not None:
@@ -1487,8 +1560,8 @@ class Diamond:
     iter = self.treestore.get_iter_first()
     if iter is None:
       return None
-    for name in names[1:len(names) - 1]:
-      while self.treestore.get_value(iter, 0) != name:
+    for name in names[1:-1]:
+      while str(self.treestore.get_value(iter, 0)) != name:
         iter = self.treestore.iter_next(iter)
         if iter is None:
           return None
@@ -1497,7 +1570,26 @@ class Diamond:
         return None
 
     return iter
+
+  def get_treestore_path_from_node(self, node):
+    """
+    Look for the path for the given node.
+    """
     
+    def search(iter, node, indent=""):
+      while iter:
+        if self.treestore.get_value(iter, 0) is node:
+          return iter
+        else:
+          child = search(self.treestore.iter_children(iter), node, indent + "  ")
+          if child: return child
+
+          iter = self.treestore.iter_next(iter)      
+      return iter
+
+    iter = search(self.treestore.get_iter_first(), node)
+    return self.treestore.get_path(iter) if iter else None
+ 
   def set_geometry_dim_tree(self):
     """
     Find the iter into the treestore corresponding to the geometry dimension, and
@@ -1553,17 +1645,17 @@ class Diamond:
     
     return
 
-  def treestore_iter_is_active(self, iter):
+  def iter_is_active(self, treemodel, iter):
     """
     Test whether the node at the given iter in the LHS treestore is active.
     """
 
     while iter is not None:
-      choice_or_tree = self.treestore.get_value(iter, 2)
-      active_tree = self.treestore.get_value(iter, 3)
+      choice_or_tree = treemodel.get_value(iter, 0)
+      active_tree = treemodel.get_value(iter, 1)
       if not choice_or_tree.active or not active_tree.active:
         return False
-      iter = self.treestore.iter_parent(iter)
+      iter = treemodel.iter_parent(iter)
 
     return True
 
@@ -1621,7 +1713,7 @@ class Diamond:
       iter = self.treestore.get_iter_first()
     if iter is None:
       yield None
-    choice_or_tree = self.treestore.get_value(iter, 2)
+    choice_or_tree = self.treestore.get_value(iter, 0)
 
     if self.choice_or_tree_matches(text, choice_or_tree, isinstance(choice_or_tree, choice.Choice)):
       yield iter

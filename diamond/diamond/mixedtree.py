@@ -55,10 +55,10 @@ class MixedTree:
     return
 
   def valid_data(self, datatype, data):
-    return self.parent.valid_data(datatype, data)
+    return self.child.valid_data(datatype, data)
 
   def validity_check(self, datatype, data):
-    return self.parent.validity_check(datatype, data)
+    return self.child.validity_check(datatype, data)
 
   def matches(self, text, case_sensitive = False):
     old_parent_data = self.parent.data
@@ -96,16 +96,11 @@ class MixedTree:
       return False
 
     # Check that this element has calculable and positive dimensions
-    if isinstance(geometry_dim_tree.datatype, tuple):
-      possible_dims = geometry_dim_tree.datatype
-    else:
-      possible_dims = [geometry_dim_tree.data]
-    for opt in possible_dims:
       try:
-        dim1, dim2 = self.tensor_shape(int(opt))
+        dim1, dim2 = self.tensor_shape(geometry_dim_tree)
         assert dim1 > 0
         assert dim2 > 0
-      except:
+      except AssertionError:
         return False
 
     # The element must have dim1, rank and shape attributes
@@ -141,7 +136,7 @@ class MixedTree:
       if geometry_dim_tree.data is None:
         return False
 
-      dim1, dim2 = self.tensor_shape()
+      dim1, dim2 = self.tensor_shape(geometry_dim_tree)
       if "dim2" in self.child.attrs.keys():
         if self.child.attrs["shape"][1] != str(dim1) + " " + str(dim2):
           return False
@@ -199,3 +194,6 @@ class MixedTree:
 
   def get_name_path(self, leaf = True):
     return self.parent.get_name_path(leaf)
+
+  def is_sliceable(self):
+    return True
