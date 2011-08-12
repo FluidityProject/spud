@@ -44,39 +44,36 @@ for dir in dirs:
       except:
         debug.deprint("Failure to examine entry " + file + " in folder " + dir + ".")
         continue
-      lines = [x.strip() for x in handle]
+      lines = [x.strip() for x in handle if x.strip()]
       if len(lines) < 2:
         debug.deprint("Warning: Found schema registration file \"" + file + "\", but file is improperly formatted - schema type not registered", 0)
         continue
+
       # Expand environment variables in the schema path
       alias = {}
       for i in range(1, len(lines)):
-        keyvalue = [x.strip() for x in lines[i].split("=")]
-        key, value = (None, keyvalue[0]) if len(keyvalue) == 1 else keyvalue
+        line = lines[i]
+
+        keyvalue = [x.strip() for x in line.split("=")]
+        key, value = ("default", keyvalue[0]) if len(keyvalue) == 1 else keyvalue
 
         value = os.path.expandvars(value)
         if not os.path.exists(value) and 'http' not in value:
-          debug.deprint("Warning: not a valid path: %s" % value, 0)
+          debug.deprint("Warning: not a valid path: %s" % value)
           debug.deprint("schema type not registered")
           continue
 
-        alias[key] = value
-        if key == "default":
-          alias[None] = value
+        if key in alias:
+          debug.deprint("""alias "%s" already registered, ignoring""" % key)
+        else:
+          alias[key] = value
+          if key == "default":
+            alias[None] = value
 
       schemata[file] = (lines[0], alias)
       debug.dprint("Registered schema type: " + file)
   except OSError:
     pass
-
-if len(schemata) == 0 and "-s" not in sys.argv:
-  debug.deprint("Error: could not find any registered schemata.", 0)
-  debug.deprint("Have you registered any in one of the directores %s?" % dirs, 0)
-  debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
-  debug.deprint("The file should have two lines in it:", 0)
-  debug.deprint(" A Verbal Description Of The Language Purpose", 0)
-  debug.deprint(" /path/to/the/schema/file.rng", 0)
-  sys.exit(1)
 
 if __name__ == "__main__":
   for key in schemata:

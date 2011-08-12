@@ -48,6 +48,7 @@ def Help():
                "-h               Display this message\n" + \
                "-f               Forks at startup\n" + \
                "-s [SCHEMAFILE]  Use the supplied schema file *\n" + \
+               "-a [ALIAS]       Use the supplied alias, if not given use \"default\"\n" + \
                "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error\n" + \
@@ -57,20 +58,10 @@ def Help():
 
   return
 
-
-def is_valid_alias(alias):
-  valid_chars = string.ascii_letters + string.digits + "-_"
-
-  for c in alias:
-    if c not in valid_chars:
-      return False
-
-  return True
-
 def main():
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hvfs:t:")
+    opts, args = getopt.getopt(sys.argv[1:], "hvfsa:t:")
   except:
     Help()
     sys.exit(1)
@@ -127,16 +118,22 @@ def main():
   # if the user specifies a schema on the command line, use that.
 
   input_schemafile = None
+  input_alias = None
   input_schematron_file = None
   for opt in opts:
     if opt[0] == "-s":
       input_schemafile = opt[1]
+    elif opt[0] == "-a":
+      input_alias = opt[1]    
     elif opt[0] == "-t":
       input_schematron_file = opt[1]
 
+  if input_schemafile is not None and input_alias is not None:
+    debug.deprint("-s and -a are mutually exclusive", 0)
+    sys.exit(1)
 
-  #is not given or an alias so look up actual path
-  if input_schemafile is None or is_valid_alias(input_schemafile):
+  #schemafile is not given so look up actual path
+  if input_schemafile is None:
 
     # if the user has specified a file to work on, use the suffix as a key
     if input_filename is not None:
@@ -147,9 +144,10 @@ def main():
         debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
         debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
         debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
-        debug.deprint("The file should have two lines in it:", 0)
-        debug.deprint("A Verbal Description Of The Language Purpose", 0)
-        debug.deprint("/path/to/the/schema/file.rng", 0)
+        debug.deprint("The file should consist of:", 0)
+        debug.deprint("  A Verbal Description Of The Language Purpose", 0)
+        debug.deprint("  Lines of the format alias=/path/to/the/schema/file.rng", 0)
+        debug.deprint("  alias= is optional, if not given default= is added automaticly")
         sys.exit(1)
       
     # if there is only one schema, use that
@@ -165,9 +163,10 @@ def main():
       schemata = config.schemata[suffix]
 
     try:
-      input_schemafile = schemata[1][input_schemafile]   
+      #if input_alias is None it will just use the default
+      input_schemafile = schemata[1][input_alias]   
     except KeyError:
-      debug.deprint("""Could not find alias "%s"!""" % input_schemafile, 0)
+      debug.deprint("""Could not find alias "%s"!""" % (input_alias or "default"), 0)
       sys.exit(1)
 
   #endif
