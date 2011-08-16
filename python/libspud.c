@@ -323,12 +323,12 @@ spud_get_option_aux_scalar_or_string(const char *key, int key_len, int type, int
     int outcomeGetOption;
 
     if (type == SPUD_DOUBLE){
-        float val;
+        double val;
         outcomeGetOption = spud_get_option(key, key_len, &val);
         if (error_checking(outcomeGetOption, "get option aux scalar or string") == NULL){
             return NULL;
         }
-        return Py_BuildValue("f", val);
+        return Py_BuildValue("d", val);
     }
     else if (type == SPUD_INT){
         int val;

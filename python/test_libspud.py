@@ -4,6 +4,8 @@ libspud.load_options('test.flml')
 
 #libspud.print_options()
 
+assert libspud.get_option('/timestepping/timestep') == 0.025
+
 assert libspud.get_number_of_children('/geometry') == 5
 assert libspud.get_child_name('geometry', 0) == "dimension"
 
