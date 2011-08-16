@@ -94,6 +94,14 @@ libspud_print_options(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject*
+libspud_clear_options(PyObject *self, PyObject *args)
+{
+    spud_clear_options();
+
+    Py_RETURN_NONE;
+}
+
 static PyObject *
 libspud_get_number_of_children(PyObject *self, PyObject *args)
 {
@@ -753,6 +761,8 @@ static PyMethodDef libspudMethods[] = {
      "load options from xml file."},
     {"print_options",  libspud_print_options, METH_VARARGS,
      "print options from xml file."},
+    {"clear_options",  libspud_clear_options, METH_VARARGS,
+     "clear options from xml file."},
     {"get_number_of_children",  libspud_get_number_of_children, METH_VARARGS,
      "get number of children from xml file."},
     {"get_child_name",  libspud_get_child_name, METH_VARARGS,
