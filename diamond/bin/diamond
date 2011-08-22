@@ -99,8 +99,13 @@ def main():
   except IndexError:
     input_filename = None
 
+  if sys.platform == "win32" or sys.platform == "win64":
+    possible_logofiles = [os.path.join(diamond_path, "gui", "diamond.png")]
+  else:
+    possible_logofiles = [os.path.join(diamond_path, "gui", "diamond.svg"), "/usr/share/diamond/gui/diamond.svg"]
+	
   logofile = None
-  for possible_logofile in [os.path.join(diamond_path, "gui", "diamond.svg"), "/usr/share/diamond/gui/diamond.svg"]:
+  for possible_logofile in possible_logofiles:
     try:
       os.stat(possible_logofile)
       logofile = possible_logofile
