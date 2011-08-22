@@ -1145,6 +1145,227 @@ void Spud::print_options()
 
 Prints the entire options tree to standard output. Useful for debugging.
 
+\section{libspud.c}
+
+libspud.c is a module written in C using the header file Python.h and spud.h.
+It provides a python interface to libspud; so that users could use python codes to access the C codes in libspud.
+The module takes in python arguments, converts them into C arguments and then call the corresponding C functions with the converted C arguments. 
+
+\subsection{Errors}
+
+The module inherits all the errors from libspud. Here is the list of them: \\* 
+SpudError; \\* 
+SpudTypeError; \\* 
+SpudKeyError; \\* 
+SpudFileError; \\* 
+SpudNewKeyWarning; \\* 
+SpudAttrSetFailedWarning; \\* 
+SpudShapeError; \\* 
+SpudRankError; 
+
+\subsection{Data type parameters}\label{sec:types}
+
+The option\_type routine returns the following values. In Fortran these are
+named constants in the \lstinline+spud+ module while in C and C++ these are
+the enum types \lstinline+SpudOptionType+ and \lstinline+Spud::OptionType+
+respectively.
+
+\begin{tabular}{lll}
+  \textbf{Fortran} & \textbf{C/C++} & \textbf{python} \\
+  \lstinline+SPUD_REAL+ & \lstinline+SPUD_DOUBLE+ & \lstinline+PyFloat_Type+ \\
+  \lstinline+SPUD_INTEGER+ & \lstinline+SPUD_INT+ & \lstinline+PyInt_Type+ \\
+  \lstinline+SPUD_NONE+ & \lstinline+SPUD_NONE+ & \lstinline+Py_RETURN_NONE+ \\
+  \lstinline+SPUD_CHARACTER+ & \lstinline+SPUD_STRING+ & \lstinline+PyString_Type+
+\end{tabular}
+
+\subsection{clear\_options}
+
+\begin{lstlisting}[language=python]
+def clear_options()
+return None
+\end{lstlisting}
+
+This function takes no arguements and returns None.
+Clears the entire options tree.
+
+\subsection{load\_options}
+
+\begin{lstlisting}[language=python]
+def load_options(string filename)
+return None
+\end{lstlisting}
+
+This function takes the XML filename in the form of a python string and raises SpudFileError if file cannot be read or does not exist.
+Otherwise, it reads the file into the options tree, and then returns None.
+
+\subsection{write\_options}
+
+\begin{lstlisting}[language=python]
+def write_options(string filename)
+return None
+\end{lstlisting}
+
+This function takes the XML filename in the form of a python string and raises SpudFileError if file cannot be written or does not exist.
+Otherwise, it writes the options tree to the file, and then returns None.
+
+\subsection{get\_child\_name}
+
+\begin{lstlisting}[language=python]
+def get_child_name(string key, int index)
+return string
+\end{lstlisting}
+
+This function takes the key in the form of a python string, and an integer index. 
+It raises SpudKeyError if supplied key does not exist in the options tree.
+Otherwise, it retrieves the childname of the indexth of key , and then returns the childname as python string.
+
+\subsection{get\_number\_of\_children}
+
+\begin{lstlisting}[language=python]
+def get_number_of_children(string key)
+return int
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It raises SpudKeyError if supplied key does not exist in the options tree.
+Otherwise, it returns the number of children of the key as python integer.
+
+\subsection{option\_count}
+
+\begin{lstlisting}[language=python]
+def option_count(string key)
+return int
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It returns the number of options which match the key as python integer.
+It returns 0 if key is not present in the dictionary.
+
+\subsection{have\_option}
+
+\begin{lstlisting}[language=python]
+def have_option(string key)
+return True or False
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It returns True if the key is present in the options dictionary, False otherwise.
+
+\subsection{get\_option\_type}
+
+\begin{lstlisting}[language=python]
+def get_option_type(string key)
+return PyObject_Type
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It raises SpudKeyError if the supplied key does not exist in the options tree.
+It returns the type of the key as one of the python object types in 3.6.2.
+
+\subsection{get\_option\_rank}
+
+\begin{lstlisting}[language=python]
+def get_option_rank(string key)
+return int
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It raises SpudKeyError if the supplied key does not exist in the options tree.
+It returns the rank of the key as python ints.
+0 for scalar, 1 for vector, 2 for tensor or matrix.
+
+\subsection{get\_option\_shape}
+
+\begin{lstlisting}[language=python]
+def get_option_shape(string key)
+return (int, int)
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It raises SpudKeyError if the supplied key does not exist in the options tree.
+It returns the shape of the key as python two-tuple.
+If the option in question is rank 1 then the second component will be -1, if the option is rank 0 (a scalar) then both entries will be -1.
+
+\subsection{get\_option}
+
+\begin{lstlisting}[language=python]
+def get_option(string key)
+return optionvalue
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+If key matches an option but the shape, rank or type fails to match, appropriate error code will
+be set (see 3.6.1).
+If key fails to match but default is present, option is set to the value of default.
+If key fails to match and default is not present, the error code will be set to SpudKeyError.
+It returns the value of the option, the value could be of any type.
+
+\subsection{add\_option}
+
+\begin{lstlisting}[language=python]
+def add_option(string key)
+return None
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It creates a new option at the supplied key.
+If the option does not currently exist, creates the option
+(with data type SPUD\_NONE) and returns error code SpudNewKeyWarning.
+
+\subsection{set\_option}
+
+\begin{lstlisting}[language=python]
+def set_option(string key, valuetype value)
+return None
+\end{lstlisting}
+
+This function takes the key in the form of a python string, and the value to be set. 
+Value could be of any type listed in 3.6.2.
+If key matches an option but the shape, rank or type fails to match currently existing option,
+returns an appropriate error code (see 3.6.1).
+If key fails to match, creates a new option at the supplied key, sets the option to value and returns
+error code SpudNewKeyWarning.
+This function is for setting options in the options tree.
+
+\subsection{set\_option\_attribute}
+
+\begin{lstlisting}[language=python]
+def set_option_attribute(string key, valuetype value)
+return None
+\end{lstlisting}
+
+This function takes the key in the form of a python string, and the value to be set. 
+Value could be of any type listed in 3.6.2.
+If key matches an option but the shape, rank or type fails to match currently existing option,
+returns an appropriate error code (see 3.6.1).
+If key fails to match, creates a new option at the supplied key, sets the option to value and returns
+error code SpudNewKeyWarning.
+If key matches an option, but the existing option has children, sets the option to val and
+returns error code SpudAttrSetFailedWarning.
+This function is for setting options in the options tree, but additionally attempts to mark the option at the key as an attribute.
+
+\subsection{delete\_option}
+
+\begin{lstlisting}[language=python]
+def delete_option(string key)
+return None
+\end{lstlisting}
+
+This function takes the key in the form of a python string. 
+It raises SpudKeyError if the supplied key does not exist in the options tree.
+This function deletes the option in the options tree.
+
+\subsection{print\_options}
+
+\begin{lstlisting}[language=python]
+def print_options()
+return None
+\end{lstlisting}
+
+This function takes no arguments.
+It prints the entire options tree to standard output.
+
+
 \chapter{Diamond}
 
 \section{Installation}
