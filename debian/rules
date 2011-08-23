@@ -83,6 +83,9 @@ install-python%:
 install-pyspud:
 	$(MAKE) install-pyspud DESTDIR=$(CURDIR)/debian/python-spud
 
+install-dxdiff:
+	$(MAKE) install-dxdiff DESTDIR=$(CURDIR)/debian/python-dxdiff
+
 binary-arch: build-libspud install-libspud install-spudtools install-pyspud
 	dh_testdir
 	dh_testroot
@@ -114,7 +117,7 @@ binary-arch: build-libspud install-libspud install-spudtools install-pyspud
 	dh_md5sums
 	dh_builddeb
 
-binary-indep: build-diamond install-diamond build-libspud install-libspud install-spudtools
+binary-indep: build-diamond install-diamond build-libspud install-libspud install-spudtools install-dxdiff
 	dh_testdir -i
 	dh_testroot -i
 	DH_PYCENTRAL=include-links dh_pycentral -i

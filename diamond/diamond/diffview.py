@@ -30,10 +30,10 @@ import databuttonswidget
 import datawidget
 import mixedtree
 
-diff_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir, os.pardir, "xmldiff")
-sys.path.insert(0, diff_path)
+#diff_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir, os.pardir, "xmldiff")
+#sys.path.insert(0, diff_path)
 
-import xmldiff.diff as xmldiff
+import dxdiff.diff as xmldiff
 
 class DiffView(gtk.Window):
 
@@ -41,36 +41,36 @@ class DiffView(gtk.Window):
     gtk.Window.__init__(self)
     self.__add_controls()
 
-    if os.path.isfile(path):
+    if path and os.path.isfile(path):
       filename = path
-    else:    
+    else:
       dialog = gtk.FileChooserDialog(title = "Diff against", 
                                    action = gtk.FILE_CHOOSER_ACTION_OPEN, 
                                    buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
       if path:
         dialog.set_current_folder(path)
-    
+
       response = dialog.run()
       if response != gtk.RESPONSE_OK:
         dialog.destroy()
         self.destroy()
         return
-      
+
       filename = dialog.get_filename()
       dialog.destroy()
- 
+
     tree1 = etree.parse(filename)
     tree2 = etree.ElementTree(tree.write_core(None))
 
     editscript = xmldiff.diff(tree1, tree2)
     self.__update(tree1, editscript)
-    
+
     self.show_all()
-    
+
   def __add_controls(self):
     self.set_default_size(800, 600)
     self.set_title("Diff View")
-   
+
     mainvbox = gtk.VBox()
 
     menubar = gtk.MenuBar()
@@ -87,11 +87,11 @@ class DiffView(gtk.Window):
     key, mod = gtk.accelerator_parse("<Control>C")
     copyitem.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
     editmenu.append(copyitem)
-    
+
     mainvbox.pack_start(menubar, expand = False)
- 
+
     hpane = gtk.HPaned()
-    
+
     self.treeview = gtk.TreeView()
 
     self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -115,7 +115,7 @@ class DiffView(gtk.Window):
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
     hpane.pack1(self.treeview)
-    
+
     vpane = gtk.VPaned()
     frame = gtk.Frame()
     label = gtk.Label()
@@ -128,7 +128,7 @@ class DiffView(gtk.Window):
     celltext = gtk.CellRendererText()
     keycolumn = gtk.TreeViewColumn("Key", celltext)
     keycolumn.set_cell_data_func(celltext, self.set_cellkey)
-    
+
     self.attribview.append_column(keycolumn)
 
     celltext = gtk.CellRendererText()
@@ -145,7 +145,7 @@ class DiffView(gtk.Window):
     label.set_markup("<b>Data</b>")
     frame.set_label_widget(label)
     frame.set_shadow_type(gtk.SHADOW_NONE)
-    
+
     self.dataview = gtk.TextView()
     self.dataview.set_cursor_visible(False)
     self.dataview.set_editable(False)
@@ -153,7 +153,7 @@ class DiffView(gtk.Window):
 
     frame.add(self.dataview)
     vpane.pack2(frame)
-    
+
     hpane.pack2(vpane)
     mainvbox.pack_start(hpane)
     self.add(mainvbox)
@@ -181,22 +181,22 @@ class DiffView(gtk.Window):
   def show_popup(self, func, button, time):
     self.popup.popup( None, None, func, button, time)
     return
- 
+
   def __update(self, tree, editscript):
-    self.__set_treestore(tree.getroot())    
+    self.__set_treestore(tree.getroot())
     self.__parse_editscript(editscript)
     self.__floodfill(self.treestore.get_iter_root())
-    
+
   def __set_treestore(self, tree, iter = None):
-    
+
     attrib = {}
     for key, value in tree.attrib.iteritems():
       attrib[key] = (value, value, "")
-    
+
     child_iter = self.treestore.append(iter, [tree.tag, attrib, tree.text, tree.text, ""]) 
     for child in tree:
       self.__set_treestore(child, child_iter)
-      
+
   def __parse_editscript(self, editscript):
     print editscript
 
@@ -213,7 +213,7 @@ class DiffView(gtk.Window):
           __insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][0], 0)
 
       else:
-        
+
         if edit["type"] == "insert":
           self.__insert(iter, edit["value"], int(edit["index"]))
         elif edit["type"] == "delete":

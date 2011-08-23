@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-#    This file is part of xmldiff.
+#    This file is part of dxdiff.
 #
-#    xmldiff is free software: you can redistribute it and/or modify
+#    dxdiff is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    xmldiff is distributed in the hope that it will be useful,
+#    dxdiff is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
@@ -19,14 +19,14 @@ from getopt import getopt
 import sys
 import os
 from lxml import etree
-import diff
+from dxdiff.diff import diff
  
 def __display_help():
   """
   Prints usage information to standard output.
   """
 
-  print "\n".join(["Usage: xmldiff [OPTIONS] ... [FILE1] [FILE2]",
+  print "\n".join(["Usage: dxdiff [OPTIONS] ... [FILE1] [FILE2]",
                    "", 
                    "An XML aware diff tool. [FILE1] and [FILE2] are the XML files to be compared.",
                    "[FILE1] should be the old file.",
@@ -38,7 +38,7 @@ def __display_help():
 
 def __main():
   """
-  Main routine to run xmldiff
+  Main routine to run dxdiff
   """
 
   try:
