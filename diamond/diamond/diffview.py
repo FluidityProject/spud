@@ -266,7 +266,10 @@ class DiffView(gtk.Window):
       attrib[key] = (value, "", "insert")
     else:
       after = self.treestore.iter_nth_child(iter, index)
-      self.treestore.insert_after(iter, after, [value, {}, "", "", "insert"]) 
+      if after:
+        self.treestore.insert_after(iter, after, [value, {}, "", "", "insert"]) 
+      else:
+        self.treestore.append(iter, [value, {}, "", "", "insert"])
 
   def __move(self, iter, value, index):
     """
