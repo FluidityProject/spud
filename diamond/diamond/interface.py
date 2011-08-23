@@ -142,6 +142,7 @@ class Diamond:
                     "on_paste": self.on_paste,
                     "on_slice": self.on_slice,
                     "on_diff": self.on_diff,
+                    "on_diffsave": self.on_diffsave,
                     "on_group": self.on_group,
                     "on_ungroup": self.on_ungroup}
 
@@ -742,6 +743,10 @@ class Diamond:
 
   def on_diff(self, widget = None):
     path = os.path.dirname(self.filename) if self.filename else None
+    window = diffview.DiffView(path, self.tree)
+
+  def on_diffsave(self, widget = None):
+    path = self.filename if self.filename else None
     window = diffview.DiffView(path, self.tree)
 
   def on_slice(self, widget = None):
