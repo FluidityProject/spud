@@ -304,12 +304,12 @@ class DiffView(gtk.Window):
     """
     Convert the given XML path to an iter into the treestore.
     """
-    
+ 
     if iter is None:
       iter = self.treestore.get_iter_first()
       
     tag = self.treestore.get_value(iter, 0)
-    
+
     if path == "/" + tag or path == "/" + tag + "/text()":
       return (iter, None)
 
@@ -327,7 +327,7 @@ class DiffView(gtk.Window):
       
     root = path[:index]
     path = path[index:]
-    
+
     parentiter = self.treestore.iter_parent(iter)
     if parentiter:
       siblingsiter = self.treestore.iter_children(parentiter)
@@ -335,21 +335,21 @@ class DiffView(gtk.Window):
       while siblingsiter is not None:
         siblingtag = self.treestore.get_value(siblingsiter, 0)
         if siblingtag == tag:
-          siblings.append(siblingsiter)
+          siblings.append(self.treestore.get_path(siblingsiter))
           
         siblingsiter = self.treestore.iter_next(siblingsiter)
-      
+    
       if len(siblings) != 1:
-        index = "[" + str(siblings.index(iter)) + "]"
+        index = "[" + str(siblings.index(self.treestore.get_path(iter)) + 1) + "]"
       else:
         index = ""
-        
+      
       if root != "/" + tag + index:
         return None
     else:
       if root != "/" + tag:
         return None
-    
+   
     if path:          
       iter = self.treestore.iter_children(iter)
       
@@ -361,7 +361,7 @@ class DiffView(gtk.Window):
           
       return None
     else:
-      return self
+      return (iter, None)
 
   def on_select_row(self, selection):
     """
