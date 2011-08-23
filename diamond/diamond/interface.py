@@ -741,8 +741,9 @@ class Diamond:
 
     return
 
-  def on_diff(self, widget = None):
-    path = os.path.dirname(self.filename) if self.filename else None
+  def on_diff(self, widget = None, path = None):
+    if path is None:
+      path = os.path.dirname(self.filename) if self.filename else None
     window = diffview.DiffView(path, self.tree)
 
   def on_diffsave(self, widget = None):
