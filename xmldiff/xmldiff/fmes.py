@@ -103,9 +103,6 @@ class Dom:
       return "/" + self.tag
   
   def find(self, path):
-    
-    print "find", path, "@", self.tag + self.typetag
-
     if self.is_text():
       if path == "/text()":
         return self
@@ -123,19 +120,14 @@ class Dom:
     root = path[:index]
     path = path[index:]
 
-    print root, ":", path
-    
     if self.parent:
       siblings = self.parent.children
-      print siblings 
       siblings = [sibling for sibling in siblings if sibling.tag == self.tag]
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self) + 1) + "]"
       else:
         index = ""
 
-      print "index", index
-       
       if root != "/" + self.tag + index:
         return None
     else:
@@ -151,8 +143,6 @@ class Dom:
       return self
 
   def insert(self, tag, tagtype, value, xpath, index):
-    print "insert", tag, tagtype, value, xpath, index
-
     parent = self.find(xpath)
 
     node = Dom(tag, value, parent, tagtype == "/Attribute")
@@ -363,7 +353,7 @@ def postorder_iter(tree):
     if t is not tree:
       yield t
 
-def editscript(t1, t2):
+def editscript(t1, t2, force = False):
   """
   Finds an editscript between t1 and t2.
   See figure 8 in reference.
@@ -371,8 +361,14 @@ def editscript(t1, t2):
 
   E = EditScript()
   M = fastmatch(t1, t2)
- 
-  M.add((t1, t2))
+
+  if M.left[t1] != t2: # roots don't match
+    if force: # force them to match
+      M.add((t1, t2))
+    else:
+      raise "Tree roots don't match."
+
+  alignchildren(t1, t2, M, E, t1, t2)
  
   for x in breadth_iter(t2):
     y = x.parent
@@ -443,14 +439,11 @@ def findpos(M, x):
   """
   See figure 9 in reference.
   """
-  print "findpos", x.tag
   if x.is_text() or x.is_attribute():
     return 0
 
   y = x.parent
   children = [child for child in y.children if child.is_element()]
- 
-  print [(child.xpath, child.inorder) for child in children]
  
   for v in children:
     if v.inorder:
