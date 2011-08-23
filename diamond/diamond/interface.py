@@ -746,8 +746,10 @@ class Diamond:
     window = diffview.DiffView(path, self.tree)
 
   def on_diffsave(self, widget = None):
-    path = self.filename if self.filename else None
-    window = diffview.DiffView(path, self.tree)
+    if self.filename:
+      window = diffview.DiffView(self.filename, self.tree)
+    else:
+      dialogs.error(self.main_window, "No save to diff against.")
 
   def on_slice(self, widget = None):
     if not self.selected_node.is_sliceable():
