@@ -198,7 +198,7 @@ class DiffView(gtk.Window):
       self.__set_treestore(child, child_iter)
 
   def __parse_editscript(self, editscript):
-    print editscript
+    open('/home/fjw08/editscript.xml', 'w+').write(str(editscript))
 
     for edit in editscript:
       iter, key = self.__get_iter(edit["location"])
@@ -210,7 +210,7 @@ class DiffView(gtk.Window):
           attrib[key] = (edit["value"], attrib[key][0], attrib[key][2])
         elif edit["type"] == "move":
           attrib[key] = ("", attrib[key][0], "delete")
-          __insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][0], 0)
+          self.__insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][0], 0)
 
       else:
 
@@ -300,67 +300,89 @@ class DiffView(gtk.Window):
 
     move(iter, destiter)
 
-  def __get_iter(self, path, iter = None):    
+  def __get_iter(self, path, iter = None):
     """
     Convert the given XML path to an iter into the treestore.
     """
- 
+
     if iter is None:
       iter = self.treestore.get_iter_first()
-      
-    tag = self.treestore.get_value(iter, 0)
+      print "look", path
 
-    if path == "/" + tag or path == "/" + tag + "/text()":
-      return (iter, None)
-
-    apath = "/" + tag + "/@"
-    if path.startswith(apath):
-      attrib = self.treestore.get_value(iter, 1)
-      for key in attrib.iterkeys():
-        if path == apath + key:
-          return (iter, key)
-      return None
-      
-    index = path.find("/", 1)
-    if index == -1:
-      index = len(path)
-      
-    root = path[:index]
-    path = path[index:]
+    tag, edit = self.treestore.get(iter, 0, 4)
+    if edit == "delete":
+      return None # don't search deleted paths
 
     parentiter = self.treestore.iter_parent(iter)
     if parentiter:
       siblingsiter = self.treestore.iter_children(parentiter)
       siblings = []
       while siblingsiter is not None:
-        siblingtag = self.treestore.get_value(siblingsiter, 0)
-        if siblingtag == tag:
+        siblingtag, siblingsedit = self.treestore.get(siblingsiter, 0, 4)
+        if siblingsedit != "delete" and siblingtag == tag:
           siblings.append(self.treestore.get_path(siblingsiter))
-          
+
         siblingsiter = self.treestore.iter_next(siblingsiter)
-    
+
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self.treestore.get_path(iter)) + 1) + "]"
       else:
         index = ""
-      
-      if root != "/" + tag + index:
-        return None
+
+      tag = "/" + tag + index
     else:
-      if root != "/" + tag:
+      tag = "/" + tag
+
+    print "------------"
+    print path, "@", tag
+
+    index = path.find("/", 1)
+    if index == -1:
+      index = len(path)
+
+    root = path[:index]
+    path = path[index:]
+    print root, ":", path
+
+    #check we match root
+    if root != tag:
+      return None
+
+    if path:
+      # check for text()
+      if path == "/text()":
+        return (iter, None)
+
+      # check attributes
+      if path.startswith("/@"):
+        attrib = self.treestore.get_value(iter, 1)
+        for key in attrib:
+          print "attr", key
+          if path == "/@" + key:
+            return (iter, key)
         return None
-   
-    if path:          
+
+      # check children
+      citer = self.treestore.iter_children(iter)
+      while citer is not None:
+        edit = self.treestore.get_value(citer, 4)
+        if edit != "delete":
+          print "/" + self.treestore.get_value(citer, 0)
+        citer = self.treestore.iter_next(citer)
+
       iter = self.treestore.iter_children(iter)
-      
+
       while iter is not None:
-        result = self.__get_iter(path, iter)
-        if result:
-          return result
+        edit = self.treestore.get_value(iter, 4)
+        if edit != "delete":
+          result = self.__get_iter(path, iter)
+          if result:
+            return result
         iter = self.treestore.iter_next(iter)
-          
+
       return None
     else:
+      # must be us
       return (iter, None)
 
   def on_select_row(self, selection):

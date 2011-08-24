@@ -734,10 +734,10 @@ class Diamond:
           msg += "Warning: added xml attributes:\n"
           for ele in added_attrs:
             msg += ele + "\n"
-      
+
         dialogs.long_message(self.main_window, msg)
- 
-      self.set_saved(False)     
+
+      self.set_saved(False)
 
     return
 

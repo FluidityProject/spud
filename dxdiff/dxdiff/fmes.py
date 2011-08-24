@@ -93,7 +93,7 @@ class Dom:
    
     if self.parent:
       siblings = self.parent.children
-      siblings = [sibling for sibling in siblings if sibling.tag == self.tag]
+      siblings = [sibling for sibling in siblings if sibling.tag == self.tag and sibling.is_element()]
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self) + 1) + "]"
       else:
@@ -111,12 +111,12 @@ class Dom:
     if self.is_attribute():
       if path == "/@" + self.tag:
         return self
-      else: return None      
-    
+      else: return None
+
     index = path.find("/", 1)
     if index == -1:
       index = len(path)
-      
+
     root = path[:index]
     path = path[index:]
 
@@ -133,7 +133,7 @@ class Dom:
     else:
       if root != "/" + self.tag:
         return None
-    
+
     if path:
       for child in self.children:
         result = child.find(path)
@@ -399,11 +399,15 @@ def editscript(t1, t2, force = False):
         t1.move(w.path(), z.path(), k)
 
     alignchildren(t1, t2, M, E, w, x)
-    
+
   for w in postorder_iter(t1):
     if w not in M.left:
-      E.delete(w.path())
-      t1.delete(w.path())
+      if w.typetag == "/Text": #Can't delete Text, do an update
+        E.update(w.path(), "")
+        t1.update(w.path(), "")
+      else:
+        E.delete(w.path())
+        t1.delete(w.path())
 
   return E
 
@@ -416,7 +420,7 @@ def alignchildren(t1, t2, M, E, w, x):
     c.inorder = False
   for c in x.children:
     c.inorder = False
-  
+
   s1 = [child for child in w.children if child in M.left and M.left[child].parent == x]
   s2 = [child for child in x.children if child in M.right and M.right[child].parent == w]
 
@@ -459,9 +463,8 @@ def findpos(M, x):
     index -= 1
 
   u = M.right[v]
-  if u is not None:
-    children = [child for child in u.parent.children if child.is_element()]
-    return children.index(u) + 1
+  children = [child for child in u.parent.children if child.is_element()]
+  return children.index(u) + 1
 
 def diff(tree1, tree2):
   return editscript(dom(tree1), dom(tree2))
