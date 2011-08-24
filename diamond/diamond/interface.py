@@ -18,6 +18,7 @@
 import os
 import os.path
 import re
+import time
 import sys
 import tempfile
 import cStringIO as StringIO
@@ -47,6 +48,7 @@ import commentwidget
 import descriptionwidget
 import databuttonswidget
 import datawidget
+import diffview
 import sliceview
 
 from lxml import etree
@@ -140,6 +142,8 @@ class Diamond:
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
                     "on_slice": self.on_slice,
+                    "on_diff": self.on_diff,
+                    "on_diffsave": self.on_diffsave,
                     "on_group": self.on_group,
                     "on_ungroup": self.on_ungroup}
 
@@ -601,15 +605,16 @@ class Diamond:
                       "You should have received a copy of the GNU General Public License\n"+
                       "along with Diamond.  If not, see http://www.gnu.org/licenses/.")
 
-    logo = gtk.gdk.pixbuf_new_from_file(self.logofile)
-
+    if self.logofile is not None:
+      logo = gtk.gdk.pixbuf_new_from_file(self.logofile)
+      about.set_logo(logo)
+      
     try:
       image = about.get_children()[0].get_children()[0].get_children()[0]
       image.set_tooltip_text("Diamond: it's clearer than GEM")
     except:
       pass
-
-    about.set_logo(logo)
+    
     about.show()
 
     return
@@ -730,12 +735,30 @@ class Diamond:
           msg += "Warning: added xml attributes:\n"
           for ele in added_attrs:
             msg += ele + "\n"
-      
+
         dialogs.long_message(self.main_window, msg)
- 
-      self.set_saved(False)     
+
+      self.set_saved(False)
 
     return
+
+  def __diff(self, path):
+    self.statusbar.set_statusbar("Calculating diff... (this may take a while)")
+    start = time.clock()
+    diffview.DiffView(path, self.tree)
+    seconds = time.clock() - start
+    self.statusbar.set_statusbar("Diff calculated (took " + str(seconds) + " seconds)")
+
+  def on_diff(self, widget = None, path = None):
+    if path is None:
+      path = os.path.dirname(self.filename) if self.filename else None
+    self.__diff(path)
+
+  def on_diffsave(self, widget = None):
+    if self.filename:
+      self.__diff(self.filename)
+    else:
+      dialogs.error(self.main_window, "No save to diff against.")
 
   def on_slice(self, widget = None):
     if not self.selected_node.is_sliceable():

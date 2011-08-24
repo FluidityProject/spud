@@ -29,6 +29,8 @@ import gobject
 # do this right at the start, so we can find the diamond modules
 diamond_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir )
 sys.path.insert(0, diamond_path)
+dxdiff_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir, os.pardir, "dxdiff" )
+sys.path.insert(0, dxdiff_path)
 
 import diamond.debug as debug
 
@@ -48,6 +50,7 @@ def Help():
                "-f               Forks at startup\n" + \
                "-s [SCHEMAFILE]  Use the supplied schema file *\n" + \
                "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
+               "-d [FILE]        Diff against the supplied file. (FILE must be specified)\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error\n" + \
                "\n" + \
@@ -59,7 +62,7 @@ def Help():
 def main():
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hvfs:t:")
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvfs:t:d:")
   except:
     Help()
     sys.exit(1)
@@ -209,7 +212,20 @@ def main():
 
   i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
   i.open_file(schemafile = input_schemafile, filename = input_filename)
-  i.main_window.window.set_cursor(None)  
+  i.main_window.window.set_cursor(None)
+
+  # see if the user wants to diff against a file
+  input_difffile = None
+  for opt in opts:
+    if opt[0] == "-d":
+      input_difffile = opt[1]
+
+  if input_difffile:
+    if input_filename:
+      i.on_diff(None, input_difffile)
+    else:
+      debug.dprint("Cannot diff if against nothing.", 0)
+
 
   gtk.main()
 
