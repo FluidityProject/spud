@@ -199,8 +199,6 @@ class DiffView(gtk.Window):
       self.__set_treestore(child, child_iter)
 
   def __parse_editscript(self, editscript):
-    open('/home/fjw08/editscript.xml', 'w+').write(str(editscript))
-
     for edit in editscript:
       iter, key = self.__get_iter(edit["location"])
       if key:

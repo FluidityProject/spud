@@ -463,6 +463,4 @@ def diff(tree1, tree2):
   t1 = dom(tree1)
   t2 = dom(tree2)
   E = editscript(t1, t2)
-  open("/home/fjw08/tree1.txt", "w+").write(str(t1))
-  open("/home/fjw08/tree2.txt", "w+").write(str(t2))
   return E
