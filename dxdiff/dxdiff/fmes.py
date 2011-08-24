@@ -94,6 +94,10 @@ class Dom:
       return "/" + self.tag
 
   def find(self, path):
+
+    print "------------"
+    print "find", path, "@", self.tag
+
     if self.is_text():
       if path == "/text()":
         return self
@@ -118,6 +122,7 @@ class Dom:
       else:
         index = ""
 
+      print "index:", index
       if root != "/" + self.tag + index:
         return None
     else:
@@ -370,14 +375,14 @@ def editscript(t1, t2):
 
     if x not in M.right:
       if x.typetag == "/Text": #Can't insert Text, do an update
-        E.update(y.path(), x.value, x.xpath if hasattr(x, "xpath") else None)
-        w = t1.insert(x.tag, x.typetag, x.value, y.path(), 0)
+        E.update(z.path(), x.value, x.xpath if hasattr(x, "xpath") else None)
+        w = t1.insert(x.tag, x.typetag, x.value, z.path(), 0)
         M.add((w, x))
       else:
         x.inorder = True
         k = findpos(M, x)
-        E.insert(y.path(), str(k), x.tag, x.value, x.xpath if hasattr(x, "xpath") else None)
-        w = t1.insert(x.tag, x.typetag, x.value, y.path(), k)
+        E.insert(z.path(), str(k), x.tag, x.value, x.xpath if hasattr(x, "xpath") else None)
+        w = t1.insert(x.tag, x.typetag, x.value, z.path(), k)
         M.add((w, x))
     else: # y is not None:
       w = M.right[x]
