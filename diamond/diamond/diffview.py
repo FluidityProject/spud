@@ -279,7 +279,7 @@ class DiffView(gtk.Window):
       attrib = self.treestore.get_value(iter, 1)
       attrib[key] = (value, None, "insert")
     else:
-      before = self.__iter_nth_child(iter, index)
+      before = self.__iter_nth_child(iter, index - 1)
       if before:
         self.treestore.insert_before(iter, before, [value, {}, None, None, "insert"]) 
       else:
@@ -296,7 +296,7 @@ class DiffView(gtk.Window):
 
     destiter = self.__get_iter(value)[0]
 
-    before = self.__iter_nth_child(destiter, index)
+    before = self.__iter_nth_child(destiter, index - 1)
     if before:
       destiter = self.treestore.insert_before(destiter, before, [tag, attrib, text, None, "insert"]) 
     else:
@@ -338,7 +338,6 @@ class DiffView(gtk.Window):
 
     if iter is None:
       iter = self.treestore.get_iter_first()
-      print "look", path
 
     tag, edit = self.treestore.get(iter, 0, 4)
     if edit == "delete":
@@ -361,16 +360,12 @@ class DiffView(gtk.Window):
     else:
       tag = "/" + tag
 
-    print "------------"
-    print path, "@", tag
-
     index = path.find("/", 1)
     if index == -1:
       index = len(path)
 
     root = path[:index]
     path = path[index:]
-    print root, ":", path
 
     #check we match root
     if root != tag:
@@ -385,17 +380,11 @@ class DiffView(gtk.Window):
       if path.startswith("/@"):
         attrib = self.treestore.get_value(iter, 1)
         for key in attrib:
-          print "attr", key
           if path == "/@" + key:
             return (iter, key)
         return None
 
       # check children
-      for citer in self.__iter_children(iter):
-        edit = self.treestore.get_value(citer, 4)
-        if edit != "delete":
-          print "/" + self.treestore.get_value(citer, 0)
-
       for iter in self.__iter_children(iter):
         edit = self.treestore.get_value(iter, 4)
         if edit != "delete":
@@ -537,9 +526,9 @@ class DiffView(gtk.Window):
   def __get_treestore(self, iter):
 
     tag, attrib, text = self.treestore.get(iter, 0, 1, 2)
-    
+
     tree = etree.Element(tag)
-    
+
     for key, (newvalue, oldvalue, edit) in attrib.iteritems():
       tree.attrib[key] = newvalue
 
@@ -548,7 +537,7 @@ class DiffView(gtk.Window):
       child = self.__get_treestore(child_iter)
       tree.append(child)
       child_iter = self.treestore.iter_next(child_iter)
-      
+
     return tree
 
   def on_copy(self, widget=None):

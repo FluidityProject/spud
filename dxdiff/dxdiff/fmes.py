@@ -46,40 +46,32 @@ class Dom:
       self.depth = 0
 
     self.inorder = False
- 
+
+  def elements(self):
+    return [child for child in self.children if child.is_element()]
+
+  def attributes(self):
+    return [child for child in self.children if child.is_attribute()]
+
+  def text(self):
+    return [child for child in self.children if child.is_text()]
+
   def is_element(self):
     return self.typetag == "/Element"
-    
+
   def is_text(self):
     return self.typetag == "/Text"
-    
+
   def is_attribute(self):
     return self.typetag == "/Attribute"
-	
+
   def __repr__(self):
     return "<" + self.label + ">" + (self.value or "")
- 
+
   def __str__(self, indent = ""):
-    title = indent + "<" + self.label + ">" + (self.value or "") + "\n" + indent
+    title = indent + "<" + self.path() + ">" + (self.value or "") + "\n" + indent
     children = ("\n" + indent).join(child.__str__(indent + "  ") for child in self.children)
     return title + children
-
-  def __eq__(self, other):
-    if self.tag != other.tag:
-      return False
-    if self.value != other.value:
-      return False
-    if len(self.children) != len(other.children):
-      return False
-    for (x, y) in zip(self.children, other.children):
-      if x == y:
-        pass
-      else:
-        return False
-    return True 
-
-  def __hash__(self):
-    return id(self).__hash__()
 
   def path(self):
     """
@@ -92,8 +84,7 @@ class Dom:
       return self.parent.path() + "/@" + self.tag
 
     if self.parent:
-      siblings = self.parent.children
-      siblings = [sibling for sibling in siblings if sibling.tag == self.tag and sibling.is_element()]
+      siblings = [sibling for sibling in self.parent.elements() if sibling.tag == self.tag]
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self) + 1) + "]"
       else:
@@ -121,8 +112,7 @@ class Dom:
     path = path[index:]
 
     if self.parent:
-      siblings = self.parent.children
-      siblings = [sibling for sibling in siblings if sibling.tag == self.tag]
+      siblings = [sibling for sibling in self.parent.elements() if sibling.tag == self.tag]
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self) + 1) + "]"
       else:
@@ -142,17 +132,26 @@ class Dom:
     else:
       return self
 
+  def _real_index(self, parent, index):
+    if index == 0:
+      return 0
+
+    elements = parent.elements()
+    if len(elements) < index:
+      return len(parent.children)
+    return parent.children.index(elements[index - 1])
+
   def insert(self, tag, tagtype, value, path, index):
     parent = self.find(path)
 
     node = Dom(tag, value, parent, tagtype == "/Attribute")
-    parent.children.insert(index, node)
+    parent.children.insert(self._real_index(parent, index), node)
     node.label = _strip_indexers(node.path()) + node.typetag
     return node
 
   def update(self, path, value):
     node = self.find(path)
-    
+
     node.value = value
     return node
 
@@ -161,7 +160,7 @@ class Dom:
     node.parent.children.remove(node)
 
     parent = self.find(to_path)
-    parent.children.insert(index, node)
+    parent.children.insert(self._real_index(parent, index), node)
     node.parent = parent
 
   def delete(self, path):
@@ -191,21 +190,25 @@ def dom(root, tree = None, parent = None):
   
   if tree is None:
     tree = root.getroot()
-  
-  path = _strip_indexers(root.getpath(tree))
+
+  xpath = root.getpath(tree)
+  path = _strip_indexers(xpath)
 
   node = Dom(tree.tag, None, parent)
   node.label = path + node.typetag
+  node.xpath = xpath
 
   text = _get_text(tree)
   if text:
     text = Dom(tree.tag, text, node)
     text.label = path + text.typetag
+    text.xpath = xpath + "/text()"
     node.children.append(text)
 
   for key, value in tree.items():
     attr = Dom(key, value, node, True)
     attr.label = path + "/@" + key + attr.typetag
+    attr.xpath = path + "/@" + key
     node.children.append(attr)
 
   for child in tree:
@@ -287,9 +290,9 @@ def _match(nodes1, nodes2, M, equal):
 
     s1 = get_chain(nodes1, label)
     s2 = get_chain(nodes2, label)
-    
+
     path = lcs.lcs(lcs.path(s1, s2, equal))
- 
+
     for x, y in path:
       M.add((s1[x], s2[y]))
     for x, y in reversed(path):
@@ -317,9 +320,9 @@ def fastmatch(t1, t2):
     nodes2 = get_depth_nodes(t2, depth)
 
     equal = utils.partial(depth_equal, 0.6, 0.5, M)
-    
+
     _match(nodes1, nodes2, M, equal)
-    
+
     depth -= 1
 
   return M
@@ -349,7 +352,7 @@ def postorder_iter(tree):
     if t is not tree:
       yield t
 
-def editscript(t1, t2, force = False):
+def editscript(t1, t2):
   """
   Finds an editscript between t1 and t2.
   See figure 8 in reference.
@@ -358,40 +361,34 @@ def editscript(t1, t2, force = False):
   E = EditScript()
   M = fastmatch(t1, t2)
 
-  if t1 not in M.left or M.left[t1] != t2: # roots don't match
-    if force: # force them to match
-      M.add((t1, t2))
-    else:
-      raise Exception("Tree roots don't match.")
-
+  M.add((t1, t2))
   alignchildren(t1, t2, M, E, t1, t2)
- 
+
   for x in breadth_iter(t2):
     y = x.parent
     z = M.right[y]
 
     if x not in M.right:
       if x.typetag == "/Text": #Can't insert Text, do an update
-        x.inorder = True
-        E.update(y.path(), x.value)
+        E.update(y.path(), x.value, x.xpath if hasattr(x, "xpath") else None)
         w = t1.insert(x.tag, x.typetag, x.value, y.path(), 0)
         M.add((w, x))
       else:
         x.inorder = True
         k = findpos(M, x)
-        E.insert(y.path(), str(k), x.tag, x.value)
+        E.insert(y.path(), str(k), x.tag, x.value, x.xpath if hasattr(x, "xpath") else None)
         w = t1.insert(x.tag, x.typetag, x.value, y.path(), k)
         M.add((w, x))
     else: # y is not None:
       w = M.right[x]
       v = w.parent
       if w.value != x.value:
-        E.update(w.path(), x.value)
+        E.update(w.path(), x.value, w.xpath if hasattr(w, "xpath") else None)
         t1.update(w.path(), x.value)
       if (v, y) not in M:
         x.inorder = True
         k = findpos(M, x)
-        E.move(w.path(), z.path(), str(k))
+        E.move(w.path(), z.path(), str(k), w.xpath if hasattr(w, "xpath") else None)
         t1.move(w.path(), z.path(), k)
 
     alignchildren(t1, t2, M, E, w, x)
@@ -399,10 +396,10 @@ def editscript(t1, t2, force = False):
   for w in breadth_iter(t1):
     if w not in M.left:
       if w.typetag == "/Text": #Can't delete Text, do an update
-        E.update(w.path(), "")
+        E.update(w.path(), "", w.xpath if hasattr(w, "xpath") else None)
         t1.update(w.path(), "")
       else:
-        E.delete(w.path())
+        E.delete(w.path(), w.xpath if hasattr(w, "xpath") else None)
         t1.delete(w.path())
 
   return E
@@ -412,13 +409,13 @@ def alignchildren(t1, t2, M, E, w, x):
   See figure 9 in reference.
   """
 
-  for c in w.children:
+  for c in w.elements():
     c.inorder = False
-  for c in x.children:
+  for c in x.elements():
     c.inorder = False
 
-  s1 = [child for child in w.children if child in M.left and M.left[child].parent == x]
-  s2 = [child for child in x.children if child in M.right and M.right[child].parent == w]
+  s1 = [child for child in w.elements() if child in M.left and M.left[child].parent == x]
+  s2 = [child for child in x.elements() if child in M.right and M.right[child].parent == w]
 
   def equal(a, b):
     return (a, b) in M
@@ -431,7 +428,7 @@ def alignchildren(t1, t2, M, E, w, x):
     for b in s2:
       if (a, b) in M and (a, b) not in S:
         k = findpos(M, b)
-        E.move(a.path(), w.path(), k)
+        E.move(a.path(), w.path(), k, a.xpath if hasattr(a, "xpath") else None)
         t1.move(a.path(), w.path(), str(k))
         a.inorder = b.inorder = True
 
@@ -443,24 +440,28 @@ def findpos(M, x):
     return 0
 
   y = x.parent
-  children = [child for child in y.children if child.is_element()]
- 
-  for v in children:
-    if v.inorder:
-      if v is x:
-        return 0
-      break
+  children = y.elements()
 
-  index = children.index(x) - 1
-  while index >= 0:
-    v = children[index]
-    if v.inorder:
-      break
-    index -= 1
+  #find the rightmost inorder node left of x (v)
+  index = children.index(x)
+  v = None
+  for i in range(index):
+    c = children[i]
+    if c.inorder:
+      v = c
+
+  if v is None:
+    return 1
 
   u = M.right[v]
-  children = [child for child in u.parent.children if child.is_element()]
-  return children.index(u) + 1
+  children = u.parent.elements()
+  index = children.index(u) + 1
+  return index + 1
 
 def diff(tree1, tree2):
-  return editscript(dom(tree1), dom(tree2))
+  t1 = dom(tree1)
+  t2 = dom(tree2)
+  E = editscript(t1, t2)
+  open("/home/fjw08/tree1.txt", "w+").write(str(t1))
+  open("/home/fjw08/tree2.txt", "w+").write(str(t2))
+  return E

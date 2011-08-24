@@ -34,26 +34,30 @@ class EditScript:
   def __iter__(self):
     return self.script.__iter__()
 
-  def update(self, path, value):
+  def update(self, path, value, userdata = None):
     self.script.append({ "type": "update",
                          "location": path,
-                         "value": value })
+                         "value": value,
+                         "userdata": userdata })
   
-  def insert(self, path, index, tag, value = None):
+  def insert(self, path, index, tag, value = None, userdata = None):
     self.script.append({ "type": "insert",
                          "location": path,
                          "index": index,
-                         "value": tag + (" " + value if value is not None else "") })
+                         "value": tag + (" " + value if value is not None else ""),
+                         "userdata": userdata})
 
-  def delete(self, path):
+  def delete(self, path, userdata = None):
     self.script.append({ "type": "delete",
-                         "location": path })
+                         "location": path,
+                         "userdata": userdata})
 
-  def move(self, path, destination, index):
+  def move(self, path, destination, index, userdata = None):
     self.script.append({ "type": "move",
                          "location": path,
                          "index": index,
-                         "value": destination })
+                         "value": destination,
+                         "userdata": userdata })
 
   def to_xml(self):
     tree = etree.Element("xmldiff")
@@ -62,10 +66,13 @@ class EditScript:
       node = etree.Element(edit["type"], location = edit["location"])
       if "index" in edit:
         node.attrib["index"] = edit["index"]
+      if edit["userdata"] is not None:
+        node.attrib["userdata"] = edit["userdata"]
+
       if "value" in edit:
         node.text = edit["value"]
       tree.append(node)
-      
+
     return etree.ElementTree(tree)
 
   def write(self, path):
