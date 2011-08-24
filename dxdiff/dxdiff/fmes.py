@@ -142,17 +142,16 @@ class Dom:
     else:
       return self
 
-  def insert(self, tag, tagtype, value, xpath, index):
-    parent = self.find(xpath)
+  def insert(self, tag, tagtype, value, path, index):
+    parent = self.find(path)
 
     node = Dom(tag, value, parent, tagtype == "/Attribute")
     parent.children.insert(index, node)
-    node.xpath = node.path()
-    node.label = _strip_indexers(node.xpath) + node.typetag
+    node.label = _strip_indexers(node.path()) + node.typetag
     return node
 
-  def update(self, xpath, value):
-    node = self.find(xpath)
+  def update(self, path, value):
+    node = self.find(path)
     
     node.value = value
     return node
@@ -178,7 +177,7 @@ def _get_text(tree):
 
 def _strip_indexers(path):
   """
-  Strips out indexers from an xpath.
+  Strips out indexers from an path.
   """
   while True:
     lindex = path.find("[")
@@ -193,23 +192,19 @@ def dom(root, tree = None, parent = None):
   if tree is None:
     tree = root.getroot()
   
-  xpath = root.getpath(tree)
-  path = _strip_indexers(xpath)
+  path = _strip_indexers(root.getpath(tree))
 
   node = Dom(tree.tag, None, parent)
-  node.xpath = xpath
   node.label = path + node.typetag
 
   text = _get_text(tree)
   if text:
     text = Dom(tree.tag, text, node)
-    text.xpath = xpath
     text.label = path + text.typetag
     node.children.append(text)
 
   for key, value in tree.items():
     attr = Dom(key, value, node, True)
-    attr.xpath = xpath + "/@" + key
     attr.label = path + "/@" + key + attr.typetag
     node.children.append(attr)
 
@@ -362,11 +357,11 @@ def editscript(t1, t2, force = False):
   E = EditScript()
   M = fastmatch(t1, t2)
 
-  if M.left[t1] != t2: # roots don't match
+  if t1 not in M.left or M.left[t1] != t2: # roots don't match
     if force: # force them to match
       M.add((t1, t2))
     else:
-      raise "Tree roots don't match."
+      raise Exception("Tree roots don't match.")
 
   alignchildren(t1, t2, M, E, t1, t2)
  

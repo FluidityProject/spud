@@ -191,9 +191,9 @@ class DiffView(gtk.Window):
 
     attrib = {}
     for key, value in tree.attrib.iteritems():
-      attrib[key] = (value, value, "")
+      attrib[key] = (value, value, None)
 
-    child_iter = self.treestore.append(iter, [tree.tag, attrib, tree.text, tree.text, ""]) 
+    child_iter = self.treestore.append(iter, [tree.tag, attrib, tree.text, tree.text, None]) 
     for child in tree:
       self.__set_treestore(child, child_iter)
 
@@ -205,26 +205,26 @@ class DiffView(gtk.Window):
       if key:
         attrib = self.treestore.get_value(iter, 1)
         if edit["type"] == "delete":
-          attrib[key] = ("", attrib[key][0], "delete")
+          attrib[key] = (None, attrib[key][0], "delete")
         elif edit["type"] == "update":
           attrib[key] = (edit["value"], attrib[key][0], attrib[key][2])
         elif edit["type"] == "move":
-          attrib[key] = ("", attrib[key][0], "delete")
-          self.__insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][0], 0)
+          attrib[key] = (None, attrib[key][0], "delete")
+          self.__insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][1], 0)
 
       else:
 
         if edit["type"] == "insert":
           self.__insert(iter, edit["value"], int(edit["index"]))
         elif edit["type"] == "delete":
-          self.treestore.set(iter, 2, "")
+          self.treestore.set(iter, 2, None)
           self.treestore.set(iter, 4, "delete")
         elif edit["type"] == "update":
           self.treestore.set(iter, 2, edit["value"])
         elif edit["type"] == "move":
           self.__move(iter, edit["value"], int(edit["index"]))
 
-  def __floodfill(self, iter, parentedit = ""):
+  def __floodfill(self, iter, parentedit = None):
     """
     Floodfill the tree with the correct edit types.
     If something has changed below you, "subupdate"
@@ -232,44 +232,60 @@ class DiffView(gtk.Window):
     If insert, all below insert
     If delete, all below delete
     """
-
     attribs, new, old, edit = self.treestore.get(iter, 1, 2, 3, 4)
-    if edit != "insert" and edit != "delete":
-      if parentedit == "insert" or parentedit == "delete":
-        self.treestore.set(iter, 4, parentedit)
-      else:
-        update = False
-        for key, (valuenew, valueold, valueedit) in attribs.iteritems():
-          if valueedit != "":
-            update = True
-            break
-        if new != old:
+
+    if parentedit == "insert":
+      edit = "insert"
+    elif parentedit == "delete":
+      edit = "delete"
+
+    if edit == "insert" or edit == "delete":
+
+      self.treestore.set(iter, 4, edit)
+
+      for key, (valuenew, valueold, valueedit) in attribs.iteritems():
+        attrib[key] = (valuenew, valueold, edit)
+
+      child = self.treestore.iter_children(iter)
+      while child is not None:
+        self.__floodfile(child, edit)
+        child = self.treestore.iter_next(child)
+
+      return edit
+    else:
+      child = self.treestore.iter_children(iter)
+      while child is not None:
+        change = self.__floodfill(child, edit)
+        if change is not None:
+          self.treestore.set(iter, 4, "subupdate")
+          return "subupdate"
+        child = self.treestore.iter_next(child)
+
+      update = False
+      for key, (valuenew, valueold, valueedit) in attribs.iteritems():
+        if valueedit is not None:
           update = True
+          break
+      if new != old:
+        update = True
 
-        if update:    
-          self.treestore.set(iter, 4, "update")
+      if update:
+        self.treestore.set(iter, 4, "update")
+        return "update"
 
-    child = self.treestore.iter_children(iter)
+      return None
 
-    while child is not None:
-      change = self.__floodfill(child, edit)
-      if edit == "" and change != "":
-        self.treestore.set(iter, 4, "subupdate")
-      child = self.treestore.iter_next(child)
-
-    return self.treestore.get_value(iter, 4)
- 
   def __insert(self, iter, value, index):
     if " " in value:
       key, value = value.split(" ")
       attrib = self.treestore.get_value(iter, 1)
-      attrib[key] = (value, "", "insert")
+      attrib[key] = (value, None, "insert")
     else:
-      before = self.treestore.iter_nth_child(iter, index)
+      before = self.__iter_nth_child(iter, index)
       if before:
-        self.treestore.insert_before(iter, before, [value, {}, "", "", "insert"]) 
+        self.treestore.insert_before(iter, before, [value, {}, None, None, "insert"]) 
       else:
-        self.treestore.append(iter, [value, {}, "", "", "insert"])
+        self.treestore.append(iter, [value, {}, None, None, "insert"])
 
   def __move(self, iter, value, index):
     """
@@ -277,28 +293,45 @@ class DiffView(gtk.Window):
     mark all of iter as deleted, and all of the copy inserted.
     """
     tag, attrib, text = self.treestore.get(iter, 0, 1, 2)
-    self.treestore.set(iter, 2, "")
+    self.treestore.set(iter, 2, None)
     self.treestore.set(iter, 4, "delete")
 
     destiter = self.__get_iter(value)[0]
 
-    after = self.treestore.iter_nth_child(destiter, index)
-    self.treestore.insert_after(destiter, after, [tag, attrib, text, "", "insert"])
+    before = self.__iter_nth_child(destiter, index)
+    if before:
+      destiter = self.treestore.insert_before(destiter, before, [tag, attrib, text, None, "insert"]) 
+    else:
+      destiter = self.treestore.append(destiter, [tag, attrib, text, None, "insert"])
 
     def move(iterfrom, iterto):
-      childfrom = self.treestore.iter_children(iterfrom)
-
-      while childfrom:
+      for childfrom in self.__iter_children(iterfrom):
         tag, attrib, text = self.treestore.get(childfrom, 0, 1, 2)
-        self.treestore.set(iter, 2, "")
+        self.treestore.set(childfrom, 2, None)
         self.treestore.set(childfrom, 4, "delete")
-        
-        childto = self.treestore.append(iterto, [tag, attrib, text, "", "insert"])
+
+        childto = self.treestore.append(iterto, [tag, attrib, text, None, "insert"])
         move(childfrom, childto)
 
-        childfrom = self.treestore.iter_next(childfrom)
-
     move(iter, destiter)
+
+  def __iter_children(self, iter):
+    child = self.treestore.iter_children(iter)
+
+    while child:
+      active = self.treestore.get_value(child, 4) != "delete"
+      if active:
+        yield child
+      child = self.treestore.iter_next(child)
+
+  def __iter_nth_child(self, iter, n):
+
+    for child in self.__iter_children(iter):
+      if n == 0:
+        return child
+      else:
+        n -= 1
+    return None
 
   def __get_iter(self, path, iter = None):
     """
@@ -315,14 +348,11 @@ class DiffView(gtk.Window):
 
     parentiter = self.treestore.iter_parent(iter)
     if parentiter:
-      siblingsiter = self.treestore.iter_children(parentiter)
       siblings = []
-      while siblingsiter is not None:
-        siblingtag, siblingsedit = self.treestore.get(siblingsiter, 0, 4)
-        if siblingsedit != "delete" and siblingtag == tag:
-          siblings.append(self.treestore.get_path(siblingsiter))
-
-        siblingsiter = self.treestore.iter_next(siblingsiter)
+      for siblingiter in self.__iter_children(parentiter):
+        siblingtag = self.treestore.get_value(siblingiter, 0)
+        if siblingtag == tag:
+          siblings.append(self.treestore.get_path(siblingiter))
 
       if len(siblings) != 1:
         index = "[" + str(siblings.index(self.treestore.get_path(iter)) + 1) + "]"
@@ -363,22 +393,17 @@ class DiffView(gtk.Window):
         return None
 
       # check children
-      citer = self.treestore.iter_children(iter)
-      while citer is not None:
+      for citer in self.__iter_children(iter):
         edit = self.treestore.get_value(citer, 4)
         if edit != "delete":
           print "/" + self.treestore.get_value(citer, 0)
-        citer = self.treestore.iter_next(citer)
 
-      iter = self.treestore.iter_children(iter)
-
-      while iter is not None:
+      for iter in self.__iter_children(iter):
         edit = self.treestore.get_value(iter, 4)
         if edit != "delete":
           result = self.__get_iter(path, iter)
           if result:
             return result
-        iter = self.treestore.iter_next(iter)
 
       return None
     else:
@@ -403,7 +428,7 @@ class DiffView(gtk.Window):
       tag.set_property("foreground", "black")
     else:
       databuffer.set_text("No data")
-      self.__set_cell_property(tag, "")
+      self.__set_cell_property(tag, None)
       tag.set_property("foreground", "grey")
     
     bounds = databuffer.get_bounds()
@@ -450,7 +475,7 @@ class DiffView(gtk.Window):
     rem.set_property("background", "indianred")
 
   def __set_cell_property(self, cell, edit):
-    if edit == "":
+    if edit is None:
       cell.set_property("foreground", "black")
     elif edit == "insert":
       cell.set_property("foreground", "green")
