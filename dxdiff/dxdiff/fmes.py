@@ -95,9 +95,6 @@ class Dom:
 
   def find(self, path):
 
-    print "------------"
-    print "find", path, "@", self.tag
-
     if self.is_text():
       if path == "/text()":
         return self
@@ -122,7 +119,6 @@ class Dom:
       else:
         index = ""
 
-      print "index:", index
       if root != "/" + self.tag + index:
         return None
     else:

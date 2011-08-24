@@ -271,7 +271,7 @@ class DiffView(gtk.Window):
             self.treestore.set(iter, 4, "subupdate")
           child = self.treestore.iter_next(child)
 
-      return self.treestore.get_value(iter, 4)
+    return self.treestore.get_value(iter, 4)
 
   def __insert(self, iter, value, index):
     if " " in value:
