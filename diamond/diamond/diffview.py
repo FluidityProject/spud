@@ -191,6 +191,7 @@ class DiffView(gtk.Window):
 
     attrib = {}
     for key, value in tree.attrib.iteritems():
+      #             (new,   old,   edit)
       attrib[key] = (value, value, None)
 
     child_iter = self.treestore.append(iter, [tree.tag, attrib, tree.text, tree.text, None]) 
@@ -203,14 +204,15 @@ class DiffView(gtk.Window):
     for edit in editscript:
       iter, key = self.__get_iter(edit["location"])
       if key:
-        attrib = self.treestore.get_value(iter, 1)
+        attribs = self.treestore.get_value(iter, 1)
+        old = attribs[key][1]
         if edit["type"] == "delete":
-          attrib[key] = (None, attrib[key][0], "delete")
+          attribs[key] = (None, old, "delete")
         elif edit["type"] == "update":
-          attrib[key] = (edit["value"], attrib[key][0], attrib[key][2])
+          attribs[key] = (edit["value"], old, "update")
         elif edit["type"] == "move":
-          attrib[key] = (None, attrib[key][0], "delete")
-          self.__insert(self.__get_iter(edit["value"])[0], key + " " + attrib[key][1], 0)
+          attribs[key] = (None, old, "delete")
+          self.__insert(self.__get_iter(edit["value"])[0], key + " " + old, 0)
 
       else:
 
@@ -240,30 +242,20 @@ class DiffView(gtk.Window):
       edit = "delete"
 
     if edit == "insert" or edit == "delete":
+      for key, (valuenew, valueold, valueedit) in attribs.iteritems():
+        attribs[key] = (valuenew, valueold, edit)
+
+      child = self.treestore.iter_children(iter)
+      while child is not None:
+        self.__floodfill(child, edit)
+        child = self.treestore.iter_next(child)
 
       self.treestore.set(iter, 4, edit)
-
-      for key, (valuenew, valueold, valueedit) in attribs.iteritems():
-        attrib[key] = (valuenew, valueold, edit)
-
-      child = self.treestore.iter_children(iter)
-      while child is not None:
-        self.__floodfile(child, edit)
-        child = self.treestore.iter_next(child)
-
-      return edit
     else:
-      child = self.treestore.iter_children(iter)
-      while child is not None:
-        change = self.__floodfill(child, edit)
-        if change is not None:
-          self.treestore.set(iter, 4, "subupdate")
-          return "subupdate"
-        child = self.treestore.iter_next(child)
-
       update = False
-      for key, (valuenew, valueold, valueedit) in attribs.iteritems():
-        if valueedit is not None:
+      for key in attribs:
+        # edit value
+        if attribs[key][2] is not None:
           update = True
           break
       if new != old:
@@ -271,9 +263,15 @@ class DiffView(gtk.Window):
 
       if update:
         self.treestore.set(iter, 4, "update")
-        return "update"
+      else:
+        child = self.treestore.iter_children(iter)
+        while child is not None:
+          change = self.__floodfill(child, edit)
+          if change is not None:
+            self.treestore.set(iter, 4, "subupdate")
+          child = self.treestore.iter_next(child)
 
-      return None
+      return self.treestore.get_value(iter, 4)
 
   def __insert(self, iter, value, index):
     if " " in value:
@@ -419,7 +417,7 @@ class DiffView(gtk.Window):
       return
 
     attrib, new, old, edit = model.get(row, 1, 2, 3, 4)
-    
+
     databuffer = self.dataview.get_buffer()
     tag = databuffer.get_tag_table().lookup("tag")
     if new or old: 
@@ -430,7 +428,7 @@ class DiffView(gtk.Window):
       databuffer.set_text("No data")
       self.__set_cell_property(tag, None)
       tag.set_property("foreground", "grey")
-    
+
     bounds = databuffer.get_bounds()
     databuffer.apply_tag(tag, bounds[0], bounds[1])
 
@@ -438,14 +436,14 @@ class DiffView(gtk.Window):
     # 1: Value
     # 2: Old value
     # 3: "insert", "delete", "update",  ""
- 
+
     attribstore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
 
     for key, (new, old, diff) in attrib.iteritems():
       attribstore.append(None, [key, new, old, diff])
 
     self.attribview.set_model(attribstore)
-   
+
   def __set_textdiff(self, databuffer, old, new):
     text1 = old.splitlines() if old else []
     text2 = new.splitlines() if new else []
@@ -453,8 +451,8 @@ class DiffView(gtk.Window):
     from difflib import Differ
     differ = Differ()
     result = differ.compare(text1, text2)
-    result = [line + "\n" for line in result if not line.startswith("? ")]   
-   
+    result = [line + "\n" for line in result if not line.startswith("? ")]
+
     databuffer.set_text("") 
     for line in result:
       iter = databuffer.get_end_iter()

@@ -77,10 +77,10 @@ class Dom:
       else:
         return False
     return True 
-  
+
   def __hash__(self):
     return id(self).__hash__()
- 
+
   def path(self):
     """
     Finds the path of this element.
@@ -90,7 +90,7 @@ class Dom:
 
     if self.is_attribute():
       return self.parent.path() + "/@" + self.tag
-   
+
     if self.parent:
       siblings = self.parent.children
       siblings = [sibling for sibling in siblings if sibling.tag == self.tag and sibling.is_element()]
@@ -101,7 +101,7 @@ class Dom:
       return self.parent.path() + "/" + self.tag + index
     else:
       return "/" + self.tag
-  
+
   def find(self, path):
     if self.is_text():
       if path == "/text()":
@@ -329,10 +329,11 @@ def breadth_iter(tree):
   Q.append(tree)
   while Q:
     t = Q.popleft()
-    for child in t.children:
-      Q.append(child)
     if t is not tree:
       yield t
+    if t.parent is not None or t is tree: #check we haven't deleted it
+      for child in t.children:
+        Q.append(child)
 
 def postorder_iter(tree):
   S = []
@@ -395,7 +396,7 @@ def editscript(t1, t2, force = False):
 
     alignchildren(t1, t2, M, E, w, x)
 
-  for w in postorder_iter(t1):
+  for w in breadth_iter(t1):
     if w not in M.left:
       if w.typetag == "/Text": #Can't delete Text, do an update
         E.update(w.path(), "")
