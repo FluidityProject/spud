@@ -62,7 +62,7 @@ def Help():
 def main():
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hvfs:t:d:")
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvfs:t:d:")
   except:
     Help()
     sys.exit(1)
