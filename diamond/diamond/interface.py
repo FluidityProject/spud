@@ -18,6 +18,7 @@
 import os
 import os.path
 import re
+import time
 import sys
 import tempfile
 import cStringIO as StringIO
@@ -741,14 +742,21 @@ class Diamond:
 
     return
 
+  def __diff(self, path):
+    self.statusbar.set_statusbar("Calculating diff... (this may take a while)")
+    start = time.clock()
+    diffview.DiffView(path, self.tree)
+    seconds = time.clock() - start
+    self.statusbar.set_statusbar("Diff calculated (took " + str(seconds) + " seconds)")
+
   def on_diff(self, widget = None, path = None):
     if path is None:
       path = os.path.dirname(self.filename) if self.filename else None
-    window = diffview.DiffView(path, self.tree)
+    self.__diff(path)
 
   def on_diffsave(self, widget = None):
     if self.filename:
-      window = diffview.DiffView(self.filename, self.tree)
+      self.__diff(self.filename)
     else:
       dialogs.error(self.main_window, "No save to diff against.")
 

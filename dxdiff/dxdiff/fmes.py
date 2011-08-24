@@ -302,7 +302,7 @@ def _match(nodes1, nodes2, M, equal):
     for x in range(len(s1)):
       for y in range(len(s2)):
         if equal(s1[x], s2[y]):
-          M.add(s1[x], s2[y])
+          M.add((s1[x], s2[y]))
           s2.pop(y)
           break
 
