@@ -743,7 +743,7 @@ class Diamond:
     return
 
   def __diff(self, path):
-    def run_diff():
+    def run_diff(self, path):
       start = time.clock()
       diffview.DiffView(path, self.tree)
       seconds = time.clock() - start
@@ -751,7 +751,8 @@ class Diamond:
       return False
 
     self.statusbar.set_statusbar("Calculating diff... (this may take a while)")
-    gobject.idle_add(run_diff)
+    #gobject.idle_add(run_diff, self, path)
+    run_diff(self, path)
 
   def on_diff(self, widget = None, path = None):
     if path is None:
