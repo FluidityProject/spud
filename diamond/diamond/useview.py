@@ -24,9 +24,35 @@ class UseView(gtk.Window):
   def __init__(self, schema, path):
     gtk.Window.__init__(self)
     self.__add_controls()
-
+    self.__update(schema, path)
     self.show_all()
 
   def __add_controls(self): 
     self.set_title("Unused schema entries")
     self.set_default_size(800, 600)
+
+    self.treeview = gtk.TreeView()
+
+    self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
+
+    # Node column
+    celltext = gtk.CellRendererText()
+    column = gtk.TreeViewColumn("Node", celltext)
+    column.set_cell_data_func(celltext, self.set_celltext)
+
+    self.treeview.append_column(column)
+
+    # 0: The node tag
+    # 1: Used (0 == Not used, 1 = Child not used, 2 = Used)
+    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
+    self.treeview.set_model(self.treestore)
+    self.treeview.set_enable_search(False)
+
+    self.add(self.treeview)
+
+  def __update(self, schema, path):
+    pass
+
+  def set_celltext(self, column, cell, model, iter):
+    tag, useage = model.get(iter, 0, 1)
+    cell.set_property("text", tag)
