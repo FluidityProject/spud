@@ -60,12 +60,12 @@ class Schema(object):
                       'except' : self.cb_except,
                       'ignore' : self.cb_ignore,
                       'notAllowed' : self.cb_notallowed}
-                      
+
     self.lost_eles  = []
     self.added_eles = []
     self.lost_attrs  = []
     self.added_attrs = []
-  
+
     return
 
   def element_children(self, element):

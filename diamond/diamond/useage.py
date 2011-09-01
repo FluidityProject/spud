@@ -20,33 +20,51 @@ from lxml import etree
 
 from schema import Schema
 
+def strip(tag):
+  return tag[tag.index("}") + 1:]
+
 def find_fullset(tree):
   """
-  Given a schema pulls out xpaths for every node.
+  Given a schema tree pulls out xpaths for every node.
   """
 
-  node = tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})
+  def traverse(node):
 
-  print [n.tag for n in node]
+    if strip(node.tag) == "element":
+      fullset.add(tree.getpath(node))
+
+      for child in node:
+        traverse(child)
+    elif (strip(node.tag) == "choice" and not any(strip(child.tag) == "value" for child in node)
+        or strip(node.tag) == "optional"
+        or strip(node.tag) == "zeroOrMore"
+        or strip(node.tag) == "oneOrMore"):
+      for child in node:
+        traverse(child)
+
+  start = tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+
+  root = start[0]
+
+  fullset = set()
+  traverse(root)
+  return fullset
 
 def find_useset(tree):
   """
-  Given an xml tree pulls out xpaths for every element and attribute.
+  Given a diamond xml tree pulls out scehama paths for every element and attribute.
   """
 
-  def traverse(useset, node):
-    xpath = tree.getpath(node)
+  def traverse(node):
+    xpath = node.schemaname
 
     useset.add(xpath)
 
-    for key in node.attrib:
-      useset.add(xpath + "/@" + key)
-
-    for child in node:
-      traverse(useset, child)
+    for child in node.get_children():
+      traverse(child)
 
   useset = set()
-  traverse(useset, tree.getroot())
+  traverse(tree)
   return useset
 
 def find_unusedset(schema, paths):
@@ -64,7 +82,38 @@ def find_unusedset(schema, paths):
 
   return fullset - useset
 
-if __name__ == "__main__":
-  find_fullset(etree.parse("/home/fjw08/fluidity/schemas/fluidity_options.rng"))
+def set_to_paths(schema, nameset):
+  """
+  Converts a set of schemanames to a list of paths.
+  """
+  def traverse(node):
+    if node is start:
+      return ""
 
-  print find_useset(etree.parse("/home/fjw08/fluidity/examples/top_hat/top_hat_cv.flml"))
+    if "name" in node.keys():
+      return traverse(node.getparent()) + "/" + node.get("name")
+    else:
+      return traverse(node.getparent()) + "/" + strip(node.tag)
+
+  start = schema.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+  paths = []
+
+  for name in nameset:
+    node = schema.xpath(name)[0]
+    paths.append(traverse(node))
+
+  return paths
+
+if __name__ == "__main__":
+  schema = Schema("/home/fjw08/fluidity/schemas/fluidity_options.rng")
+
+  fullset = find_fullset(schema.tree)
+  useset = find_useset(schema.read("/home/fjw08/fluidity/examples/top_hat/top_hat_cv.flml"))
+  print fullset
+  print useset
+  print fullset & useset
+  paths = set_to_paths(schema.tree, fullset & useset)
+  print "------------"
+  for path in sorted(paths, key = lambda (path): path.count("/")):
+    print path
+
