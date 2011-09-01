@@ -20,15 +20,51 @@ from lxml import etree
 
 from schema import Schema
 
-def fullset(schema):
+def find_fullset(tree):
   """
   Given a schema pulls out xpaths for every node.
   """
-  tree = schema.tree
 
   node = tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})
 
   print [n.tag for n in node]
 
+def find_useset(tree):
+  """
+  Given an xml tree pulls out xpaths for every element and attribute.
+  """
+
+  def traverse(useset, node):
+    xpath = tree.getpath(node)
+
+    useset.add(xpath)
+
+    for key in node.attrib:
+      useset.add(xpath + "/@" + key)
+
+    for child in node:
+      traverse(useset, child)
+
+  useset = set()
+  traverse(useset, tree.getroot())
+  return useset
+
+def find_unusedset(schema, paths):
+  """
+  Given the path to a scheam and a list of paths to xml files
+  find the unused xpaths.
+  """
+
+  useset = set()
+  for path in paths:
+    tree = etree.parse(path)
+    useset |= find_useset(tree)
+
+  fullset = find_fullset(etree.parse(schema))
+
+  return fullset - useset
+
 if __name__ == "__main__":
-  fullset("/home/fraser/fluidity/schemas/fluidity_options.rng") 
+  find_fullset(etree.parse("/home/fjw08/fluidity/schemas/fluidity_options.rng"))
+
+  print find_useset(etree.parse("/home/fjw08/fluidity/examples/top_hat/top_hat_cv.flml"))

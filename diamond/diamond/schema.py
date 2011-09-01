@@ -55,9 +55,9 @@ class Schema(object):
                       'interleave': self.cb_group,
                       'name': self.cb_name,
                       'text': self.cb_text,
-		      'anyName' : self.cb_anyname,
-		      'nsName' : self.cb_nsname,
-		      'except' : self.cb_except,
+                      'anyName' : self.cb_anyname,
+                      'nsName' : self.cb_nsname,
+                      'except' : self.cb_except,
                       'ignore' : self.cb_ignore,
                       'notAllowed' : self.cb_notallowed}
                       
@@ -145,19 +145,12 @@ class Schema(object):
     if isinstance(eid, tree.Tree) or isinstance(eid, choice.Choice):
       eidtree = eid
       eid = eid.schemaname
-    
-    if eid == ":start":
-      try:
-        node = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
-      except:
-        debug.deprint("No valid start node found. Are you using a library Relax-NG file like spud_base.rng?", 0)
-        sys.exit(0)
-    else:
-      xpath = self.tree.xpath(eid)
-      if len(xpath) == 0:
-        debug.deprint("Warning: no element with XPath %s" % eid)
-        return None
-      node = xpath[0]
+
+    xpath = self.tree.xpath(eid)
+    if len(xpath) == 0:
+      debug.deprint("Warning: no element with XPath %s" % eid)
+      return None
+    node = xpath[0]
 
     node = self.to_tree(node)
   
