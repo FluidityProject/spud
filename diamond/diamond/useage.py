@@ -35,10 +35,7 @@ def find_fullset(tree):
 
       for child in node:
         traverse(child)
-    elif (strip(node.tag) == "choice" and not any(strip(child.tag) == "value" for child in node)
-        or strip(node.tag) == "optional"
-        or strip(node.tag) == "zeroOrMore"
-        or strip(node.tag) == "oneOrMore"):
+    else:
       for child in node:
         traverse(child)
 
@@ -90,10 +87,17 @@ def set_to_paths(schema, nameset):
     if node is start:
       return ""
 
-    if "name" in node.keys():
-      return traverse(node.getparent()) + "/" + node.get("name")
-    else:
-      return traverse(node.getparent()) + "/" + strip(node.tag)
+    tagname = node.get("name") if "name" in node.keys() else strip(node.tag)
+    name = None
+
+    for child in node:
+      if strip(child.tag) == "attribute":
+        if "name" in child.keys() and child.get("name") == "name":
+          for grandchild in child:
+            if strip(grandchild.tag) == "value":
+              name = "[" + grandchild.text + "]"
+
+    return traverse(node.getparent()) + "/" + tagname + (name if name else "")
 
   start = schema.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
   paths = []
@@ -109,11 +113,9 @@ if __name__ == "__main__":
 
   fullset = find_fullset(schema.tree)
   useset = find_useset(schema.read("/home/fjw08/fluidity/examples/top_hat/top_hat_cv.flml"))
-  print fullset
-  print useset
-  print fullset & useset
-  paths = set_to_paths(schema.tree, fullset & useset)
+
+  paths = set_to_paths(schema.tree, fullset - useset)
   print "------------"
-  for path in sorted(paths, key = lambda (path): path.count("/")):
+  for path in sorted(paths, key = lambda (path): (path.count("/"), path)):
     print path
 
