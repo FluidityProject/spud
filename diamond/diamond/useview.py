@@ -18,11 +18,15 @@
 import gobject
 import gtk
 
+import schemauseage
+
 class UseView(gtk.Window):
-  def __init__(self):
+  def __init__(self, schema, path):
     gtk.Window.__init__(self)
     self.__add_controls()
-    
+
+    self.show_all()
+
   def __add_controls(self): 
     self.set_title("Unused schema entries")
     self.set_default_size(800, 600)

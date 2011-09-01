@@ -106,7 +106,7 @@ def set_to_paths(schema, nameset):
     node = schema.xpath(name)[0]
     paths.append(traverse(node))
 
-  return paths
+  return sorted(paths, key = lambda (path): (path.count("/"), path))
 
 if __name__ == "__main__":
   schema = Schema("/home/fjw08/fluidity/schemas/fluidity_options.rng")
