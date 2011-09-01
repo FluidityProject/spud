@@ -41,25 +41,7 @@ class DiffView(gtk.Window):
     gtk.Window.__init__(self)
     self.__add_controls()
 
-    if path and os.path.isfile(path):
-      filename = path
-    else:
-      dialog = gtk.FileChooserDialog(title = "Diff against", 
-                                   action = gtk.FILE_CHOOSER_ACTION_OPEN, 
-                                   buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-      if path:
-        dialog.set_current_folder(path)
-
-      response = dialog.run()
-      if response != gtk.RESPONSE_OK:
-        dialog.destroy()
-        self.destroy()
-        return
-
-      filename = dialog.get_filename()
-      dialog.destroy()
-
-    tree1 = etree.parse(filename)
+    tree1 = etree.parse(path)
     tree2 = etree.ElementTree(tree.write_core(None))
 
     editscript = xmldiff.diff(tree1, tree2)
