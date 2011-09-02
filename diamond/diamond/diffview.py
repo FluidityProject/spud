@@ -73,7 +73,9 @@ class DiffView(gtk.Window):
     mainvbox.pack_start(menubar, expand = False)
 
     hpane = gtk.HPaned()
-
+    scrolledwindow = gtk.ScrolledWindow()
+    scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    
     self.treeview = gtk.TreeView()
 
     self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -96,7 +98,8 @@ class DiffView(gtk.Window):
     self.treeview.set_enable_search(False)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
-    hpane.pack1(self.treeview)
+    scrolledwindow.add(self.treeview)
+    hpane.pack1(scrolledwindow, True)
 
     vpane = gtk.VPaned()
     frame = gtk.Frame()
