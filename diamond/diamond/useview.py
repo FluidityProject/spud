@@ -44,14 +44,25 @@ class UseView(gtk.Window):
 
     # 0: The node tag
     # 1: Used (0 == Not used, 1 = Child not used, 2 = Used)
-    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
+    # 3: The xpath
+    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
     self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
 
     self.add(self.treeview)
 
+  def __set_treestore(self, tree, iter = None):
+
+    tag = schemauseage.node_name(tree)
+
+    child_iter = self.treestore.append(iter, [tag, 2, tree])
+    for child in tree:
+      self.__set_treestore(child, child_iter)
+ 
   def __update(self, schema, path):
-    pass
+    self.start = schema.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+
+    self.__set_treestore(self.start[0])
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)

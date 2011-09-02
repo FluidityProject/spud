@@ -79,6 +79,21 @@ def find_unusedset(schema, paths):
 
   return fullset - useset
 
+def node_name(node):
+  """
+  Returns a name for this node.
+  """
+  tagname = node.get("name") if "name" in node.keys() else strip(node.tag)
+  name = None
+
+  for child in node:
+    if strip(child.tag) == "attribute":
+      if "name" in child.keys() and child.get("name") == "name":
+        for grandchild in child:
+          if strip(grandchild.tag) == "value":
+            name = "[" + grandchild.text + "]"
+  return tagname + (name if name else "")
+
 def set_to_paths(schema, nameset):
   """
   Converts a set of schemanames to a list of paths.
@@ -87,17 +102,7 @@ def set_to_paths(schema, nameset):
     if node is start:
       return ""
 
-    tagname = node.get("name") if "name" in node.keys() else strip(node.tag)
-    name = None
-
-    for child in node:
-      if strip(child.tag) == "attribute":
-        if "name" in child.keys() and child.get("name") == "name":
-          for grandchild in child:
-            if strip(grandchild.tag) == "value":
-              name = "[" + grandchild.text + "]"
-
-    return traverse(node.getparent()) + "/" + tagname + (name if name else "")
+    return traverse(node.getparent()) + node_name(node)
 
   start = schema.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
   paths = []
