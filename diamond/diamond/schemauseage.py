@@ -66,16 +66,16 @@ def find_useset(tree):
 
 def find_unusedset(schema, paths):
   """
-  Given the path to a scheam and a list of paths to xml files
+  Given the a diamond schema and a list of paths to xml files
   find the unused xpaths.
   """
 
   useset = set()
   for path in paths:
-    tree = etree.parse(path)
+    tree = schema.read(path)
     useset |= find_useset(tree)
 
-  fullset = find_fullset(etree.parse(schema))
+  fullset = find_fullset(schema.tree)
 
   return fullset - useset
 

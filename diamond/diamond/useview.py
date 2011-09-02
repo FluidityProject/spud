@@ -24,7 +24,7 @@ class UseView(gtk.Window):
   def __init__(self, schema, path):
     gtk.Window.__init__(self)
     self.__add_controls()
-    self.__update(schema, path)
+    self.__update(schema, [path])
     self.show_all()
 
   def __add_controls(self): 
@@ -51,18 +51,35 @@ class UseView(gtk.Window):
 
     self.add(self.treeview)
 
-  def __set_treestore(self, tree, iter = None):
+  def __set_treestore(self, node, iter = None):
 
-    tag = schemauseage.node_name(tree)
+    tag = schemauseage.node_name(node)
 
-    child_iter = self.treestore.append(iter, [tag, 2, tree])
-    for child in tree:
+    child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
+    for child in node:
       self.__set_treestore(child, child_iter)
+
+  def __set_useage(self, useage):
+    def find(xpath, iter = None):
+      iter = self.treestore.iter_children(iter)
+      while iter:
+        if self.treestore.get_value(iter, 2) == xpath:
+          return iter
+        result = find(xpath, iter)
+        if result:
+          return result
+        iter = self.treestore.iter_next(iter)
+      return None
+
+    for xpath in useage:
+      self.treestore.set_value(find(xpath), 1, 0)
  
-  def __update(self, schema, path):
-    self.start = schema.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+  def __update(self, schema, paths):
+    self.tree = schema.tree
+    self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
 
     self.__set_treestore(self.start[0])
+    self.__set_useage(schemauseage.find_unusedset(schema, paths))
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)
