@@ -65,7 +65,7 @@ Description: An automatic options system for scientific models (python interface
 
 Package: python-dxdiff
 Section: python
-Architecture: any
+Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends}, ${misc:Depends}
 Description: An XML aware diff tool.

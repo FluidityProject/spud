@@ -105,7 +105,7 @@ class DescriptionWidget(gtk.Frame):
   def render_whitespace(self, desc):
     ''' Render the line wrapping in desc as follows:
     
-    * Newlines followed by 0-1 spaces are ignored.
+    * Newlines followed by 0-1 spaces are ignored, and 1 space is used.
     * Blank lines start new paragraphs.
     * Newlines followed by more than 1 space are honoured.
     '''
@@ -130,6 +130,8 @@ class DescriptionWidget(gtk.Frame):
       else: #normal case
         if para: #add if starting a new paragraph
           text.append("\n   ")
+        if not line.startswith(" "):
+          text.append(" ")
         text.append(line)
         para = False
         literal = False

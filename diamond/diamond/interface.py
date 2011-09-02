@@ -745,15 +745,34 @@ class Diamond:
     return
 
   def __diff(self, path):
-    def run_diff():
+    def run_diff(self, path):
       start = time.clock()
       diffview.DiffView(path, self.tree)
       seconds = time.clock() - start
       self.statusbar.set_statusbar("Diff calculated (took " + str(seconds) + " seconds)")
       return False
 
+    if path and os.path.isfile(path):
+      filename = path
+    else:
+      dialog = gtk.FileChooserDialog(
+                                     title = "Diff against",
+                                     action = gtk.FILE_CHOOSER_ACTION_OPEN,
+                                     buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+
+      if path:
+        dialog.set_current_folder(path)
+
+      response = dialog.run()
+      if response != gtk.RESPONSE_OK:
+        dialog.destroy()
+        return
+
+      filename = dialog.get_filename()
+      dialog.destroy()
+
     self.statusbar.set_statusbar("Calculating diff... (this may take a while)")
-    gobject.idle_add(run_diff)
+    gobject.idle_add(run_diff, self, filename)
 
   def on_diff(self, widget = None, path = None):
     if path is None:

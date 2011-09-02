@@ -25,6 +25,7 @@ import gtk
 import gtk.gdk
 gtk.gdk.threads_init()
 import gobject
+gobject.threads_init()
 
 # do this right at the start, so we can find the diamond modules
 diamond_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir )

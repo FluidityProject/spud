@@ -197,19 +197,16 @@ def dom(root, tree = None, parent = None):
 
   node = Dom(tree.tag, None, parent)
   node.label = path + node.typetag
-  node.xpath = xpath
 
   text = _get_text(tree)
   if text:
     text = Dom(tree.tag, text, node)
     text.label = path + text.typetag
-    text.xpath = xpath + "/text()"
     node.children.append(text)
 
   for key, value in tree.items():
     attr = Dom(key, value, node, True)
     attr.label = path + "/@" + key + attr.typetag
-    attr.xpath = path + "/@" + key
     node.children.append(attr)
 
   for child in tree:
@@ -268,7 +265,7 @@ def compare_value(value1, value2):
   return 1.0 - (float(len(lcs.lcs(lcs.path(value1, value2)))) / max(len(value1), len(value2)))
 
 def leaf_equal(f, M, l1, l2):
-  return l1.label == l2.label and compare_value(l1.value, l2.value) <= f
+  return compare_value(l1.value, l2.value) <= f
 
 def common(children1, children2, M):
   return [(x, y) for (x, y) in M if x in children1 and y in children2]
@@ -277,9 +274,12 @@ def compare_children(children1, children2, M):
   return (float(len(common(children1, children2, M))) / max(len(children1), len(children2)))
 
 def node_equal(t, M, n1, n2):
-  return n1.label == n2.label and compare_children(n1.children, n2.children, M) > t
+  return compare_children(n1.children, n2.children, M) > t
 
 def depth_equal(f, t, M, n1, n2):
+  if n1.label != n2.label:
+    return False
+
   if n1.children or n2.children:
     return node_equal(t, M, n1, n2)
   else:
@@ -371,25 +371,25 @@ def editscript(t1, t2):
 
     if x not in M.right:
       if x.typetag == "/Text": #Can't insert Text, do an update
-        E.update(z.path(), x.value, x.xpath if hasattr(x, "xpath") else None)
+        E.update(z.path(), x.value)
         w = t1.insert(x.tag, x.typetag, x.value, z.path(), 0)
         M.add((w, x))
       else:
         x.inorder = True
         k = findpos(M, x)
-        E.insert(z.path(), str(k), x.tag, x.value, x.xpath if hasattr(x, "xpath") else None)
+        E.insert(z.path(), str(k), x.tag, x.value)
         w = t1.insert(x.tag, x.typetag, x.value, z.path(), k)
         M.add((w, x))
     else: # y is not None:
       w = M.right[x]
       v = w.parent
       if w.value != x.value:
-        E.update(w.path(), x.value, w.xpath if hasattr(w, "xpath") else None)
+        E.update(w.path(), x.value)
         t1.update(w.path(), x.value)
       if (v, y) not in M:
         x.inorder = True
         k = findpos(M, x)
-        E.move(w.path(), z.path(), str(k), w.xpath if hasattr(w, "xpath") else None)
+        E.move(w.path(), z.path(), str(k))
         t1.move(w.path(), z.path(), k)
 
     alignchildren(t1, t2, M, E, w, x)
@@ -397,10 +397,10 @@ def editscript(t1, t2):
   for w in breadth_iter(t1):
     if w not in M.left:
       if w.typetag == "/Text": #Can't delete Text, do an update
-        E.update(w.path(), "", w.xpath if hasattr(w, "xpath") else None)
+        E.update(w.path(), "")
         t1.update(w.path(), "")
       else:
-        E.delete(w.path(), w.xpath if hasattr(w, "xpath") else None)
+        E.delete(w.path())
         t1.delete(w.path())
 
   return E
@@ -429,7 +429,7 @@ def alignchildren(t1, t2, M, E, w, x):
     for b in s2:
       if (a, b) in M and (a, b) not in S:
         k = findpos(M, b)
-        E.move(a.path(), w.path(), k, a.xpath if hasattr(a, "xpath") else None)
+        E.move(a.path(), w.path(), k)
         t1.move(a.path(), w.path(), str(k))
         a.inorder = b.inorder = True
 
