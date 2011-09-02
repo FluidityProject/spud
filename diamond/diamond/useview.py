@@ -20,6 +20,9 @@ import gtk
 
 import schemauseage
 
+RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
+RELAXNG = "{" + RELAXNGNS + "}"
+
 class UseView(gtk.Window):
   def __init__(self, schema, path):
     gtk.Window.__init__(self)
@@ -55,13 +58,29 @@ class UseView(gtk.Window):
     scrolledwindow.add(self.treeview)
     self.add(scrolledwindow)
 
-  def __set_treestore(self, node, iter = None):
+  def __set_treestore(self, node, iter = None, type = None):
+    if node.tag == RELAXNG + "element":
+      tag = schemauseage.node_name(node) + (type if type else "")
+      child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
+      type = None
+    elif node.tag == RELAXNG + "choice":
+      tag = "choice" + (type if type else "")
+      child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
+      type = None
+    elif node.tag == RELAXNG + "optional":
+      child_iter = iter
+      type = " ?"
+    elif node.tag == RELAXNG + "oneOrMore":
+      child_iter = iter
+      type = " +"
+    elif node.tag == RELAXNG + "zeroOrMore":
+      child_iter = iter
+      type = " *"
+    else:
+      return
 
-    tag = schemauseage.node_name(node)
-
-    child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
     for child in node:
-      self.__set_treestore(child, child_iter)
+      self.__set_treestore(child, child_iter, type)
 
   def __set_useage(self, useage):
     def find(xpath, iter = None):
@@ -76,7 +95,9 @@ class UseView(gtk.Window):
       return None
 
     for xpath in useage:
-      self.treestore.set_value(find(xpath), 1, 0)
+      iter = find(xpath)
+      if iter:
+        self.treestore.set_value(iter, 1, 0)
 
   def __floodfill(self, iter):
     """
@@ -96,7 +117,7 @@ class UseView(gtk.Window):
 
   def __update(self, schema, paths):
     self.tree = schema.tree
-    self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+    self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': RELAXNGNS})[0]
 
     self.__set_treestore(self.start[0])
     self.__set_useage(schemauseage.find_unusedset(schema, paths))

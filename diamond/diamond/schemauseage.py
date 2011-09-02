@@ -20,6 +20,9 @@ from lxml import etree
 
 from schema import Schema
 
+RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
+RELAXNG = "{" + RELAXNGNS + "}"
+
 def strip(tag):
   return tag[tag.index("}") + 1:]
 
@@ -30,7 +33,7 @@ def find_fullset(tree):
 
   def traverse(node):
 
-    if strip(node.tag) == "element":
+    if node.tag == RELAXNG + "element":
       fullset.add(tree.getpath(node))
 
       for child in node:
@@ -39,7 +42,7 @@ def find_fullset(tree):
       for child in node:
         traverse(child)
 
-  start = tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+  start = tree.xpath("/t:grammar/t:start", namespaces={'t': RELAXNGNS})[0]
 
   root = start[0]
 
@@ -87,11 +90,11 @@ def node_name(node):
   name = None
 
   for child in node:
-    if strip(child.tag) == "attribute":
+    if child.tag == RELAXNG + "attribute":
       if "name" in child.keys() and child.get("name") == "name":
         for grandchild in child:
-          if strip(grandchild.tag) == "value":
-            name = "[" + grandchild.text + "]"
+          if grandchild.tag == RELAXNG + "value":
+            name = " (" + grandchild.text + ")"
   return tagname + (name if name else "")
 
 def set_to_paths(schema, nameset):
@@ -104,7 +107,7 @@ def set_to_paths(schema, nameset):
 
     return traverse(node.getparent()) + node_name(node)
 
-  start = schema.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
+  start = schema.xpath("/t:grammar/t:start", namespaces={'t': RELAXNGNS})[0]
   paths = []
 
   for name in nameset:
