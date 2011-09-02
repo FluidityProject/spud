@@ -25,7 +25,7 @@ def strip(tag):
 
 def find_fullset(tree):
   """
-  Given a schema tree pulls out xpaths for every node.
+  Given a schema tree pulls out xpaths for every element.
   """
 
   def traverse(node):
@@ -109,10 +109,10 @@ def set_to_paths(schema, nameset):
   return sorted(paths, key = lambda (path): (path.count("/"), path))
 
 if __name__ == "__main__":
-  schema = Schema("/home/fjw08/fluidity/schemas/fluidity_options.rng")
+  schema = Schema("/home/fraser/fluidity/schemas/fluidity_options.rng")
 
   fullset = find_fullset(schema.tree)
-  useset = find_useset(schema.read("/home/fjw08/fluidity/examples/top_hat/top_hat_cv.flml"))
+  useset = find_useset(schema.read("/home/fraser/fluidity/examples/top_hat/top_hat_cv.flml"))
 
   paths = set_to_paths(schema.tree, fullset - useset)
   print "------------"

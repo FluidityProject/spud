@@ -56,3 +56,10 @@ class UseView(gtk.Window):
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)
     cell.set_property("text", tag)
+
+    if useage == 0:
+      cell.set_property("foreground", "red")
+    elif useage == 1:
+      cell.set_property("foreground", "indianred")
+    else:
+      cell.set_property("foreground", "black")
