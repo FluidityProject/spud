@@ -31,6 +31,9 @@ class UseView(gtk.Window):
     self.set_title("Unused schema entries")
     self.set_default_size(800, 600)
 
+    scrolledwindow = gtk.ScrolledWindow()
+    scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
     self.treeview = gtk.TreeView()
 
     self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -49,7 +52,8 @@ class UseView(gtk.Window):
     self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
 
-    self.add(self.treeview)
+    scrolledwindow.add(self.treeview)
+    self.add(scrolledwindow)
 
   def __set_treestore(self, node, iter = None):
 
@@ -73,13 +77,30 @@ class UseView(gtk.Window):
 
     for xpath in useage:
       self.treestore.set_value(find(xpath), 1, 0)
+
+  def __floodfill(self, iter):
+    """
+    Floodfill the tree with the correct useage.
+    """
+    useage = self.treestore.get_value(iter, 1)
+
+    child = self.treestore.iter_children(iter)
+    while child is not None:
+      change = self.__floodfill(child)
+      if change != 2:
+        self.treestore.set(iter, 1, 1)
+      child = self.treestore.iter_next(child)
+
+    return self.treestore.get_value(iter, 1)
  
+
   def __update(self, schema, paths):
     self.tree = schema.tree
     self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': 'http://relaxng.org/ns/structure/1.0'})[0]
 
     self.__set_treestore(self.start[0])
     self.__set_useage(schemauseage.find_unusedset(schema, paths))
+    self.__floodfill(self.treestore.get_iter_root())
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)
