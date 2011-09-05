@@ -283,6 +283,32 @@ class Diamond:
     
     return
 
+  def display_validation_errors(self, errors):
+    # Extract and display validation errors
+    saved = True
+    lost_eles, added_eles, lost_attrs, added_attrs = errors
+    if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
+      saved = False
+      msg = ""
+      if len(lost_eles) > 0:
+        msg += "Warning: lost xml elements:\n"
+        for ele in lost_eles:
+          msg += ele + "\n"
+      if len(added_eles) > 0:
+        msg += "Warning: added xml elements:\n"
+        for ele in added_eles:
+          msg += ele + "\n"
+      if len(lost_attrs) > 0:
+        msg += "Warning: lost xml attributes:\n"
+        for ele in lost_attrs:
+          msg += ele + "\n"
+      if len(added_attrs) > 0:
+        msg += "Warning: added xml attributes:\n"
+        for ele in added_attrs:
+          msg += ele + "\n"
+
+      dialogs.long_message(self.main_window, msg)
+
   def load_file(self, filename):
     # if we have a relative path, make it absolute
     filename = os.path.abspath(filename)
@@ -301,31 +327,8 @@ class Diamond:
     try:
       tree_read = self.s.read(filename)
       
-      # Extract and display validation errors
-      saved = True
-      lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
-      if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
-        saved = False
-        msg = ""
-        if len(lost_eles) > 0:
-          msg += "Warning: lost xml elements:\n"
-          for ele in lost_eles:
-            msg += ele + "\n"
-        if len(added_eles) > 0:
-          msg += "Warning: added xml elements:\n"
-          for ele in added_eles:
-            msg += ele + "\n"
-        if len(lost_attrs) > 0:
-          msg += "Warning: lost xml attributes:\n"
-          for ele in lost_attrs:
-            msg += ele + "\n"
-        if len(added_attrs) > 0:
-          msg += "Warning: added xml attributes:\n"
-          for ele in added_attrs:
-            msg += ele + "\n"
-      
-        dialogs.long_message(self.main_window, msg)
-        
+      self.display_validation_errors(self.s.read_errors())
+       
       self.tree = tree_read
       self.filename = filename
     except:
@@ -710,33 +713,14 @@ class Diamond:
         children.insert(children.index(node), newnode)
         children.remove(node)
  
+      self.treeview.freeze_child_notify()
       iter = self.set_treestore(self.selected_iter, [newnode], True, True)
       newnode.recompute_validity()
+      self.treeview.thaw_child_notify()
+
       self.treeview.get_selection().select_iter(iter)
 
-      # Extract and display validation errors
-      lost_eles, added_eles, lost_attrs, added_attrs = self.s.read_errors()
-      if len(lost_eles) > 0 or len(added_eles) > 0 or len(lost_attrs) > 0 or len(added_attrs) > 0:
-        saved = False
-        msg = ""
-        if len(lost_eles) > 0:
-          msg += "Warning: lost xml elements:\n"
-          for ele in lost_eles:
-            msg += ele + "\n"
-        if len(added_eles) > 0:
-          msg += "Warning: added xml elements:\n"
-          for ele in added_eles:
-            msg += ele + "\n"
-        if len(lost_attrs) > 0:
-          msg += "Warning: lost xml attributes:\n"
-          for ele in lost_attrs:
-            msg += ele + "\n"
-        if len(added_attrs) > 0:
-          msg += "Warning: added xml attributes:\n"
-          for ele in added_attrs:
-            msg += ele + "\n"
-
-        dialogs.long_message(self.main_window, msg)
+      self.display_validation_errors(self.s.read_errors())
 
       self.set_saved(False)
 
@@ -1463,7 +1447,37 @@ class Diamond:
     f = StringIO.StringIO()
     self.tree.write(f)
     xml = f.getvalue()
-    plugin.execute(xml, self.current_xpath)
+    xml = plugin.execute(xml, self.current_xpath)
+    if xml:
+      ios = StringIO.StringIO(xml)
+
+      try:
+        tree_read = self.s.read(filename)
+        self.display_validation_errors(self.s.read_errors())
+        self.tree = tree_read
+      except:
+        dialogs.error_tb(self.main_window, "Unable to read plugin result")
+        return
+
+      path = self.treestore.get_path(self.selected_iter)
+
+      self.display_validation_errors(self.s.read_errors())
+
+      self.set_saved(False)
+ 
+      self.treeview.freeze_child_notify()
+      self.treeview.set_model(None)
+      self.signals = {}
+      self.set_treestore(None, [self.tree], True)
+      self.treeview.set_model(self.treestore)
+      self.treeview.thaw_child_notify()
+
+      self.set_geometry_dim_tree()
+  
+      self.treeview.get_selection().select_path(path)
+
+      self.scherror.destroy_error_list()
+
 
   def get_selected_row(self, selection=None):
     """
