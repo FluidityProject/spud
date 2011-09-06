@@ -50,8 +50,7 @@ class UseView(gtk.Window):
 
     # 0: The node tag
     # 1: Used (0 == Not used, 1 = Child not used, 2 = Used)
-    # 3: The xpath
-    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
+    self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
     self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
 
@@ -61,11 +60,13 @@ class UseView(gtk.Window):
   def __set_treestore(self, node, iter = None, type = None):
     if node.tag == RELAXNG + "element":
       tag = schemauseage.node_name(node) + (type if type else "")
-      child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
+      child_iter = self.treestore.append(iter, [tag, 2])
+      self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
       type = None
-    elif node.tag == RELAXNG + "choice":
+    elif node.tag == RELAXNG + "choice" and all(n.tag != RELAXNG + "value" for n in node):
       tag = "choice" + (type if type else "")
-      child_iter = self.treestore.append(iter, [tag, 2, self.tree.getpath(node)])
+      child_iter = self.treestore.append(iter, [tag, 2])
+      self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
       type = None
     elif node.tag == RELAXNG + "optional":
       child_iter = iter
@@ -76,6 +77,11 @@ class UseView(gtk.Window):
     elif node.tag == RELAXNG + "zeroOrMore":
       child_iter = iter
       type = " *"
+    elif node.tag == RELAXNG + "ref":
+      node = self.tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
+      child_iter = iter
+    elif node.tag == RELAXNG + "group" or node.tag == RELAXNG + "interleave":
+      child_iter = iter
     else:
       return
 
@@ -83,32 +89,23 @@ class UseView(gtk.Window):
       self.__set_treestore(child, child_iter, type)
 
   def __set_useage(self, useage):
-    def find(xpath, iter = None):
-      iter = self.treestore.iter_children(iter)
-      while iter:
-        if self.treestore.get_value(iter, 2) == xpath:
-          return iter
-        result = find(xpath, iter)
-        if result:
-          return result
-        iter = self.treestore.iter_next(iter)
-      return None
-
     for xpath in useage:
-      iter = find(xpath)
-      if iter:
-        self.treestore.set_value(iter, 1, 0)
+      iter = self.treestore.get_iter(self.mapping[xpath])
+      self.treestore.set_value(iter, 1, 0)
 
-  def __floodfill(self, iter):
+  def __floodfill(self, iter, parent = 2):
     """
     Floodfill the tree with the correct useage.
     """
+    if parent == 0: #parent is not used
+      self.treestore.set_value(iter, 1, 0) #color us not used
+
     useage = self.treestore.get_value(iter, 1)
 
     child = self.treestore.iter_children(iter)
     while child is not None:
       change = self.__floodfill(child)
-      if change != 2:
+      if change != 2 and useage == 2:
         self.treestore.set(iter, 1, 1)
       child = self.treestore.iter_next(child)
 
@@ -118,10 +115,11 @@ class UseView(gtk.Window):
   def __update(self, schema, paths):
     self.tree = schema.tree
     self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': RELAXNGNS})[0]
+    self.mapping = {}
 
     self.__set_treestore(self.start[0])
     self.__set_useage(schemauseage.find_unusedset(schema, paths))
-    self.__floodfill(self.treestore.get_iter_root())
+    #self.__floodfill(self.treestore.get_iter_root())
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)

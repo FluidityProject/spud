@@ -154,7 +154,7 @@ class Choice(gobject.GObject):
     return self.get_current_tree().get_name()
 
   def get_children(self):
-    return self.get_current_tree().get_children()
+    return [self.get_current_tree()]
 
   def get_choices(self):
     return self.choices

@@ -33,14 +33,14 @@ def find_fullset(tree):
 
   def traverse(node):
 
-    if node.tag == RELAXNG + "element":
+    if node.tag == RELAXNG + "element" or (node.tag == RELAXNG + "choice" and all(n.tag != RELAXNG + "value" for n in node)):
       fullset.add(tree.getpath(node))
 
-      for child in node:
-        traverse(child)
-    else:
-      for child in node:
-        traverse(child)
+    elif node.tag == RELAXNG + "ref":
+      node = tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
+
+    for child in node:
+      traverse(child)
 
   start = tree.xpath("/t:grammar/t:start", namespaces={'t': RELAXNGNS})[0]
 
@@ -56,12 +56,11 @@ def find_useset(tree):
   """
 
   def traverse(node):
-    xpath = node.schemaname
+    if node.active:
+      useset.add(node.schemaname)
 
-    useset.add(xpath)
-
-    for child in node.get_children():
-      traverse(child)
+      for child in node.get_children():
+        traverse(child)
 
   useset = set()
   traverse(tree)
@@ -72,15 +71,13 @@ def find_unusedset(schema, paths):
   Given the a diamond schema and a list of paths to xml files
   find the unused xpaths.
   """
+  unusedset = find_fullset(schema.tree)
 
-  useset = set()
   for path in paths:
     tree = schema.read(path)
-    useset |= find_useset(tree)
+    unusedset -= find_useset(tree)
 
-  fullset = find_fullset(schema.tree)
-
-  return fullset - useset
+  return unusedset
 
 def node_name(node):
   """
@@ -96,34 +93,3 @@ def node_name(node):
           if grandchild.tag == RELAXNG + "value":
             name = " (" + grandchild.text + ")"
   return tagname + (name if name else "")
-
-def set_to_paths(schema, nameset):
-  """
-  Converts a set of schemanames to a list of paths.
-  """
-  def traverse(node):
-    if node is start:
-      return ""
-
-    return traverse(node.getparent()) + node_name(node)
-
-  start = schema.xpath("/t:grammar/t:start", namespaces={'t': RELAXNGNS})[0]
-  paths = []
-
-  for name in nameset:
-    node = schema.xpath(name)[0]
-    paths.append(traverse(node))
-
-  return sorted(paths, key = lambda (path): (path.count("/"), path))
-
-if __name__ == "__main__":
-  schema = Schema("/home/fraser/fluidity/schemas/fluidity_options.rng")
-
-  fullset = find_fullset(schema.tree)
-  useset = find_useset(schema.read("/home/fraser/fluidity/examples/top_hat/top_hat_cv.flml"))
-
-  paths = set_to_paths(schema.tree, fullset - useset)
-  print "------------"
-  for path in sorted(paths, key = lambda (path): (path.count("/"), path)):
-    print path
-
