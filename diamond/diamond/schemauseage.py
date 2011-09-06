@@ -93,3 +93,9 @@ def node_name(node):
           if grandchild.tag == RELAXNG + "value":
             name = " (" + grandchild.text + ")"
   return tagname + (name if name else "")
+
+if __name__ == "__main__":
+  sch = Schema("/home/fjw08/fluidity/schemas/fluidity_options.rng")
+  s = find_fullset(sch.tree)
+
+  print len(s)

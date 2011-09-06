@@ -27,7 +27,25 @@ class UseView(gtk.Window):
   def __init__(self, schema, path):
     gtk.Window.__init__(self)
     self.__add_controls()
-    self.__update(schema, [path])
+
+    dialog = gtk.FileChooserDialog(title = "Input list",
+                                   action = gtk.FILE_CHOOSER_ACTION_OPEN,
+                                   buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+
+    dialog.set_current_folder(path)
+    response = dialog.run()
+    if response != gtk.RESPONSE_OK:
+      dialog.destroy()
+      return
+
+    filename = dialog.get_filename()
+    dialog.destroy()
+
+    paths = [line.strip() for line in open(filename) if line.strip()]
+    if not paths:
+      return
+
+    self.__update(schema, paths)
     self.show_all()
 
   def __add_controls(self): 
