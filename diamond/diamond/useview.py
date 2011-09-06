@@ -104,7 +104,7 @@ class UseView(gtk.Window):
 
     child = self.treestore.iter_children(iter)
     while child is not None:
-      change = self.__floodfill(child)
+      change = self.__floodfill(child, useage)
       if change != 2 and useage == 2:
         self.treestore.set(iter, 1, 1)
       child = self.treestore.iter_next(child)
@@ -119,7 +119,7 @@ class UseView(gtk.Window):
 
     self.__set_treestore(self.start[0])
     self.__set_useage(schemauseage.find_unusedset(schema, paths))
-    #self.__floodfill(self.treestore.get_iter_root())
+    self.__floodfill(self.treestore.get_iter_root())
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)
