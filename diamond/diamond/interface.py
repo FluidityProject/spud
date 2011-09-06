@@ -308,27 +308,28 @@ class Diamond:
           msg += ele + "\n"
 
       dialogs.long_message(self.main_window, msg)
+    return saved
 
   def load_file(self, filename):
     # if we have a relative path, make it absolute
     filename = os.path.abspath(filename)
-  
+
     try:
       os.stat(filename)
     except OSError:
       self.filename = filename
       self.set_saved(False)
-      
-      self.remove_children(None)      
+
+      self.remove_children(None)
       self.init_datatree()
-      
+
       return
-      
+
     try:
       tree_read = self.s.read(filename)
-      
-      self.display_validation_errors(self.s.read_errors())
-       
+
+      saved = self.display_validation_errors(self.s.read_errors())
+
       self.tree = tree_read
       self.filename = filename
     except:
@@ -336,7 +337,7 @@ class Diamond:
       return
 
     self.set_saved(saved, filename)
-      
+
     return
 
   def open_file(self, schemafile = "", filename = ""):

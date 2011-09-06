@@ -30,8 +30,6 @@ import databuttonswidget
 import datawidget
 import mixedtree
 
-#diff_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir, os.pardir, "xmldiff")
-#sys.path.insert(0, diff_path)
 
 import dxdiff.diff as xmldiff
 
@@ -39,6 +37,22 @@ class DiffView(gtk.Window):
 
   def __init__(self, path, tree):
     gtk.Window.__init__(self)
+
+    self.colors = {"insert": "green",
+                   "delete": "red",
+                   "update": "blue",
+                   "subupdate": "cornflowerblue",
+                   "diffadd": "lightgreen",
+                   "diffsub": "indianred"}
+
+    try:
+      handle = open(os.path.join(os.path.expanduser('~'), ".diamond", "settings"))
+      for setting in (x.strip() for x in handle if x.strip()):
+        key, value = setting.split("=")
+        self.colors[key.strip()] = value.strip()
+    except:
+      pass
+
     self.__add_controls()
 
     tree1 = etree.parse(path)
@@ -441,20 +455,20 @@ class DiffView(gtk.Window):
     add = databuffer.create_tag("add")
     rem = databuffer.create_tag("rem")
 
-    add.set_property("background", "lightgreen")
-    rem.set_property("background", "indianred")
+    add.set_property("background", self.colors["diffadd"])
+    rem.set_property("background", self.colors["diffsub"])
 
   def __set_cell_property(self, cell, edit):
     if edit is None:
       cell.set_property("foreground", "black")
     elif edit == "insert":
-      cell.set_property("foreground", "green")
+      cell.set_property("foreground", self.colors["insert"])
     elif edit == "delete":
-      cell.set_property("foreground", "red")
+      cell.set_property("foreground", self.colors["delete"])
     elif edit == "update":
-      cell.set_property("foreground", "blue")
+      cell.set_property("foreground", self.colors["update"])
     elif edit == "subupdate":
-      cell.set_property("foreground", "cornflowerblue")
+      cell.set_property("foreground", self.colors["subupdate"])
 
   def set_celltext(self, column, cell, model, iter):
   
