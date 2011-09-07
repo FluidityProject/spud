@@ -328,6 +328,10 @@ class Diamond:
     try:
       tree_read = self.s.read(filename)
 
+      if tree_read is None:
+        dialogs.error_tb(self.main_window, "Unable to open file \"" + filename + "\"")
+        return
+
       saved = self.display_validation_errors(self.s.read_errors())
 
       self.tree = tree_read
@@ -1455,6 +1459,11 @@ class Diamond:
 
       try:
         tree_read = self.s.read(filename)
+
+        if tree_read is None:
+          self.statusbar.set_statusbar("Unable to read plugin result")
+          return
+
         self.display_validation_errors(self.s.read_errors())
         self.tree = tree_read
       except:
