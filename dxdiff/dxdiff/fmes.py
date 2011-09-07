@@ -66,7 +66,7 @@ class Dom:
     return self.typetag == "/Attribute"
 
   def __repr__(self):
-    return "<" + self.label + ">" + (self.value or "")
+    return "<" + self.label() + ">" + (self.value or "")
 
   def __str__(self, indent = ""):
     title = indent + "<" + self.path() + ">" + (self.value or "") + "\n" + indent
@@ -92,6 +92,20 @@ class Dom:
       return self.parent.path() + "/" + self.tag + index
     else:
       return "/" + self.tag
+
+
+  def label(self):
+    """
+    Strips out indexers from the path of this element.
+    """
+    path = self.path()
+    while True:
+      lindex = path.find("[")
+      if lindex == -1:
+        break
+      rindex = path.find("]", lindex)
+      path = path[:lindex] + path[rindex + 1:]
+    return path
 
   def find(self, path):
 
@@ -147,7 +161,6 @@ class Dom:
 
     node = Dom(tag, value, parent, tagtype == "/Attribute")
     parent.children.insert(self._real_index(parent, index), node)
-    node.label = _strip_indexers(node.path()) + node.typetag
     return node
 
   def update(self, path, value):
@@ -175,42 +188,20 @@ def _get_text(tree):
   """
   return "".join([tree.text or ""] + [child.tail or "" for child in tree]).strip()
 
-def _strip_indexers(path):
-  """
-  Strips out indexers from an path.
-  """
-  while True:
-    lindex = path.find("[")
-    if lindex == -1:
-      break
-    rindex = path.find("]", lindex)
-    path = path[:lindex] + path[rindex + 1:]
-  return path
-
-def dom(root, tree = None, parent = None):
-  
-  if tree is None:
-    tree = root.getroot()
-
-  xpath = root.getpath(tree)
-  path = _strip_indexers(xpath)
-
+def dom(tree = None, parent = None):
   node = Dom(tree.tag, None, parent)
-  node.label = path + node.typetag
 
   text = _get_text(tree)
   if text:
     text = Dom(tree.tag, text, node)
-    text.label = path + text.typetag
     node.children.append(text)
 
   for key, value in tree.items():
     attr = Dom(key, value, node, True)
-    attr.label = path + "/@" + key + attr.typetag
     node.children.append(attr)
 
   for child in tree:
-    node.children.append(dom(root, child, node))
+    node.children.append(dom(child, node))
 
   return node
 
@@ -255,7 +246,7 @@ def get_depth_nodes(tree, depth):
       return []  
 
 def get_chain(nodes, label):
-  return [node for node in nodes if node.label == label]
+  return [node for node in nodes if node.label() == label]
 
 def compare_value(value1, value2):
   if value1 is None and value2 is None:
@@ -277,8 +268,11 @@ def node_equal(t, M, n1, n2):
   return compare_children(n1.children, n2.children, M) > t
 
 def depth_equal(f, t, M, n1, n2):
-  if n1.label != n2.label:
-    return False
+  if n1.label() != n2.label():
+    return False #labels must match
+
+  if "[" not in n1.path() and "[" not in n2.path():
+    return True #if paths are not indexed and match then match the nodes
 
   if n1.children or n2.children:
     return node_equal(t, M, n1, n2)
@@ -287,7 +281,7 @@ def depth_equal(f, t, M, n1, n2):
 
 def _match(nodes1, nodes2, M, equal):
   nodes = nodes1 + nodes2
-  for label in utils.nub([node.label for node in nodes]):
+  for label in utils.nub([node.label() for node in nodes]):
 
     s1 = get_chain(nodes1, label)
     s2 = get_chain(nodes2, label)
@@ -460,7 +454,7 @@ def findpos(M, x):
   return index + 1
 
 def diff(tree1, tree2):
-  t1 = dom(tree1)
-  t2 = dom(tree2)
+  t1 = dom(tree1.getroot())
+  t2 = dom(tree2.getroot())
   E = editscript(t1, t2)
   return E
