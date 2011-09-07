@@ -32,7 +32,8 @@ class UseView(gtk.Window):
                                    action = gtk.FILE_CHOOSER_ACTION_OPEN,
                                    buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
 
-    dialog.set_current_folder(path)
+    if path:
+      dialog.set_current_folder(path)
     response = dialog.run()
     if response != gtk.RESPONSE_OK:
       dialog.destroy()
@@ -77,7 +78,11 @@ class UseView(gtk.Window):
 
   def __set_treestore(self, node, iter = None, type = None):
     if node.tag == RELAXNG + "element":
-      tag = schemauseage.node_name(node) + (type if type else "")
+      name = schemauseage.node_name(node)
+      if name == "comment":
+        return #early out to skip comment nodes
+
+      tag = name + (type if type else "")
       child_iter = self.treestore.append(iter, [tag, 2])
       self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
       type = None

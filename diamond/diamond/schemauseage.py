@@ -70,7 +70,7 @@ def find_unusedset(schema, paths):
   """
   def traverse(node):
     if node.active:
-      useset.discard(node.schemaname)
+      unusedset.discard(node.schemaname)
 
       for child in node.get_children():
         traverse(child)
