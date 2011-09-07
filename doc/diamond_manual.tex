@@ -1,0 +1,92 @@
+\chapter{Diamond}\label{chap:diamond}
+
+\section{Installation}
+Diamond depends on Python (version 2.3 or greater), PyGTK,
+the 4Suite XML library, and the lxml library. All of these dependencies
+are available in the Debian/Ubuntu repositories with the following command:
+\begin{verbatim}
+apt-get install python-gtk2 python-lxml python-4suite-xml
+\end{verbatim}
+
+Windows versions of these packages are available for download on their respective websites.
+
+\section{Configuration files}
+
+In accordance with normal Unix practice, system wide configuration for
+diamond is stored in the \verb+/etc/diamond+ directory while per-user
+configuration is stored in a \verb+.diamond+ directory in the user's home
+directory.
+
+\subsection{Schemas}
+
+Diamond needs to know which Spud schemas are installed and available on the
+current system. This is specified in the \verb+schemata+ subdirectory of the
+\verb+/etc/diamond+ and \verb+~/.diamond+ directories. The file names in the
+\verb+schemata+ directory give the filename extension associated with a
+particular problem description language. The content of the file is two
+lines. The first line is the name of the problem description language while
+the second line contains the path of the XML syntax (\verb+.rng+) version of
+the corresponding schema.
+
+For example, the Fluidity package has a problem description language called
+the Fluidity Markup Language which uses the file extension
+\verb+.flml+. When installed on a system by the sysadmin, Fluidity might
+create the file \verb+/etc/diamond/flml+ with the following contents:
+\begin{verbatim}
+Fluidity Markup Language
+/usr/share/fluidity/fluidity_options.rng
+\end{verbatim}
+An individual user \verb+jrluser+ might have the current version of the
+Fluidity svn tree checked out in their home directory and would need to
+point diamond at the (posssibly updated) schema in their source
+tree. \verb+jrluser+ would then create the file
+\verb+/home/jrluser/.diamond/schemata/flml+ which would contain:
+\begin{verbatim}
+Fluidity Markup Language
+/home/jrluser/fluidity/tools/fluidity_options.rng
+\end{verbatim}
+Now Diamond will pick up the version of the schema in \verb+jrluser+'s svn
+tree rather than the version the sysadmin installed.
+
+It is also possible to specify a URL over HTTP for the location of the
+schema. For example:
+\begin{verbatim}
+Fluidity Markup Language
+http://amcg.ese.ic.ac.uk/svn/fluidity/trunk/tools/fluidity_options.rng
+\end{verbatim}
+This is to facilitate centralised deployments.
+
+\subsection{Running Diamond}
+
+Diamond can be started in several ways.
+
+When executed as
+\begin{verbatim}
+diamond
+\end{verbatim}
+Diamond will offer the user the choice of which registered schema to use.
+If only one schema is registered, then it will use that by default.
+Diamond will open a blank document of the language specified by the schema to be edited.
+
+When executed as
+\begin{verbatim}
+diamond -s /path/to/schema.rng
+\end{verbatim}
+Diamond will open a blank document using the schema specified on the command line.
+
+When executed as
+\begin{verbatim}
+diamond filename.suffix
+\end{verbatim}
+Diamond will inspect the registered schemas for the suffix specified
+and use that schema.
+
+\subsection{Dynamic validation}
+Diamond uses the schema to guide the editing of valid documents that the schema
+permits. When a blank document is opened, information necessary to make a valid
+document is missing and the document is thus invalid\footnote{This is true for all
+but a trivial schema which permits only one document.}. The invalidity of the document
+is reflected in the colouration of the root node: valid nodes are coloured in black,
+while invalid nodes are coloured in blue. As invalid nodes have their attributes
+and data specified, their validity is dynamically updated and they are coloured appropriately.
+The document as a whole is valid if and only if the root node is coloured black.
