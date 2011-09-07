@@ -23,9 +23,6 @@ from schema import Schema
 RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
 RELAXNG = "{" + RELAXNGNS + "}"
 
-def strip(tag):
-  return tag[tag.index("}") + 1:]
-
 def find_fullset(tree):
   """
   Given a schema tree pulls out xpaths for every element.
@@ -71,13 +68,23 @@ def find_unusedset(schema, paths):
   Given the a diamond schema and a list of paths to xml files
   find the unused xpaths.
   """
+  def traverse(node):
+    if node.active:
+      useset.discard(node.schemaname)
+
+      for child in node.get_children():
+        traverse(child)
+
   unusedset = find_fullset(schema.tree)
 
   for path in paths:
     tree = schema.read(path)
-    unusedset -= find_useset(tree)
+    traverse(tree)
 
   return unusedset
+
+def strip(tag):
+  return tag[tag.index("}") + 1:]
 
 def node_name(node):
   """
