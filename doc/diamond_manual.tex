@@ -138,7 +138,7 @@ used in the main view such as hiding certain elements (for example real\_value o
 The colors used in the diff view can be set in the settings file see \ref{sec:colour}.
 
 \subsection{Dynamic validation}
-Diamond uses the schema to guide the editing of valid documents that the schema
+Diamond uses the schema to guide the editing of valid documents that the schema 
 permits. When a blank document is opened, information necessary to make a valid
 document is missing and the document is thus invalid\footnote{This is true for all
 but a trivial schema which permits only one document.}. The invalidity of the document
@@ -146,3 +146,9 @@ is reflected in the colouration of the root node: valid nodes are coloured in bl
 while invalid nodes are coloured in blue. As invalid nodes have their attributes
 and data specified, their validity is dynamically updated and they are coloured appropriately.
 The document as a whole is valid if and only if the root node is coloured black.
+
+\subsection{Finding unused schema elements}
+Diamond has a built in tool to test mutliple document files against one schema to see what parts of the schema are not used.
+In the \verb+Tools+ menu select \verb+Find schema useage+, it will prompt for an input file. The input file should be a text file
+with the absoulte paths to each document file to test, one path per line.
+Diamond may appear to freeze for some time (could be an hour), it has not frozen! Just let it run.
