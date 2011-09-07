@@ -364,7 +364,8 @@ class Diamond:
 
     self.set_geometry_dim_tree()
 
-    self.treeview.get_selection().unselect_all()
+    self.treeview.grab_focus()
+    self.treeview.get_selection().select_path(0)
 
     self.selected_node = None
     self.update_options_frame()
