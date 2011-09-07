@@ -11,7 +11,7 @@ _diamond()
     case $prev in
         -a)
           cur=${COMP_WORDS[COMP_CWORD]}
-          COMPREPLY=( $(compgen -W "$( find "${HOME}/.diamond/schemata/" -maxdepth 1 -type f ! -iname ".*" -print | while read file; do cat ${file} | grep ' = ' | sed -e 's/ *=.*$//' | tr '\n' ' '; done )" -- $cur ) )
+          COMPREPLY=( $(compgen -W "$( find "${HOME}/.diamond/schemata/" -maxdepth 1 -type f ! -iname ".*" -print | while read file; do cat ${file} | grep ' = ' | sed -e 's/ *=.*$//' | tr '\n' ' '; done; echo -n 'default ' )" -- $cur ) )
           return 0
           ;;
         -s)
