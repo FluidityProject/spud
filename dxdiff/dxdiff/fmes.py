@@ -94,19 +94,6 @@ class Dom:
       return "/" + self.tag
 
 
-  def label(self):
-    """
-    Strips out indexers from the path of this element.
-    """
-    path = self.path()
-    while True:
-      lindex = path.find("[")
-      if lindex == -1:
-        break
-      rindex = path.find("]", lindex)
-      path = path[:lindex] + path[rindex + 1:]
-    return path
-
   def find(self, path):
 
     if self.is_text():
@@ -246,7 +233,7 @@ def get_depth_nodes(tree, depth):
       return []  
 
 def get_chain(nodes, label):
-  return [node for node in nodes if node.label() == label]
+  return [node for node in nodes if node.label == label]
 
 def compare_value(value1, value2):
   if value1 is None and value2 is None:
@@ -268,7 +255,7 @@ def node_equal(t, M, n1, n2):
   return compare_children(n1.children, n2.children, M) > t
 
 def depth_equal(f, t, M, n1, n2):
-  if n1.label() != n2.label():
+  if n1.label != n2.label:
     return False #labels must match
 
   if "[" not in n1.path() and "[" not in n2.path():
@@ -281,7 +268,7 @@ def depth_equal(f, t, M, n1, n2):
 
 def _match(nodes1, nodes2, M, equal):
   nodes = nodes1 + nodes2
-  for label in utils.nub([node.label() for node in nodes]):
+  for label in utils.nub([node.label for node in nodes]):
 
     s1 = get_chain(nodes1, label)
     s2 = get_chain(nodes2, label)
@@ -301,6 +288,21 @@ def _match(nodes1, nodes2, M, equal):
           s2.pop(y)
           break
 
+def label(tree):
+  """
+  Strips out indexers from the paths.
+  """
+
+  for node in depth_iter(tree):
+    path = node.path()
+    while True:
+      lindex = path.find("[")
+      if lindex == -1:
+        break
+      rindex = path.find("]", lindex)
+      path = path[:lindex] + path[rindex + 1:]
+    node.label = path
+
 def fastmatch(t1, t2):
   """
   Calculates a match between t1 and t2.
@@ -308,6 +310,8 @@ def fastmatch(t1, t2):
   """
   M = Bimap()
 
+  label(t1)
+  label(t2)
   depth = max(get_depth(t1), get_depth(t2))
 
   while 0 <= depth:
@@ -321,6 +325,15 @@ def fastmatch(t1, t2):
     depth -= 1
 
   return M
+
+def depth_iter(tree):
+  Q = []
+  Q.append(tree)
+  while Q:
+    t = Q.pop()
+    for child in t.children:
+      Q.append(child)
+    yield t
 
 def breadth_iter(tree):
   Q = deque()
