@@ -46,9 +46,6 @@ __set_default("subupdate", "cornflowerblue")
 __set_default("diffadd", "lightgreen")
 __set_default("diffsub", "indianred")
 
-with open(os.path.join(dirs[0], "settings"), "w") as configfile:
-  config.write(configfile)
-
 # Here we hard-code a default for flml
 # so that users don't have to tweak this to run it.
 schemata = {'flml': ('Fluidity markup language', 'http://bazaar.launchpad.net/~fluidity-core/fluidity/4.0-release/download/head:/fluidity_options.rng-20110415014759-hdavpx17hi2vz53z-811/fluidity_options.rng')}
