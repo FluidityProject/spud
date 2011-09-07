@@ -50,6 +50,7 @@ import databuttonswidget
 import datawidget
 import diffview
 import sliceview
+import useview
 
 from lxml import etree
 
@@ -144,6 +145,7 @@ class Diamond:
                     "on_slice": self.on_slice,
                     "on_diff": self.on_diff,
                     "on_diffsave": self.on_diffsave,
+                    "on_finduseage": self.on_finduseage,
                     "on_group": self.on_group,
                     "on_ungroup": self.on_ungroup}
 
@@ -772,6 +774,9 @@ class Diamond:
       self.__diff(self.filename)
     else:
       dialogs.error(self.main_window, "No save to diff against.")
+
+  def on_finduseage(self, widget = None):
+    useview.UseView(self.s, self.filename)
 
   def on_slice(self, widget = None):
     if not self.selected_node.is_sliceable():
