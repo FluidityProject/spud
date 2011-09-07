@@ -1335,20 +1335,22 @@ class Diamond:
         self.show_popup(None, event.button, event.time)
         return True
 
-  def popup_location(self, widget, user_data):
+  def popup_location(self, widget):
     column = self.treeview.get_column(0)
-    path = self.treeview.get_selection().get_selected_rows()[0]
-    area = self.treeview.get_cell_area(path, column)
-    tx, ty = area.x, area.y
+    treemodel, treeiter = self.treeview.get_selection().get_selected()
+    treepath = treemodel.get_path(treeiter)
+    area = self.treeview.get_cell_area(treepath, column)
+    sx, sy = self.popup.size_request()
+    tx, ty = area.x, area.y + int(sy * 1.25)
     x, y = self.treeview.tree_to_widget_coords(tx, ty)
     return (x, y, True)
-    
+
   def on_treeview_popup(self, treeview):
-    self.show_popup(None, self.popup_location, gtk.get_current_event_time())
+    self.show_popup(self.popup_location, 0, gtk.get_current_event_time())
     return
 
   def show_popup(self, func, button, time):
-    self.popup.popup( None, None, func, button, time)  
+    self.popup.popup(None, None, func, button, time)
     return
 
   def on_select_row(self, selection=None):

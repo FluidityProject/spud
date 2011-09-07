@@ -20,7 +20,20 @@ directory.
 \subsection{Colour}
 
 Diamond diff view uses colour to display differences between documents.
-These colors are configured by a text file in the diamond directory called \verb+settings+ 
+These colors are configured by a text file in the diamond directory called \verb+settings+
+with the following contents:
+\begin{verbatim}
+[colour]
+normal = black
+insert = green
+delete = red
+update = blue
+subupdate = cornflowerblue
+diffadd = lightgreen
+diffsub = indianred
+\end{verbatim}
+All colours are optional and will be filled in to the above default values if not given.
+The colour are specified with X11 colour names, see \href{http://en.wikipedia.org/wiki/X11_color_names}{here}.
 
 \subsection{Schemas}
 
@@ -61,7 +74,7 @@ http://amcg.ese.ic.ac.uk/svn/fluidity/trunk/tools/fluidity_options.rng
 \end{verbatim}
 This is to facilitate centralised deployments.
 
-\subsection{Running Diamond}
+\section{Starting Diamond}
 
 Diamond can be started in several ways.
 
@@ -85,6 +98,25 @@ diamond filename.suffix
 \end{verbatim}
 Diamond will inspect the registered schemas for the suffix specified
 and use that schema.
+
+\section{Using Diamond}
+
+Diamond provides three views.
+\begin{description}
+\item[Main view] Is how Diamond starts up.
+\item[Slice view] Shows same type elements together.
+\item[Diff view] Shows the differences between the open document and another.
+\end{description}
+
+\subsection{Main view}
+The main view shows the tree structure of the document on the left hand side and
+data and documentation for the currently selected element on the right hand side.
+The treeview can be traversed with either the mouse by clicking to open, close, add and 
+destroy elements or with the keyboard, useing the arrows keys, enter and delete.
+Elements can be copied (puts the XML representation onto the clipboard) or XML can be pasted into 
+an element.
+Finaly elements of the same type can be grouped together (Right click - Group)
+
 
 \subsection{Dynamic validation}
 Diamond uses the schema to guide the editing of valid documents that the schema
