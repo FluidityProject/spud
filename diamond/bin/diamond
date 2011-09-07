@@ -168,7 +168,7 @@ def main():
 
     try:
       #if input_alias is None it will just use the default
-      input_schemafile = schemata[1][input_alias]   
+      input_schemafile = schemata[1][input_alias]
     except KeyError:
       debug.deprint("""Could not find alias "%s"!""" % (input_alias or "default"), 0)
       sys.exit(1)

@@ -77,10 +77,6 @@ for dir in [os.path.join(path, "schemata") for path in dirs]:
         key, value = ("default", keyvalue[0]) if len(keyvalue) == 1 else keyvalue
 
         value = os.path.expandvars(value)
-        if not os.path.exists(value) and 'http' not in value:
-          debug.deprint("Warning: not a valid path: %s" % value)
-          debug.deprint("schema type not registered")
-          continue
 
         if key in alias:
           debug.deprint("""alias "%s" already registered, ignoring""" % key)
