@@ -66,7 +66,7 @@ class Dom:
     return self.typetag == "/Attribute"
 
   def __repr__(self):
-    return "<" + self.label + ">" + (self.value or "")
+    return "<" + self.label() + ">" + (self.value or "")
 
   def __str__(self, indent = ""):
     title = indent + "<" + self.path() + ">" + (self.value or "") + "\n" + indent
@@ -92,6 +92,7 @@ class Dom:
       return self.parent.path() + "/" + self.tag + index
     else:
       return "/" + self.tag
+
 
   def find(self, path):
 
@@ -147,7 +148,6 @@ class Dom:
 
     node = Dom(tag, value, parent, tagtype == "/Attribute")
     parent.children.insert(self._real_index(parent, index), node)
-    node.label = _strip_indexers(node.path()) + node.typetag
     return node
 
   def update(self, path, value):
@@ -175,45 +175,20 @@ def _get_text(tree):
   """
   return "".join([tree.text or ""] + [child.tail or "" for child in tree]).strip()
 
-def _strip_indexers(path):
-  """
-  Strips out indexers from an path.
-  """
-  while True:
-    lindex = path.find("[")
-    if lindex == -1:
-      break
-    rindex = path.find("]", lindex)
-    path = path[:lindex] + path[rindex + 1:]
-  return path
-
-def dom(root, tree = None, parent = None):
-  
-  if tree is None:
-    tree = root.getroot()
-
-  xpath = root.getpath(tree)
-  path = _strip_indexers(xpath)
-
+def dom(tree = None, parent = None):
   node = Dom(tree.tag, None, parent)
-  node.label = path + node.typetag
-  node.xpath = xpath
 
   text = _get_text(tree)
   if text:
     text = Dom(tree.tag, text, node)
-    text.label = path + text.typetag
-    text.xpath = xpath + "/text()"
     node.children.append(text)
 
   for key, value in tree.items():
     attr = Dom(key, value, node, True)
-    attr.label = path + "/@" + key + attr.typetag
-    attr.xpath = path + "/@" + key
     node.children.append(attr)
 
   for child in tree:
-    node.children.append(dom(root, child, node))
+    node.children.append(dom(child, node))
 
   return node
 
@@ -268,7 +243,7 @@ def compare_value(value1, value2):
   return 1.0 - (float(len(lcs.lcs(lcs.path(value1, value2)))) / max(len(value1), len(value2)))
 
 def leaf_equal(f, M, l1, l2):
-  return l1.label == l2.label and compare_value(l1.value, l2.value) <= f
+  return compare_value(l1.value, l2.value) <= f
 
 def common(children1, children2, M):
   return [(x, y) for (x, y) in M if x in children1 and y in children2]
@@ -277,9 +252,15 @@ def compare_children(children1, children2, M):
   return (float(len(common(children1, children2, M))) / max(len(children1), len(children2)))
 
 def node_equal(t, M, n1, n2):
-  return n1.label == n2.label and compare_children(n1.children, n2.children, M) > t
+  return compare_children(n1.children, n2.children, M) > t
 
 def depth_equal(f, t, M, n1, n2):
+  if n1.label != n2.label:
+    return False #labels must match
+
+  if "[" not in n1.path() and "[" not in n2.path():
+    return True #if paths are not indexed and match then match the nodes
+
   if n1.children or n2.children:
     return node_equal(t, M, n1, n2)
   else:
@@ -307,6 +288,21 @@ def _match(nodes1, nodes2, M, equal):
           s2.pop(y)
           break
 
+def label(tree):
+  """
+  Strips out indexers from the paths.
+  """
+
+  for node in depth_iter(tree):
+    path = node.path()
+    while True:
+      lindex = path.find("[")
+      if lindex == -1:
+        break
+      rindex = path.find("]", lindex)
+      path = path[:lindex] + path[rindex + 1:]
+    node.label = path
+
 def fastmatch(t1, t2):
   """
   Calculates a match between t1 and t2.
@@ -314,6 +310,8 @@ def fastmatch(t1, t2):
   """
   M = Bimap()
 
+  label(t1)
+  label(t2)
   depth = max(get_depth(t1), get_depth(t2))
 
   while 0 <= depth:
@@ -327,6 +325,15 @@ def fastmatch(t1, t2):
     depth -= 1
 
   return M
+
+def depth_iter(tree):
+  Q = []
+  Q.append(tree)
+  while Q:
+    t = Q.pop()
+    for child in t.children:
+      Q.append(child)
+    yield t
 
 def breadth_iter(tree):
   Q = deque()
@@ -371,25 +378,25 @@ def editscript(t1, t2):
 
     if x not in M.right:
       if x.typetag == "/Text": #Can't insert Text, do an update
-        E.update(z.path(), x.value, x.xpath if hasattr(x, "xpath") else None)
+        E.update(z.path(), x.value)
         w = t1.insert(x.tag, x.typetag, x.value, z.path(), 0)
         M.add((w, x))
       else:
         x.inorder = True
         k = findpos(M, x)
-        E.insert(z.path(), str(k), x.tag, x.value, x.xpath if hasattr(x, "xpath") else None)
+        E.insert(z.path(), str(k), x.tag, x.value)
         w = t1.insert(x.tag, x.typetag, x.value, z.path(), k)
         M.add((w, x))
     else: # y is not None:
       w = M.right[x]
       v = w.parent
       if w.value != x.value:
-        E.update(w.path(), x.value, w.xpath if hasattr(w, "xpath") else None)
+        E.update(w.path(), x.value)
         t1.update(w.path(), x.value)
       if (v, y) not in M:
         x.inorder = True
         k = findpos(M, x)
-        E.move(w.path(), z.path(), str(k), w.xpath if hasattr(w, "xpath") else None)
+        E.move(w.path(), z.path(), str(k))
         t1.move(w.path(), z.path(), k)
 
     alignchildren(t1, t2, M, E, w, x)
@@ -397,10 +404,10 @@ def editscript(t1, t2):
   for w in breadth_iter(t1):
     if w not in M.left:
       if w.typetag == "/Text": #Can't delete Text, do an update
-        E.update(w.path(), "", w.xpath if hasattr(w, "xpath") else None)
+        E.update(w.path(), "")
         t1.update(w.path(), "")
       else:
-        E.delete(w.path(), w.xpath if hasattr(w, "xpath") else None)
+        E.delete(w.path())
         t1.delete(w.path())
 
   return E
@@ -429,7 +436,7 @@ def alignchildren(t1, t2, M, E, w, x):
     for b in s2:
       if (a, b) in M and (a, b) not in S:
         k = findpos(M, b)
-        E.move(a.path(), w.path(), k, a.xpath if hasattr(a, "xpath") else None)
+        E.move(a.path(), w.path(), k)
         t1.move(a.path(), w.path(), str(k))
         a.inorder = b.inorder = True
 
@@ -460,7 +467,7 @@ def findpos(M, x):
   return index + 1
 
 def diff(tree1, tree2):
-  t1 = dom(tree1)
-  t2 = dom(tree2)
+  t1 = dom(tree1.getroot())
+  t2 = dom(tree2.getroot())
   E = editscript(t1, t2)
   return E

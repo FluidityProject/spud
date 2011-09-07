@@ -30,36 +30,17 @@ import databuttonswidget
 import datawidget
 import mixedtree
 
-#diff_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir, os.pardir, "xmldiff")
-#sys.path.insert(0, diff_path)
-
+from config import config
 import dxdiff.diff as xmldiff
 
 class DiffView(gtk.Window):
 
   def __init__(self, path, tree):
     gtk.Window.__init__(self)
+
     self.__add_controls()
 
-    if path and os.path.isfile(path):
-      filename = path
-    else:
-      dialog = gtk.FileChooserDialog(title = "Diff against", 
-                                   action = gtk.FILE_CHOOSER_ACTION_OPEN, 
-                                   buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-      if path:
-        dialog.set_current_folder(path)
-
-      response = dialog.run()
-      if response != gtk.RESPONSE_OK:
-        dialog.destroy()
-        self.destroy()
-        return
-
-      filename = dialog.get_filename()
-      dialog.destroy()
-
-    tree1 = etree.parse(filename)
+    tree1 = etree.parse(path)
     tree2 = etree.ElementTree(tree.write_core(None))
 
     editscript = xmldiff.diff(tree1, tree2)
@@ -91,7 +72,9 @@ class DiffView(gtk.Window):
     mainvbox.pack_start(menubar, expand = False)
 
     hpane = gtk.HPaned()
-
+    scrolledwindow = gtk.ScrolledWindow()
+    scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    
     self.treeview = gtk.TreeView()
 
     self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -114,7 +97,8 @@ class DiffView(gtk.Window):
     self.treeview.set_enable_search(False)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
-    hpane.pack1(self.treeview)
+    scrolledwindow.add(self.treeview)
+    hpane.pack1(scrolledwindow, True)
 
     vpane = gtk.VPaned()
     frame = gtk.Frame()
@@ -456,20 +440,20 @@ class DiffView(gtk.Window):
     add = databuffer.create_tag("add")
     rem = databuffer.create_tag("rem")
 
-    add.set_property("background", "lightgreen")
-    rem.set_property("background", "indianred")
+    add.set_property("background", config.get("colour", "diffadd"))
+    rem.set_property("background", config.get("colour", "diffsub"))
 
   def __set_cell_property(self, cell, edit):
     if edit is None:
-      cell.set_property("foreground", "black")
+      cell.set_property("foreground", config.get("colour", "normal"))
     elif edit == "insert":
-      cell.set_property("foreground", "green")
+      cell.set_property("foreground", config.get("colour", "insert"))
     elif edit == "delete":
-      cell.set_property("foreground", "red")
+      cell.set_property("foreground", config.get("colour", "delete"))
     elif edit == "update":
-      cell.set_property("foreground", "blue")
+      cell.set_property("foreground", config.get("colour", "update"))
     elif edit == "subupdate":
-      cell.set_property("foreground", "cornflowerblue")
+      cell.set_property("foreground", config.get("colour", "subupdate"))
 
   def set_celltext(self, column, cell, model, iter):
   
