@@ -42,10 +42,11 @@ Diamond needs to know which Spud schemas are installed and available on the
 current system. This is specified in the \verb+schemata+ subdirectory of the
 \verb+/etc/diamond+ and \verb+~/.diamond+ directories. The file names in the
 \verb+schemata+ directory give the filename extension associated with a
-particular problem description language. The content of the file is two
-lines. The first line is the name of the problem description language while
-the second line contains the path of the XML syntax (\verb+.rng+) version of
-the corresponding schema.
+particular problem description language. The content of the file is two or
+more lines. The first line is the name of the problem description language,
+the remaining lines are key value pairs (key = value) of alias names and the 
+path of the XML syntax (\verb+.rng+) version of the corresponding schema.
+A line with no "key =" part will be interpreted as "default =".
 
 For example, the Fluidity package has a problem description language called
 the Fluidity Markup Language which uses the file extension
@@ -66,6 +67,12 @@ Fluidity Markup Language
 \end{verbatim}
 Now Diamond will pick up the version of the schema in \verb+jrluser+'s svn
 tree rather than the version the sysadmin installed.
+Alternativly they could just add an alias to the existing \verb+//home/jrluser/.diamond/schemata/flml+:
+\begin{verbatim}
+Fluidity Markup Language
+/usr/share/fluidity/fluidity_options.rng
+jrl = /home/jrluser/fluidity/tools/fluidity_options.rng
+\end{verbatim}
 
 It is also possible to specify a URL over HTTP for the location of the
 schema. For example:
