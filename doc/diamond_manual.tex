@@ -18,6 +18,7 @@ configuration is stored in a \verb+.diamond+ directory in the user's home
 directory.
 
 \subsection{Colour}
+\label{sec:colour}
 
 Diamond diff view uses colour to display differences between documents.
 These colors are configured by a text file in the diamond directory called \verb+settings+
@@ -115,8 +116,19 @@ The treeview can be traversed with either the mouse by clicking to open, close, 
 destroy elements or with the keyboard, useing the arrows keys, enter and delete.
 Elements can be copied (puts the XML representation onto the clipboard) or XML can be pasted into 
 an element.
-Finaly elements of the same type can be grouped together (Right click - Group)
+Finaly elements of the same type can be grouped together, this will bring all elements of the selected 
+type to the toplevel and hide other elements. Ungroup will then return the view to normal.
 
+\subsection{Slice view}
+The slice view shows a list of a given type of element. Each item shows the path, data and attributes 
+for that element. Slice view is opened by right clicking an element and selecting \verb+Slice+ or 
+selecting an element and then selecting \verb+Slice+ in the \verb+Edit+ menu.
+
+\subsection{Diff view}
+The diff view shows the differences between the currently open document (understood to be the newer version)
+and a user selected document (understood to be the older version). The diff view does NOT understand some conventions
+used in the main view such as hiding certain elements (for example real\_value or comment).
+The colors used in the diff view can be set in the settings file see \ref{sec:colour}.
 
 \subsection{Dynamic validation}
 Diamond uses the schema to guide the editing of valid documents that the schema
