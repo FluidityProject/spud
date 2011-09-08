@@ -112,8 +112,11 @@ class UseView(gtk.Window):
 
   def __set_useage(self, useage):
     for xpath in useage:
-      iter = self.treestore.get_iter(self.mapping[xpath])
-      self.treestore.set_value(iter, 1, 0)
+      try:
+        iter = self.treestore.get_iter(self.mapping[xpath])
+        self.treestore.set_value(iter, 1, 0)
+      except KeyError:
+        pass #probably a comment node
 
   def __floodfill(self, iter, parent = 2):
     """
