@@ -31,6 +31,14 @@ import plist
 import preprocess
 import tree
 
+def memoise(f):
+    cache = {}
+    def memf(*x):
+        if x not in cache:
+            cache[x] = f(*x)
+        return cache[x]
+    return memf
+
 ##########################
 #     SCHEMA CLASS       #
 ##########################
@@ -68,6 +76,7 @@ class Schema(object):
 
     return
 
+  @memoise
   def element_children(self, element):
     """
     Return a list of the children of the supplied element, following references
