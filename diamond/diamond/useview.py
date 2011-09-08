@@ -25,21 +25,23 @@ RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
 RELAXNG = "{" + RELAXNGNS + "}"
 
 class UseView(gtk.Window):
-  def __init__(self, schema, suffix):
+  def __init__(self, schema, suffix, folder = None):
     gtk.Window.__init__(self)
     self.__add_controls()
 
-    dialog = gtk.FileChooserDialog(title = "Input directory",
+    if folder is None:
+      dialog = gtk.FileChooserDialog(title = "Input directory",
                                    action = gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                    buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
 
-    response = dialog.run()
-    if response != gtk.RESPONSE_OK:
-      dialog.destroy()
-      return
+      response = dialog.run()
+      if response != gtk.RESPONSE_OK:
+        dialog.destroy()
+        return
 
-    folder = os.path.abspath(dialog.get_filename())
-    dialog.destroy()
+      folder = os.path.abspath(dialog.get_filename())
+      dialog.destroy()
+    #endif
 
     paths = []
     for dirpath, dirnames, filenames in os.walk(folder):

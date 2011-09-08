@@ -54,6 +54,7 @@ def Help():
                "-a [ALIAS]       Use the supplied alias, if not given use \"default\"\n" + \
                "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
                "-d [FILE]        Diff against the supplied file. (FILE must be specified)\n" + \
+               "-u [DIRECTORY]   Find unused schema entries in the given directory\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error\n" + \
                "\n" + \
@@ -65,7 +66,7 @@ def Help():
 def main():
 
   try:
-    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvfs:a:t:d:")
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvfs:a:t:d:u:")
   except:
     Help()
     sys.exit(1)
@@ -99,6 +100,7 @@ def main():
   import diamond.schema as schema
   import diamond.tree as tree
   import diamond.plugins as plugins
+  import diamond.useview as useview
 
   try:
     input_filename = args[0]
@@ -224,26 +226,36 @@ def main():
                "Logo file:   " + str(logofile) + "\n" + \
                "Input file:  " + str(input_filename) + "\n")
 
-  plugins.configure_plugins(suffix)
-
-  i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
-
-  i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
-  i.open_file(schemafile = input_schemafile, filename = input_filename)
-  i.main_window.window.set_cursor(None)
-
-  # see if the user wants to diff against a file
-  input_difffile = None
+  # see if the user wants to find usage
+  input_usage = None
   for opt in opts:
-    if opt[0] == "-d":
-      input_difffile = opt[1]
+    if opt[0] == "-u":
+      input_usage = opt[1]
 
-  if input_difffile:
-    if input_filename:
-      i.on_diff(None, input_difffile)
-    else:
-      debug.dprint("Cannot diff if against nothing.", 0)
+  if input_usage:
+    view = useview.UseView(schema.Schema(input_schemafile), suffix, input_usage)
+    view.connect("delete_event", lambda widget, event: gtk.main_quit())
+  else:
+    plugins.configure_plugins(suffix)
 
+    i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
+
+    i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+    i.open_file(schemafile = input_schemafile, filename = input_filename)
+    i.main_window.window.set_cursor(None)
+
+    # see if the user wants to diff against a file
+    input_difffile = None
+    for opt in opts:
+      if opt[0] == "-d":
+        input_difffile = opt[1]
+
+    if input_difffile:
+      if input_filename:
+        i.on_diff(None, input_difffile)
+      else:
+        debug.dprint("Cannot diff if against nothing.", 0)
+  #endif
 
   gtk.main()
 
