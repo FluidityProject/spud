@@ -78,8 +78,11 @@ def find_unusedset(schema, paths):
   unusedset = find_fullset(schema.tree)
 
   for path in paths:
-    tree = schema.read(path)
-    traverse(tree)
+    try:
+      tree = schema.read(path)
+      traverse(tree)
+    except IOError:
+      pass
 
   return unusedset
 
