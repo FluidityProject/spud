@@ -237,7 +237,7 @@
                     <child>
                       <widget class="GtkMenuItem" id="menuitemFindUseage">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Find schema useage</property>
+                        <property name="label" translatable="yes">Find schema usage</property>
                         <signal name="activate" handler="on_finduseage"/>
                       </widget>
                     </child>

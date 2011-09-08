@@ -18,7 +18,7 @@
 import gobject
 import gtk
 
-import schemauseage
+import schemausage
 
 RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
 RELAXNG = "{" + RELAXNGNS + "}"
