@@ -28,7 +28,7 @@ def find_fullset(tree):
   Given a schema tree pulls out xpaths for every element.
   """
 
-  cache = {}
+  cache = set()
 
   def traverse(node):
 
@@ -37,9 +37,10 @@ def find_fullset(tree):
 
     elif node.tag == RELAXNG + "ref":
       query = '/t:grammar/t:define[@name="' + node.get("name") + '"]'
-      if query not in cache:
-        cache[query] = tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
-      node = cache[query]
+      if query in cache:
+        return # we only need to add the reference once 
+      cache.add(query)
+      node = tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
 
     for child in node:
       traverse(child)
@@ -107,4 +108,7 @@ def node_name(node):
         for grandchild in child:
           if grandchild.tag == RELAXNG + "value":
             name = " (" + grandchild.text + ")"
+            break
+    if name:
+      break
   return tagname + (name if name else "")

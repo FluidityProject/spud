@@ -77,40 +77,47 @@ class UseView(gtk.Window):
     scrolledwindow.add(self.treeview)
     self.add(scrolledwindow)
 
-  def __set_treestore(self, node, iter = None, type = None):
-    if node.tag == RELAXNG + "element":
-      name = schemausage.node_name(node)
-      if name == "comment":
-        return #early out to skip comment nodes
+  def __set_treestore(self, node):
+    def set_treestore(node, iter, type):
+      if node.tag == RELAXNG + "element":
+        name = schemausage.node_name(node)
+        if name == "comment":
+          return #early out to skip comment nodes
 
-      tag = name + (type if type else "")
-      child_iter = self.treestore.append(iter, [tag, 2])
-      self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
-      type = None
-    elif node.tag == RELAXNG + "choice" and all(n.tag != RELAXNG + "value" for n in node):
-      tag = "choice" + (type if type else "")
-      child_iter = self.treestore.append(iter, [tag, 2])
-      self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
-      type = None
-    elif node.tag == RELAXNG + "optional":
-      child_iter = iter
-      type = " ?"
-    elif node.tag == RELAXNG + "oneOrMore":
-      child_iter = iter
-      type = " +"
-    elif node.tag == RELAXNG + "zeroOrMore":
-      child_iter = iter
-      type = " *"
-    elif node.tag == RELAXNG + "ref":
-      node = self.tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
-      child_iter = iter
-    elif node.tag == RELAXNG + "group" or node.tag == RELAXNG + "interleave":
-      child_iter = iter
-    else:
-      return
+        tag = name + (type if type else "")
+        child_iter = self.treestore.append(iter, [tag, 2])
+        self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
+        type = None
+      elif node.tag == RELAXNG + "choice" and all(n.tag != RELAXNG + "value" for n in node):
+        tag = "choice" + (type if type else "")
+        child_iter = self.treestore.append(iter, [tag, 2])
+        self.mapping[self.tree.getpath(node)] = self.treestore.get_path(child_iter)
+        type = None
+      elif node.tag == RELAXNG + "optional":
+        child_iter = iter
+        type = " ?"
+      elif node.tag == RELAXNG + "oneOrMore":
+        child_iter = iter
+        type = " +"
+      elif node.tag == RELAXNG + "zeroOrMore":
+        child_iter = iter
+        type = " *"
+      elif node.tag == RELAXNG + "ref":
+        query = '/t:grammar/t:define[@name="' + node.get("name") + '"]'
+        if query not in cache:
+          cache[query] = self.tree.xpath(query, namespaces={'t': RELAXNGNS})[0]
+        node = cache[query]
+        child_iter = iter
+      elif node.tag == RELAXNG + "group" or node.tag == RELAXNG + "interleave":
+        child_iter = iter
+      else:
+        return
 
-    for child in node:
-      self.__set_treestore(child, child_iter, type)
+      for child in node:
+        set_treestore(child, child_iter, type)
+
+    cache = {}
+    set_treestore(node, None, None)
 
   def __set_useage(self, useage):
     for xpath in useage:
