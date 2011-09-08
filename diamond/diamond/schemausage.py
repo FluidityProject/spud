@@ -28,13 +28,18 @@ def find_fullset(tree):
   Given a schema tree pulls out xpaths for every element.
   """
 
+  cache = {}
+
   def traverse(node):
 
     if node.tag == RELAXNG + "element" or (node.tag == RELAXNG + "choice" and all(n.tag != RELAXNG + "value" for n in node)):
       fullset.add(tree.getpath(node))
 
     elif node.tag == RELAXNG + "ref":
-      node = tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
+      query = '/t:grammar/t:define[@name="' + node.get("name") + '"]'
+      if query not in cache:
+        cache[query] = tree.xpath('/t:grammar/t:define[@name="' + node.get("name") + '"]', namespaces={'t': RELAXNGNS})[0]
+      node = cache[query]
 
     for child in node:
       traverse(child)
