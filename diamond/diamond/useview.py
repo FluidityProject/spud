@@ -17,6 +17,7 @@
 
 import gobject
 import gtk
+import os
 
 import schemausage
 
@@ -24,27 +25,25 @@ RELAXNGNS = "http://relaxng.org/ns/structure/1.0"
 RELAXNG = "{" + RELAXNGNS + "}"
 
 class UseView(gtk.Window):
-  def __init__(self, schema, path):
+  def __init__(self, schema, suffix):
     gtk.Window.__init__(self)
     self.__add_controls()
 
-    dialog = gtk.FileChooserDialog(title = "Input list",
-                                   action = gtk.FILE_CHOOSER_ACTION_OPEN,
+    dialog = gtk.FileChooserDialog(title = "Input directory",
+                                   action = gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                    buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
 
-    if path:
-      dialog.set_current_folder(path)
     response = dialog.run()
     if response != gtk.RESPONSE_OK:
       dialog.destroy()
       return
 
-    filename = dialog.get_filename()
+    folder = os.path.abspath(dialog.get_filename())
     dialog.destroy()
 
-    paths = [line.strip() for line in open(filename) if line.strip()]
-    if not paths:
-      return
+    paths = []
+    for dirpath, dirnames, filenames in os.walk(folder):
+      paths.extend([os.path.join(dirpath, filename) for filename in filenames if filename.endswith(suffix)])
 
     self.__update(schema, paths)
     self.show_all()
@@ -78,7 +77,7 @@ class UseView(gtk.Window):
 
   def __set_treestore(self, node, iter = None, type = None):
     if node.tag == RELAXNG + "element":
-      name = schemauseage.node_name(node)
+      name = schemausage.node_name(node)
       if name == "comment":
         return #early out to skip comment nodes
 
@@ -141,7 +140,7 @@ class UseView(gtk.Window):
     self.mapping = {}
 
     self.__set_treestore(self.start[0])
-    self.__set_useage(schemauseage.find_unusedset(schema, paths))
+    self.__set_useage(schemausage.find_unusedset(schema, paths))
     self.__floodfill(self.treestore.get_iter_root())
 
   def set_celltext(self, column, cell, model, iter):

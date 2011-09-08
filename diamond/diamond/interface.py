@@ -776,7 +776,7 @@ class Diamond:
       dialogs.error(self.main_window, "No save to diff against.")
 
   def on_finduseage(self, widget = None):
-    useview.UseView(self.s, self.filename)
+    useview.UseView(self.s, self.suffix)
 
   def on_slice(self, widget = None):
     if not self.selected_node.is_sliceable():
