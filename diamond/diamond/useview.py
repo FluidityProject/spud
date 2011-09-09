@@ -18,6 +18,7 @@
 import gobject
 import gtk
 import os
+import threading
 
 import schemausage
 
@@ -54,6 +55,8 @@ class UseView(gtk.Window):
     self.set_title("Unused schema entries")
     self.set_default_size(800, 600)
 
+    vbox = gtk.VBox()
+
     scrolledwindow = gtk.ScrolledWindow()
     scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
@@ -71,11 +74,14 @@ class UseView(gtk.Window):
     # 0: The node tag
     # 1: Used (0 == Not used, 1 = Child not used, 2 = Used)
     self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
-    self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
 
     scrolledwindow.add(self.treeview)
-    self.add(scrolledwindow)
+    vbox.pack_start(scrolledwindow)
+
+    self.statusbar = gtk.Statusbar()
+    vbox.pack_end(self.statusbar, expand = False)
+    self.add(vbox)
 
   def __set_treestore(self, node):
     def set_treestore(node, iter, type):
@@ -148,12 +154,21 @@ class UseView(gtk.Window):
 
   def __update(self, schema, paths):
     self.tree = schema.tree
-    self.start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': RELAXNGNS})[0]
+    start = self.tree.xpath('/t:grammar/t:start', namespaces={'t': RELAXNGNS})[0]
     self.mapping = {}
 
-    self.__set_treestore(self.start[0])
-    self.__set_useage(schemausage.find_unusedset(schema, paths))
-    self.__floodfill(self.treestore.get_iter_root())
+    def async_update(self, start, schema, paths, context):
+      gtk.idle_add(self.statusbar.push, context, "Parseing schema")
+      self.__set_treestore(start[0])
+      gtk.idle_add(self.statusbar.push, context, "Schema parsed... finding usage")
+      self.__set_useage(schemausage.find_unusedset(schema, paths))
+      gtk.idle_add(self.statusbar.push, context, "Usage found")
+      self.__floodfill(self.treestore.get_iter_root())
+      gtk.idle_add(self.statusbar.push, context, "")
+      gtk.idle_add(self.treeview.set_model, self.treestore)
+
+    t = threading.Thread(target = async_update, args = (self, start, schema, paths, self.statusbar.get_context_id("update")))
+    t.start()
 
   def set_celltext(self, column, cell, model, iter):
     tag, useage = model.get(iter, 0, 1)

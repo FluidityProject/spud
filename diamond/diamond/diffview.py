@@ -22,6 +22,7 @@ import cStringIO as StringIO
 
 import gobject
 import gtk
+import threading
 
 from lxml import etree
 
@@ -43,8 +44,7 @@ class DiffView(gtk.Window):
     tree1 = etree.parse(path)
     tree2 = etree.ElementTree(tree.write_core(None))
 
-    editscript = xmldiff.diff(tree1, tree2)
-    self.__update(tree1, editscript)
+    self.__update(tree1, tree2)
 
     self.show_all()
 
@@ -93,7 +93,6 @@ class DiffView(gtk.Window):
     # 3: The old value of the node
     # 4: "insert", "delete", "update",  ""
     self.treestore = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)
-    self.treeview.set_model(self.treestore)
     self.treeview.set_enable_search(False)
     self.treeview.connect("button_press_event", self.on_treeview_button_press)
     self.treeview.connect("popup_menu", self.on_treeview_popup)
@@ -166,10 +165,17 @@ class DiffView(gtk.Window):
     self.popup.popup( None, None, func, button, time)
     return
 
-  def __update(self, tree, editscript):
-    self.__set_treestore(tree.getroot())
-    self.__parse_editscript(editscript)
-    self.__floodfill(self.treestore.get_iter_root())
+  def __update(self, tree1, tree2):
+
+    def async_diff(self, tree1, tree2):
+      editscript = xmldiff.diff(tree1, tree2)
+      self.__set_treestore(tree1.getroot())
+      self.__parse_editscript(editscript)
+      self.__floodfill(self.treestore.get_iter_root())
+      gtk.idle_add(self.treeview.set_model, self.treestore) 
+
+    t = threading.Thread(target = async_diff, args = (self, tree1, tree2))
+    t.start()
 
   def __set_treestore(self, tree, iter = None):
 
