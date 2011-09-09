@@ -149,6 +149,6 @@ The document as a whole is valid if and only if the root node is coloured black.
 
 \subsection{Finding unused schema elements}
 Diamond has a built in tool to test mutliple document files against one schema to see what parts of the schema are not used.
-In the \verb+Tools+ menu select \verb+Find schema useage+, it will prompt for an input file. The input file should be a text file
-with the absoulte paths to each document file to test, one path per line.
+In the \verb+Tools+ menu select \verb+Find schema useage+, it will prompt for an input directory. It will find every file with
+a matching suffix (.flml for Fluidity Markup Langauge) in the directory tree and check the schema against them.
 Diamond may appear to freeze for some time (could be an hour), it has not frozen! Just let it run.
