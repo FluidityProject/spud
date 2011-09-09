@@ -55,7 +55,7 @@ def Help():
                "-t [TRONFILE]    Use the supplied schematron file for extended validation\n" + \
                "-d [FILE]        Diff against the supplied file. (FILE must be specified)\n" + \
                "-u [DIRECTORY]   Find unused schema entries in the given directory\n" + \
-               "-ub [DIRECTORY]  Find unused schema entries, batch mode\n" + \
+               "--ub [DIRECTORY] Find unused schema entries, batch mode\n" + \
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error\n" + \
                "\n" + \
