@@ -158,7 +158,7 @@ class UseView(gtk.Window):
     self.mapping = {}
 
     def async_update(self, start, schema, paths, context):
-      gtk.idle_add(self.statusbar.push, context, "Parseing schema")
+      gtk.idle_add(self.statusbar.push, context, "Parsing schema")
       self.__set_treestore(start[0])
       gtk.idle_add(self.statusbar.push, context, "Schema parsed... finding usage")
       self.__set_useage(schemausage.find_unusedset(schema, paths))
