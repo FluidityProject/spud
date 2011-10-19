@@ -25,6 +25,7 @@ import debug
 dirs = [os.path.join(os.path.expanduser('~'), ".diamond")]
 if sys.platform != "win32" and sys.platform != "win64":
   dirs.append("/etc/diamond")
+  dirs.append("/usr/share/diamond")
 
 config = ConfigParser.SafeConfigParser()
 config.read([os.path.join(path, "settings") for path in reversed(dirs)]) #reversed to load usr last
