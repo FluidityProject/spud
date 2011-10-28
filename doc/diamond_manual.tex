@@ -62,7 +62,7 @@ tree. \verb+jrluser+ would then create the file
 \verb+/home/jrluser/.diamond/schemata/flml+ which would contain:
 \begin{verbatim}
 Fluidity Markup Language
-/home/jrluser/fluidity/tools/fluidity_options.rng
+/home/jrluser/fluidity/schemas/fluidity_options.rng
 \end{verbatim}
 Now Diamond will pick up the version of the schema in \verb+jrluser+'s svn
 tree rather than the version the sysadmin installed.
@@ -70,7 +70,7 @@ Alternatively they could just add an alias to the existing \verb+//home/jrluser/
 \begin{verbatim}
 Fluidity Markup Language
 /usr/share/fluidity/fluidity_options.rng
-jrl = /home/jrluser/fluidity/tools/fluidity_options.rng
+jrl = /home/jrluser/fluidity/schemas/fluidity_options.rng
 \end{verbatim}
 
 It is also possible to specify a URL over HTTP for the location of the
