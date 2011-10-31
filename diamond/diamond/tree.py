@@ -449,7 +449,28 @@ class Tree(gobject.GObject):
     it is intended to be used to store code data.
     """
 
+    try:
+      lang = self.get_attr("language")
+      if lang == "python":
+        return True
+    except:
+      pass
+
     return False
+
+  def get_code_language(self):
+    """
+    Assuming this is a code snippet return the language.
+    """
+
+    if not self.is_code():
+      return "python"
+
+    try:
+      lang = self.get_attr("language")
+      return lang
+    except:   
+      return "python"
 
   def get_display_name(self):
     """

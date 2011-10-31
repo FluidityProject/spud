@@ -176,6 +176,12 @@ class MixedTree:
     Perform a series of tests on the current MixedTree, to determine if
     it is intended to be used to store code data.
     """
+    try:
+      lang = self.get_attr("language")
+      if lang == "python":
+        return True
+    except:
+      pass
 
     if self.datatype is not str:
       return False
@@ -197,7 +203,11 @@ class MixedTree:
       lang = self.child.get_attr("language")
       return lang
     except:
-      return "python"
+      try:
+        lang = self.get_attr("language")
+        return lang
+      except:   
+        return "python"
 
   def get_name_path(self, leaf = True):
     return self.parent.get_name_path(leaf)
