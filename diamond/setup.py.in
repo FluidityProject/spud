@@ -9,12 +9,23 @@ try:
 except KeyError:
   destdir = ""
 
+prefix = None
+import sys
+for i, arg in enumerate(sys.argv):
+  if "--prefix" in arg:
+    prefix = arg.split('=')[1]
+    break
+
 # Get all the plugin directories we have
 plugin_dirs = [dir for dir in os.listdir('plugins') if os.path.isdir(os.path.join('plugins', dir)) and dir[0] != '.']
 plugin_data_files = []
 for plugin in plugin_dirs:
-  plugin_data_files.append((destdir + "@prefix@/share/diamond/plugins/" + plugin,
-    glob.glob('plugins/' + plugin + '/*.py')))
+  if prefix is None:
+    plugin_data_files.append((destdir + "@prefix@/share/diamond/plugins/" + plugin,
+      glob.glob('plugins/' + plugin + '/*.py')))
+  else:
+    plugin_data_files.append((destdir + "/" + prefix + "/share/diamond/plugins/" + plugin,
+      glob.glob('plugins/' + plugin + '/*.py')))
 
 setup(
       name='diamond',
