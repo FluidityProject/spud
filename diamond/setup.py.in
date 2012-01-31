@@ -27,6 +27,15 @@ for plugin in plugin_dirs:
     plugin_data_files.append((destdir + "/" + prefix + "/share/diamond/plugins/" + plugin,
       glob.glob('plugins/' + plugin + '/*.py')))
 
+# Consider whether we honour the configure or the setup prefix
+gui_data_files = []
+if prefix is None:
+  gui_data_files.append((destdir + "@prefix@/share/diamond/gui",
+    ["gui/gui.glade", "gui/diamond.svg"]))
+else:
+  gui_data_files.append((destdir + "/" + prefix + "/share/diamond/gui",
+    ["gui/gui.glade", "gui/diamond.svg"]))
+
 setup(
       name='diamond',
       version='1.0',
@@ -37,7 +46,6 @@ setup(
       packages = ['diamond'],
       package_dir = {'diamond': 'diamond'},
       scripts=["bin/diamond"],
-      data_files = [(destdir + "@prefix@/share/diamond/gui", ["gui/gui.glade", "gui/diamond.svg"])] +
-                   plugin_data_files
+      data_files = gui_data_files + plugin_data_files
      )
 
