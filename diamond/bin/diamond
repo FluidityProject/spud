@@ -158,6 +158,16 @@ def main():
         debug.deprint("  alias= is optional, if not given default= is added automaticly")
         sys.exit(1)
       
+    elif len(config.schemata) == 0:
+      debug.deprint("Could not find a schema file.", 0)
+      debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+      debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
+      debug.deprint("The file should consist of:", 0)
+      debug.deprint("  A Verbal Description Of The Language Purpose", 0)
+      debug.deprint("  Lines of the format alias=/path/to/the/schema/file.rng", 0)
+      debug.deprint("  alias= is optional, if not given default= is added automaticly")
+      sys.exit(1)
+
     # if there is only one schema, use that
     elif len(config.schemata) == 1:
       suffix = config.schemata.keys()[0]
