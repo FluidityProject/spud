@@ -11,10 +11,15 @@ except KeyError:
 
 prefix = None
 import sys
+
+print "FOO"
+print sys.argv
+
 for i, arg in enumerate(sys.argv):
   if "--prefix" in arg:
     prefix = arg.split('=')[1]
-    break
+  if "--root" in arg:
+    destdir = arg.split('=')[1]
 
 # Get all the plugin directories we have
 plugin_dirs = [dir for dir in os.listdir('plugins') if os.path.isdir(os.path.join('plugins', dir)) and dir[0] != '.']
