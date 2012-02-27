@@ -12,9 +12,6 @@ except KeyError:
 prefix = None
 import sys
 
-print "FOO"
-print sys.argv
-
 for i, arg in enumerate(sys.argv):
   if "--prefix" in arg:
     prefix = arg.split('=')[1]
