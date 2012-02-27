@@ -23,7 +23,9 @@ import sys
 
 # We may also be given prefix, either as a configuration option (which will be
 # dealt with by substitutions later) or as a command line option. If a command
-# line option is present, parse this. 
+# line option is present, parse this. In some cases, just to add spice into the
+# mix, PREFIX is supplied twice - once by configure, and again by a parent
+# Makefile as a command-line flag.
 #
 # As an alternative to DESTDIR being set, Debian packaging calls setup.py with
 # a --root command line option which does the same thing. This needs to be
@@ -44,6 +46,10 @@ for i, arg in enumerate(sys.argv):
 #   * prefixes as command-line options are pushed by us
 #   * DESTDIR and root have now been condensed into 'destdir' and are pushed
 #       by us
+#
+# Note that in the case of this and other packages which supply prefix twice
+# (once in configure, and then again on the command line) we honour the prefix
+# on the command line in preference to the configure prefix.
 
 # First parse the plugin directories
 plugin_dirs = [dir for dir in os.listdir('plugins') if os.path.isdir(os.path.join('plugins', dir)) and dir[0] != '.']
