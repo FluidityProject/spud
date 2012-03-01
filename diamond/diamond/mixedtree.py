@@ -30,7 +30,10 @@ class MixedTree:
 
     self.name = parent.name
     self.schemaname = parent.schemaname
-    self.attrs = dict(self.parent.attrs.items() + self.child.attrs.items())
+
+    excluded_attrs = ["shape"]
+    self.attrs = dict(self.parent.attrs.items() + [x for x in self.child.attrs.items() if x[0] not in excluded_attrs])
+
     self.children = parent.children
     self.datatype = child.datatype
     self.data = child.data
