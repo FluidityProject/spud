@@ -656,7 +656,7 @@ set_option_aux_scalar(PyObject *pyscalar, const char *key, int key_len, int type
 
     if (type == SPUD_DOUBLE){ //scalar is double
         double val;
-        PyArg_Parse(pyscalar, "f", &val);
+        PyArg_Parse(pyscalar, "d", &val);
         outcomeSetOption = spud_set_option(key, key_len, &val, type, rank, shape);
     }
     else if (type == SPUD_INT){
