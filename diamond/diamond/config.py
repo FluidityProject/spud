@@ -26,6 +26,8 @@ dirs = []
 if sys.platform != "win32" and sys.platform != "win64":
   dirs.append("/usr/share/diamond")
   dirs.append("/etc/diamond")
+if "DIAMOND_CONFIG_PATH" in os.environ:
+  dirs += os.environ["DIAMOND_CONFIG_PATH"].split(":")
 dirs.append(os.path.join(os.path.expanduser('~'), ".diamond"))
 
 config = ConfigParser.SafeConfigParser()
