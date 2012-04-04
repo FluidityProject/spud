@@ -42,13 +42,14 @@ current system. This is specified in the \verb+schemata+ subdirectory of:
 \begin{itemize}
 \item the \verb+/usr/share/diamond+ directory
 \item the \verb+/etc/diamond+ directory
-\item any directories specified in the \verb+$DIAMOND_CONFIG_PATH+ environment variable
-\item the \verb+~/.diamond+ directory. 
+\item the \verb+~/.diamond+ directory
+\item any directories specified in the \verb+$DIAMOND_CONFIG_PATH+ environment variable.
 \end{itemize}
 Directories are searched in the above order.  The file names in the
 \verb+schemata+ directory give the filename extension associated with a
 particular problem description language. If multiple files corresponding to a particular extension are found the last file takes
-precendence.  
+precendence (i.e. a file found in a \verb+schemata+ subdirectory of \verb+$DIAMOND_CONFIG_PATH+ will take precendence over 
+one in \verb+~/.diamond/schemata+).  
 
 The content of the file is two or
 more lines. The first line is the name of the problem description language,

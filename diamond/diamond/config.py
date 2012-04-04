@@ -26,9 +26,9 @@ dirs = []
 if sys.platform != "win32" and sys.platform != "win64":
   dirs.append("/usr/share/diamond")
   dirs.append("/etc/diamond")
+dirs.append(os.path.join(os.path.expanduser('~'), ".diamond"))
 if "DIAMOND_CONFIG_PATH" in os.environ:
   dirs += os.environ["DIAMOND_CONFIG_PATH"].split(":")
-dirs.append(os.path.join(os.path.expanduser('~'), ".diamond"))
 
 config = ConfigParser.SafeConfigParser()
 config.read([os.path.join(path, "settings") for path in reversed(dirs)]) #reversed to load usr last
