@@ -59,7 +59,7 @@ def Help():
                "-v               Verbosity switch - if supplied Diamond prints additional\n" + \
                "                 debugging information to standard output and standard error\n" + \
                "\n" + \
-               "* Note: The locations of Spud schemas can also be defined in ~/.diamond/schemata/,\n" + \
+               "* Note: The locations of Spud schemas can also be defined in various schemata folders,\n" + \
                "  see the Spud manual for further details.", 0)
 
   return
@@ -150,7 +150,8 @@ def main():
         schemata = config.schemata[suffix]
       except:
         debug.deprint("Could not find schema matching suffix %s." % suffix, 0)
-        debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+        debug.deprint("Have you registered it in /usr/share/diamond/schemata, /etc/diamond/schemata, $HOME/.diamond/schemata", 0)
+        debug.deprint("or a schemata directory beneath a location listed in the environment variable $DIAMOND_CONFIG_PATH?", 0)
         debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
         debug.deprint("The file should consist of:", 0)
         debug.deprint(" A Verbal Description Of The Language Purpose", 0)
@@ -160,7 +161,8 @@ def main():
       
     elif len(config.schemata) == 0:
       debug.deprint("Could not find a schema file.", 0)
-      debug.deprint("Have you registered it in /etc/diamond/schemata/ or $HOME/.diamond/schemata?", 0)
+      debug.deprint("Have you registered it in /usr/share/diamond/schemata, /etc/diamond/schemata, $HOME/.diamond/schemata", 0)
+      debug.deprint("or a schemata directory beneath a location listed in the environment variable $DIAMOND_CONFIG_PATH?", 0)
       debug.deprint("To register a schema, place a file in one of those directories, and let its name be the suffix of your language.", 0)
       debug.deprint("The file should consist of:", 0)
       debug.deprint(" A Verbal Description Of The Language Purpose", 0)
