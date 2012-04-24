@@ -76,7 +76,13 @@ for dir in [os.path.join(path, "schemata") for path in dirs]:
         line = lines[i]
 
         keyvalue = [x.strip() for x in line.split("=")]
-        key, value = ("default", keyvalue[0]) if len(keyvalue) == 1 else keyvalue
+        if len(keyvalue) == 1:
+          key, value = ("default", keyvalue[0])
+        elif len(keyvalue) == 2:
+          (key, value) = keyvalue
+        else:
+          debug.deprint("Warning: ignoring line %s" % line)
+          continue
 
         value = os.path.expandvars(value)
 
