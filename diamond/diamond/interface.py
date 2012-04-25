@@ -626,7 +626,8 @@ class Diamond:
     except:
       pass
     
-    about.show()
+    about.run()
+    about.destroy()
 
     return
 
