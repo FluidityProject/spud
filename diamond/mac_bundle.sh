@@ -28,30 +28,47 @@ cd ../diamond;
 # Unfortunately, it's in the wrong place, so move it 
 mkdir $INSTALLDIR/MacOS
 cp $INSTALLDIR/bin/diamond $INSTALLDIR/MacOS/
-rm -rf $INSTALLDIR/bin
+
+
+# Sort out the MacResources
+cp MacOS_Resources/* $INSTALLDIR/
+mkdir $INSTALLDIR/Resources
+mv $INSTALLDIR/diamond.icns $INSTALLDIR/Resources/
 
 # Now we have to play silly buggers with some bits of the diamond file
 # as the Mac app packages adds a command line argument, which we want to ignore
-sed -i -e 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/Contents/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
+sed -i -e 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
 
 # Now we have to feed the app some schemas or it's all for nothing
 # Set up the schema folders
-mkdir $INSTALLDIR/share/schemata
+mkdir -p $INSTALLDIR/share/schemata
 
 # Let's get the latest fluidity release schema
 # NOTE: UPDATE URL AFTER A RELEASE
-bzr branch lp:fluidity/4.1 fluidity
+if [ ! -d fluidity ]; then
+	bzr branch lp:fluidity/4.1 fluidity
+else
+	cd fluidity
+	bzr up
+	cd ../
+fi
 # Make the schemata description
 # The path of the RNG is relative to diamond.egg/EGG_INFO directory
 cat > $INSTALLDIR/share/schemata/flml << EOF
 Fluidity Markup Language
 ../../../../../share/schemata/fluidity/fluidity_options.rng
 EOF
-cp -r fluidity/schemas $INSTALLDIR/share/schemata/fluidity
+rm -rf $INSTALLDIR/share/schemata/fluidity
+mkdir $INSTALLDIR/share/schemata/fluidity
+cp fluidity/schemas/*.rng $INSTALLDIR/share/schemata/fluidity/
+cp ../schema/*.rng $INSTALLDIR/share/schemata/fluidity/
 # clean up
-rm -rf fluidity
+#rm -rf fluidity
 
 # Do the above for any other schema we want to distribute
+# Don't forget the spud-base!
+
+
 
 # Let's get lxml installed
 $INSTALLDIR/bin/easy_install --allow-hosts=lxml.de,*.python.org lxml

@@ -110,7 +110,7 @@ def main():
     input_filename = None
 
   logofile = None
-  if sys.platform == darwin:
+  if sys.platform == "darwin":
    for possible_logofile in [os.path.join(diamond_path, "gui", "diamond.png"),os.path.join(diamond_path, "..", "diamond.png")]:
 	 try:
 	   os.stat(possible_logofile)

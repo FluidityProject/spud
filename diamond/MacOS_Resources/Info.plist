@@ -5,11 +5,13 @@
 	<key>CFBundleExecutable</key>
 	<string>diamond</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Diamond</string>
+	<string>Diamond: Fluidity preprocessor</string>
 	<key>CFBundleIdentifier</key>
 	<string>scienceapps.diamond</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleIconFile</key>
+	<string>appStore.icns</string>
 	<key>CFBundleName</key>
 	<string>Diamond</string>
 	<key>CFBundlePackageType</key>
