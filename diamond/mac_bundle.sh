@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Package script for Gaphor.
+# Package script for Diamond.
 #
 # Thanks: http://stackoverflow.com/questions/1596945/building-osx-app-bundle
 
@@ -160,5 +160,10 @@ fix_config $INSTALLDIR/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache 's#/usr
 # Package!
 
 VERSION=0.01
+# we now need to fiddle with the Python run path on the diamond script
+# COMMENT THESE OUT IF YOU WANT TO TEST YOUR APP WITHOUT INSTALLING
+sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
+sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/MacOS/diamond
+
 zip -rq Diamond-$VERSION-osx-x11.zip $APP
 hdiutil create -srcfolder $APP Diamond-$VERSION-x11.dmg
