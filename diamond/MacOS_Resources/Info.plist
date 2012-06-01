@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleIconFile</key>
-	<string>appStore.icns</string>
+	<string>diamond.icns</string>
 	<key>CFBundleName</key>
 	<string>Diamond</string>
 	<key>CFBundlePackageType</key>
