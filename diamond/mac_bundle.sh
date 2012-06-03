@@ -9,8 +9,8 @@ PYVER=2.7
 APP=Diamond.app
 INSTALLDIR=$APP/Contents
 LIBDIR=$INSTALLDIR/lib
-
-LOCALDIR=/opt/gtk/
+APPDIR=/Applications/$INSTALLDIR
+LOCALDIR=/opt/gtk
 
 # set up our virtual python environment
 virtualenv --python=python$PYVER --no-site-packages $INSTALLDIR
@@ -27,13 +27,14 @@ cd ../diamond;
 # This has placed a bin/diamond file which just launches our bin/diamond
 # Unfortunately, it's in the wrong place, so move it 
 mkdir $INSTALLDIR/MacOS
-cp $INSTALLDIR/bin/diamond $INSTALLDIR/MacOS/
-
 
 # Sort out the MacResources
-cp MacOS_Resources/* $INSTALLDIR/
+cp MacOS_Resources/PkgInfo $INSTALLDIR/
+cp MacOS_Resources/Info.plist $INSTALLDIR/
+cp MacOS_Resources/pango_rc $INSTALLDIR/
 mkdir $INSTALLDIR/Resources
-mv $INSTALLDIR/diamond.icns $INSTALLDIR/Resources/
+cp MacOS_Resources/diamond.icns $INSTALLDIR/Resources/
+cp MacOS_Resources/diamond $INSTALLDIR/MacOS
 
 # Now we have to play silly buggers with some bits of the diamond file
 # as the Mac app packages adds a command line argument, which we want to ignore
@@ -94,7 +95,7 @@ cp $oldsite/pygtk.pth $SITEPACKAGES
 
 
 # Modules, config, etc.
-for dir in etc/pango lib/pango etc/gtk-2.0 lib/gtk-2.0 share/themes lib/gdk-pixbuf-2.0; do
+for dir in lib etc/pango etc/gtk-2.0 share/themes; do
   mkdir -p $INSTALLDIR/$dir
   cp -r $LOCALDIR/$dir/* $INSTALLDIR/$dir
 done
@@ -125,7 +126,7 @@ function fix_paths() {
   local lib=$1
   log Fixing $lib
   for dep in `resolve_deps $lib`; do
-    #log Fixing `basename $lib`
+    log Fixing `basename $lib`
     log "|  $dep"
     install_name_tool -change $dep @executable_path/../lib/`basename $dep` $lib
   done
@@ -144,26 +145,39 @@ done | sort -u | while read lib; do
   fix_paths $LIBDIR/`basename $lib`
 done
 
-function fix_config() {
-  local file=$1
-  local replace=$2
+for lib in $dylibs; do
+  log Resolving $lib
+  resolve_deps $lib
+  fix_paths $lib
+done | sort -u | while read lib; do
+  log Copying $lib
+  cp $lib $LIBDIR
+  chmod u+w $LIBDIR/`basename $lib`
+  fix_paths $LIBDIR/`basename $lib`
+done
 
-  mv $file $file.orig
-  sed "$replace" $file.orig > $file
-}
 
 # Fix config files
-fix_config $INSTALLDIR/Resources/etc/pango/pango.modules 's#/usr/local/.*lib/#/usr/local/lib/#'
-fix_config $INSTALLDIR/Resources/etc/gtk-2.0/gtk.immodules 's#/usr/local/.*lib/#/usr/local/lib/#'
-fix_config $INSTALLDIR/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache 's#/usr/local/.*lib/#/usr/local/lib/#'
+sed -i -e 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/etc/pango/pango.modules 
+sed -i -e 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+sed -i -e 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/etc/pango/pango.modules 
+sed -i -e 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+
+
 
 # Package!
-
 VERSION=0.01
 # we now need to fiddle with the Python run path on the diamond script
 # COMMENT THESE OUT IF YOU WANT TO TEST YOUR APP WITHOUT INSTALLING
+# EDIT AS REQUIRED
 sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
 sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/MacOS/diamond
 
-zip -rq Diamond-$VERSION-osx-x11.zip $APP
-hdiutil create -srcfolder $APP Diamond-$VERSION-x11.dmg
+zip -rq Diamond-$VERSION-osx.zip $APP
+hdiutil create -srcfolder $APP Diamond-$VERSION.dmg
+
+
+# To test, temporarily move your /opt/gtk folder
+# Move the Diamond.app folder to /Applications and go
+# open -a Console 
+# helps to debug
