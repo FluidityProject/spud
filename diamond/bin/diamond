@@ -229,7 +229,7 @@ def main():
   gladefile = None
   for possible_gladefile in [os.path.join(diamond_path, "gui", "gui.glade"),
                              os.path.join(diamond_path, "share", "diamond", "gui", "gui.glade"),
-                             os.path.join(diamond_path, "..", "gui.glade"),
+                             os.path.join(diamond_path, "gui.glade"),
                              "/usr/share/diamond/gui/gui.glade"]:
     print possible_gladefile
     try:

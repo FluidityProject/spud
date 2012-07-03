@@ -16,7 +16,7 @@ LOCALDIR=/opt/gtk
 virtualenv --python=python$PYVER --no-site-packages $INSTALLDIR
 
 # install diamond in it
-$INSTALLDIR/bin/python setup.py install  --prefix=.
+$INSTALLDIR/bin/python setup.py install
 
 # install dxdiff
 cd ../dxdiff;
@@ -38,7 +38,7 @@ cp MacOS_Resources/diamond $INSTALLDIR/MacOS
 
 # Now we have to play silly buggers with some bits of the diamond file
 # as the Mac app packages adds a command line argument, which we want to ignore
-sed -i -e 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
+sed -i -e 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/bin/diamond
 
 # Now we have to feed the app some schemas or it's all for nothing
 # Set up the schema folders
@@ -170,7 +170,7 @@ VERSION=0.01
 # we now need to fiddle with the Python run path on the diamond script
 # COMMENT THESE OUT IF YOU WANT TO TEST YOUR APP WITHOUT INSTALLING
 # EDIT AS REQUIRED
-sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/lib/python2.7/site-packages/diamond-1.0-py2.7.egg/EGG-INFO/scripts/diamond
+sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/bin/diamond
 sed -i -e 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/MacOS/diamond
 
 zip -rq Diamond-$VERSION-osx.zip $APP
