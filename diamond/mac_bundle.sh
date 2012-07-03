@@ -16,7 +16,7 @@ LOCALDIR=/opt/gtk
 virtualenv --python=python$PYVER --no-site-packages $INSTALLDIR
 
 # install diamond in it
-$INSTALLDIR/bin/python setup.py install
+$INSTALLDIR/bin/python setup.py install  --prefix=.
 
 # install dxdiff
 cd ../dxdiff;
