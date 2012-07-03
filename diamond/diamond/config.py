@@ -30,7 +30,7 @@ if sys.platform != "win32" and sys.platform != "win64":
 # directory, if the HOME directory exists
 if sys.platform == "darwin":
     diamond_path = os.path.join( os.path.realpath(os.path.dirname(__file__)), os.pardir )
-    dirs.append(os.path.join(diamond_path,'../share'))
+    dirs.append(os.path.join(diamond_path,'../../../share'))
 dirs.append(os.path.join(os.path.expanduser('~'), ".diamond"))
 if "DIAMOND_CONFIG_PATH" in os.environ:
   dirs += reversed(os.environ["DIAMOND_CONFIG_PATH"].split(":"))

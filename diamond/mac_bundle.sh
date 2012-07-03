@@ -54,10 +54,10 @@ else
 	cd ../
 fi
 # Make the schemata description
-# The path of the RNG is relative to diamond.egg/EGG_INFO directory
+# The path of the RNG is relative to Contents directory
 cat > $INSTALLDIR/share/schemata/flml << EOF
 Fluidity Markup Language
-../../../../../share/schemata/fluidity/fluidity_options.rng
+share/schemata/fluidity/fluidity_options.rng
 EOF
 rm -rf $INSTALLDIR/share/schemata/fluidity
 mkdir $INSTALLDIR/share/schemata/fluidity

@@ -14,6 +14,7 @@ import glob
 
 prefix = None
 import sys
+packaging=False
 
 # We may also be given prefix, either as a configuration option (which will be
 # dealt with by substitutions later) or as a command line option. If a command
@@ -29,8 +30,6 @@ import sys
 for i, arg in enumerate(sys.argv):
   if "--prefix" in arg:
     prefix = arg.split('=')[1]
-  if "--package" in arg:
-  	packaging = True
 
 # Given the above prefix possibilities, as well as root and DESTDIR, we need to
 # construct a list of data directories to be installed
