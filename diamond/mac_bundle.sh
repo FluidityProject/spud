@@ -4,6 +4,18 @@
 #
 # Thanks: http://stackoverflow.com/questions/1596945/building-osx-app-bundle
 
+# Instructions:
+#  bzr co lp:spud mac_bundle
+#  cd mac_bundle
+#  ./configure
+#  cd diamond
+#  vi setup.py  -> switch packaging=False to True
+#  ./mac_bundle
+#  *make a coffee or tea*
+#  Done
+#
+
+
 # Also fix $INSTALLDIR/MacOS/diamond in case this number changes
 PYVER=2.7
 APP=Diamond.app
