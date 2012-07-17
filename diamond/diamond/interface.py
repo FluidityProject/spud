@@ -1462,12 +1462,11 @@ class Diamond:
     self.tree.write(f)
     xml = f.getvalue()
     xml = plugin.execute(xml, self.current_xpath)
-    print xml
     if xml:
       ios = StringIO.StringIO(xml)
 
       try:
-        tree_read = self.s.read(ios)
+        tree_read = self.s.read(filename)
 
         if tree_read is None:
           self.statusbar.set_statusbar("Unable to read plugin result")
