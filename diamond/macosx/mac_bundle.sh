@@ -28,7 +28,7 @@ virtualenv --python=python$PYVER --no-site-packages $INSTALLDIR
 
 cd ../
 # install diamond in it
-sed -i 's/packaging=False/packaging=True/' setup.py
+sed -i .bak 's/packaging=False/packaging=True/' setup.py
 macosx/$INSTALLDIR/bin/python setup.py install
 
 # install dxdiff
@@ -37,7 +37,6 @@ cd ../dxdiff;
 
 cd ../diamond/macosx;
 
-mkdir $INSTALLDIR/gui
 mkdir $INSTALLDIR/MacOS
 mkdir $INSTALLDIR/Resources
 
@@ -50,7 +49,7 @@ cp diamond $INSTALLDIR/MacOS
 
 # Now we have to play silly buggers with some bits of the diamond file
 # as the Mac app packages adds a command line argument, which we want to ignore
-sed -i 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/bin/diamond
+sed -i .bak 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/bin/diamond
 
 
 
@@ -167,10 +166,10 @@ done
 
 
 # Fix config files
-sed -i 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/etc/pango/pango.modules 
-sed -i 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
-sed -i 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/etc/pango/pango.modules 
-sed -i 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+sed -i .bak 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/etc/pango/pango.modules 
+sed -i .bak 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+sed -i .bak 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/etc/pango/pango.modules 
+sed -i .bak 's#/opt/gtk/#'$APPDIR'/#' $INSTALLDIR/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 
 
 
@@ -179,8 +178,8 @@ VERSION=0.01
 # we now need to fiddle with the Python run path on the diamond script
 # COMMENT THESE OUT IF YOU WANT TO TEST YOUR APP WITHOUT INSTALLING
 # EDIT AS REQUIRED
-sed -i 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/bin/diamond
-sed -i 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/MacOS/diamond
+sed -i .bak 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/bin/diamond
+sed -i .bak 's|/Users/amcg/Software/spud/mac_port/diamond|/Applications|' $INSTALLDIR/MacOS/diamond
 
 zip -rq Diamond-$VERSION-osx.zip $APP
 hdiutil create -srcfolder $APP Diamond-$VERSION.dmg
