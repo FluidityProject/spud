@@ -27,34 +27,32 @@ LOCALDIR=/opt/gtk
 # set up our virtual python environment
 virtualenv --python=python$PYVER --no-site-packages $INSTALLDIR
 
+cd ../
 # install diamond in it
-$INSTALLDIR/bin/python setup.py install
+macosx/$INSTALLDIR/bin/python setup.py install
 
 # install dxdiff
 cd ../dxdiff;
-../diamond/$INSTALLDIR/bin/python setup.py install
+../diamond/macosx/$INSTALLDIR/bin/python setup.py install
 
-cd ../diamond;
+cd ../diamond/macosx;
 
-# This has placed a bin/diamond file which just launches our bin/diamond
-# Unfortunately, it's in the wrong place, so move it 
+mkdir $INSTALLDIR/gui
 mkdir $INSTALLDIR/MacOS
-
-# Sort out the MacResources
-cp MacOS_Resources/PkgInfo $INSTALLDIR/
-cp MacOS_Resources/Info.plist $INSTALLDIR/
-cp MacOS_Resources/pango_rc $INSTALLDIR/
 mkdir $INSTALLDIR/Resources
-cp MacOS_Resources/diamond.icns $INSTALLDIR/Resources/
-cp MacOS_Resources/diamond $INSTALLDIR/MacOS
+
+# Sort out the Resources
+cp PkgInfo $INSTALLDIR/
+cp Info.plist $INSTALLDIR/
+cp pango_rc $INSTALLDIR/Resources/
+cp diamond.icns $INSTALLDIR/Resources/
+cp diamond $INSTALLDIR/MacOS
 
 # Now we have to play silly buggers with some bits of the diamond file
 # as the Mac app packages adds a command line argument, which we want to ignore
 sed -i -e 's/sys.argv\[1:\]/sys.argv\[2:\]/' $INSTALLDIR/bin/diamond
 
-# Now we have to feed the app some schemas or it's all for nothing
-# Set up the schema folders
-mkdir -p $INSTALLDIR/share/schemata
+
 
 # Let's get the latest fluidity release schema
 # NOTE: UPDATE URL AFTER A RELEASE
@@ -66,15 +64,14 @@ else
 	cd ../
 fi
 # Make the schemata description
-# The path of the RNG is relative to Contents directory
-cat > $INSTALLDIR/share/schemata/flml << EOF
+rm -rf $INSTALLDIR/Resources/schemata/fluidity
+mkdir -p $INSTALLDIR/Resources/schemata/fluidity
+cat > $INSTALLDIR/Resources/schemata/flml << EOF
 Fluidity Markup Language
-share/schemata/fluidity/fluidity_options.rng
+/Applications/Diamond.app/Contents/Resources/schemata/fluidity/fluidity_options.rng
 EOF
-rm -rf $INSTALLDIR/share/schemata/fluidity
-mkdir $INSTALLDIR/share/schemata/fluidity
-cp fluidity/schemas/*.rng $INSTALLDIR/share/schemata/fluidity/
-cp ../schema/*.rng $INSTALLDIR/share/schemata/fluidity/
+cp fluidity/schemas/*.rng $INSTALLDIR/Resources/schemata/fluidity/
+cp ../../schema/*.rng $INSTALLDIR/Resources/schemata/fluidity/
 # clean up
 #rm -rf fluidity
 
