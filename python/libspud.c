@@ -318,7 +318,7 @@ spud_get_option_aux_list_doubles(const char *key, int key_len, int type, int ran
         return NULL;
     }
     for (j = 0; j < size; j++){
-        PyObject* element = Py_BuildValue("f", val[j]);
+        PyObject* element = Py_BuildValue("d", val[j]);
         PyList_SetItem(pylist, j, element);
     }
 
