@@ -9,7 +9,7 @@ XS-Python-Version: >= 2.5
 
 Package: diamond
 Architecture: all
-Depends: python-gtk2, python-lxml, libxml2-utils, python, spudtools, python-gtksourceview2, python-dxdiff, python-glade2
+Depends: python-gtk2, python-lxml, libxml2-utils, python, spudtools, python-gtksourceview2, python-dxdiff, python-glade2, python-rsvg
 Recommends: python-psyco
 Suggests: 
 Conflicts: python-diamond
