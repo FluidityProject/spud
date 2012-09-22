@@ -273,7 +273,11 @@ def main():
   else:
     plugins.configure_plugins(suffix)
 
+  try:
     i = interface.Diamond(gladefile = gladefile, logofile = logofile, suffix = suffix)
+  except Exception, e:
+    debug.deprint('Error: ' + str(e), 0)
+    i = interface.Diamond(gladefile = gladefile, suffix = suffix)
 
     i.main_window.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
     i.open_file(schemafile = input_schemafile, filename = input_filename)
