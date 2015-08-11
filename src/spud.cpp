@@ -673,6 +673,10 @@ namespace Spud{
   }
 
   OptionManager::Option::~Option(){
+    for(deque< pair<string, Option*> >::iterator it=children.begin();it!=children.end();++it){
+      delete it->second;
+    }
+
     return;
   }
 
