@@ -1234,17 +1234,15 @@ namespace Spud{
       return SPUD_KEY_ERROR;
     }
 
-    Option new_option1 = Option(*option1);
-    new_option1.node_name = key2_name;
+    Option* new_option1 = new Option(*option1);
+    new_option1->node_name = key2_name;
     string new_node_name, name_attr;
-    new_option1.split_node_name(new_node_name, name_attr);
+    new_option1->split_node_name(new_node_name, name_attr);
     if(name_attr.size() == 0){
-      // CRW: might have problems here when new_option1 goes out of scope
-      option2_parent->children.push_back(pair<string, Option*>(new_node_name, &new_option1));
+      option2_parent->children.push_back(pair<string, Option*>(new_node_name, new_option1));
     }else{
-      new_option1.set_attribute("name", name_attr);
-      // CRW: might have problems here when new_option1 goes out of scope
-      option2_parent->children.push_back(pair<string, Option*>(new_node_name + "::" + name_attr, &new_option1));
+      new_option1->set_attribute("name", name_attr);
+      option2_parent->children.push_back(pair<string, Option*>(new_node_name + "::" + name_attr, new_option1));
     }
          
     return SPUD_NO_ERROR;
@@ -1274,17 +1272,15 @@ namespace Spud{
       return SPUD_KEY_ERROR;
     }
 
-    Option new_option1 = Option(*option1);
-    new_option1.node_name = key2_name;
+    Option* new_option1 = new Option(*option1);
+    new_option1->node_name = key2_name;
     string new_node_name, name_attr;
-    new_option1.split_node_name(new_node_name, name_attr);
+    new_option1->split_node_name(new_node_name, name_attr);
     if(name_attr.size() == 0){
-      // CRW: might have problems here when new_option1 goes out of scope
-      option2_parent->children.push_back(pair<string, Option*>(new_node_name, &new_option1));
+      option2_parent->children.push_back(pair<string, Option*>(new_node_name, new_option1));
     }else{
-      new_option1.set_attribute("name", name_attr);
-      // CRW: might have problems here when new_option1 goes out of scope
-      option2_parent->children.push_back(pair<string, Option*>(new_node_name + "::" + name_attr, &new_option1));
+      new_option1->set_attribute("name", name_attr);
+      option2_parent->children.push_back(pair<string, Option*>(new_node_name + "::" + name_attr, new_option1));
     }
          
     delete_option(key1);
@@ -1421,7 +1417,6 @@ namespace Spud{
           cerr << "SPUD WARNING: Creating __value child for non null element - deleting parent data" << endl;
           set_option_type(SPUD_NONE);
         }
-        // CRW: not sure if this is valid
         children.push_back(pair<string, Option*>(name, new Option(name)));
         string new_node_name, name_attr;
         children.rbegin()->second->split_node_name(new_node_name, name_attr);
@@ -1443,7 +1438,6 @@ namespace Spud{
           child = find_next(child, name);
         }
         if(child == children.end() and index == (int)i){
-          // CRW: not sure if this is valid
           children.push_back(pair<string, Option*>(name, new Option(name)));
           child = children.end(); child--;
           is_attribute = false;
