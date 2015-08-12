@@ -1423,9 +1423,10 @@ namespace Spud{
         }
         children.push_back(pair<string, Option*>(name, new Option(name)));
         string new_node_name, name_attr;
-        children.rbegin()->second->split_node_name(new_node_name, name_attr);
+        child = children.end(); child--;
+        child->second->split_node_name(new_node_name, name_attr);
         if(name_attr.size() > 0){
-          children.rbegin()->second->set_attribute("name", name_attr);
+          child->second->set_attribute("name", name_attr);
         }
         is_attribute = false;
       }
