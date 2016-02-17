@@ -1,4 +1,3 @@
-#    Copyright (C) 2007 Imperial College London and others.
 #
 #    Please see the AUTHORS file in the main source directory for a full list
 #    of copyright holders.
@@ -125,3 +124,8 @@ distclean: clean
 	rm -f Makefile src/tests/Makefile examples/Makefile
 	rm -f bin/spud-preprocess
 	rm -f diamond/setup.py diamond/diamond/plugins.py diamond/diamond/preprocess.py
+	rm -fr debian/diamond debian/python-dxdiff debian/python-spud
+	rm -fr debian/spudtools debian/libspud-dev
+	rm -rf diamond/diamond.egg-info/
+	rm -f debian/*.debhelper* debian/*.substvars 
+	rm -f build-* debian/files
