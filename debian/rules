@@ -101,8 +101,7 @@ binary-arch: build-libspud install-libspud install-spudtools install-pyspud
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-#	Fallback to dh_python2 of dh_python2 is not available (as on Ubuntu Lucid)
-	([ -x $(which dh_python2) ] && dh_python2) || dh_python2
+	dh_python2
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
@@ -122,8 +121,7 @@ binary-arch: build-libspud install-libspud install-spudtools install-pyspud
 binary-indep: build-diamond install-diamond build-libspud install-libspud install-spudtools install-dxdiff
 	dh_testdir -i
 	dh_testroot -i
-#	Fallback to dh_python2 of dh_python2 is not available (as on Ubuntu Lucid)
-	([ -x $(which dh_python2) ] && dh_python2 -i) || dh_python2 -i
+	dh_python2 -i
 	dh_installdocs -i
 	dh_installdirs -i
 	dh_installexamples  -i
