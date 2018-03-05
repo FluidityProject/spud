@@ -28,8 +28,8 @@ packaging=False
 # environment.
 
 for i, arg in enumerate(sys.argv):
-  if "--prefix" in arg:
-    prefix = arg.split('=')[1]
+    if "--prefix" in arg:
+        prefix = arg.split('=')[1]
 
 # Given the above prefix possibilities, as well as root and DESTDIR, we need to
 # construct a list of data directories to be installed
@@ -46,42 +46,42 @@ for i, arg in enumerate(sys.argv):
 plugin_dirs = [dir for dir in os.listdir('plugins') if os.path.isdir(os.path.join('plugins', dir)) and dir[0] != '.']
 plugin_data_files = []
 if sys.platform == 'darwin' and packaging:
-	for plugin in plugin_dirs:
-  		plugin_data_files.append(("./plugins/" + plugin,
-		  glob.glob('plugins/' + plugin + '/*.py')))
+    for plugin in plugin_dirs:
+        plugin_data_files.append(("./plugins/" + plugin,
+            glob.glob('plugins/' + plugin + '/*.py')))
 else:
-	for plugin in plugin_dirs:
-	  if prefix is None:
-		plugin_data_files.append(("@prefix@/share/diamond/plugins/" + plugin,
-		  glob.glob('plugins/' + plugin + '/*.py')))
-	  else:
-		plugin_data_files.append((prefix + "/share/diamond/plugins/" + plugin,
-		  glob.glob('plugins/' + plugin + '/*.py')))
+    for plugin in plugin_dirs:
+        if prefix is None:
+            plugin_data_files.append(("@prefix@/share/diamond/plugins/" + plugin,
+                glob.glob('plugins/' + plugin + '/*.py')))
+        else:
+            plugin_data_files.append((prefix + "/share/diamond/plugins/" + plugin,
+                glob.glob('plugins/' + plugin + '/*.py')))
 
 # Now parse the GUI directories
 gui_data_files = []
-if sys.platform == 'darwin' and packaging	:
-  gui_data_files.append(("./gui",
-    ["gui/gui.glade", "gui/diamond.svg", "gui/diamond.png"]))
+if sys.platform == 'darwin' and packaging :
+    gui_data_files.append(("./gui",
+        ["gui/gui.glade", "gui/diamond.svg", "gui/diamond.png"]))
 else:
-	if prefix is None:
-	  gui_data_files.append(("@prefix@/share/diamond/gui",
-		["gui/gui.glade", "gui/diamond.svg"]))
-	else:
-	  gui_data_files.append((prefix + "/share/diamond/gui",
-		["gui/gui.glade", "gui/diamond.svg"]))
+    if prefix is None:
+        gui_data_files.append(("@prefix@/share/diamond/gui",
+            ["gui/gui.glade", "gui/diamond.svg"]))
+    else:
+        gui_data_files.append((prefix + "/share/diamond/gui",
+            ["gui/gui.glade", "gui/diamond.svg"]))
 
 # We now have all the information we need; run setup.
 setup(
-      name='diamond',
-      version='1.0',
-      description="Fluidity preprocessor",
-      author = "The ICOM team",
-      author_email = "patrick.farrell@imperial.ac.uk",
-      url = "http://amcg.ese.ic.ac.uk",
-      packages = ['diamond'],
-      package_dir = {'diamond': 'diamond'},
-      scripts=["bin/diamond"],
-      data_files = gui_data_files + plugin_data_files
-     )
+    name='diamond',
+    version='1.0',
+    description="Fluidity preprocessor",
+    author = "The ICOM team",
+    author_email = "patrick.farrell@imperial.ac.uk",
+    url = "http://amcg.ese.ic.ac.uk",
+    packages = ['diamond'],
+    package_dir = {'diamond': 'diamond'},
+    scripts=["bin/diamond"],
+    data_files = gui_data_files + plugin_data_files
+)
 
