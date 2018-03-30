@@ -345,13 +345,16 @@ contains
     integer, intent(out) :: child_count
     integer, optional, intent(out) :: stat
 
-    integer :: lstat
+    integer(c_int) :: lstat
+    integer(c_int) :: lchild_count
 
-    lstat = spud_get_number_of_children(string_array(key), len_trim(key), child_count)
+    lstat = spud_get_number_of_children(string_array(key), len_trim(key), lchild_count)
     if(lstat /= SPUD_NO_ERROR) then
       call option_error(key, lstat, stat)
       return
     end if
+
+    child_count = lchild_count
 
   end subroutine get_number_of_children
 
