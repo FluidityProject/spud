@@ -16,17 +16,44 @@ pipeline {
                 sh './configure --prefix=\$HOME' 
             }
         }    
-        stage('Building') {       
+        stage('Building for python2') {       
             steps { 
                 sh 'make -j'
                 sh 'make doc'
 		sh 'make install'
             }
         }
-        stage('Testing') {       
+	stage('Testing fortran library') {
             steps { 
                 sh 'make junittest' ;
                 junit 'src/tests/test_result*xml'
+            }
+	}
+        stage('Testing for python2') {       
+            steps { 
+	        withEnv(['PYTHONPATH=/home/fluidity/lib/python2.7/site-packages',
+		         'LD_LIBRARY_PATH=/home/fluidity/lib']) {
+		    sh 'cd python; python2 test_libspud_junit.py' 
+                }
+                junit 'python/test_result*xml'
+		sh 'rm python/test_result*xml'
+            }
+        }
+/*	stage('Building for python3') {       
+            steps { 
+		sh 'cd python; python3 setup.py install; cd ..'
+            }
+        }
+	stage('Testing for python3') {       
+            steps { 
+		sh 'cd python; python3 test_libspud_junit.py' 
+                junit 'python/test_result*xml'
+		sh 'rm python/test_result*xml'
+            }
+        } */
+	stage('Building documentation') {       
+            steps { 
+		sh 'make doc'
             }
         }
     }
