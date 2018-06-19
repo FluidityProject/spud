@@ -39,18 +39,21 @@ pipeline {
 		sh 'rm python/test_result*xml'
             }
         }
-/*	stage('Building for python3') {       
+	stage('Building libspud for python3') {       
             steps { 
-		sh 'cd python; python3 setup.py install; cd ..'
+		sh 'cd python; python3 setup.py install --prefix=/home/fluidity; cd ..'
             }
         }
 	stage('Testing for python3') {       
             steps { 
-		sh 'cd python; python3 test_libspud_junit.py' 
+                withEnv(['PYTHONPATH=/home/fluidity/lib/python3.5/site-packages',
+		         'LD_LIBRARY_PATH=/home/fluidity/lib']) {
+		    sh 'cd python; python3 test_libspud_junit.py'
+                }
                 junit 'python/test_result*xml'
 		sh 'rm python/test_result*xml'
             }
-        } */
+        }
 	stage('Building documentation') {       
             steps { 
 		sh 'make doc'
