@@ -27,6 +27,7 @@ class AttributeWidget(gtk.Frame):
 
   __gsignals__ = { "on-store" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
                    "update-name"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+  fontsize = 12
 
   def __init__(self):
     gtk.Frame.__init__(self)
@@ -68,6 +69,8 @@ class AttributeWidget(gtk.Frame):
 
     column3 = gtk.TreeViewColumn("", icon_renderer)
     column3.set_cell_data_func(icon_renderer, self.icon_data_func)
+
+    self.set_fontsize()
 
     treeview.append_column(column1)
     treeview.append_column(column2)
@@ -339,5 +342,18 @@ class AttributeWidget(gtk.Frame):
         return False
 
     return True
+
+  def increase_font(self):
+    self.fontsize = self.fontsize + 2
+    self.set_fontsize()
+
+  def decrease_font(self):
+    self.fontsize = self.fontsize - 2
+    self.set_fontsize()
+
+  def set_fontsize(self):
+    self.key_renderer.set_property("font-desc", pango.FontDescription(str(self.fontsize)))
+    self.entry_renderer.set_property("font-desc", pango.FontDescription(str(self.fontsize)))
+    self.combo_renderer.set_property("font-desc", pango.FontDescription(str(self.fontsize)))
 
 gobject.type_register(AttributeWidget)

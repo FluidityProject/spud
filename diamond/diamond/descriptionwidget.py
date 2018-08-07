@@ -23,6 +23,9 @@ from . import TextBufferMarkup
 import webbrowser
 
 class DescriptionWidget(gtk.Frame):
+
+  fontsize = 12
+
   def __init__(self):
     gtk.Frame.__init__(self)
 
@@ -33,6 +36,7 @@ class DescriptionWidget(gtk.Frame):
     textView.set_editable(False)
     textView.set_wrap_mode(gtk.WrapMode.WORD)
     textView.set_cursor_visible(False)
+    textView.modify_font(pango.FontDescription(str(self.fontsize)))
 
     textView.set_buffer(TextBufferMarkup.PangoBuffer())
     textView.connect("button-release-event", self.mouse_button_release)
@@ -193,3 +197,11 @@ class DescriptionWidget(gtk.Frame):
       webbrowser.open(hyperlink)
 
     return
+
+  def increase_font(self):
+    self.fontsize = self.fontsize + 2
+    self.textView.modify_font(pango.FontDescription(str(self.fontsize)))
+
+  def decrease_font(self):
+    self.fontsize = self.fontsize - 2
+    self.textView.modify_font(pango.FontDescription(str(self.fontsize)))
