@@ -18,13 +18,12 @@
 import base64
 import bz2
 import copy
-import StringIO
+import io
 from lxml import etree
 
+from gi.repository import GObject as gobject
 
-import gobject
-
-import tree
+from . import tree
 
 class Choice(gobject.GObject):
 
@@ -78,7 +77,7 @@ class Choice(gobject.GObject):
     debug.deprint("self.name == %s" % self.name, 0)
     for choice in self.choices:
       debug.deprint("choice.name == %s" % choice.name, 0)
-    raise Exception, "No such choice name: %s" % name
+    raise Exception("No such choice name: %s" % name)
 
   def set_active_choice_by_name(self, name):
     matched = False
@@ -88,7 +87,7 @@ class Choice(gobject.GObject):
         self.index = self.choices.index(t)
 
     if not matched:
-      raise Exception, "no such name %s found" % name
+      raise Exception("no such name %s found" % name)
 
     self.recompute_validity()
 
