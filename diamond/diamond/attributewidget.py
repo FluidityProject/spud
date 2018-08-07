@@ -97,6 +97,8 @@ class AttributeWidget(gtk.Frame):
       self.set_property("visible", True)
 
       for key in list(node.attrs.keys()):
+        if node.attrs[key][0] == "fixed": continue
+
         model = self.treeview.get_model()
         cell_model = gtk.ListStore(gobject.TYPE_STRING)
 
