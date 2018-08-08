@@ -153,7 +153,11 @@ class DescriptionWidget(gtk.Frame):
       return None
     
     buffer_pos = self.textView.window_to_buffer_coords(gtk.TextWindowType.TEXT, x, y)
-    found, textiter = self.textView.get_iter_at_location(buffer_pos[0], buffer_pos[1])
+    result = self.textView.get_iter_at_location(buffer_pos[0], buffer_pos[1])
+    if isinstance(result, tuple):
+      textiter = result[1]
+    else:
+      textiter = result
     char_offset = textiter.get_offset()
 
     for bounds in self.link_bounds:
