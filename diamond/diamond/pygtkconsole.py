@@ -140,6 +140,8 @@ class GTKInterpreterConsole(gtk.ScrolledWindow):
   """
   def __init__(self, locals = None):
     gtk.ScrolledWindow.__init__(self)
+    self.set_hexpand(True)
+    self.set_vexpand(True)
     self.set_policy (gtk.PolicyType.AUTOMATIC,gtk.PolicyType.AUTOMATIC)
 
     self.text = gtk.TextView()
