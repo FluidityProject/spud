@@ -51,6 +51,8 @@ def long_message(parent, message):
   message_dialog.vbox.add(scrolled_window)
   scrolled_window.show()
 
+  scrolled_window.set_hexpand(True)
+  scrolled_window.set_vexpand(True)
   scrolled_window.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.ALWAYS)
 
   text_view = gtk.TextView()
