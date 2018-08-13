@@ -469,19 +469,19 @@ class Diamond:
       return self.on_save_as(widget)
     else:
       self.statusbar.set_statusbar("Saving ...")
-      self.main_window.window.set_cursor(gdk.Cursor(gdk.CursorType.WATCH))
+      self.main_window.get_window().set_cursor(gdk.Cursor(gdk.CursorType.WATCH))
       try:
         self.tree.write(self.filename)
       except:
         dialogs.error_tb(self.main_window, "Saving to \"" + self.filename + "\" failed")
         self.statusbar.clear_statusbar()
-        self.main_window.window.set_cursor(None)
+        self.main_window.get_window().set_cursor(None)
         return False
 
       self.set_saved(True)
 
       self.statusbar.clear_statusbar()
-      self.main_window.window.set_cursor(None)
+      self.main_window.get_window().set_cursor(None)
       return True
 
     return False
