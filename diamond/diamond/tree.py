@@ -486,7 +486,7 @@ class Tree(gobject.GObject):
 
   def get_name(self):
     if "name" in self.attrs:
-      name = self.attrs["name"][1]
+      name = self.get_attr("name")
       return name
 
     return None

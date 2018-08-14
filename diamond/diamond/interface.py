@@ -1424,8 +1424,8 @@ class Diamond:
     name_tree = active_tree
     name = ""
     while name_tree is not None:
-      if "name" in name_tree.attrs and name_tree.attrs["name"][1] is not None:
-        used_name = name_tree.name + '::%s' % name_tree.attrs["name"][1]
+      if "name" in name_tree.attrs and name_tree.get_attr("name") is not None:
+        used_name = name_tree.name + '::%s' % name_tree.get_attr("name")
       elif name_tree.parent is not None and name_tree.parent.count_children_by_schemaname(name_tree.schemaname) > 1:
         siblings = [x for x in name_tree.parent.children if x.schemaname == name_tree.schemaname]
         i = 0
@@ -1450,8 +1450,8 @@ class Diamond:
     name_tree = active_tree
     name = ""
     while name_tree is not None:
-      if "name" in name_tree.attrs and name_tree.attrs["name"][1] is not None:
-        used_name = name_tree.name + '[@name="%s"]' % name_tree.attrs["name"][1]
+      if "name" in name_tree.attrs and name_tree.get_attr("name") is not None:
+        used_name = name_tree.name + '[@name="%s"]' % name_tree.get_attr("name")
       elif name_tree.parent is not None and name_tree.parent.count_children_by_schemaname(name_tree.schemaname) > 1:
         siblings = [x for x in name_tree.parent.children if x.schemaname == name_tree.schemaname]
         i = 0

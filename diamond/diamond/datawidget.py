@@ -403,7 +403,7 @@ class DataWidget(gtk.VBox):
       self.node.set_data(value_check)
 
       dim1, dim2 = self.node.tensor_shape(self.geometry_dim_tree)
-      if int(self.node.child.attrs["rank"][1]) == 1:
+      if int(self.node.child.get_attr("rank")) == 1:
         self.node.child.set_attr("shape", str(dim1))
       else:
         self.node.child.set_attr("shape", str(dim1) + " " + str(dim2))
