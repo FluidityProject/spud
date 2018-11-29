@@ -28,7 +28,7 @@ def prompt(parent, message, type = gtk.MessageType.QUESTION, has_cancel = False)
   Display a simple Yes / No dialog. Returns one of gtk.ResponseType.{YES,NO,CANCEL}.
   """
 
-  prompt_dialog = gtk.MessageDialog(parent, 0, type, gtk.ButtonsType.NONE, message)
+  prompt_dialog = gtk.MessageDialog(transient_for=parent, flags=0, message_type=type, buttons=gtk.ButtonsType.NONE, text=message)
   prompt_dialog.add_buttons(gtk.STOCK_YES, gtk.ResponseType.YES, gtk.STOCK_NO, gtk.ResponseType.NO)
   if has_cancel:
     prompt_dialog.add_buttons(gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL)
