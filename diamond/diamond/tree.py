@@ -33,8 +33,8 @@ class Tree(gobject.GObject):
   """This class maps pretty much 1-to-1 with an xml tree.
      It is used to represent the options in-core."""
 
-  __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
-                   "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
+  __gsignals__ = { "on-set-data" : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, (str,)),
+                   "on-set-attr"  : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, (str, str))}
   
   def __init__(self, name="", schemaname="", attrs={}, children=None, cardinality='', datatype=None, doc=None):
     gobject.GObject.__init__(self)
