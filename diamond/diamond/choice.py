@@ -27,8 +27,8 @@ from . import tree
 
 class Choice(gobject.GObject):
 
-  __gsignals__ = { "on-set-data" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str,)),
-                   "on-set-attr"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, str))}
+  __gsignals__ = { "on-set-data" : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, (str,)),
+                   "on-set-attr"  : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, (str, str))}
 
   def __init__(self, choices, schemaname="", cardinality=''):
     gobject.GObject.__init__(self)
