@@ -144,8 +144,9 @@ class PangoBuffer (gtk.TextBuffer):
 
     def set_text (self, txt):
         gtk.TextBuffer.set_text(self,"")
-        success,self.parsed,self.txt,self.separator = pango.parse_markup(txt,-1,'\x00')
-        if not success:
+        try:
+            success,self.parsed,self.txt,self.separator = pango.parse_markup(txt,-1,'\x00')
+        except:
             debug.deprint('Escaping text, we seem to have a problem here!', 2)
             txt=xml.sax.saxutils.escape(txt)
             success,self.parsed,self.txt,self.separator = pango.parse_markup(txt,-1,'\x00')
