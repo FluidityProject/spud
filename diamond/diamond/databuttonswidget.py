@@ -20,8 +20,8 @@ from gi.repository import Gtk as gtk
 
 class DataButtonsWidget(gtk.HBox):
 
-  __gsignals__ = { "revert" : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-                   "store"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+  __gsignals__ = { "revert" : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, ()),
+                   "store"  : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, ())}
 
   def __init__(self):
     gtk.HBox.__init__(self)

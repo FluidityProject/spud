@@ -1368,8 +1368,8 @@ class Diamond:
       new_tree = parent_tree.add_inactive_instance(choice_or_tree)
       liststore = self.create_liststore(new_tree)
       self.expand_treestore(iter)
-      iter = self.treestore.insert_after(
-        None, iter, [new_tree, new_tree.get_current_tree(), liststore])
+      iter = self.treestore.insert_after(self.treestore.iter_parent(iter), iter, 
+                                         [new_tree, new_tree.get_current_tree(), liststore])
       attrid = new_tree.connect("on-set-attr", self.on_set_attr, self.treestore.get_path(iter))
       dataid = new_tree.connect("on-set-data", self.on_set_data, self.treestore.get_path(iter))
       self.signals[new_tree] = (attrid, dataid)
