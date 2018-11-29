@@ -22,7 +22,7 @@ from gi.repository import Pango as pango
 
 class CommentWidget(gtk.Frame):
 
-  __gsignals__ = { "on-store"  : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())}
+  __gsignals__ = { "on-store"  : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, ())}
 
   def __init__(self):
     gtk.Frame.__init__(self)
