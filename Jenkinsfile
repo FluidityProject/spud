@@ -2,7 +2,7 @@ pipeline {
 
     agent { 
         docker {
-	    image 'fluidity/baseimages:bionic'
+	    image 'fluidity/spudbase:bionic'
             label 'dockerhost'
         } 
     }
@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Configuring') {   
             steps { 
-                sh './configure --prefix=\$HOME' 
+                sh './configure --prefix=/home/spud' 
             }
         }    
         stage('Building for python2') {       
@@ -30,8 +30,8 @@ pipeline {
 	}
         stage('Testing for python2') {       
             steps { 
-	        withEnv(['PYTHONPATH=/home/fluidity/lib/python2.7/site-packages',
-		         'LD_LIBRARY_PATH=/home/fluidity/lib']) {
+	        withEnv(['PYTHONPATH=/home/spud/lib/python2.7/site-packages',
+		         'LD_LIBRARY_PATH=/home/spud/lib']) {
 		    sh 'cd python; python2 test_libspud_junit.py' 
                 }
                 junit 'python/test_result*xml'
@@ -40,13 +40,13 @@ pipeline {
         }
 	stage('Building libspud for python3') {       
             steps { 
-		sh 'cd python; python3 setup.py install --prefix=/home/fluidity; cd ..'
+		sh 'cd python; python3 setup.py install --prefix=/home/spud; cd ..'
             }
         }
 	stage('Testing for python3') {       
             steps { 
-                withEnv(['PYTHONPATH=/home/fluidity/lib/python3.6/site-packages',
-		         'LD_LIBRARY_PATH=/home/fluidity/lib']) {
+                withEnv(['PYTHONPATH=/home/spud/lib/python3.6/site-packages',
+		         'LD_LIBRARY_PATH=/home/spud/lib']) {
 		    sh 'cd python; python3 test_libspud_junit.py'
                 }
                 junit 'python/test_result*xml'
