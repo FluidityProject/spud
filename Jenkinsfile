@@ -2,7 +2,7 @@ pipeline {
 
     agent { 
         docker {
-	    image 'fluidity/baseimages:xenial'
+	    image 'fluidity/baseimages:bionic'
             label 'dockerhost'
         } 
     }
