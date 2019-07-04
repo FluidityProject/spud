@@ -45,7 +45,7 @@ pipeline {
         }
 	stage('Testing for python3') {       
             steps { 
-                withEnv(['PYTHONPATH=/home/fluidity/lib/python3.5/site-packages',
+                withEnv(['PYTHONPATH=/home/fluidity/lib/python3.6/site-packages',
 		         'LD_LIBRARY_PATH=/home/fluidity/lib']) {
 		    sh 'cd python; python3 test_libspud_junit.py'
                 }
