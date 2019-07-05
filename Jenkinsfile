@@ -18,7 +18,6 @@ pipeline {
         stage('Building for python2') {       
             steps { 
                 sh 'make -j'
-                sh 'make doc'
 		sh 'make install'
             }
         }
