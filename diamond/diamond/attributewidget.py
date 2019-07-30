@@ -348,8 +348,9 @@ class AttributeWidget(gtk.Frame):
     self.set_fontsize()
 
   def decrease_font(self):
-    self.fontsize = self.fontsize - 2
-    self.set_fontsize()
+    if self.fontsize > 0:
+      self.fontsize = self.fontsize - 2
+      self.set_fontsize()
 
   def set_fontsize(self):
     self.key_renderer.set_property("font-desc", pango.FontDescription(str(self.fontsize)))

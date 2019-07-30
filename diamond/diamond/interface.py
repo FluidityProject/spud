@@ -603,9 +603,10 @@ class Diamond:
     self.data.decrease_font()
     self.attributes.decrease_font()
 
-    self.fontsize = self.fontsize - 2
-    self.cellcombo.set_property("font-desc", pango.FontDescription(str(self.fontsize)))
-    self.redraw_tree()
+    if self.fontsize > 0:
+      self.fontsize = self.fontsize - 2
+      self.cellcombo.set_property("font-desc", pango.FontDescription(str(self.fontsize)))
+      self.redraw_tree()
     return
 
   def redraw_tree(self):
