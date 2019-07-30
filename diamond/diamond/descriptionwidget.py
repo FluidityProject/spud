@@ -207,5 +207,6 @@ class DescriptionWidget(gtk.Frame):
     self.textView.modify_font(pango.FontDescription(str(self.fontsize)))
 
   def decrease_font(self):
-    self.fontsize = self.fontsize - 2
-    self.textView.modify_font(pango.FontDescription(str(self.fontsize)))
+    if self.fontsize > 0:
+      self.fontsize = self.fontsize - 2
+      self.textView.modify_font(pango.FontDescription(str(self.fontsize)))
