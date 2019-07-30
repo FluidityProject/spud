@@ -1,3 +1,9 @@
+spud (1.1.6) bionic; urgency=low
+
+  * Point-release to switch packaging over to bionic
+
+ -- Tim Greaves <tim.greaves@imperial.ac.uk>  Tue, 30 Jul 2019 23:04:31 +0100
+
 spud (1.1.5) precise; urgency=low
 
   * Point-release to formally include bugfixes from 2012-03/04
