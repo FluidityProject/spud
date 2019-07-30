@@ -1,4 +1,4 @@
-spud (1.1.6) bionic; urgency=low
+spud (1.1.7) bionic; urgency=low
 
   * Point-release to switch packaging over to bionic
 
