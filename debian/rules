@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PACKAGE_NAME=diamond
+PACKAGE_NAME=spud-diamond
 MODULE_NAME=diamond
 DEB_UPSTREAM_VERSION=1.0
 
@@ -37,8 +37,8 @@ build-libspud: config.status
 	$(MAKE) doc
 
 
-build-diamond: build-diamond-stamp 
-build-diamond-stamp: $(PYVERS:%=build-python%)
+build-spud-diamond: build-spud-diamond-stamp 
+build-spud-diamond-stamp: $(PYVERS:%=build-python%)
 	touch $@
 build-python%: config.status
 # Force setuptools, but reset sys.argv[0] to 'setup.py' because setup.py files expect that.
@@ -61,7 +61,7 @@ install-libspud: build-libspud install-prereq
 install-spudtools: install-prereq
 	$(MAKE) install-spudtools DESTDIR=$(CURDIR)/debian/spudtools
 
-install-diamond: build-diamond install-prereq $(PYVERS:%=install-python%)
+install-spud-diamond: build-spud-diamond install-prereq $(PYVERS:%=install-python%)
 	dh_install
 install-prereq:
 	dh_testdir
@@ -118,7 +118,7 @@ binary-arch: build-libspud install-libspud install-spudtools install-pyspud
 	dh_md5sums
 	dh_builddeb
 
-binary-indep: build-diamond install-diamond build-libspud install-libspud install-spudtools install-dxdiff
+binary-indep: build-spud-diamond install-spud-diamond build-libspud install-libspud install-spudtools install-dxdiff
 	dh_testdir -i
 	dh_testroot -i
 	dh_python2 -i
@@ -131,8 +131,8 @@ binary-indep: build-diamond install-diamond build-libspud install-libspud instal
 	: # Replace all '#!' calls to python with $(PYTHON)
 	: # and make them executable
 	for i in \
-	  `find debian/diamond/usr/bin -type f` \
-	  `find debian/diamond/usr/lib -type f`; \
+	  `find debian/spud-diamond/usr/bin -type f` \
+	  `find debian/spud-diamond/usr/lib -type f`; \
 	do \
 	  case "$$i" in *-[0-9].[0-9]) continue; esac; \
 	  sed '1s,#!.*python[^ ]*\(.*\),#! /usr/bin/python\1,' \
@@ -153,4 +153,4 @@ binary-indep: build-diamond install-diamond build-libspud install-libspud instal
 binary: binary-indep binary-arch
 
 
-.PHONY: build clean binary-indep binary-arch binary-diamond binary-libspud install configure
+.PHONY: build clean binary-indep binary-arch binary-spud-diamond binary-libspud install configure
