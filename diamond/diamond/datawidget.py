@@ -29,6 +29,7 @@ from . import plist
 class DataWidget(gtk.VBox):
 
   __gsignals__ = { "on-store"  : (gobject.SignalFlags.RUN_LAST, gobject.TYPE_NONE, ())}
+  fontsize = 12
 
   def __init__(self):
     gtk.VBox.__init__(self)
@@ -176,6 +177,7 @@ class DataWidget(gtk.VBox):
     self.set_data_empty()
    
     self.data = self.add_text_view()
+    self.set_fontsize()
 
     self.data.get_buffer().create_tag("tag")
     text_tag = self.data.get_buffer().get_tag_table().lookup("tag")
@@ -209,6 +211,7 @@ class DataWidget(gtk.VBox):
     self.set_data_empty()
 
     self.data = self.add_text_view()
+    self.set_fontsize()
 
     self.data.get_buffer().create_tag("tag")
     text_tag = self.data.get_buffer().get_tag_table().lookup("tag")
@@ -268,6 +271,7 @@ class DataWidget(gtk.VBox):
             entry.set_text(self.node.data.split(" ")[jindex + iindex * dim2])
 
     self.interacted = [False for i in range(dim1 * dim2)]
+    self.set_fontsize()
 
     return
 
@@ -321,6 +325,8 @@ class DataWidget(gtk.VBox):
       self.data.child.set_text(self.node.data)
 
     self.data.connect("changed", self.combo_changed)
+
+    self.set_fontsize()
 
     return
 
@@ -506,5 +512,27 @@ class DataWidget(gtk.VBox):
       self.emit("on-store")      
       self.interacted = False
     return
+
+  def increase_font(self):
+    self.fontsize = self.fontsize + 2
+    self.set_fontsize()
+
+  def decrease_font(self):
+    if self.fontsize > 0:
+      self.fontsize = self.fontsize - 2
+      self.set_fontsize()
+
+  def set_fontsize(self):
+    if self.frame.get_child() is not None:
+      if isinstance(self.data, gtk.TextView) or isinstance(self.data, gtksource.View):
+        self.data.modify_font(pango.FontDescription(str(self.fontsize)))
+        self.data.show()
+      elif isinstance(self.data, gtk.ComboBox):
+        self.data.get_child().modify_font(pango.FontDescription(str(self.fontsize)))
+      elif isinstance(self.data, gtk.Table):
+        dim1, dim2 = self.data.get_size()
+        for i in range(dim1):
+          for j in range(dim2):
+            self.data.get_children()[i + j * dim1].modify_font(pango.FontDescription(str(self.fontsize)))
 
 gobject.type_register(DataWidget)
