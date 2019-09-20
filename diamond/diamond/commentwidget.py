@@ -51,6 +51,7 @@ class CommentWidget(gtk.Frame):
     self.add(scrolledWindow)
     
     self.comment_tree = None                           
+    self.interacted = False
     return
 
   def update(self, node):
@@ -70,7 +71,7 @@ class CommentWidget(gtk.Frame):
         self.textView.set_property("has-tooltip", False)
       except:
         pass
-
+      self.interacted = False
       return
 
     self.comment_tree = comment_tree = node.get_comment()
