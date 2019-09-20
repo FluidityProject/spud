@@ -105,13 +105,13 @@ class AttributeWidget(gtk.Frame):
         model.set_value(iter, 2, cell_model)
 
         if isinstance(node.attrs[key][0], tuple):
-          if node.attrs[key][1] is None:
+          if node.get_attr(key) is None:
             if isinstance(node.attrs[key][0][0], tuple):
               model.set_value(iter, 1, "Select " + datatype.print_type(node.attrs[key][0][1]) + "...")
             else:
               model.set_value(iter, 1, "Select...")
           else:
-            model.set_value(iter, 1, node.attrs[key][1])
+            model.set_value(iter, 1, node.get_attr(key))
 
           if isinstance(node.attrs[key][0][0], tuple):
             opts = node.attrs[key][0][0]
@@ -125,10 +125,10 @@ class AttributeWidget(gtk.Frame):
           self.treeview.get_column(2).set_property("visible", True)
         elif node.attrs[key][0] is None:
           model.set_value(iter, 1, "No data")
-        elif node.attrs[key][1] is None:
+        elif node.get_attr(key) is None:
           model.set_value(iter, 1, datatype.print_type(node.attrs[key][0]))
         else:
-          model.set_value(iter, 1, node.attrs[key][1])
+          model.set_value(iter, 1, node.get_attr(key))
 
       self.treeview.queue_resize()
 
@@ -173,7 +173,7 @@ class AttributeWidget(gtk.Frame):
 
     if not self.node.active or self.node.attrs[iter_key][0] is None or self.node.attrs[iter_key][0] == "fixed":
       cell_renderer.set_property("foreground", "grey")
-    elif self.node.attrs[iter_key][1] is None:
+    elif self.node.get_attr(iter_key) is None:
       cell_renderer.set_property("foreground", "blue")
     else:
       cell_renderer.set_property("foreground", "black")
@@ -195,7 +195,7 @@ class AttributeWidget(gtk.Frame):
     elif not isinstance(self.node.attrs[iter_key][0], tuple):
       cell_renderer.set_property("editable", True)
       cell_renderer.set_property("visible", True)
-      if self.node.attrs[iter_key][1] is None:
+      if self.node.get_attr(iter_key) is None:
         cell_renderer.set_property("foreground", "blue")
       else:
         cell_renderer.set_property("foreground", "black")
@@ -220,7 +220,7 @@ class AttributeWidget(gtk.Frame):
         cell_renderer.set_property("has-entry", True)
       else:
         cell_renderer.set_property("has-entry", False)
-      if self.node.attrs[iter_key][1] is None:
+      if self.node.get_attr(iter_key) is None:
         cell_renderer.set_property("foreground", "blue")
       else:
         cell_renderer.set_property("foreground", "black")
@@ -255,7 +255,7 @@ class AttributeWidget(gtk.Frame):
     iter = self.treeview.get_model().get_iter(path)
     iter_key = self.treeview.get_model().get_value(iter, 0)
 
-    if self.node.attrs[iter_key][1] is None:
+    if self.node.get_attr(iter_key) is None:
       editable.set_text("")
 
     return
@@ -269,7 +269,7 @@ class AttributeWidget(gtk.Frame):
     iter = self.treeview.get_model().get_iter(path)
     iter_key = self.treeview.get_model().get_value(iter, 0)
 
-    if isinstance(self.node.attrs[iter_key][0][0], tuple) and self.node.attrs[iter_key][1] is None:
+    if isinstance(self.node.attrs[iter_key][0][0], tuple) and self.node.get_attr(iter_key) is None:
       editable.child.set_text("")
 
     return
@@ -288,7 +288,7 @@ class AttributeWidget(gtk.Frame):
 
     value_check = self.node.validity_check(self.node.attrs[iter_key][0], new_text)
 
-    if value_check is not None and value_check != self.node.attrs[iter_key][1]:
+    if value_check is not None and value_check != self.node.get_attr(iter_key):
       if iter_key == "name" and not self._name_check(value_check):
         return
 
@@ -320,7 +320,7 @@ class AttributeWidget(gtk.Frame):
       new_text = self.node.validity_check(self.node.attrs[iter_key][0][1], new_text)
       if iter_key == "name" and not self._name_check(new_text):
         return False
-    if new_text != self.node.attrs[iter_key][1]:
+    if new_text != self.node.get_attr(iter_key):
       self.treeview.get_model().set_value(iter, 1, new_text)
       self.node.set_attr(iter_key, new_text)
       if iter_key == "name":
