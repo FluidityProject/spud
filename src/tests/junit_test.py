@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import glob
 import subprocess
@@ -31,5 +31,3 @@ for test in tests:
 
 with open('test_results.xml', 'w') as handle:
     suites[-1].to_file(handle, suites)
-        
-

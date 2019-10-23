@@ -1,5 +1,3 @@
-#/usr/bin/env python
-
 #    This file is part of Diamond.
 #
 #    Diamond is free software: you can redistribute it and/or modify
@@ -561,4 +559,3 @@ class Tree(gobject.GObject):
     return True
  
 gobject.type_register(Tree)
-
