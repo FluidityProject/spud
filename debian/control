@@ -9,7 +9,7 @@ XS-Python-Version: >= 2.5
 
 Package: spud-diamond
 Architecture: all
-Depends: python3-gi, python3-lxml, libxml2-utils, python3, spudtools, python3-dxdiff
+Depends: ${python3:Depends}, python3-gi, python3-lxml, libxml2-utils, python3, spudtools, python3-dxdiff, ${misc:Depends}
 Recommends: 
 Suggests: 
 Conflicts: python-diamond, diamond
@@ -25,7 +25,7 @@ Description: A schema-driven interface for writing XML documents
 
 Package: libspud-dev
 Architecture: any
-Depends: ${shlibs:Depends}, spudtools, libtinyxml-dev
+Depends: ${shlibs:Depends}, spudtools, libtinyxml-dev, ${misc:Depends}
 Recommends: spud-diamond
 Section: libdevel
 Suggests:
@@ -37,10 +37,10 @@ Description: An automatic options system for scientific models.
 
 Package: spudtools
 Architecture: all
-Depends: ${shlibs:Depends}, trang (>= 20091111-1)
+Depends: ${shlibs:Depends}, ${python3:Depends}, trang (>= 20091111-1), ${misc:Depends}
 Recommends: spud-diamond
-Conflicts: libspud-dev (<1.0.6)
-Replaces: libspud-dev (<1.0.6)
+Conflicts: libspud-dev (<<1.0.6)
+Replaces: libspud-dev (<<1.0.6)
 Section: science
 Suggests:
 Description: An automatic options system for scientific models.
@@ -57,7 +57,7 @@ Conflicts: python-spud
 Replaces: python-spud
 Architecture: any
 X-Python-Version: ${python:Versions}
-Depends: libspud-dev (= ${binary:Version}), ${python:Depends}, ${misc:Depends}
+Depends: libspud-dev (= ${binary:Version}), ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Description: An automatic options system for scientific models (python interface).
  Spud is an automatic options system which reads an xml options file 
  into a dictionary for immediate access from within the model. The xml 
@@ -71,7 +71,7 @@ Conflicts: python-dxdiff
 Replaces: python-dxdiff
 Architecture: all
 X-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, ${misc:Depends}
+Depends: ${python3:Depends}, ${misc:Depends}
 Description: An XML aware diff tool.
  DXdiff (Diamond Xml diff) is an XML aware diff tool for finding edit scripts
  between two XML files.
