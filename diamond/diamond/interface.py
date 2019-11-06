@@ -39,7 +39,6 @@ from . import scherror
 from . import tree
 
 import io
-from . import TextBufferMarkup
 
 from . import attributewidget
 from . import commentwidget
