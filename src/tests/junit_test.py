@@ -11,7 +11,7 @@ tests = glob.glob('bin/*')
 suites = []
 
 for test in tests:
-    output = subprocess.check_output(os.path.abspath(test)) 
+    output = subprocess.check_output(os.path.abspath(test)).decode()
     title = ''
     for line in output.split('\n'):
         if not line.strip():
