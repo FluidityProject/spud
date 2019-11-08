@@ -9,7 +9,7 @@ XS-Python-Version: >= 2.5
 
 Package: spud-diamond
 Architecture: all
-Depends: ${python3:Depends}, python3-gi, python3-lxml, libxml2-utils, python3, spudtools, python3-dxdiff, ${misc:Depends}
+Depends: ${python3:Depends}, python3-gi, python3-lxml, libxml2-utils, python3, spudtools, python3-dxdiff, python3-future, ${misc:Depends}
 Recommends: 
 Suggests: 
 Conflicts: python-diamond, diamond
