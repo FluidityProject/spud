@@ -1,0 +1,57 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - actions
+  pull_request:
+    branches:
+      - actions
+
+jobs:
+  Ubuntu-Focal:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:focal
+
+    steps:
+      - name: Check Out Repo 
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: | 
+          echo "Europe/London" > /etc/timezone
+          apt-get -y update
+          DEBIAN_FRONTEND=noninteractive apt-get -y install gfortran g++ python3-setuptools python3-all-dev debhelper dh-python texlive python3-junit.xml
+
+      - name: Configuring
+        run: ./configure --prefix=/tmp
+
+      - name: Building
+        run: | 
+          make -j
+          make install
+
+      - name: Testing fortran library
+        run: make junittest
+
+      - name: Testing
+        env:
+          PYTHONPATH: /tmp/lib/python3.8/site-packages
+          LD_LIBRARY_PATH: /tmp/lib
+        run: | 
+          cd python
+          python3 test_libspud_junit.py
+
+      - name: Building documentation
+        run: make doc
+
+      - name: Publish JUnit
+        uses: mikepenz/action-junit-report@v2
+        with:
+          report_paths: '**/test_result*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: JUnit Report
+          fail_on_failure: true
+
+
