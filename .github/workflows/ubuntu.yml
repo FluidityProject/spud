@@ -3,10 +3,10 @@ name: Build and Test
 on:
   push:
     branches:
-      - actions
+      - master
   pull_request:
     branches:
-      - actions
+      - master
 
 jobs:
   Ubuntu-Focal:
