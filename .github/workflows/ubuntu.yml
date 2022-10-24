@@ -9,10 +9,26 @@ on:
       - main
 
 jobs:
-  Ubuntu-Focal:
+  ubuntu-local-builds:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ "Local Build Focal", "Local Build Jammy" ]
+        include:
+
+          - name: "Local Build Focal"
+            release: focal
+            python: python3.8
+
+          - name: "Local Build Jammy"
+            release: jammy
+            python: python3.10
+
+
     container:
-      image: ubuntu:focal
+      image: ubuntu:${{ matrix.release }}
 
     steps:
       - name: Check Out Repo 
@@ -22,7 +38,7 @@ jobs:
         run: | 
           echo "Europe/London" > /etc/timezone
           apt-get -y update
-          DEBIAN_FRONTEND=noninteractive apt-get -y install gfortran g++ python3-setuptools python3-all-dev debhelper dh-python texlive python3-junit.xml
+          DEBIAN_FRONTEND=noninteractive apt-get -y install gfortran g++ python3-setuptools python3-pip python3-all-dev debhelper dh-python texlive python3-junit.xml
 
       - name: Configuring
         run: ./configure --prefix=/tmp
@@ -37,7 +53,7 @@ jobs:
 
       - name: Testing
         env:
-          PYTHONPATH: /tmp/lib/python3.8/site-packages
+          PYTHONPATH: /tmp/lib/${{ matrix.python }}/site-packages
           LD_LIBRARY_PATH: /tmp/lib
         run: | 
           cd python
