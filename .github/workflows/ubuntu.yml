@@ -15,19 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ "Local Build Bionic", "Local Build Focal", "Local Build Jammy" ]
+        name: [ "Local Build Focal", "Local Build Jammy" ]
         include:
-
-          - name: "Local Build Bionic"
-            release: bionic
-            python: python3.6
 
           - name: "Local Build Focal"
             release: focal
             python: python3.8
 
           - name: "Local Build Jammy"
-            release: impish
+            release: jammy
             python: python3.10
 
 
