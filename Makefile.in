@@ -98,13 +98,13 @@ install-spudtools:
 	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)@prefix@/share/spud
 
 install-diamond:
-	python3 -mpip install --prefix=$(DESTDIR)@prefix@ diamond/
+	cd diamond; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
 
 install-pyspud:
-	python3 -mpip install --prefix=$(DESTDIR)@prefix@ python/
+	cd python; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
 
 install-dxdiff:
-	python3 -mpip install --prefix=$(DESTDIR)@prefix@ dxdiff/
+	cd dxdiff; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
 
 clean:
 	@cd doc; $(MAKE) clean
