@@ -9,10 +9,30 @@ on:
       - main
 
 jobs:
-  Ubuntu-Focal:
+  ubuntu-local-builds:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ "Local Build Bionic", "Local Build Focal", "Local Build Jammy" ]
+        include:
+
+          - name: "Local Build Bionic"
+            release: bionic
+            python: python3.6
+
+          - name: "Local Build Focal"
+            release: focal
+            python: python3.8
+
+          - name: "Local Build Jammy"
+            release: impish
+            python: python3.10
+
+
     container:
-      image: ubuntu:focal
+      image: ubuntu:${{ matrix.release }}
 
     steps:
       - name: Check Out Repo 
@@ -37,7 +57,7 @@ jobs:
 
       - name: Testing
         env:
-          PYTHONPATH: /tmp/lib/python3.8/site-packages
+          PYTHONPATH: /tmp/lib/${{ matrix.python }}/site-packages
           LD_LIBRARY_PATH: /tmp/lib
         run: | 
           cd python
