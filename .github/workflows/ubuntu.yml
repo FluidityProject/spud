@@ -22,7 +22,7 @@ jobs:
         run: | 
           echo "Europe/London" > /etc/timezone
           apt-get -y update
-          DEBIAN_FRONTEND=noninteractive apt-get -y install gfortran g++ python3-setuptools python3-all-dev debhelper dh-python texlive python3-junit.xml
+          DEBIAN_FRONTEND=noninteractive apt-get -y install gfortran g++ python3-setuptools python3-pip python3-all-dev debhelper dh-python texlive python3-junit.xml
 
       - name: Configuring
         run: ./configure --prefix=/tmp

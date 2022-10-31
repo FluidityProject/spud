@@ -3,7 +3,7 @@ Maintainer: The ICOM team <patrick.farrell@imperial.ac.uk>
 Uploaders: David Ham <david.ham@imperial.ac.uk>
 Section: science
 Priority: optional
-Build-Depends: gfortran (>=4.2), g++ (>=4.2), python3-setuptools (>= 39), python3-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), dh-python, texlive
+Build-Depends: gfortran (>=4.2), g++ (>=4.2), python3-setuptools (>= 39), python3-pip, python3-all-dev , debhelper (>= 5.0.38), dh-python, texlive
 Standards-Version: 3.8.0
 X-Python3-Version: >= 3.6
 

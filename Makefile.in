@@ -51,7 +51,7 @@ VPATH = src/
 .cpp.lo:
 	./libtool --mode=compile --tag=CXX $(CXX) $(CXXFLAGS) -c $<
 
-default: libspud.la build-diamond
+default: libspud.la build-diamond build-pyspud
 
 libspud.la: $(OBJS)
 	./libtool --mode=link --tag=FC $(FC) $(FCFLAGS) -o $(LIB) $(OBJS) $(LIBS) -rpath @prefix@/lib 
@@ -60,6 +60,9 @@ libspud.la: $(OBJS)
 
 build-diamond:
 	cd diamond; python3 setup.py build; cd ..
+
+build-pyspud: libspud.la
+	cd python; python3 setup.py build; cd ..
 
 test: unittest
 
@@ -95,13 +98,13 @@ install-spudtools:
 	@INSTALL@ -m644 schema/spud_base.rng $(DESTDIR)@prefix@/share/spud
 
 install-diamond:
-	cd diamond; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
+	python3 -mpip install --prefix=$(DESTDIR)@prefix@ diamond/
 
 install-pyspud:
-	cd python; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
+	python3 -mpip install --prefix=$(DESTDIR)@prefix@ python/
 
 install-dxdiff:
-	cd dxdiff; python3 setup.py install --prefix=$(DESTDIR)@prefix@; cd ..
+	python3 -mpip install --prefix=$(DESTDIR)@prefix@ dxdiff/
 
 clean:
 	@cd doc; $(MAKE) clean
