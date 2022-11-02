@@ -67,7 +67,64 @@ jobs:
         with:
           report_paths: '**/test_result*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: JUnit Report
+          check_name: JUnit Report ${{ matrix.release }} local build 
           fail_on_failure: true
 
 
+  ubuntu-package-builds:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ "Local Build Focal", "Local Build Jammy" ]
+        include:
+
+          - name: "Local Build Focal"
+            release: focal
+            python: python3.8
+
+          - name: "Local Build Jammy"
+            release: jammy
+            python: python3.10
+
+
+    container:
+      image: ubuntu:${{ matrix.release }}
+
+    steps:
+      - name: Check Out Repo 
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: | 
+          echo "Europe/London" > /etc/timezone
+          apt-get -y update
+          DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs python3-junit.xml
+          # make empty spud-build-dep package which depends on the build deps for the spud debian package
+          mk-build-deps
+          # install it so that build dependencies get installed
+          DEBIAN_FRONTEND=noninteractive apt-get -y install ./spud-build-dep*deb
+
+
+      - name: Build Ubuntu package
+        run: debuild -uc -us
+
+      - name: Install Ubuntu package
+        run: DEBIAN_FRONTEND=noninteractive apt-get -y install ../*.deb
+
+      - name: Testing fortran library
+        run: make junittest
+
+      - name: Testing
+        run: | 
+          cd python
+          python3 test_libspud_junit.py
+
+      - name: Publish JUnit
+        uses: mikepenz/action-junit-report@v3
+        with:
+          report_paths: '**/test_result*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: JUnit Report ${{ matrix.release }} Package
+          fail_on_failure: true
