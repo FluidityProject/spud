@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 export BUILDING_DEBIAN=yes
 PYTHON_DIRS=diamond dxdiff python
 
@@ -13,6 +13,7 @@ PYTHON_DIRS=diamond dxdiff python
 override_dh_auto_build:
 	dh_auto_build -- libspud.la
 	for i in $(PYTHON_DIRS); do PYBUILD_NAME=$$i; dh_auto_build --buildsystem=pybuild --sourcedir=$$i; done
+	rm -rf .pybuild/  # this should have been removed by pybuild, but doesn't https://bugs-devel.debian.org/cgi-bin/bugreport.cgi?bug=1056291
 
 # instead of a single "make install" into debian/tmp
 # only use makefile for install-libspud and install-spudtools
@@ -20,3 +21,4 @@ override_dh_auto_build:
 override_dh_auto_install:
 	make install-libspud install-spudtools DESTDIR=debian/tmp/
 	for i in $(PYTHON_DIRS); do PYBUILD_NAME=$$i; dh_auto_install --buildsystem=pybuild --sourcedir=$$i; done
+	rm -rf .pybuild/  # this should have been removed by pybuild, but doesn't https://bugs-devel.debian.org/cgi-bin/bugreport.cgi?bug=1056291
