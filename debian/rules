@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-export DH_VERBOSE=1
+#export DH_VERBOSE=1
 export BUILDING_DEBIAN=yes
 PYTHON_DIRS=diamond dxdiff python
 
