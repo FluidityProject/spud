@@ -100,6 +100,17 @@ options type:
 ./configure --help
 \end{verbatim}
 
+For a custom prefix, the Python installation directory may need to be added
+to \verb+PYTHONPATH+ and the library directory to \verb+LD_LIBRARY_PATH+.
+The Python directory depends on the platform and setuptools version. The
+following command prints the default and standard POSIX locations:
+
+\begin{verbatim}
+python3 -c 'import sysconfig; v = {"base": "/your/prefix", "platbase": "/your/prefix"};
+for s in (sysconfig.get_default_scheme(), "posix_prefix"):
+    print(sysconfig.get_path("platlib", s, vars=v))'
+\end{verbatim}
+
 \section{Ubuntu packages}
 
 Ubuntu packages are available from a Launchpad repository managed by the Applied Modelling and Computation
