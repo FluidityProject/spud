@@ -1,6 +1,7 @@
 name: Build and Test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -15,12 +16,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ "Local Build Focal", "Local Build Jammy" ]
+        name: [ "Local Build Resolute", "Local Build Jammy" ]
         include:
 
-          - name: "Local Build Focal"
-            release: focal
-            python: python3.8
+          - name: "Local Build Resolute"
+            release: resolute
+            python: python3.14
 
           - name: "Local Build Jammy"
             release: jammy
@@ -53,11 +54,12 @@ jobs:
 
       - name: Testing
         env:
-          PYTHONPATH: /tmp/lib/${{ matrix.python }}/site-packages
           LD_LIBRARY_PATH: /tmp/lib
         run: | 
+          PYTHONPATH="$(${{ matrix.python }} -c 'import os, sysconfig; v = {"base": "/tmp", "platbase": "/tmp"}; print(os.pathsep.join(sysconfig.get_path("platlib", scheme, vars=v) for scheme in (sysconfig.get_default_scheme(), "posix_prefix")))')"
+          export PYTHONPATH
           cd python
-          python3 test_libspud_junit.py
+          ${{ matrix.python }} test_libspud_junit.py
 
       - name: Building documentation
         run: make doc
@@ -77,12 +79,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ "Local Build Focal", "Local Build Jammy" ]
+        name: [ "Local Build Resolute", "Local Build Jammy" ]
         include:
 
-          - name: "Local Build Focal"
-            release: focal
-            python: python3.8
+          - name: "Local Build Resolute"
+            release: resolute
+            python: python3.14
 
           - name: "Local Build Jammy"
             release: jammy
